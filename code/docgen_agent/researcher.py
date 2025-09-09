@@ -1,9 +1,10 @@
 import json
 import logging
+import os
 from typing import Annotated, Any, Sequence
 
 from langchain_core.runnables import RunnableConfig
-from langchain_nvidia_ai_endpoints import ChatNVIDIA
+from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel
@@ -14,7 +15,16 @@ from .prompts import research_prompt
 _LOGGER = logging.getLogger(__name__)
 _MAX_LLM_RETRIES = 3
 
-llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+llm = ChatOpenAI(
+    model="nvidia/nemotron-nano-9b-v2",
+    temperature=0,
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    default_headers={
+        "HTTP-Referer": "https://github.com/workshop-build-an-agent",
+        "X-Title": "Workshop Build an Agent",
+    }
+)
 llm_with_tools = llm.bind_tools([tools.search_tavily])
 
 

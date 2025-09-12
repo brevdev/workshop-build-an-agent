@@ -3,6 +3,9 @@
 !.project/brev.*
 !.project/cache
 
+# LangGraph extras
+**/.langgraph_api
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -181,3 +184,18 @@ cython_debug/
 # Operating System files
 **/.Trash*
 secrets.env
+
+# Ignore generated or temporary files managed by the Workbench
+!.project/configpacks
+
+# General ignores
+.DS_Store
+
+# Temp directories, notebooks created by jupyterlab
+.Trash-*/
+.jupyter/
+.local/
+
+# Python distribution / packaging
+
+# Workbench Project Layout

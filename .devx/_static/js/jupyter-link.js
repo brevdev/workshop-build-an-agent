@@ -232,3 +232,76 @@ async function openNewTerminal() {
         console.error('Failed to open new terminal:', error);
     }
 }
+
+
+function findLauncherCommand(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learning Path") {
+    // Access the global JupyterLab app object
+    const app = window.parent.jupyterapp;
+    if (!app) {
+        console.error('JupyterLab app is not available on window.jupyterapp');
+        return;
+    }
+
+    // Find all widgets in the shell that are Launcher widgets
+    var launchers = Array.from(app.shell.widgets('main')).filter(w =>
+        w.id && w.id.includes('launcher')
+    );
+    var createdLauncher = false;
+
+    if (launchers.length == 0) {
+        console.log("No launchers found, creating one");
+        app.commands.execute("launcher:create");
+        launchers = Array.from(app.shell.widgets('main')).filter(w =>
+            w.id && w.id.includes('launcher')
+        );
+        createdLauncher = true;
+    }
+
+    // Search through all launchers for the target item
+    for (const launcher of launchers) {
+        // Find the section HTML
+        const h2Elements = Array.from(launcher.node.getElementsByTagName('h2'));
+        const sectionHeader = h2Elements.find(h2 => h2.innerText === sectionName);
+        if (!sectionHeader) {
+            console.error(`Section ${sectionName} not found`);
+            return null;
+        }
+        const sectionHTML = sectionHeader?.parentElement?.parentElement;
+
+        // Get all the section labels
+        const sectionLabels = Array.from(
+            sectionHTML.getElementsByClassName("jp-LauncherCard-label")
+        ).map(label => {
+            const p = label.getElementsByTagName("p")[0];
+            return p ? p.innerText.trim() : "";
+        });
+        const itemRank = sectionLabels.indexOf(itemLabel);
+
+        // Find JupyterLab's object for this item
+        var model = launcher.content?.model;
+        var item = model.itemsList.filter(item => item.category == sectionName && item.rank == itemRank);
+
+        // Return the command
+        if (item.length > 0) {
+            return item[0].command;
+        }
+        return null;
+    }
+}
+
+
+function launch(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learning Path") {
+    const app = window.parent.jupyterapp;
+    if (!app) {
+        console.error('JupyterLab app is not available on window.jupyterapp');
+        return;
+    }
+
+    const command = findLauncherCommand(itemLabel, sectionName);
+    if (!command) {
+        console.error('No DevX workshop command found');
+        return;
+    }
+
+    app.commands.execute(command);
+}

@@ -4,27 +4,51 @@ Prompts for the report generation agent.
 
 from typing import Final
 
-# fmt: off
-report_planner_instructions = """You are an expert technical writer, helping to plan a report.
+report_planner_instructions = """You are an expert technical writer. You must create a report structure and return it in JSON format.
 
-Your goal is to generate the outline of the sections of the report.
+TOPIC: {topic}
 
-The overall topic of the report is:
+ORGANIZATION: {report_structure}
 
-{topic}
+TASK: Create a report outline with the following fields for each section:
+- name: Section name
+- description: Brief overview of main topics and concepts
+- research: true/false - whether web research is needed
+- content: Leave empty string ""
 
-The report should follow this organization:
+IMPORTANT: You must respond ONLY with valid JSON wrapped in ```json blocks. Do not include any other text, explanations, or questions.
 
-{report_structure}
+Example format (you must follow this exact structure):
 
-Now, generate the sections of the report. Each section should have the following fields:
+```json
+{{
+    "title": "Report Title About {topic}",
+    "sections": [
+        {{
+            "name": "Introduction",
+            "description": "Overview and background information",
+            "research": false,
+            "content": ""
+        }},
+        {{
+            "name": "Main Analysis",
+            "description": "Detailed analysis of key concepts",
+            "research": true,
+            "content": ""
+        }},
+        {{
+            "name": "Conclusion",
+            "description": "Summary and final thoughts",
+            "research": false,
+            "content": ""
+        }}
+    ]
+}}
+```
 
-- Name - Name for this section of the report.
-- Description - Brief overview of the main topics and concepts to be covered in this section.
-- Research - Whether to perform web research for this section of the report.
-- Content - The content of the section, which you will leave blank for now.
+Create 3-5 sections. Sections like introduction and conclusion typically don't need research. Body sections usually do need research.
 
-Consider which sections require web research. For example, introduction and conclusion will not require research because they will distill information from other parts of the report."""
+RESPOND ONLY WITH THE JSON - NO OTHER TEXT."""
 
 ###############################################################################
 
@@ -70,25 +94,26 @@ Make sure your queries are specific enough to avoid generic results but comprehe
 """
 
 section_writing_prompt: Final[str] = """
-You are an expert technical writer. Your goal is to write a comprehensive section of a technical report.
+You are an expert technical writer. You must write a complete section of a technical report.
 
-Overall report topic: {overall_topic}
-Section name: {section_name}
-Section description: {section_description}
+REPORT TOPIC: {overall_topic}
+SECTION NAME: {section_name}
+SECTION DESCRIPTION: {section_description}
 
-If this section is an introduction or conclusion, keep the section brief. Only one or two paragraphs.
+INSTRUCTIONS:
+- Write ONLY the section content - no questions, no meta-commentary, no explanations
+- Use research information from the conversation history if available
+- For introduction/conclusion: Write 1-2 paragraphs
+- For body sections: Write detailed content with subsections if needed
+- Use professional technical writing style
+- Include specific examples and implementation details
+- Start writing immediately - do not ask questions or seek clarification
 
-If this is a body section, Based on the research information provided in the conversation history, write a detailed, well-structured section that:
+IMPORTANT: 
+- Respond with ONLY the section content. Do not include phrases like "Would you like me to..." or "Should I focus on..."
+- DO NOT write placeholder text like "Note: The actual section content will be drafted..."
+- DO NOT write "TODO" items or notes about what will be written later
+- Write the complete, detailed section content immediately using the research provided
 
-1. Covers all the key points outlined in the section description
-2. Uses the research information to provide accurate, up-to-date technical details
-3. Is written in a clear, professional technical writing style
-4. Includes specific examples and implementation details where relevant
-5. Is appropriately detailed for a technical audience
-6. Flows logically and connects well with the overall report topic
-
-Structure your section with appropriate subsections if needed, and ensure it provides comprehensive coverage of the topic while remaining focused on the section's specific scope.
-
-Write the complete section content as your response - do not include any meta-commentary or explanations about the writing process.
+Begin writing the section content:
 """
-# fmt: on

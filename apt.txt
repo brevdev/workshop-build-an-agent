@@ -1,4 +1,8 @@
 curl
+docker-ce-cli
+docker-compose-plugin
 gh
+git
+git-lfs
 jq
 vim

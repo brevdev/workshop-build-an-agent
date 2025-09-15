@@ -17,20 +17,23 @@ layout:
 environment:
     base:
         registry: nvcr.io
-        image: nvidia/rapidsai/notebooks:25.04-cuda12.8-py3.12
-        build_timestamp: ""
-        name: RAPIDS with CUDA
+        image: nvidia/ai-workbench/python-basic:1.0.8
+        build_timestamp: "20250729154429"
+        name: Python Basic
         supported_architectures: []
         cuda_version: ""
-        description: ""
-        entrypoint_script: /home/rapids/entrypoint.sh
-        labels: []
+        description: A Python Base with Jupyterlab
+        entrypoint_script: ""
+        labels:
+            - ubuntu
+            - python3
+            - jupyterlab
         apps:
-            - name: jupyterlab
+            - name: DevX-Lab
               type: jupyterlab
               class: webapp
-              start_command: jupyter lab --allow-root --port 8888 --ip 0.0.0.0 --no-browser --NotebookApp.base_url=$PROXY_PREFIX --NotebookApp.default_url=/lab --NotebookApp.allow_origin='*'
-              health_check_command: '[ \$(echo url=\$(jupyter lab list | head -n 2 | tail -n 1 | cut -f1 -d'' '' | grep -v ''Currently'' | sed "s@/?@/lab?@g") | curl -o /dev/null -s -w ''%{http_code}'' --config -) == ''200'' ]'
+              start_command: jupyter lab --allow-root --port 8888 --ip 0.0.0.0 --no-browser --NotebookApp.base_url=$PROXY_PREFIX --NotebookApp.default_url=/lab --NotebookApp.allow_origin='*' --expose-app-in-browser --NotebookApp.password='' --NotebookApp.token=''
+              health_check_command: curl -o /dev/null -sL $(jupyter lab list | grep :8888/projects/ | awk '{print $1}')
               stop_command: jupyter lab stop 8888
               user_msg: ""
               logfile_path: ""
@@ -44,66 +47,52 @@ environment:
                 url_command: jupyter lab list | head -n 2 | tail -n 1 | cut -f1 -d' ' | grep -v 'Currently'
         programming_languages:
             - python3
-        icon_url: ""
-        image_version: ""
+        icon_url: https://workbench.download.nvidia.com/static/img/ai-workbench-icon-rectangle.jpg
+        image_version: 1.0.8
         os: linux
         os_distro: ubuntu
-        os_distro_release: "24.04"
-        schema_version: ""
+        os_distro_release: "22.04"
+        schema_version: v2
         user_info:
-            uid: "1000"
-            gid: "1001"
-            username: rapids
+            uid: ""
+            gid: ""
+            username: ""
         package_managers:
             - name: apt
               binary_path: /usr/bin/apt
-              installed_packages: []
-            - name: conda3
-              binary_path: /opt/conda/bin/conda
               installed_packages:
-                - rapidsai
-                - cudf
-                - cuml
-                - cugraph
-                - rmm
-                - pylibraft
-                - cuspatial
-                - cuxfilter
+                - curl
+                - git
+                - git-lfs
+                - python3
+                - gcc
+                - python3-dev
+                - python3-pip
+                - vim
             - name: pip
-              binary_path: /opt/conda/bin/pip
-              installed_packages:
-                - jupyterlab-nvdashboar
+              binary_path: /usr/local/bin/pip3.12
+              installed_packages: []
         package_manager_environment:
-            name: conda
-            target: /opt/conda
+            name: ""
+            target: ""
     compose_file_path: ""
 execution:
-    apps:
-        - name: devx-lab
-          type: jupyterlab
-          class: webapp
-          start_command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --ServerApp.token='' --ServerApp.password_required=False --expose-app-in-browser --NotebookApp.allow_origin='*' --NotebookApp.base_url=$PROXY_PREFIX --NotebookApp.default_url=/lab --allow-root
-          health_check_command: curl -f http://localhost:8888/api || exit 1
-          stop_command: jupyter lab stop 8888
-          user_msg: ""
-          logfile_path: ""
-          timeout_seconds: 60
-          icon_url: ""
-          webapp_options:
-            autolaunch: true
-            port: "8888"
-            proxy:
-                trim_prefix: false
-            url: http://localhost:8888/lab
+    apps: []
     resources:
         gpu:
-            requested: 0
+            requested: 1
         sharedMemoryMB: 0
-    secrets:
-        - variable: NGC_API_KEY
-          description: NGC Personal Key from https://org.ngc.nvidia.com/setup/personal-keys
+    secrets: []
     mounts:
         - type: project
-          target: /project
+          target: /project/
           description: Project directory
           options: rw
+        - type: volume
+          target: /nvwb-shared-volume/
+          description: ""
+          options: volumeName=nvwb-shared-volume
+        - type: host
+          target: /var/host-run/
+          description: Host's Run Directory
+          options: ""

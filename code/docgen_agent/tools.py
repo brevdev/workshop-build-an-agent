@@ -13,7 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 tavily_client = AsyncTavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 INCLUDE_RAW_CONTENT = False
 MAX_TOKENS_PER_SOURCE = 1000
-MAX_RESULTS = 5
+MAX_RESULTS = 2
 SEARCH_DAYS = 30
 
 

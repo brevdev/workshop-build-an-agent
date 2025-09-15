@@ -1,0 +1,22 @@
+---
+config:
+  theme: 'base'
+  themeVariables:
+    primaryColor: '#eaf6e0'
+    secondaryColor: '#eaf6e0'
+    background: white
+---
+
+flowchart LR
+    dot0(( ))
+    subgraph retrieval[Retrieval Chain]
+        embedding[Embedding<br />Model]
+        vector_search[(Vector DB<br />Search)]
+        rerank[Reranking<br />Model]
+    end
+    dot1(( ))
+    dot0  --> embedding --> vector_search --> rerank --> dot1
+
+
+    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
+    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

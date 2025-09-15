@@ -1,4 +1,4 @@
-import json
+import os, json
 import logging
 from typing import Annotated, Any, Sequence
 
@@ -14,14 +14,19 @@ from .prompts import research_prompt
 _LOGGER = logging.getLogger(__name__)
 _MAX_LLM_RETRIES = 3
 
-llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+llm = ChatNVIDIA(
+    base_url="https://openrouter.ai/api/v1",
+    model="nvidia/nemotron-nano-9b-v2", 
+    temperature=0.0,
+    api_key=os.getenv("OPENROUTER_API_KEY")
+)
 llm_with_tools = llm.bind_tools([tools.search_tavily])
 
 
 class ResearcherState(BaseModel):
     topic: str
     # the topic to be researched
-    number_of_queries: int = 5
+    number_of_queries: int = 1
     # how many searches should be done per topic?
     messages: Annotated[Sequence[Any], add_messages] = []
     # a chat log of the research results
@@ -50,12 +55,12 @@ async def call_model(
     config: RunnableConfig,
 ) -> dict[str, Any]:
     _LOGGER.info("Calling model.")
-    system_prompt = research_prompt.format(
+    user_prompt = research_prompt.format(
         topic=state.topic, number_of_queries=state.number_of_queries
     )
 
     for count in range(_MAX_LLM_RETRIES):
-        messages = [{"role": "system", "content": system_prompt}] + list(state.messages)
+        messages = [{"role": "system", "content": "/no_think"}, {"role": "user", "content": user_prompt}] + list(state.messages)
         response = await llm_with_tools.ainvoke(messages, config)
 
         if response:

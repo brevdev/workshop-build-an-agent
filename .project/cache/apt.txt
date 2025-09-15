@@ -1,4 +1,0 @@
-curl
-gh
-jq
-vim

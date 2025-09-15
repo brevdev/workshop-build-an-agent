@@ -3,8 +3,10 @@ The main agent that orchestrates the report generation process.
 """
 
 import asyncio
+import json
 import logging
 import os
+import re
 from typing import Annotated, Any, Sequence, cast
 
 from langchain_core.runnables import RunnableConfig
@@ -15,13 +17,19 @@ from pydantic import BaseModel
 
 from . import author, researcher
 from .prompts import report_planner_instructions
+from .json_utils import parse_json_response
 
 _LOGGER = logging.getLogger(__name__)
 _MAX_LLM_RETRIES = 3
 _QUERIES_PER_SECTION = 5
 _THROTTLE_LLM_CALLS = os.getenv("THROTTLE_LLM_CALLS", "0")
 
-llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+llm = ChatNVIDIA(
+    base_url="https://openrouter.ai/api/v1",
+    model="nvidia/nemotron-nano-9b-v2", 
+    temperature=0.0,
+    api_key=os.getenv("OPENROUTER_API_KEY")
+)
 
 
 class Report(BaseModel):
@@ -53,22 +61,35 @@ async def topic_research(state: AgentState, config: RunnableConfig):
 
 
 async def report_planner(state: AgentState, config: RunnableConfig):
-    """Call the model."""
+    """Call the model using JSON mode."""
     _LOGGER.info("Calling report planner.")
 
-    model = llm.with_structured_output(Report)  # type: ignore
-
-    system_prompt = report_planner_instructions.format(
+    user_prompt = report_planner_instructions.format(
         topic=state.topic,
         report_structure=state.report_structure,
     )
+    
     for count in range(_MAX_LLM_RETRIES):
-        messages = [{"role": "system", "content": system_prompt}] + list(state.messages)
-        response = await model.ainvoke(messages, config)
-        if response:
-            response = cast(Report, response)
-            state.report_plan = response
-            return state
+        # Use only system and user messages for report planning to avoid confusion from conversation history
+        messages = [
+            {"role": "system", "content": "/no_think You are a report planner. Respond only with valid JSON in the requested format."},
+            {"role": "user", "content": user_prompt}
+        ]
+        response = await llm.ainvoke(messages, config)
+        
+        if response and response.content:
+            try:
+                # Parse JSON response into Report model
+                parsed_report = parse_json_response(response.content, Report)
+                state.report_plan = parsed_report
+                return state
+            except ValueError as e:
+                _LOGGER.warning("Failed to parse JSON response on attempt %d: %s", count + 1, e)
+                if count == _MAX_LLM_RETRIES - 1:
+                    _LOGGER.error("Raw response was: %s", response.content)
+        else:
+            _LOGGER.warning("Empty response on attempt %d", count + 1)
+        
         _LOGGER.debug(
             "Retrying LLM call. Attempt %d of %d", count + 1, _MAX_LLM_RETRIES
         )
@@ -91,7 +112,7 @@ async def section_author_orchestrator(state: AgentState, config: RunnableConfig)
             index=idx,
             section=section,
             topic=state.topic,
-            messages=state.messages,
+            messages=[],  # Start with empty messages for each section to avoid interference
         )
         writers.append(author.graph.ainvoke(section_writer_state, config))
 
@@ -110,8 +131,16 @@ async def section_author_orchestrator(state: AgentState, config: RunnableConfig)
     for section in all_sections:
         index = section["index"]
         content = section["section"].content
+        section_name = state.report_plan.sections[index].name
+        
+        # Debug: Log section content details
+        _LOGGER.info("Finished section: %s", section_name)
+        _LOGGER.info("Section content length: %d characters", len(content))
+        if "Note: The actual section content will be drafted" in content:
+            _LOGGER.warning("Section '%s' contains placeholder content!", section_name)
+        _LOGGER.info("Section content preview: %s", content[:200] + "..." if len(content) > 200 else content)
+        
         state.report_plan.sections[index].content = content
-        _LOGGER.info("Finished section: %s", state.report_plan.sections[index].name)
 
     return state
 

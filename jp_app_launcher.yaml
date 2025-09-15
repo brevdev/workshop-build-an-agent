@@ -1,0 +1,48 @@
+# ref: https://jupyter-app-launcher.readthedocs.io/en/stable/usage.html
+
+- title: "1. Introduction to Agents"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/project/.devx/1-build-an-agent"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /project/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "2. Agentic RAG"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/project/.devx/2-agentic-rag"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /project/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "Secrets Manager"
+  source: /project/code/secrets_management.ipynb
+  cwd: /projects
+  args: {}
+  type: notebook-voila
+  icon: /project/.devx/_static/img/key.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "Simple Agents Client"
+  source: http://localhost:$PORT/
+  cwd: /project/code/
+  type: local-server
+  args:
+    - streamlit
+    - run
+    - simple_client.py
+    - --server.port
+    - $PORT
+  icon: /project/.devx/_static/img/chatbot.svg
+  catalog: NVIDIA DevX Learning Path

@@ -1,4 +1,4 @@
-# Build An Agent Workshop
+# Build An Agent Workshop [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-32kC34ErT9wsqTcJyaKMxBEuhr2)
 
 The Build An Agent Workshop teaches you how to create AI agents that can perform complex tasks using Large Language Models (LLMs) and tools. You'll build a **Report Generation Agent** - an intelligent system that can research any topic, create comprehensive outlines, write detailed sections, and compile professional reports automatically. Unlike simple workflows, agents are intelligent programs that can adapt to changing requirements, choose tools dynamically, and perform complex reasoning and planning.
 

@@ -30,20 +30,7 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 ## Tavily API Key
 
-Tavily is a search API designed for AI agents. It provides real-time web search capabilities that help agents gather up-to-date information from the internet. We will also need a Tavily API key for this workshop.
-
-<details>
-<summary>⚠️ Don't have an account?</summary>
-
-You can get free access to Tavily with a [Tavily Developer Account](https://tavily.com/).
-</details>
-
-<details>
-<summary>⚠️ Don't have an API Key?</summary>
-
-Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
-
-</details>
+Tavily is a search API designed for AI agents. It provides real-time web search capabilities that help agents gather up-to-date information from the internet. You do **not** need to set this API Key for the Agentic RAG workshop. 
 
 ## LangSmith API Key
 

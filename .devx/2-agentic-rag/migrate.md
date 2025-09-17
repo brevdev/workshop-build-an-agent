@@ -6,7 +6,7 @@
 
 These APIs are useful for fast starts and experiments. However, for the unlimited performance and control needed in production, deploy models locally with NVIDIA NIM microservice containers.
 
-In this excercise, we will run our LLM model locally and transition our code to our private model.
+In this exercise, we will run our LLM model locally and transition our code to our private model.
 
 <!-- fold:break -->
 

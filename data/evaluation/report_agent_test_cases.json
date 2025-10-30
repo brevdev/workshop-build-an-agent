@@ -1,0 +1,156 @@
+[
+  {
+    "topic": "The Impact of Artificial Intelligence on Healthcare",
+    "expected_sections": [
+      "Introduction",
+      "Current Applications of AI in Healthcare",
+      "Benefits and Opportunities",
+      "Challenges and Limitations",
+      "Ethical Considerations",
+      "Future Outlook",
+      "Conclusion"
+    ],
+    "quality_criteria": {
+      "should_include": [
+        "specific examples of AI applications",
+        "discussion of patient outcomes",
+        "privacy and data security concerns",
+        "regulatory considerations"
+      ],
+      "should_avoid": [
+        "overly technical jargon without explanation",
+        "unsubstantiated claims",
+        "bias toward or against AI adoption"
+      ]
+    }
+  },
+  {
+    "topic": "Renewable Energy Trends in 2025",
+    "expected_sections": [
+      "Executive Summary",
+      "Solar Energy Developments",
+      "Wind Energy Advancements",
+      "Energy Storage Solutions",
+      "Policy and Regulatory Landscape",
+      "Economic Analysis",
+      "Recommendations"
+    ],
+    "quality_criteria": {
+      "should_include": [
+        "current statistics and data",
+        "cost comparisons",
+        "technological innovations",
+        "geographic variations"
+      ],
+      "should_avoid": [
+        "outdated information",
+        "political bias",
+        "unverified claims"
+      ]
+    }
+  },
+  {
+    "topic": "Remote Work Best Practices for Enterprise Organizations",
+    "expected_sections": [
+      "Introduction",
+      "Technology Infrastructure Requirements",
+      "Communication and Collaboration Tools",
+      "Security Considerations",
+      "Employee Productivity and Well-being",
+      "Management Strategies",
+      "Case Studies",
+      "Implementation Roadmap"
+    ],
+    "quality_criteria": {
+      "should_include": [
+        "specific tool recommendations",
+        "security best practices",
+        "metrics for success",
+        "real-world examples"
+      ],
+      "should_avoid": [
+        "generic advice without actionability",
+        "vendor-specific bias",
+        "ignoring security implications"
+      ]
+    }
+  },
+  {
+    "topic": "Quantum Computing: Current State and Future Applications",
+    "expected_sections": [
+      "Introduction to Quantum Computing",
+      "Current State of Technology",
+      "Leading Companies and Research",
+      "Potential Applications",
+      "Challenges and Limitations",
+      "Timeline for Practical Applications",
+      "Conclusion"
+    ],
+    "quality_criteria": {
+      "should_include": [
+        "explanation of quantum principles",
+        "comparison with classical computing",
+        "specific use cases",
+        "current limitations"
+      ],
+      "should_avoid": [
+        "overhyping capabilities",
+        "excessive technical detail without context",
+        "ignoring practical limitations"
+      ]
+    }
+  },
+  {
+    "topic": "Sustainable Supply Chain Management",
+    "expected_sections": [
+      "Executive Summary",
+      "Environmental Impact of Supply Chains",
+      "Sustainable Practices and Technologies",
+      "Cost-Benefit Analysis",
+      "Regulatory Requirements",
+      "Industry Examples",
+      "Implementation Framework",
+      "Conclusion"
+    ],
+    "quality_criteria": {
+      "should_include": [
+        "environmental metrics",
+        "cost implications",
+        "specific technologies and practices",
+        "compliance requirements"
+      ],
+      "should_avoid": [
+        "greenwashing",
+        "ignoring economic realities",
+        "lack of concrete examples"
+      ]
+    }
+  },
+  {
+    "topic": "Cybersecurity Threats in the Financial Sector",
+    "expected_sections": [
+      "Introduction",
+      "Current Threat Landscape",
+      "Common Attack Vectors",
+      "Impact and Consequences",
+      "Defense Strategies",
+      "Regulatory Compliance",
+      "Emerging Threats",
+      "Recommendations"
+    ],
+    "quality_criteria": {
+      "should_include": [
+        "specific threat examples",
+        "statistical data on incidents",
+        "technical and non-technical controls",
+        "compliance frameworks"
+      ],
+      "should_avoid": [
+        "fear-mongering",
+        "overly technical content",
+        "product recommendations without context"
+      ]
+    }
+  }
+]
+

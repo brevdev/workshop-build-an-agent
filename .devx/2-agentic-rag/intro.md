@@ -78,4 +78,4 @@ You can also add more tools for different data sources if needed. This makes you
 
 Now that we have a basic understanding of RAG, ReAct Agents, and how to plumb them up, let's go build one of our own.
 
-Continue to [Setting up Secrets](secrets.md) to get started!
+Continue to the [Building Agentic RAG](agentic_rag.md) section to get started!

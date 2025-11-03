@@ -49,3 +49,4 @@ Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/s
 
 </details>
 
+Once you're ready, continue to the [Introduction to RAG](intro.md) section to get started with agentic RAG.

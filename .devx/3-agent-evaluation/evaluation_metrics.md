@@ -35,6 +35,8 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 Context Precision = (Σ (Precision@k × relevance_k)) / Total number of relevant items in ground truth
 ```
 
+where `relevance_k` is the relevance indicator (0 or 1) for the item at rank `k`.
+
 **Score interpretation**:
 - **0.9-1.0**: Excellent - nearly all retrieved documents are relevant
 - **0.7-0.9**: Good - most documents are relevant with few irrelevant ones
@@ -70,7 +72,7 @@ Better retrieval: [Password reset guide, Password reset FAQ, Account security, L
 
 **Why it matters**: Low context recall means your agent is missing important information, leading to incomplete or incorrect answers. Even with perfect generation, missing context will result in gaps in the response.
 
-**How it works**: Given a **ground truth** answer, RAGAS uses an LLM to extract claims/statements from that answer, then checks if each claim can be attributed to at least one of the retrieved contexts. The score is:
+**How it works**: Given a *ground truth* answer, RAGAS uses an LLM to extract claims/statements from that answer, then checks if each claim can be attributed to at least one of the retrieved contexts. The score is:
 
 ```
 Context Recall = (Number of claims attributable to contexts) / (Total number of claims in ground truth)
@@ -110,7 +112,7 @@ For high recall, contexts must cover all three steps.
 **Why it matters**: Faithfulness is critical for production RAG systems. It prevents hallucination and ensures users can trust the agent's responses. Low faithfulness means the model is "making things up" rather than grounding answers in retrieved knowledge.
 
 **How it works**: RAGAS uses an LLM to:
-1. Extract individual claims/statements from the generated answer
+1. Extract individual claims/statements from the *generated answer*
 2. For each claim, verify if it's supported by the retrieved contexts
 3. Calculate the ratio of supported claims to total claims:
 
@@ -158,6 +160,8 @@ Unfaithful answer: "Contact your manager to reset passwords immediately." (Faith
 Answer Relevancy = mean(cosine_similarity(original_question, generated_question_i))
 ```
 
+where `i` indicates the index of a generated question derived from the generated response.
+
 **Score interpretation**:
 - **0.9-1.0**: Excellent - answer directly addresses the question
 - **0.7-0.9**: Good - mostly relevant with minor tangents
@@ -186,7 +190,7 @@ Medium relevancy: "You can reset your password. Also, remember to use strong pas
 
 Low relevancy: "Passwords are important for security. Our company requires passwords to be changed every 90 days." (Relevancy ≈ 0.40)
     
-    Generated questions: "Why are passwords importnant?", "How often do I need to change my password?"
+    Generated questions: "Why are passwords important?", "How often do I need to change my password?"
 ```
 
 </details>

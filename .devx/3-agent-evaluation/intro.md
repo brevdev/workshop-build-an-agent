@@ -163,5 +163,5 @@ In the following lessons, we'll put these concepts into practice:
 - **Running Evaluations**: Create automated evaluation workflows for your agents
 - **Continuous Improvement**: Use evaluation results to systematically improve agent quality
 
-Ready to start measuring your agents? Let's continue to [Setting up Secrets](secrets.md) to configure the tools we'll need.
+Ready to start measuring your agents? Let's continue to [Understanding Evaluation Metrics](evaluation_metrics.md) to configure the tools we'll need.
 

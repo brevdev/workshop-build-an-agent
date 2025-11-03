@@ -32,10 +32,35 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 **How it works**: RAGAS uses an LLM to determine if each retrieved chunk is relevant to answering the question. It then calculates precision at each position (precision@k) in the ranked results and averages them. The formula weighs higher-ranked relevant documents more heavily:
 
 ```
-Context Precision = (Σ (Precision@k × relevance_k)) / Total number of relevant items in ground truth
+Context Precision = (Σ (Precision@k × relevance_k)) / Total number of relevant items in retrieved contexts
 ```
 
-where `relevance_k` is the relevance indicator (0 or 1) for the item at rank `k`.
+where `relevance_k` is the relevance indicator (0 or 1) for the item at rank `k` and: 
+
+```
+Precision@k = true positives @ k / (true positives @ k + false positives @k) 
+```
+
+<details>
+<summary><strong>Don't get it yet? Click me!</strong></summary>
+
+Consider a sample RAG query in which we have retrieved 2 relevant chunks from ``K=3`` total retrieved chunks. First, label each of the 3 chunks as either relevant or irrelevant for the query. Let's assume relevant-irrelevant-relevant ordering for this exercise. 
+
+* Precision@1 = 1/1 = 1
+* Precision@2 = 1/2 = 0.5
+* Precision@3 = 2/3 = 0.67
+
+The final Context Precision is the average of the individual Precision@k values, ignoring irrelevant retrieved chunks. 
+
+* Rank 1: v_1 x Precision@1 = 1 x 1 = 1
+* Rank 2: v_2 x Precision@2 = 0 x 0.5 = 0
+* Rank 3: v_3 x Precision@3 = 1 x 0.67 = 0.67
+
+So Context Precision = (1+0+0.67)/(1+0+1) = **0.83**. 
+
+Note that this context precision value is not a perfect 1.0 score. Why? Because we can actually improve the precision if the third retrieved chunk were instead ranked second, ahead of the irrelevant chunk. This is the most ideal retrieval arrangement.
+
+</details>
 
 **Score interpretation**:
 - **0.9-1.0**: Excellent - nearly all retrieved documents are relevant

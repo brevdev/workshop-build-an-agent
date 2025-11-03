@@ -581,6 +581,157 @@ for question in synthetic_questions:
 
 <!-- fold:break -->
 
+## Real-World Example: Complete Improvement Cycle
+
+<img src="_static/robots/hero.png" alt="Success Story" style="float:right;max-width:300px;margin:25px;" />
+
+Let's walk through a complete example of using the evaluation life cycle to improve an agent. Note, the following denotes a purely fictional example to demonstrate the process.
+
+### Starting Point
+
+Your IT Help Desk agent has these evaluation results:
+
+```
+Mean Scores:
+  Faithfulness:  0.65 (Needs improvement)
+  Relevancy:     0.78 (Good)
+  Helpfulness:   0.72 (Good)
+  Citation Rate: 45%
+
+Problem areas identified:
+- Low faithfulness on password-related questions
+- Inconsistent citation usage
+- Some responses include general knowledge beyond KB
+```
+
+### Step 1: Investigate Root Causes
+
+Examine low-scoring examples:
+
+```python
+# Find faithfulness issues
+low_faith = df[df['faithfulness_score'] < 0.6]
+print(low_faith[['question', 'agent_response', 'faithfulness_explanation']])
+
+# Example finding:
+# Question: "How do I reset my password?"
+# Response: "Reset your password at the portal. Passwords should be 
+#            at least 12 characters with uppercase, lowercase, and symbols."
+# Issue: The complexity requirements weren't in the retrieved context!
+```
+
+**Root cause**: Agent is adding password policy knowledge from training data.
+
+### Step 2: Implement Fix
+
+Update the system prompt:
+
+```python
+# Before
+SYSTEM_PROMPT = """
+You are an IT help desk support agent.
+Use the knowledge base to answer questions.
+"""
+
+# After
+SYSTEM_PROMPT = """
+You are an IT help desk support agent.
+
+CRITICAL RULES:
+1. ONLY use information from retrieved context
+2. DO NOT add information from your general knowledge
+3. If context doesn't cover something, say "I don't have that information in our knowledge base"
+4. Cite EVERY fact with [KB]
+5. Better to say "I don't know" than to guess
+
+When answering:
+- Check: Is this fact in my retrieved context?
+- If yes: Include it with [KB] citation
+- If no: Don't include it
+"""
+```
+
+### Step 3: Re-evaluate
+
+Run evaluation again:
+
+```python
+# Re-run evaluation with updated agent
+updated_results = evaluate_agent(updated_agent, test_cases)
+
+print("Improvement Analysis:")
+print(f"Faithfulness: {original_results['faithfulness']:.2f} → {updated_results['faithfulness']:.2f}")
+print(f"Citation Rate: {original_results['citation_rate']:.1%} → {updated_results['citation_rate']:.1%}")
+```
+
+**Results**:
+```
+Faithfulness: 0.65 → 0.85 (+0.20 ✅)
+Citation Rate: 45% → 82% (+37% ✅)
+Relevancy: 0.78 → 0.76 (-0.02, acceptable)
+```
+
+### Step 4: Address Remaining Issues
+
+Citation rate still below 90%. Add enforcement:
+
+```python
+def validate_response(response: str, contexts: str) -> dict:
+    """Validate response quality before returning."""
+    issues = []
+    
+    # Check for citations
+    if "[KB]" not in response:
+        issues.append("Missing knowledge base citation")
+    
+    # Check faithfulness
+    if len(response) > 100 and response.count("[KB]") < 2:
+        issues.append("Insufficient citations for response length")
+    
+    if issues:
+        # Regenerate with stricter prompt
+        return regenerate_with_emphasis(response, contexts, issues)
+    
+    return {"response": response, "validated": True}
+
+# Add to agent workflow
+validated_response = validate_response(agent_response, contexts)
+```
+
+### Step 5: Final Results
+
+After 3 iterations:
+
+```
+FINAL SCORES (after improvements):
+  Faithfulness:  0.88 (Excellent) ✅
+  Relevancy:     0.79 (Good) ✅
+  Helpfulness:   0.85 (Excellent) ✅
+  Citation Rate: 94% ✅
+
+Improvement Summary:
+  +35% Faithfulness
+  +23pp Citation Rate
+  +18% Helpfulness
+  0 Regression issues
+
+Time invested: 4 hours
+Production impact: Reduced user complaints by 40%
+```
+
+### Key Takeaways
+
+1. **Measure first**: Evaluation revealed the specific problem (low faithfulness)
+2. **Diagnose deeply**: Found root cause (adding training knowledge)
+3. **Targeted fix**: Updated prompt with explicit constraints
+4. **Verify impact**: Re-evaluated to confirm improvement
+5. **Iterate**: Added validation layer for remaining issues
+6. **Monitor**: Continued tracking to ensure sustained improvement
+
+This systematic approach turns vague "improve the agent" goals into concrete, measurable improvements.
+
+<!-- fold:break -->
+
 ## Congratulations!
 
 <img src="_static/robots/finish.png" alt="Finish Line" style="float:right;max-width:300px;margin:25px;" />

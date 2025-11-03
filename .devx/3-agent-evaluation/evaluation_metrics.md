@@ -25,67 +25,177 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 
 ### Context Precision
 
-**What it measures**: Whether the retrieved contexts are relevant to the question, with emphasis on ranking quality.
+**What it measures**: Whether the retrieved contexts are relevant to the question, with emphasis on ranking quality. Specifically, it evaluates if relevant chunks appear early in the ranked list and if irrelevant chunks are filtered out.
 
-**How it works**: RAGAS uses an LLM to determine if each retrieved chunk is relevant to answering the question. It then calculates precision at each position in the ranked results.
+**Why it matters**: High context precision means your retrieval system isn't wasting the LLM's context window with irrelevant information. This improves both generation quality and cost-efficiency. It also reduces the risk of the model being distracted by off-topic content.
 
-**Why it matters**: High context precision means your retrieval system isn't wasting the LLM's context window with irrelevant information. This improves both quality and cost-efficiency.
+**How it works**: RAGAS uses an LLM to determine if each retrieved chunk is relevant to answering the question. It then calculates precision at each position (precision@k) in the ranked results and averages them. The formula weighs higher-ranked relevant documents more heavily:
 
-**Example**:
-- Question: "How do I reset my password?"
-- Retrieved contexts: [Password reset guide, VPN setup, Password reset FAQ, Printer setup]
-- Context Precision would be lower because irrelevant documents (VPN, Printer) are mixed with relevant ones
+```
+Context Precision = (Σ (Precision@k × relevance_k)) / Total number of relevant items in ground truth
+```
+
+**Score interpretation**:
+- **0.9-1.0**: Excellent - nearly all retrieved documents are relevant
+- **0.7-0.9**: Good - most documents are relevant with few irrelevant ones
+- **0.5-0.7**: Fair - significant noise in retrieval results
+- **Below 0.5**: Poor - retrieval is returning mostly irrelevant documents
+
+**Improving context precision**:
+- Fine-tune your retrieval parameters (similarity threshold, top-k)
+- Improve embedding model quality
+- Add reranking as a second stage
+- Use metadata filtering to narrow search scope
+
+<details>
+<summary><strong>Click to See an Example</strong></summary>
+
+```
+Question: "How do I reset my password?"
+Retrieved contexts: 
+    [Password reset guide, VPN setup, Password reset FAQ, Printer setup]
+```
+
+Context Precision would be lower (approximately 0.5) because irrelevant documents (VPN, Printer) are mixed with relevant ones
+
+Better retrieval: [Password reset guide, Password reset FAQ, Account security, Login procedures] would score higher
+
+</details>
 
 <!-- fold:break -->
 
 ### Context Recall
 
-**What it measures**: Whether all the necessary information to answer the question was retrieved.
+**What it measures**: Whether all the necessary information to answer the question was retrieved. It evaluates completeness rather than precision.
 
-**How it works**: Given a ground truth answer, RAGAS checks if all the facts in that answer can be attributed to the retrieved contexts.
+**Why it matters**: Low context recall means your agent is missing important information, leading to incomplete or incorrect answers. Even with perfect generation, missing context will result in gaps in the response.
 
-**Why it matters**: Low context recall means your agent is missing important information, leading to incomplete or incorrect answers.
+**How it works**: Given a **ground truth** answer, RAGAS uses an LLM to extract claims/statements from that answer, then checks if each claim can be attributed to at least one of the retrieved contexts. The score is:
 
-**Example**:
-- Question: "What are the steps to request a virtual desktop?"
-- Ground truth answer includes: "Submit form, manager approval, IT provisioning"
-- If retrieved contexts only mention the form submission, context recall would be low
+```
+Context Recall = (Number of claims attributable to contexts) / (Total number of claims in ground truth)
+```
+
+**Score interpretation**:
+- **0.9-1.0**: Excellent - all critical information was retrieved
+- **0.7-0.9**: Good - most information retrieved, minor gaps
+- **0.5-0.7**: Fair - significant information gaps
+- **Below 0.5**: Poor - major information gaps, answer will be incomplete
+
+**Improving context recall**:
+- Increase the number of retrieved documents (k parameter)
+- Improve query formulation (query expansion, reformulation)
+- Ensure a comprehensive knowledge base with extensive coverage
+
+<details>
+<summary><strong>Click to See an Example</strong></summary>
+
+```
+Question: "What are the steps to request a virtual desktop?"
+Ground truth answer includes: "Submit form, manager approval, IT provisioning"
+```
+
+If retrieved contexts only mention the form submission, context recall would be low (eg. approximately 0.33)
+
+For high recall, contexts must cover all three steps.
+
+</details>
 
 <!-- fold:break -->
 
 ### Faithfulness
 
-**What it measures**: Whether the generated answer is factually consistent with the retrieved context.
+**What it measures**: Whether the generated answer is factually consistent with the retrieved context. It's essentially a measure of hallucination - lower faithfulness means more hallucinated content.
 
-**How it works**: RAGAS extracts claims from the generated answer and verifies each claim against the retrieved contexts using an LLM.
+**Why it matters**: Faithfulness is critical for production RAG systems. It prevents hallucination and ensures users can trust the agent's responses. Low faithfulness means the model is "making things up" rather than grounding answers in retrieved knowledge.
 
-**Why it matters**: Faithfulness prevents hallucination. A faithful agent only makes claims supported by its retrieved information.
+**How it works**: RAGAS uses an LLM to:
+1. Extract individual claims/statements from the generated answer
+2. For each claim, verify if it's supported by the retrieved contexts
+3. Calculate the ratio of supported claims to total claims:
 
-**Example**:
-- Context: "Password resets take 5-10 minutes to propagate"
-- Faithful answer: "Your password reset will take 5-10 minutes to take effect"
-- Unfaithful answer: "Your password reset is instant" (contradicts context)
+```
+Faithfulness = (Number of claims supported by context) / (Total number of claims in answer)
+```
+
+**Score interpretation**:
+- **0.9-1.0**: Excellent - answer is fully grounded in context
+- **0.7-0.9**: Good - mostly grounded with minor extrapolations
+- **0.5-0.7**: Fair - significant unsupported claims
+- **Below 0.5**: Poor - frequent hallucination, unreliable
+
+**Improving faithfulness**:
+- Strengthen system prompts to emphasize grounding in context
+- Lower model temperature for more deterministic outputs
+- Add explicit "cite your sources" instructions
+- Implement a validation layer that checks for unsupported claims
+
+<details>
+<summary><strong>Click to See an Example</strong></summary>
+
+```
+Context: "Password resets take 5-10 minutes to propagate across all systems. Use the self-service portal."
+
+Faithful answer: "Your password reset will take 5-10 minutes to take effect. Use the self-service portal." (Faithfulness = 1.0, both claims supported)
+
+Partially faithful: "Your password reset is instant via the portal." (Faithfulness = 0.5, only portal claim supported)
+
+Unfaithful answer: "Contact your manager to reset passwords immediately." (Faithfulness = 0.0, contradicts context)
+```
+</details>
 
 <!-- fold:break -->
 
 ### Answer Relevancy
 
-**What it measures**: How well the generated answer addresses the original question.
+**What it measures**: How well the generated answer addresses the original question. It evaluates whether the response is on-topic and directly answers what was asked.
 
-**How it works**: RAGAS generates potential questions that the answer would address, then measures similarity with the original question.
+**Why it matters**: An agent might generate a factually correct, faithful response that still doesn't answer what the user asked. High relevancy ensures users get actionable answers to their specific questions, improving user satisfaction and reducing follow-up queries.
 
-**Why it matters**: An agent might generate a factually correct, faithful response that still doesn't answer what the user asked.
+**How it works**: RAGAS uses an LLM to generate potential questions that the answer would be appropriate for, then measures the semantic similarity between these generated questions and the original question using embeddings:
 
-**Example**:
-- Question: "How do I reset my password?"
-- High relevancy answer: "To reset your password, visit the self-service portal..."
-- Low relevancy answer: "Passwords are important for security..." (true but not helpful)
+```
+Answer Relevancy = mean(cosine_similarity(original_question, generated_question_i))
+```
+
+**Score interpretation**:
+- **0.9-1.0**: Excellent - answer directly addresses the question
+- **0.7-0.9**: Good - mostly relevant with minor tangents
+- **0.5-0.7**: Fair - partially addresses question
+- **Below 0.5**: Poor - answer is off-topic or too generic
+
+**Improving answer relevancy**:
+- Add examples of relevant vs. irrelevant answers in system prompt
+- Implement answer validation that checks alignment with question
+- Use instruction-tuned models that follow user intent better
+- Add a reformulation step to ensure question is understood correctly
+
+<details>
+<summary><strong>Click to See an Example</strong></summary>
+
+```
+Question: "How do I reset my password?"
+
+High relevancy answer: "To reset your password, visit the self-service portal at portal.company.com/reset and follow the prompts." (Relevancy ≈ 0.95)
+    
+    Generated questions: "How to reset password?", "What's the password reset process?"
+
+Medium relevancy: "You can reset your password. Also, remember to use strong passwords with special characters." (Relevancy ≈ 0.70)
+    
+    Generated questions: "Can I reset my password?", "What does a strong password look like?"
+
+Low relevancy: "Passwords are important for security. Our company requires passwords to be changed every 90 days." (Relevancy ≈ 0.40)
+    
+    Generated questions: "Why are passwords importnant?", "How often do I need to change my password?"
+```
+
+</details>
 
 <!-- fold:break -->
 
 ## Additional RAG Metrics
 
-Beyond RAGAS, there are other useful metrics for RAG evaluation:
+Beyond RAGAS, there are other potentially useful metrics for RAG evaluation:
 
 ### Context Relevance
 
@@ -200,6 +310,36 @@ Not all metrics are equally reliable:
 - **Human metrics**: Subject to bias and fatigue
 
 **Strategy**: Validate your automated metrics against human judgment periodically.
+
+<!-- fold:break -->
+
+## NVIDIA Models for Evaluation
+
+When evaluating agents in this module, we use several NVIDIA models optimized for specific tasks:
+
+### Models Used
+
+- **nvidia/nvidia-nemotron-nano-9b-v2**: Primary LLM for evaluation judgments
+  - Fast, efficient reasoning
+  - Excellent for high-volume evaluation
+  - Used as the LLM-as-a-judge model
+  
+- **nvidia/llama-3.2-nv-embedqa-1b-v2**: Embedding model for semantic similarity
+  - Optimized for question-answering tasks
+  - Used in RAGAS metrics for semantic similarity calculations
+  - Powers answer relevancy assessments
+  
+- **nvidia/llama-3.2-nv-rerankqa-1b-v2**: Reranking model for retrieval evaluation
+  - Assesses relevance of retrieved documents
+  - Used to evaluate context precision
+  - Improves retrieval quality assessment
+
+- **nvidia/llama-3.1-nemotron-70b-instruct**: Optional larger model for complex evaluations
+  - More capable reasoning for nuanced assessments
+  - Use when evaluation requires deeper analysis
+  - Balance cost vs. accuracy needs
+
+All models are accessible through [NVIDIA NIM endpoints](https://build.nvidia.com/) with your NGC API key.
 
 <!-- fold:break -->
 

@@ -1,14 +1,14 @@
 # Understanding Evaluation Metrics
 
-<img src="_static/robots/datacenter.png" alt="Metrics and Data" style="float:right;max-width:300px;margin:25px;" />
+<img src="_static/robots/datacenter.png" alt="Metrics and Data" style="float:left;max-width:250px;margin:25px;" />
 
 Now that we understand why evaluation is important, let's dive into the specific metrics we can use to measure agent performance. Different types of agents require different evaluation approaches, so we'll explore metrics for both RAG systems and general-purpose agents.
 
 <!-- fold:break -->
 
-<img src="_static/robots/magician.png" alt="LLM Judge" style="float:right;max-width:300px;margin:25px;" />
-
 One of the most powerful techniques for evaluating AI agents is using another LLM to judge the quality of outputs. This approach, called "LLM-as-a-judge," allows us to evaluate subjective qualities like helpfulness, coherence, and relevance at scale. 
+
+<img src="_static/robots/magician.png" alt="LLM Judge" style="float:right;max-width:250px;margin:25px;" />
 
 Traditional metrics like exact string matching or BLEU scores don't work well for evaluating natural language outputs. Human evaluation is accurate but expensive and slow. LLM-as-a-judge provides a middle ground:
 

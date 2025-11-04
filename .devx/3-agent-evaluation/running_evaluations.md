@@ -1,6 +1,6 @@
 # Running Evaluations
 
-<img src="_static/robots/operator.png" alt="Running Evaluations" style="float:right;max-width:300px;margin:25px;" />
+<img src="_static/robots/operator.png" alt="Running Evaluations" style="float:left;max-width:300px;margin:25px;" />
 
 Now it's time to put everything together and run comprehensive evaluations on your agents! In this hands-on lesson, you'll build evaluation pipelines for both the RAG agent from Module 2 and the report generation agent from Module 1.
 
@@ -8,9 +8,9 @@ Now it's time to put everything together and run comprehensive evaluations on yo
 
 ## Designing Evaluation Prompts
 
-<img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
-
 The quality of an agent evaluation pipeline depends heavily on your evaluation prompts. Here are key principles:
+
+<img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
 
 ### 1. Be Specific About Criteria
 
@@ -66,7 +66,7 @@ Explanation: Discusses passwords but doesn't answer the question.
 
 ## Evaluation Architecture
 
-<img src="_static/robots/blueprint.png" alt="Evaluation Pipeline" style="float:left;max-width:300px;margin:25px;" />
+<img src="_static/robots/blueprint.png" alt="Evaluation Pipeline" style="float:right;max-width:300px;margin:25px;" />
 
 A robust evaluation pipeline consists of several components:
 
@@ -399,81 +399,6 @@ Good tool usage patterns:
 
 <!-- fold:break -->
 
-## Tracking Results Over Time
-
-<img src="_static/robots/controls.png" alt="Monitoring" style="float:left;max-width:300px;margin:25px;" />
-
-Evaluation isn't a one-time activity. Track results over time to:
-- Measure impact of changes
-- Detect regressions
-- Identify trends
-
-### Using LangSmith for Tracking
-
-LangSmith automatically tracks evaluation runs. View your results at [https://smith.langchain.com/](https://smith.langchain.com/).
-
-**Create a Dataset**: Store your test cases in LangSmith:
-
-```python
-from langsmith import Client
-
-client = Client()
-
-# Create dataset
-dataset = client.create_dataset(
-    dataset_name="rag-agent-eval",
-    description="IT Help Desk evaluation dataset"
-)
-
-# Add examples
-for test_case in test_dataset:
-    client.create_example(
-        dataset_id=dataset.id,
-        inputs={"question": test_case["question"]},
-        outputs={"answer": test_case["ground_truth"]}
-    )
-```
-
-**Run Evaluations**: LangSmith will track each run:
-
-```python
-from langsmith.evaluation import evaluate
-
-evaluate(
-    lambda inputs: rag_agent.invoke(inputs),
-    data=dataset_name,
-    evaluators=[
-        faithfulness_evaluator,
-        relevancy_evaluator,
-    ],
-    experiment_prefix="rag-agent-v1"
-)
-```
-
-<!-- fold:break -->
-
-### Comparing Versions
-
-When you make changes to your agent, compare performance:
-
-```python
-# Run evaluation on version 1
-results_v1 = evaluate(agent_v1, dataset, evaluators)
-
-# Make changes to your agent
-# ...
-
-# Run evaluation on version 2
-results_v2 = evaluate(agent_v2, dataset, evaluators)
-
-# Compare
-comparison = compare_results(results_v1, results_v2)
-print(f"Faithfulness change: {comparison['faithfulness_delta']}")
-print(f"Relevancy change: {comparison['relevancy_delta']}")
-```
-
-<!-- fold:break -->
-
 ## Interpreting Results and Taking Action
 
 <img src="_static/robots/supervisor.png" alt="Taking Action" style="float:right;max-width:300px;margin:25px;" />
@@ -529,64 +454,6 @@ Evaluation results should drive improvements. Here's how to act on common findin
 - Add tool usage examples
 - Implement tool selection validation
 - Adjust model parameters
-
-<!-- fold:break -->
-
-## Continuous Evaluation
-
-<img src="_static/robots/hiking.png" alt="Continuous Improvement" style="float:left;max-width:300px;margin:25px;" />
-
-Build evaluation into your development workflow:
-
-### 1. Pre-Commit Evaluation
-
-Run quick evaluations before committing changes:
-
-```bash
-# In your CI/CD pipeline
-python evaluate_agent.py --quick --threshold 0.7
-```
-
-### 2. Nightly Comprehensive Evaluation
-
-Run full evaluation suite overnight:
-
-```bash
-# Scheduled job
-python evaluate_agent.py --full --dataset all_test_cases
-```
-
-### 3. Production Monitoring
-
-Sample and evaluate production traffic:
-
-```python
-# In your production agent
-if random.random() < 0.01:  # Sample 1%
-    log_for_evaluation(question, response, contexts)
-```
-
-### 4. User Feedback Integration
-
-Incorporate user feedback into evaluation:
-
-```python
-# When users provide feedback
-if user_feedback == "thumbs_down":
-    add_to_evaluation_dataset(question, response, label="negative")
-```
-
-<!-- fold:break -->
-
-## Success Metrics
-
-You've successfully built an evaluation pipeline when you can:
-
-✅ Run automated evaluations on demand  
-✅ Track performance across multiple metrics  
-✅ Compare results across agent versions  
-✅ Identify specific failure modes  
-✅ Measure impact of improvements  
 
 <!-- fold:break -->
 

@@ -8,15 +8,15 @@ Now it's time to put everything together and run comprehensive evaluations on yo
 
 ## Creating Evaluation Datasets
 
-<img src="_static/robots/blueprint.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
-
-Firstly, good metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
+First off, good evaluation metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
 
 1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
 2. **Include Ground Truth**: Where possible, provide correct answers for comparison
 3. **Represent Real Usage**: Base test cases on actual user interactions
 4. **Start Small**: Begin with 20-30 high-quality examples, expand over time
 5. **Version Control**: Track your datasets alongside your code
+
+<img src="_static/robots/blueprint.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
 
 For RAG agents, each test case should include:
 - Question

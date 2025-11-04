@@ -341,7 +341,7 @@ When deciding which metrics to use, consider:
 
 <!-- fold:break -->
 
-## Practical Considerations
+## Other Practical Considerations
 
 ### Metric Computation Cost
 
@@ -363,35 +363,9 @@ Not all metrics are equally reliable:
 
 <!-- fold:break -->
 
-## Creating Evaluation Datasets
-
-<img src="_static/robots/blueprint.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
-
-Finally, good metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
-
-1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
-2. **Include Ground Truth**: Where possible, provide correct answers for comparison
-3. **Represent Real Usage**: Base test cases on actual user interactions
-4. **Start Small**: Begin with 20-30 high-quality examples, expand over time
-5. **Version Control**: Track your datasets alongside your code
-
-For RAG agents, each test case should include:
-- Question
-- Ground truth answer (if available)
-- Expected retrieved contexts (if available)
-- Success criteria
-
-For task agents, each test case should include:
-- Task description
-- Expected tools to be used
-- Success criteria
-- Example of good output
-
-<!-- fold:break -->
-
 ## Hands-On: Implementing Metrics
 
-Ready to implement these metrics? In the next lesson, we'll get hands-on with [Running Evaluations](running_evaluations.md) using NVIDIA models to evaluate agent outputs.
+Ready to implement these evaluation metrics? In the next lesson, we'll get hands-on with [Running Evaluations](running_evaluations.md) using NVIDIA models to evaluate agent outputs.
 
 You'll learn how to:
 - Use NVIDIA Nemotron models as evaluation judges

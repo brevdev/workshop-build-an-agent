@@ -6,9 +6,37 @@ Now it's time to put everything together and run comprehensive evaluations on yo
 
 <!-- fold:break -->
 
+## Creating Evaluation Datasets
+
+<img src="_static/robots/blueprint.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
+
+Firstly, good metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
+
+1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
+2. **Include Ground Truth**: Where possible, provide correct answers for comparison
+3. **Represent Real Usage**: Base test cases on actual user interactions
+4. **Start Small**: Begin with 20-30 high-quality examples, expand over time
+5. **Version Control**: Track your datasets alongside your code
+
+For RAG agents, each test case should include:
+- Question
+- Ground truth answer (if available)
+- Expected retrieved contexts (if available)
+- Success criteria
+
+For task agents, each test case should include:
+- Task description
+- Expected tools to be used
+- Success criteria
+- Example of good output
+
+TODO: SHOW THE USER THE TEST DATASETS HERE!
+
+<!-- fold:break -->
+
 ## Designing Evaluation Prompts
 
-The quality of an agent evaluation pipeline depends heavily on your evaluation prompts. Here are key principles:
+The quality of an agent evaluation pipeline also depends heavily on your evaluation prompts. Here are key principles:
 
 <img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
 
@@ -61,6 +89,8 @@ Question: "How do I reset my password?"
 Answer: "Passwords are important for security..."
 Explanation: Discusses passwords but doesn't answer the question.
 ```
+
+TODO: SHOW THE USER THE EVALUATION PROMTS HERE!
 
 <!-- fold:break -->
 

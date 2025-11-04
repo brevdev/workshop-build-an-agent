@@ -117,29 +117,6 @@ RAGAS uses LLMs to compute these metrics, making it practical for evaluating sys
 
 <!-- fold:break -->
 
-## NVIDIA's Evaluation Ecosystem
-
-NVIDIA provides several tools and models specifically designed for evaluation:
-
-### NVIDIA NIM for Evaluation
-
-NVIDIA's models can serve as powerful judges for evaluating agent outputs:
-
-- **Nemotron Models**: Optimized for reasoning and evaluation tasks
-- **Llama Models**: Available through NVIDIA NIM with reranking and embedding variants
-- **Consistent Performance**: Reproducible results for reliable evaluation pipelines
-
-### LangSmith Integration
-
-As you saw in previous modules, LangSmith provides observability for your agents. It also offers:
-
-- **Dataset Management**: Store and version evaluation datasets
-- **Automated Evaluation**: Run evaluations on every agent invocation
-- **Comparison Views**: Compare performance across model versions or prompt changes
-- **Custom Evaluators**: Define your own evaluation logic
-
-<!-- fold:break -->
-
 ## Building an Evaluation Mindset
 
 <img src="_static/robots/blueprint.png" alt="Planning Evaluation" style="float:left;max-width:300px;margin:25px;" />
@@ -159,7 +136,6 @@ Effective evaluation starts with clear thinking about what you're measuring and 
 In the following lessons, we'll put these concepts into practice:
 
 - **Evaluation Metrics**: Deep dive into implementing specific metrics
-- **LLM-as-a-Judge**: Build evaluation pipelines using NVIDIA models
 - **Running Evaluations**: Create automated evaluation workflows for your agents
 - **Continuous Improvement**: Use evaluation results to systematically improve agent quality
 

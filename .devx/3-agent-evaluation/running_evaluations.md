@@ -6,6 +6,64 @@ Now it's time to put everything together and run comprehensive evaluations on yo
 
 <!-- fold:break -->
 
+## Designing Evaluation Prompts
+
+<img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
+
+The quality of an agent evaluation pipeline depends heavily on your evaluation prompts. Here are key principles:
+
+### 1. Be Specific About Criteria
+
+**Bad**: "Is this a good answer?"
+
+**Good**: "Evaluate this answer on the following criteria:
+1. Relevance: Does it directly address the question?
+2. Accuracy: Are all factual claims correct?
+3. Completeness: Does it cover all aspects of the question?
+4. Clarity: Is it easy to understand?"
+
+### 2. Provide Context
+
+Include all relevant information the judge needs:
+- The original question or task
+- The agent's output
+- Retrieved context (for RAG systems)
+- Ground truth answer (if available)
+
+### 3. Request Structured Output
+
+Ask for scores and explanations:
+
+```
+For each criterion, provide:
+- Score (1-5)
+- Explanation (1-2 sentences)
+
+Format your response as JSON:
+{
+  "relevance": {"score": 4, "explanation": "..."},
+  "accuracy": {"score": 5, "explanation": "..."}
+}
+```
+
+### 4. Include Examples
+
+Few-shot examples help the judge understand your standards:
+
+```
+Example of a score 5 for relevance:
+Question: "How do I reset my password?"
+Answer: "To reset your password, visit portal.company.com/reset..."
+Explanation: Directly answers the question with specific steps.
+
+Example of a score 2 for relevance:
+Question: "How do I reset my password?"
+Answer: "Passwords are important for security..."
+Explanation: Discusses passwords but doesn't answer the question.
+```
+
+<!-- fold:break -->
+
 ## Evaluation Architecture
 
 <img src="_static/robots/blueprint.png" alt="Evaluation Pipeline" style="float:left;max-width:300px;margin:25px;" />
@@ -534,10 +592,10 @@ You've successfully built an evaluation pipeline when you can:
 
 ## What's Next
 
-You now have a comprehensive evaluation framework for your agents! In the next lesson, [Continuous Improvement](continuous_improvement.md), we'll explore:
+Now that you have a basic understanding of how to evaluate your agents, let's dive deeper by seeing how we can take this to production using NVIDIA open source tooling, like NeMo Evaluator. In the next lesson, [Path to Production (Optional)](production.md), we'll explore: 
 
-- Systematic approaches to improving agent performance
-- Advanced evaluation techniques
+- NeMo Evaluator as an open source platform for agent evaluation
+- Robust, reproducible, and scalable evaluation of agents and models
 - Production monitoring best practices
 - Building a culture of quality around AI agents
 

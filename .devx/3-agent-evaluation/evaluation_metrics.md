@@ -6,6 +6,27 @@ Now that we understand why evaluation is important, let's dive into the specific
 
 <!-- fold:break -->
 
+<img src="_static/robots/magician.png" alt="LLM Judge" style="float:right;max-width:300px;margin:25px;" />
+
+One of the most powerful techniques for evaluating AI agents is using another LLM to judge the quality of outputs. This approach, called "LLM-as-a-judge," allows us to evaluate subjective qualities like helpfulness, coherence, and relevance at scale. 
+
+Traditional metrics like exact string matching or BLEU scores don't work well for evaluating natural language outputs. Human evaluation is accurate but expensive and slow. LLM-as-a-judge provides a middle ground:
+
+**Advantages**:
+- **Scalable**: Evaluate thousands of outputs quickly
+- **Consistent**: More consistent than human reviewers
+- **Flexible**: Can assess any criteria you define
+- **Nuanced**: Understands semantic meaning and context
+- **Cost-Effective**: Cheaper than human evaluation at scale
+
+**Limitations**:
+- **Not Perfect**: Judge models can make mistakes
+- **Biased**: May favor outputs similar to their own style
+- **Costly**: More expensive than simple metrics
+- **Requires Validation**: Should be spot-checked against human judgment
+
+<!-- fold:break -->
+
 ## Evaluating RAG Agents
 
 The IT Help Desk agent you built in Module 2 is a Retrieval Augmented Generation (RAG) system. RAG agents have two distinct components that need evaluation:
@@ -42,23 +63,23 @@ Precision@k = true positives @ k / (true positives @ k + false positives @k)
 ```
 
 <details>
-<summary><strong>Don't get it yet? Click me!</strong></summary>
+<summary><strong>What does this all mean? Click me for more!</strong></summary>
 
-Consider a sample RAG query in which we have retrieved 2 relevant chunks from ``K=3`` total retrieved chunks. First, label each of the 3 chunks as either relevant or irrelevant for the query. Let's assume relevant-irrelevant-relevant ordering for this exercise. 
+Consider a sample RAG query in which we have retrieved 2 relevant chunks from ``K=3`` total retrieved chunks. First, label each of the 3 chunks as either relevant or irrelevant for the query. Let's assume relevant-irrelevant-relevant ordering for this exercise. Then: 
 
-* Precision@1 = 1/1 = 1
-* Precision@2 = 1/2 = 0.5
-* Precision@3 = 2/3 = 0.67
+* Precision@1 = 1/(1 + 0) = 1.0
+* Precision@2 = 1/(1 + 1) = 0.5
+* Precision@3 = 2/(2 + 1) = 0.67
 
 The final Context Precision is the average of the individual Precision@k values, ignoring irrelevant retrieved chunks. 
 
-* Rank 1: v_1 x Precision@1 = 1 x 1 = 1
-* Rank 2: v_2 x Precision@2 = 0 x 0.5 = 0
+* Rank 1: v_1 x Precision@1 = 1 x 1.0 = 1.0
+* Rank 2: v_2 x Precision@2 = 0 x 0.5 = 0.0
 * Rank 3: v_3 x Precision@3 = 1 x 0.67 = 0.67
 
-So Context Precision = (1+0+0.67)/(1+0+1) = **0.83**. 
+So Context Precision = (1.0 + 0.0 + 0.67) / (1 + 0 + 1) = **0.83**. 
 
-Note that this context precision value is not a perfect 1.0 score. Why? Because we can actually improve the precision if the third retrieved chunk were instead ranked second, ahead of the irrelevant chunk. This is the most ideal retrieval arrangement.
+Note that this context precision value is not a perfect 1.0 score. Why? Because we can actually improve the precision if the third retrieved chunk were instead ranked second, ahead of the irrelevant chunk. This would represent the most ideal retrieval arrangement, where all relevant chunks are ranked ahead of irrelevant ones for any particular value of K.
 
 </details>
 
@@ -342,41 +363,11 @@ Not all metrics are equally reliable:
 
 <!-- fold:break -->
 
-## NVIDIA Models for Evaluation
-
-When evaluating agents in this module, we use several NVIDIA models optimized for specific tasks:
-
-### Models Used
-
-- **nvidia/nvidia-nemotron-nano-9b-v2**: Primary LLM for evaluation judgments
-  - Fast, efficient reasoning
-  - Excellent for high-volume evaluation
-  - Used as the LLM-as-a-judge model
-  
-- **nvidia/llama-3.2-nv-embedqa-1b-v2**: Embedding model for semantic similarity
-  - Optimized for question-answering tasks
-  - Used in RAGAS metrics for semantic similarity calculations
-  - Powers answer relevancy assessments
-  
-- **nvidia/llama-3.2-nv-rerankqa-1b-v2**: Reranking model for retrieval evaluation
-  - Assesses relevance of retrieved documents
-  - Used to evaluate context precision
-  - Improves retrieval quality assessment
-
-- **nvidia/llama-3.1-nemotron-70b-instruct**: Optional larger model for complex evaluations
-  - More capable reasoning for nuanced assessments
-  - Use when evaluation requires deeper analysis
-  - Balance cost vs. accuracy needs
-
-All models are accessible through [NVIDIA NIM endpoints](https://build.nvidia.com/) with your NGC API key.
-
-<!-- fold:break -->
-
 ## Creating Evaluation Datasets
 
 <img src="_static/robots/blueprint.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
 
-Good metrics require good test data. When creating evaluation datasets:
+Finally, good metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
 
 1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
 2. **Include Ground Truth**: Where possible, provide correct answers for comparison
@@ -400,7 +391,7 @@ For task agents, each test case should include:
 
 ## Hands-On: Implementing Metrics
 
-Ready to implement these metrics? In the next lesson, we'll explore [LLM-as-a-Judge](llm_as_judge.md) techniques using NVIDIA models to evaluate agent outputs.
+Ready to implement these metrics? In the next lesson, we'll get hands-on with [Running Evaluations](running_evaluations.md) using NVIDIA models to evaluate agent outputs.
 
 You'll learn how to:
 - Use NVIDIA Nemotron models as evaluation judges

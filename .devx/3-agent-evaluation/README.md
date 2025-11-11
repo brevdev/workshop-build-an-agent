@@ -21,7 +21,6 @@ By the end of this workshop, you'll know how to:
 - Design evaluation datasets for different agent types
 - Implement RAGAS metrics for RAG system evaluation
 - Use NVIDIA models as judges for qualitative assessment
-- Build automated evaluation pipelines
 - Interpret evaluation results and identify improvement areas
 
 > Head over to [Setting up Secrets](secrets) to get started!

@@ -1,14 +1,27 @@
 # Running Evaluations
 
-<img src="_static/robots/operator.png" alt="Running Evaluations" style="float:left;max-width:300px;margin:25px;" />
+<img src="_static/robots/blueprint.png" alt="Running Evaluations" style="float:left;max-width:300px;margin:25px;" />
 
 Now it's time to put everything together and run comprehensive evaluations on your agents! In this hands-on lesson, you'll build evaluation pipelines for both the RAG agent from Module 2 and the report generation agent from Module 1.
 
 <!-- fold:break -->
 
+## Evaluation Architecture
+
+A robust evaluation pipeline consists of several key components:
+
+1. **Agent Under Test**: The agent you're evaluating
+2. **Test Dataset**: Collection of test cases with inputs and expected outputs
+3. **Evaluation Prompts and Metrics**: Instructions as to how to score agent outputs
+4. **Analysis of Results**: Interpret results for areas of improvement
+
+Let's take a look at these in greater detail in our hands-on example as we build out our evaluation pipeline.
+
+<!-- fold:break -->
+
 ## Creating Evaluation Datasets
 
-First off, good evaluation metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
+Good evaluation metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
 
 1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
 2. **Include Ground Truth**: Where possible, provide correct answers for comparison
@@ -16,27 +29,33 @@ First off, good evaluation metrics always require good test data. When creating 
 4. **Start Small**: Begin with 20-30 high-quality examples, expand over time
 5. **Version Control**: Track your datasets alongside your code
 
-<img src="_static/robots/blueprint.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
+<!-- fold:break -->
 
-For RAG agents, each test case should include:
+<img src="_static/robots/operator.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
+
+For the IT Help Desk RAG agent from Module 2, each of our evaluation test cases should include:
 - Question
 - Ground truth answer (if available)
 - Expected retrieved contexts (if available)
 - Success criteria
 
-For task agents, each test case should include:
+Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to take a look at some examples we will use in our evaluation pipeline. 
+
+<!-- fold:break -->
+
+For the Report Generation task agent from Module 1, each of our evaluation test cases should include:
 - Task description
 - Expected tools to be used
 - Success criteria
 - Example of good output
 
-TODO: SHOW THE USER THE TEST DATASETS HERE!
+Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Evaluation Dataset</button> to take a look at some examples we will use in our evaluation pipeline. 
 
 <!-- fold:break -->
 
 ## Designing Evaluation Prompts
 
-The quality of an agent evaluation pipeline also depends heavily on your evaluation prompts. Here are key principles:
+The quality of an agent evaluation pipeline also depends heavily on your evaluation prompts. Here are some key design principles when crafting evaluation prompts:
 
 <img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
 
@@ -50,6 +69,8 @@ The quality of an agent evaluation pipeline also depends heavily on your evaluat
 3. Completeness: Does it cover all aspects of the question?
 4. Clarity: Is it easy to understand?"
 
+<!-- fold:break -->
+
 ### 2. Provide Context
 
 Include all relevant information the judge needs:
@@ -57,6 +78,8 @@ Include all relevant information the judge needs:
 - The agent's output
 - Retrieved context (for RAG systems)
 - Ground truth answer (if available)
+
+<!-- fold:break -->
 
 ### 3. Request Structured Output
 
@@ -74,9 +97,11 @@ Format your response as JSON:
 }
 ```
 
+<!-- fold:break -->
+
 ### 4. Include Examples
 
-Few-shot examples help the judge understand your standards:
+Few-shot examples can help help the judge understand your standards:
 
 ```
 Example of a score 5 for relevance:
@@ -90,23 +115,7 @@ Answer: "Passwords are important for security..."
 Explanation: Discusses passwords but doesn't answer the question.
 ```
 
-TODO: SHOW THE USER THE EVALUATION PROMTS HERE!
-
-<!-- fold:break -->
-
-## Evaluation Architecture
-
-<img src="_static/robots/blueprint.png" alt="Evaluation Pipeline" style="float:right;max-width:300px;margin:25px;" />
-
-A robust evaluation pipeline consists of several components:
-
-1. **Test Dataset**: Collection of test cases with inputs and expected outputs
-2. **Agent Under Test**: The agent you're evaluating
-3. **Evaluation Metrics**: Functions that score agent outputs
-4. **Results Storage**: System for tracking and comparing results over time
-5. **Analysis Tools**: Dashboards and reports for interpreting results
-
-We'll use LangSmith for results storage and analysis, RAGAS for RAG-specific metrics, and NVIDIA models for LLM-as-a-judge evaluation.
+Let's take a look at some example <button onclick="goToLineAndSelect('code/evaluation_framework.py', '# Evaluation Prompt Templates');"><i class="fas fa-code"></i> evaluation prompt templates </button> just to get a better idea of these principles in action in our evaluation pipeline.
 
 <!-- fold:break -->
 
@@ -122,7 +131,7 @@ The evaluation framework uses several libraries:
 - **RAGAS**: For RAG-specific metrics
 - **LangChain**: For agent interaction and evaluation chains
 - **NVIDIA AI Endpoints**: For models used in evaluation
-- **LangSmith**: For tracking and analyzing results
+- **LangSmith** (optional): For tracking and analyzing results
 
 ### Configure Models
 

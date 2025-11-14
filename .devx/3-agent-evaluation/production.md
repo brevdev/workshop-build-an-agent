@@ -2,7 +2,11 @@
 
 <img src="_static/robots/magician.png" alt="LLM Judge" style="float:right;max-width:300px;margin:25px;" />
 
-TODO
+TODO: Focus on learning about NeMo Evaluator in this section. 
+
+<!-- fold:break -->
+
+TODO: Open the <button onclick="openOrCreateFileInJupyterLab('code/evaluator.ipynb');"><i class="fa-solid fa-flask"></i> NeMo Evaluator Tutorial </button> notebook and get started.
 
 <!-- fold:break -->
 

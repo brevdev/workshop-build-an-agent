@@ -26,7 +26,7 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 ## Hugging Face API Key
 
-We need a Hugging Face Token to access datasets and models for evaluation.
+We need a Hugging Face Token to access datasets and models for evaluation. Make sure you have both **read** and **write** permissions enabled for your key!
 
 <details>
 <summary>⚠️ Don't have an account?</summary>

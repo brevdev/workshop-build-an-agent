@@ -40,7 +40,7 @@
   catalog: NVIDIA DevX Learning Path
 
 - title: "Secrets Manager"
-  source: /project/code/secrets_management.ipynb
+  source: /project/code/secrets_management_3.ipynb
   cwd: /projects
   args: {}
   type: notebook-voila

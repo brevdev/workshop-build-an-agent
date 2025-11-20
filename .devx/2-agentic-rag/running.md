@@ -74,7 +74,7 @@ If you see any errors while running your agent, they will appear in this termina
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     File "<frozen importlib._bootstrap_external>", line 999, in exec_module
     File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-    File "/project/code/rag_agent.py", line 37, in <module>
+    File "/project/code/2-agentic-rag/rag_agent.py", line 37, in <module>
       chunks = splitter.split_documents(docs)
               ^^^^^^^^^^^^^^^^^^^^^^^^
   AttributeError: 'ellipsis' object has no attribute 'split_documents'

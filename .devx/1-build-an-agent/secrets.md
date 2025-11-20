@@ -3,7 +3,7 @@
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right; max-width:300px;margin:25px;" />
 
 
-For this agent to work, we will need to configure a few secrets. Use the <button onclick="openVoila('code/secrets_management_1.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set these up.
+For this agent to work, we will need to configure a few secrets. Use the <button onclick="openVoila('code/secrets_management/secrets_management_1.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set these up.
 
 You can also launch the Secrets Manager from the launcher.
 

@@ -77,9 +77,9 @@ For the full module experience:
 - `continuous_improvement.md` - Improvement strategies
 
 ### Code
-- `code/evaluation_framework.py` - Reusable evaluation utilities
-- `code/evaluate_rag_agent.py` - RAG agent evaluation script
-- `code/evaluate_report_agent.py` - Report agent evaluation script
+- `code/3-agent-evaluation/evaluation_framework.py` - Reusable evaluation utilities
+- `code/3-agent-evaluation/evaluate_rag_agent.py` - RAG agent evaluation script
+- `code/3-agent-evaluation/evaluate_report_agent.py` - Report agent evaluation script
 
 ### Data
 - `data/evaluation/rag_agent_test_cases.json` - Test cases for RAG agent

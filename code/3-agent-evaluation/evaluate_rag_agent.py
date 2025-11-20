@@ -23,8 +23,8 @@ from evaluation_framework import (
 )
 
 # Load environment variables
-load_dotenv("../variables.env")
-load_dotenv("../secrets.env")
+load_dotenv("../../variables.env")
+load_dotenv("../../secrets.env")
 
 logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
@@ -245,12 +245,14 @@ def main():
     _LOGGER.info("Starting RAG agent evaluation...")
     
     # Load test dataset
-    test_dataset_path = Path(__file__).parent.parent / "data" / "evaluation" / "rag_agent_test_cases.json"
+    test_dataset_path = Path(__file__).parent.parent.parent / "data" / "evaluation" / "rag_agent_test_cases.json"
     test_dataset = load_test_dataset(test_dataset_path)
     _LOGGER.info(f"Loaded {len(test_dataset)} test cases")
     
     # Initialize the RAG agent
     try:
+        import sys
+        sys.path.append(str(Path(__file__).parent.parent / "2-agentic-rag"))
         from rag_agent import AGENT
         _LOGGER.info("RAG agent loaded successfully")
     except ImportError as e:
@@ -290,7 +292,7 @@ def main():
             print(f"\n{i}. {rec}")
     
     # Save results
-    output_dir = Path(__file__).parent.parent / "data" / "evaluation"
+    output_dir = Path(__file__).parent.parent.parent / "data" / "evaluation"
     output_dir.mkdir(parents=True, exist_ok=True)
     
     results_path = output_dir / "rag_agent_results.csv"

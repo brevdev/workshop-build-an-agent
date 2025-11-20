@@ -6,7 +6,7 @@ TODO: Focus on learning about NeMo Evaluator in this section.
 
 <!-- fold:break -->
 
-TODO: Open the <button onclick="openOrCreateFileInJupyterLab('code/evaluator.ipynb');"><i class="fa-solid fa-flask"></i> NeMo Evaluator Tutorial </button> notebook and get started.
+TODO: Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluator.ipynb');"><i class="fa-solid fa-flask"></i> NeMo Evaluator Tutorial </button> notebook and get started.
 
 <!-- fold:break -->
 

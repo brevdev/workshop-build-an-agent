@@ -12,7 +12,7 @@ from langgraph.prebuilt import create_react_agent
 _LOGGER = logging.getLogger(__name__)
 
 # Data Ingestion Configuration
-DATA_DIR = Path(__file__).parent.parent / "data" / "it-knowledge-base"
+DATA_DIR = Path(__file__).parent.parent.parent / "data" / "it-knowledge-base"
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
 
@@ -33,16 +33,14 @@ docs = data_loader.load()
 
 # Split the data into chunks and ingest into FAISS vector database
 _LOGGER.info(f"Ingesting {len(docs)} documents into FAISS vector database.")
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
-)
+splitter = ...
 chunks = splitter.split_documents(docs)
-embeddings = NVIDIAEmbeddings(model=RETRIEVER_EMBEDDING_MODEL, truncate="END")
-vectordb = FAISS.from_documents(chunks, embeddings)
+embeddings = ...
+vectordb = FAISS.from_documents(chunks, embeddings)  # type: ignore
 
 # Create a document retriever and reranker
 kb_retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 6})
-reranker = NVIDIARerank(model=RETRIEVER_RERANK_MODEL)
+reranker = ...
 
 # combine those to create the final document retriever
 RETRIEVER = ContextualCompressionRetriever(
@@ -60,7 +58,7 @@ RETRIEVER_TOOL = create_retriever_tool(
 )
 
 # Define the LLM model to be used for this agent
-llm = ChatNVIDIA(model=LLM_MODEL, temperature=0.6, top_p=0.95, max_tokens=8192)
+llm = ...
 
 # Define the system prompt for the agent
 SYSTEM_PROMPT = (
@@ -73,8 +71,4 @@ SYSTEM_PROMPT = (
 )
 
 # Create the ReAct agent
-AGENT = create_react_agent(
-    model=llm,
-    tools=[RETRIEVER_TOOL],
-    prompt=SYSTEM_PROMPT,
-)
+AGENT = ...

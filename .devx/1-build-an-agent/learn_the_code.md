@@ -20,7 +20,7 @@ Tools are functions that let the agent take actions.
 Your agent can either write text or use these tools.
 
 We will define our tools in a single Python module:
-<button onclick="openOrCreateFileInJupyterLab('code/docgen_agent/tools.py');"><i class="fa-brands fa-python"></i> code/docgen_agent/tools.py</button>.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/docgen_agent/tools.py');"><i class="fa-brands fa-python"></i> code/1-build-an-agent/docgen_agent/tools.py</button>.
 
 <!-- fold:break -->
 
@@ -28,7 +28,7 @@ We will define our tools in a single Python module:
 
 For now, our agent just needs one tool: Tavily search.
 You can find it in
-<button onclick="goToLineAndSelect('code/docgen_agent/tools.py', 'def search_tavily');"><i class="fas fa-code"></i> search_tavily</button>.
+<button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/tools.py', 'def search_tavily');"><i class="fas fa-code"></i> search_tavily</button>.
 
 This function is well documented using a [Google style docstring](https://google.github.io/styleguide/pyguide.html#383-functions-and-methods). Adding this docstring helps the agent understand how the tool should be used.
 
@@ -53,7 +53,7 @@ In this setup, the agent thinks about what to do, takes an action, and then deci
 ### Research Agent Implementation
 
 This architecture has been implemented for basic research in
-<button onclick="openOrCreateFileInJupyterLab('code/docgen_agent/researcher.py');"><i class="fa-brands fa-python"></i> code/docgen_agent/researcher.py</button> and is represented in this diagram.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/docgen_agent/researcher.py');"><i class="fa-brands fa-python"></i> code/1-build-an-agent/docgen_agent/researcher.py</button> and is represented in this diagram.
 
 <center>
 
@@ -66,20 +66,20 @@ This architecture has been implemented for basic research in
 ### Researcher Agent Code Walkthrough
 
 The agent's state definition is called
-<button onclick="goToLineAndSelect('code/docgen_agent/researcher.py', 'class ResearcherState');"><i class="fas fa-code"></i> ResearcherState</button>.
+<button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/researcher.py', 'class ResearcherState');"><i class="fas fa-code"></i> ResearcherState</button>.
 
 The `state` object is passed to each node in the graph.
 
 Each node in the graph manipulates the state using a function:
-- **agent:** <button onclick="goToLineAndSelect('code/docgen_agent/researcher.py', 'def call_model');"><i class="fas fa-code"></i> call_model</button>
-- **tools:** <button onclick="goToLineAndSelect('code/docgen_agent/researcher.py', 'def tool_node');"><i class="fas fa-code"></i> tool_node</button>
-- **has tool calls?:** <button onclick="goToLineAndSelect('code/docgen_agent/researcher.py', 'def has_tool_calls');"><i class="fas fa-code"></i> has_tool_calls</button>
+- **agent:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/researcher.py', 'def call_model');"><i class="fas fa-code"></i> call_model</button>
+- **tools:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/researcher.py', 'def tool_node');"><i class="fas fa-code"></i> tool_node</button>
+- **has tool calls?:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/researcher.py', 'def has_tool_calls');"><i class="fas fa-code"></i> has_tool_calls</button>
 
 The graph is built and saved to
-<button onclick="goToLineAndSelect('code/docgen_agent/researcher.py', 'graph =');"><i class="fas fa-code"></i> graph</button>.
+<button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/researcher.py', 'graph =');"><i class="fas fa-code"></i> graph</button>.
 
 If you would like to experiment with this agent, a
-<button onclick="openOrCreateFileInJupyterLab('code/researcher_client.ipynb');"><i class="fa-solid fa-flask"></i> Researcher Agent Client</button> playground is available.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/researcher_client.ipynb');"><i class="fa-solid fa-flask"></i> Researcher Agent Client</button> playground is available.
 
 <!-- fold:break -->
 
@@ -104,33 +104,33 @@ Notice the architecture below. A gating function has been added before the ReAct
 </center>
 
 This has been created in
-<button onclick="openOrCreateFileInJupyterLab('code/docgen_agent/author.py');"><i class="fa-brands fa-python"></i> code/docgen_agent/author.py</button>.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/docgen_agent/author.py');"><i class="fa-brands fa-python"></i> code/1-build-an-agent/docgen_agent/author.py</button>.
 
 <!-- fold:break -->
 
 ### Author Agent Code Walkthrough
 
 The agent's state definition is called
-<button onclick="goToLineAndSelect('code/docgen_agent/author.py', 'class SectionWriterState');"><i class="fas fa-code"></i> SectionWriterState</button>.
+<button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/author.py', 'class SectionWriterState');"><i class="fas fa-code"></i> SectionWriterState</button>.
 Each node in the graph manipulates the state.
 
 
 The following nodes will be used in this agent:
-- **needs research?:** <button onclick="goToLineAndSelect('code/docgen_agent/author.py', 'def needs_research');"><i class="fas fa-code"></i> needs_research</button>
-- **agent:** <button onclick="goToLineAndSelect('code/docgen_agent/author.py', 'def research_model');"><i class="fas fa-code"></i> research_model</button>
-- **tools:** <button onclick="goToLineAndSelect('code/docgen_agent/author.py', 'def tool_node');"><i class="fas fa-code"></i> tool_node</button>
-- **has tool calls?:** <button onclick="goToLineAndSelect('code/docgen_agent/author.py', 'def has_tool_calls');"><i class="fas fa-code"></i> has_tool_calls</button>
-- **writer:** <button onclick="goToLineAndSelect('code/docgen_agent/author.py', 'def writing_model');"><i class="fas fa-code"></i> writing_model</button>
+- **needs research?:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/author.py', 'def needs_research');"><i class="fas fa-code"></i> needs_research</button>
+- **agent:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/author.py', 'def research_model');"><i class="fas fa-code"></i> research_model</button>
+- **tools:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/author.py', 'def tool_node');"><i class="fas fa-code"></i> tool_node</button>
+- **has tool calls?:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/author.py', 'def has_tool_calls');"><i class="fas fa-code"></i> has_tool_calls</button>
+- **writer:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/author.py', 'def writing_model');"><i class="fas fa-code"></i> writing_model</button>
 
 The graph is built and saved to
-<button onclick="goToLineAndSelect('code/docgen_agent/author.py', 'graph =');"><i class="fas fa-code"></i> graph</button>.
+<button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/author.py', 'graph =');"><i class="fas fa-code"></i> graph</button>.
 
 <!-- fold:break -->
 
 ### Author Agent Client
 
 If you would like to directly interact with this agent, an
-<button onclick="openOrCreateFileInJupyterLab('code/author_client.ipynb');"><i class="fa-solid fa-flask"></i> Author Agent Client</button> playground is available.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/author_client.ipynb');"><i class="fa-solid fa-flask"></i> Author Agent Client</button> playground is available.
 
 <!-- fold:break -->
 
@@ -149,7 +149,7 @@ We simply need to research the topic, plan the document outline, write the secti
 ### Agent Implementation
 
 This workflow is defined in
-<button onclick="openOrCreateFileInJupyterLab('code/docgen_agent/agent.py');"><i class="fa-brands fa-python"></i> code/docgen_agent/agent.py</button>.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/docgen_agent/agent.py');"><i class="fa-brands fa-python"></i> code/1-build-an-agent/docgen_agent/agent.py</button>.
 
 Compare to this diagram.
 
@@ -164,27 +164,27 @@ Compare to this diagram.
 ### Agent Code Walkthrough
 
 The agent's state definition is called
-<button onclick="goToLineAndSelect('code/docgen_agent/agent.py', 'class AgentState');"><i class="fas fa-code"></i> AgentState</button>.
+<button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/agent.py', 'class AgentState');"><i class="fas fa-code"></i> AgentState</button>.
 The `state` object is passed to each node in the graph.
 
 Each node in the graph manipulates the state using a function:
-- **researcher agent:** <button onclick="goToLineAndSelect('code/docgen_agent/agent.py', 'def topic_research');"><i class="fas fa-code"></i> topic_research</button>
-- **report_planner:** <button onclick="goToLineAndSelect('code/docgen_agent/agent.py', 'def report_planner');"><i class="fas fa-code"></i> report_planner</button>
-- **author_agent:** <button onclick="goToLineAndSelect('code/docgen_agent/agent.py', 'def section_author_orchestrator');"><i class="fas fa-code"></i> section_author_orchestrator</button>
-- **report_author:** <button onclick="goToLineAndSelect('code/docgen_agent/agent.py', 'def report_author');"><i class="fas fa-code"></i> report_author</button>
+- **researcher agent:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/agent.py', 'def topic_research');"><i class="fas fa-code"></i> topic_research</button>
+- **report_planner:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/agent.py', 'def report_planner');"><i class="fas fa-code"></i> report_planner</button>
+- **author_agent:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/agent.py', 'def section_author_orchestrator');"><i class="fas fa-code"></i> section_author_orchestrator</button>
+- **report_author:** <button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/agent.py', 'def report_author');"><i class="fas fa-code"></i> report_author</button>
 
 The graph is built and saved to
-<button onclick="goToLineAndSelect('code/docgen_agent/agent.py', 'graph =');"><i class="fas fa-code"></i> graph</button>.
+<button onclick="goToLineAndSelect('code/1-build-an-agent/docgen_agent/agent.py', 'graph =');"><i class="fas fa-code"></i> graph</button>.
 
 If you would like to experiment with this agent, a
-<button onclick="openOrCreateFileInJupyterLab('code/agent_client.ipynb');"><i class="fa-solid fa-flask"></i> Agent Client</button> playground is available.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/agent_client.ipynb');"><i class="fa-solid fa-flask"></i> Agent Client</button> playground is available.
 
 <!-- fold:break -->
 
 ### Agent Client
 
 If you would like to directly interact with this agent, an
-<button onclick="openOrCreateFileInJupyterLab('code/agent_client.ipynb');"><i class="fa-solid fa-flask"></i> Agent Client</button> playground is available.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/agent_client.ipynb');"><i class="fa-solid fa-flask"></i> Agent Client</button> playground is available.
 
 <!-- fold:break -->
 
@@ -195,7 +195,7 @@ There's one crucial ingredient we've been quietly ignoring: the system prompts.
 Every time an AI model is used, a system prompt is provided to tell the model what to do.
 
 All of these system prompts have been consolidated into
-<button onclick="openOrCreateFileInJupyterLab('code/docgen_agent/prompts.py');"><i class="fa-brands fa-python"></i> code/docgen_agent/prompts.py</button>.
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/docgen_agent/prompts.py');"><i class="fa-brands fa-python"></i> code/1-build-an-agent/docgen_agent/prompts.py</button>.
 
 <!-- fold:break -->
 

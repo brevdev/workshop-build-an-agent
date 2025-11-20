@@ -174,7 +174,7 @@ You should see the model start to answer the question, then get cut off after 64
 
 Now that your NIM is running locally, let's update your agent to use it.
 
-In your agent code, you previously created the `llm` object with the <button onclick="goToLineAndSelect('code/rag_agent.py', '= ChatNVIDIA(');"><i class="fas fa-code"></i> ChatNVIDIA</button> class. Connect to your local NIM by setting the `base_url` parameter to `http://nemotron:8000/v1` when initializing `ChatNVIDIA`.
+In your agent code, you previously created the `llm` object with the <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= ChatNVIDIA(');"><i class="fas fa-code"></i> ChatNVIDIA</button> class. Connect to your local NIM by setting the `base_url` parameter to `http://nemotron:8000/v1` when initializing `ChatNVIDIA`.
 
 Refer to the [official LangChain documentation](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#working-with-nvidia-nims) for more details.
 

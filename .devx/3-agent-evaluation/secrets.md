@@ -3,7 +3,7 @@
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right; max-width:300px;margin:25px;" />
 
 
-For this evaluation module to work, we will need to configure the Hugging Face API Key. Use the <button onclick="openVoila('code/secrets_management_3.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set this up. Note that the secrets you already set for Modules 1 and 2 should persist here as well. 
+For this evaluation module to work, we will need to configure the Hugging Face API Key. Use the <button onclick="openVoila('code/secrets_management/secrets_management_3.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set this up. Note that the secrets you already set for Modules 1 and 2 should persist here as well. 
 
 You can also launch the Secrets Manager from the launcher.
 

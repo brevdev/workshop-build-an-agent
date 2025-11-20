@@ -65,8 +65,8 @@ This module naturally follows Modules 1 and 2:
 - Generate recommendations
 
 **Teaching tips**:
-- Students should run `code/evaluate_rag_agent.py` first (faster)
-- Then run `code/evaluate_report_agent.py` (slower, good for discussion)
+- Students should run `code/3-agent-evaluation/evaluate_rag_agent.py` first (faster)
+- Then run `code/3-agent-evaluation/evaluate_report_agent.py` (slower, good for discussion)
 - Use wait time to discuss results from early finishers
 - Encourage students to examine low-scoring examples
 

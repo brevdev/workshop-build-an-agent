@@ -115,13 +115,13 @@ Answer: "Passwords are important for security..."
 Explanation: Discusses passwords but doesn't answer the question.
 ```
 
-Let's take a look at some example <button onclick="goToLineAndSelect('code/evaluation_framework.py', '# Evaluation Prompt Templates');"><i class="fas fa-code"></i> evaluation prompt templates </button> just to get a better idea of these principles in action in our evaluation pipeline.
+Let's take a look at some example <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', '# Evaluation Prompt Templates');"><i class="fas fa-code"></i> evaluation prompt templates </button> just to get a better idea of these principles in action in our evaluation pipeline.
 
 <!-- fold:break -->
 
 ## Setting Up the Evaluation Environment
 
-Before we start evaluating, let's set up our environment. Open the <button onclick="openOrCreateFileInJupyterLab('code/evaluation_framework.py');"><i class="fa-brands fa-python"></i> code/evaluation_framework.py</button> file.
+Before we start evaluating, let's set up our environment. Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluation_framework.py');"><i class="fa-brands fa-python"></i> code/3-agent-evaluation/evaluation_framework.py</button> file.
 
 This file contains the evaluation framework we'll use. Let's walk through the key components:
 
@@ -146,7 +146,7 @@ We'll use NVIDIA models for evaluation:
 
 <img src="_static/robots/datacenter.png" alt="RAG Evaluation" style="float:right;max-width:300px;margin:25px;" />
 
-Let's start by evaluating the IT Help Desk agent from Module 2. Open the <button onclick="openOrCreateFileInJupyterLab('code/evaluate_rag_agent.ipynb');"><i class="fa-solid fa-flask"></i> RAG Agent Evaluation</button> notebook.
+Let's start by evaluating the IT Help Desk agent from Module 2. Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluate_rag_agent.ipynb');"><i class="fa-solid fa-flask"></i> RAG Agent Evaluation</button> notebook.
 
 ### Load the Test Dataset
 
@@ -155,7 +155,7 @@ We've prepared a test dataset with common IT help desk questions. Each test case
 - **Ground Truth Answer**: The expected response
 - **Expected Contexts**: Documents that should be retrieved
 
-Load the dataset at <button onclick="goToLineAndSelect('code/evaluate_rag_agent.ipynb', 'test_dataset =');"><i class="fas fa-code"></i> test_dataset</button>.
+Load the dataset at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', 'test_dataset =');"><i class="fas fa-code"></i> test_dataset</button>.
 
 <!-- fold:break -->
 
@@ -167,7 +167,7 @@ For each test case, we'll:
 3. Record which contexts were retrieved
 4. Store the results for evaluation
 
-Execute the cell at <button onclick="goToLineAndSelect('code/evaluate_rag_agent.ipynb', '# Run agent on test cases');"><i class="fas fa-code"></i> Run agent on test cases</button>.
+Execute the cell at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Run agent on test cases');"><i class="fas fa-code"></i> Run agent on test cases</button>.
 
 This may take a few minutes as the agent processes each question.
 
@@ -182,7 +182,7 @@ Now let's evaluate the agent's performance using RAGAS metrics. We'll compute:
 - **Faithfulness**: Is the answer grounded in the context?
 - **Answer Relevancy**: Does the answer address the question?
 
-Run the evaluation at <button onclick="goToLineAndSelect('code/evaluate_rag_agent.ipynb', '# Compute RAGAS metrics');"><i class="fas fa-code"></i> Compute RAGAS metrics</button>.
+Run the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Compute RAGAS metrics');"><i class="fas fa-code"></i> Compute RAGAS metrics</button>.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -257,7 +257,7 @@ for i, case in enumerate(results):
 
 ### Custom Evaluation Criteria
 
-Beyond RAGAS metrics, let's add custom evaluation for IT help desk specific qualities. Add a custom evaluator at <button onclick="goToLineAndSelect('code/evaluate_rag_agent.ipynb', '# Custom evaluation');"><i class="fas fa-code"></i> Custom evaluation</button>.
+Beyond RAGAS metrics, let's add custom evaluation for IT help desk specific qualities. Add a custom evaluator at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Custom evaluation');"><i class="fas fa-code"></i> Custom evaluation</button>.
 
 We'll evaluate:
 - **Citation Quality**: Does the agent properly cite sources?
@@ -306,7 +306,7 @@ for case in results:
 
 <img src="_static/robots/typewriter.png" alt="Report Evaluation" style="float:left;max-width:300px;margin:25px;" />
 
-Now let's evaluate the Report Generation Agent from Module 1. Open the <button onclick="openOrCreateFileInJupyterLab('code/evaluate_report_agent.ipynb');"><i class="fa-solid fa-flask"></i> Report Agent Evaluation</button> notebook.
+Now let's evaluate the Report Generation Agent from Module 1. Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluate_report_agent.ipynb');"><i class="fa-solid fa-flask"></i> Report Agent Evaluation</button> notebook.
 
 ### Define Test Cases
 
@@ -315,7 +315,7 @@ For the report agent, test cases are different:
 - **Expected Sections**: Sections that should appear
 - **Quality Criteria**: What makes a good report on this topic
 
-Load the test cases at <button onclick="goToLineAndSelect('code/evaluate_report_agent.ipynb', 'report_test_cases =');"><i class="fas fa-code"></i> report_test_cases</button>.
+Load the test cases at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', 'report_test_cases =');"><i class="fas fa-code"></i> report_test_cases</button>.
 
 <!-- fold:break -->
 
@@ -365,7 +365,7 @@ For report evaluation, we'll use LLM-as-a-judge with specific criteria:
 - Is the tone appropriate for the topic?
 - Are there grammatical or formatting issues?
 
-Implement the evaluation at <button onclick="goToLineAndSelect('code/evaluate_report_agent.ipynb', '# Evaluate reports');"><i class="fas fa-code"></i> Evaluate reports</button>.
+Implement the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '# Evaluate reports');"><i class="fas fa-code"></i> Evaluate reports</button>.
 
 <details>
 <summary>🆘 Need some help?</summary>

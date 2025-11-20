@@ -39,7 +39,7 @@ However, there are four key components that are fundamental to all agents:
 
 Want to see how these components work together? 
 Check out the 
-<button onclick="openOrCreateFileInJupyterLab('code/intro_to_agents.ipynb');"><i class="fa-solid fa-flask"></i> Introduction to Agents</button>
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/intro_to_agents.ipynb');"><i class="fa-solid fa-flask"></i> Introduction to Agents</button>
 notebook where you can build your first agent the hard way - from scratch!
 
 

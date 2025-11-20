@@ -17,6 +17,6 @@ That's it! The agent handles all the complexity behind the scenes, delivering a 
 
 ## Experience It in Action
 
-<button onclick="openOrCreateFileInJupyterLab('code/agent_client.ipynb');"><i class="fa-solid fa-flask"></i> Report Agent</button>
+<button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/agent_client.ipynb');"><i class="fa-solid fa-flask"></i> Report Agent</button>
 
 See the report generation in action! Prompt the agent to search for information, gather relevant sources, and synthesize its findings. 

@@ -40,7 +40,7 @@
   catalog: NVIDIA DevX Learning Path
 
 - title: "Secrets Manager"
-  source: /project/code/secrets_management_master.ipynb
+  source: /project/code/secrets_management/secrets_management_master.ipynb
   cwd: /projects
   args: {}
   type: notebook-voila
@@ -49,7 +49,7 @@
 
 - title: "Simple Agents Client"
   source: http://localhost:$PORT/
-  cwd: /project/code/
+  cwd: /project/code/2-agentic-rag
   type: local-server
   args:
     - streamlit

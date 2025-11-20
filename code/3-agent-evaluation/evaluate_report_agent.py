@@ -23,8 +23,8 @@ from evaluation_framework import (
 )
 
 # Load environment variables
-load_dotenv("../variables.env")
-load_dotenv("../secrets.env")
+load_dotenv("../../variables.env")
+load_dotenv("../../secrets.env")
 
 logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
@@ -258,12 +258,14 @@ def main():
     _LOGGER.info("Starting report agent evaluation...")
     
     # Load test cases
-    test_cases_path = Path(__file__).parent.parent / "data" / "evaluation" / "report_agent_test_cases.json"
+    test_cases_path = Path(__file__).parent.parent.parent / "data" / "evaluation" / "report_agent_test_cases.json"
     test_cases = load_test_cases(test_cases_path)
     _LOGGER.info(f"Loaded {len(test_cases)} test cases")
     
     # Initialize the report generation agent
     try:
+        import sys
+        sys.path.append(str(Path(__file__).parent.parent / "1-build-an-agent"))
         from docgen_agent import agent
         _LOGGER.info("Report generation agent loaded successfully")
     except ImportError as e:
@@ -303,7 +305,7 @@ def main():
             print(f"\n{i}. {rec}")
     
     # Save results
-    output_dir = Path(__file__).parent.parent / "data" / "evaluation"
+    output_dir = Path(__file__).parent.parent.parent / "data" / "evaluation"
     output_dir.mkdir(parents=True, exist_ok=True)
     
     results_path = output_dir / "report_agent_results.csv"

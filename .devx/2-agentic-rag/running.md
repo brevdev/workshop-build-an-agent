@@ -18,10 +18,10 @@ While other frameworks may provide different ways to deploy agents, the core ide
 
 To get started, start a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> here in Jupyter.
 
-Change to the `code` directory:
+Change to the `code/2-agentic-rag` directory:
 
 ```bash
-cd code
+cd code/2-agentic-rag
 ```
 
 And start your Agent API with the LangGraph CLI.

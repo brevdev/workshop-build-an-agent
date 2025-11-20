@@ -1,8 +1,8 @@
 {
-  "dependencies": "../requirements.txt",
+  "dependencies": "../../requirements.txt",
   "graphs": {
     "rag_agent": "./rag_agent.py:AGENT"
   },
-  "env": ["../secrets.env", "../variables.env"]
+  "env": ["../../secrets.env", "../../variables.env"]
 }
 

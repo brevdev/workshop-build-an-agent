@@ -81,7 +81,12 @@ Response: {response}
 
 Faithfulness means every claim in the response is supported by the context.
 
-TODO: ...
+Rate faithfulness on a scale of 1-5:
+- 5: All claims fully supported by context
+- 4: Most claims supported, minor unsupported details
+- 3: Some claims supported, some unsupported
+- 2: Few claims supported
+- 1: Most claims unsupported or contradicted
 
 Provide your evaluation as JSON:
 {{

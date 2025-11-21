@@ -11,17 +11,18 @@ Now it's time to put everything together and run comprehensive evaluations on yo
 A robust evaluation pipeline consists of several key components:
 
 1. **Agent Under Test**: The agent you're evaluating
-2. **Test Dataset**: Collection of test cases with inputs and expected outputs
-3. **Evaluation Prompts and Metrics**: Instructions as to how to score agent outputs
-4. **Analysis of Results**: Interpret results for areas of improvement
+2. **Judging Mechanism**: The LLM (or human) that will judge the agent
+3. **Test Dataset**: Collection of test cases with inputs and expected outputs
+4. **Evaluation Prompts and Metrics**: Instructions as to how to score agent outputs
+5. **Analysis of Results**: Interpret results for areas of improvement
 
-Let's take a look at these in greater detail in our hands-on example as we build out our evaluation pipeline.
+Let's take a look at these in greater detail in our hands-on example as we build out our evaluation pipeline. We've already built our agents in the previous modules, and we have established our LLM-as-a-judge mechanism in the previous section. 
 
 <!-- fold:break -->
 
 ## Creating Evaluation Datasets
 
-Good evaluation metrics always require good test data. When creating evaluation datasets, here are some key considerations to keep in mind:
+Good evaluation metrics always require good test data. When creating evaluation datasets, here are some key considerations and best practices to keep in mind:
 
 1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
 2. **Include Ground Truth**: Where possible, provide correct answers for comparison
@@ -55,7 +56,7 @@ Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rep
 
 ## Designing Evaluation Prompts
 
-The quality of an agent evaluation pipeline also depends heavily on your evaluation prompts. Here are some key design principles when crafting evaluation prompts:
+The quality of an agent evaluation pipeline also depends heavily on your evaluation prompts. Here are some key design principles when crafting strong evaluation prompts:
 
 <img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
 
@@ -83,7 +84,7 @@ Include all relevant information the judge needs:
 
 ### 3. Request Structured Output
 
-Ask for scores and explanations:
+Ask for empirical and quantifiable scores, as well as leverage reasoning judge models for justification:
 
 ```
 For each criterion, provide:
@@ -115,7 +116,29 @@ Answer: "Passwords are important for security..."
 Explanation: Discusses passwords but doesn't answer the question.
 ```
 
-Let's take a look at some example <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', '# Evaluation Prompt Templates');"><i class="fas fa-code"></i> evaluation prompt templates </button> just to get a better idea of these principles in action in our evaluation pipeline.
+<!-- fold:break -->
+
+Let's take a look at some example evaluation prompt templates in <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', '# Evaluation Prompt Templates');"><i class="fas fa-code"></i> evaluation_framework.py </button> just to get a better idea of these principles in action in our evaluation pipeline.
+
+Your task is to complete the prompts in this file according to the principles outlined above and improve our evaluation prompts to best support the evaluation pipeline we are building together.
+
+**Exercise:** Under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', 'TODO: ...');"><i class="fas fa-code"></i> FAITHFULNESS_PROMPT </button>, we need to do a better job at teaching the judge model what different scores in faithfulness mean. 
+
+In your own words, briefly define what each score level should look like when it comes to evaluating faithfulness of a generated RAG response. Then save the file and check your answers below. 
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```
+Rate faithfulness on a scale of 1-5:
+- 5: All claims fully supported by context
+- 4: Most claims supported, minor unsupported details
+- 3: Some claims supported, some unsupported
+- 2: Few claims supported
+- 1: Most claims unsupported or contradicted
+```
+
+</details>
 
 <!-- fold:break -->
 
@@ -136,7 +159,7 @@ The evaluation framework uses several libraries:
 ### Configure Models
 
 We'll use NVIDIA models for evaluation:
-- **Judge Model**: Nemotron for LLM-as-a-judge evaluation
+- **Judge Model**: NVIDIA Nemotron for LLM-as-a-judge evaluation
 - **Embedding Model**: For semantic similarity metrics
 - **RAGAS Models**: For computing RAGAS metrics
 

@@ -8,9 +8,11 @@ Now that we understand why evaluation is important, let's dive into the specific
 
 One of the most powerful techniques for evaluating AI agents is using another LLM to judge the quality of outputs. This approach, called "LLM-as-a-judge," allows us to evaluate subjective qualities like helpfulness, coherence, and relevance at scale. 
 
-<img src="_static/robots/magician.png" alt="LLM Judge" style="float:right;max-width:250px;margin:25px;" />
+Traditional deterministic metrics like string matching, keyword searching, or BLEU scores don't work well for evaluating natural language outputs. Human evaluation is a lot more accurate and captures subjectivity well, but is expensive and slow. 
 
-Traditional metrics like exact string matching or BLEU scores don't work well for evaluating natural language outputs. Human evaluation is accurate but expensive and slow. LLM-as-a-judge provides a middle ground:
+LLM-as-a-judge provides a neat middle ground. 
+
+<!-- fold:break -->
 
 **Advantages**:
 - **Scalable**: Evaluate thousands of outputs quickly
@@ -18,6 +20,8 @@ Traditional metrics like exact string matching or BLEU scores don't work well fo
 - **Flexible**: Can assess any criteria you define
 - **Nuanced**: Understands semantic meaning and context
 - **Cost-Effective**: Cheaper than human evaluation at scale
+
+<!-- fold:break -->
 
 **Limitations**:
 - **Not Perfect**: Judge models can make mistakes
@@ -40,17 +44,21 @@ Let's explore the key metrics for each.
 
 ## RAGAS Metrics Deep Dive
 
-<img src="_static/robots/assembly.png" alt="Building Blocks" style="float:left;max-width:300px;margin:25px;" />
+<img src="_static/robots/assembly.png" alt="Building Blocks" style="float:right;max-width:300px;margin:25px;" />
 
-RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric addresses a specific aspect of quality:
+RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric addresses a specific aspect of quality.
 
 ### Context Precision
 
-**What it measures**: Whether the retrieved contexts are relevant to the question, with emphasis on ranking quality. Specifically, it evaluates if relevant chunks appear early in the ranked list and if irrelevant chunks are filtered out.
+**Definition**: Whether the retrieved chunks are relevant or irrelevant to the question (signal-to-noise ratio). Crucially, it accounts for **ranking**. It's not enough to retrieve the right document; it also needs to be at the top of the list. 
 
-**Why it matters**: High context precision means your retrieval system isn't wasting the LLM's context window with irrelevant information. This improves both generation quality and cost-efficiency. It also reduces the risk of the model being distracted by off-topic content.
+**Why it matters**: High context precision means your retrieval system isn't wasting the LLM's context window with irrelevant information. High context precision improves both generation quality and cost-efficiency. It also reduces the risk of the model being distracted by off-topic content.
 
-**How it works**: RAGAS uses an LLM to determine if each retrieved chunk is relevant to answering the question. It then calculates precision at each position (precision@k) in the ranked results and averages them. The formula weighs higher-ranked relevant documents more heavily:
+Crucially, LLMs can suffer from the "Lost in the Middle" phenomenon where relevant information buried in the middle of a context window can be ignored. This is why **ranking** is important as the model can see the right data first for best results. 
+
+<!-- fold:break -->
+
+**How it works**: RAGAS uses an LLM to determine if each retrieved chunk is relevant or irrelevant to answering the question. It then calculates precision at each position (precision@k) in the ranked results and averages them. The formula weighs higher-ranked relevant documents more heavily:
 
 ```
 Context Precision = (Σ (Precision@k × relevance_k)) / Total number of relevant items in retrieved contexts
@@ -63,7 +71,7 @@ Precision@k = true positives @ k / (true positives @ k + false positives @k)
 ```
 
 <details>
-<summary><strong>What does this all mean? Click me for more!</strong></summary>
+<summary><strong>I'm Confused, Click Me to See a Sample Calculation!</strong></summary>
 
 Consider a sample RAG query in which we have retrieved 2 relevant chunks from ``K=3`` total retrieved chunks. First, label each of the 3 chunks as either relevant or irrelevant for the query. Let's assume relevant-irrelevant-relevant ordering for this exercise. Then: 
 
@@ -73,9 +81,9 @@ Consider a sample RAG query in which we have retrieved 2 relevant chunks from ``
 
 The final Context Precision is the average of the individual Precision@k values, ignoring irrelevant retrieved chunks. 
 
-* Rank 1: v_1 x Precision@1 = 1 x 1.0 = 1.0
-* Rank 2: v_2 x Precision@2 = 0 x 0.5 = 0.0
-* Rank 3: v_3 x Precision@3 = 1 x 0.67 = 0.67
+* Rank 1: relevance_1 x Precision@1 = 1 x 1.0 = 1.0
+* Rank 2: relevance_2 x Precision@2 = 0 x 0.5 = 0.0
+* Rank 3: relevance_3 x Precision@3 = 1 x 0.67 = 0.67
 
 So Context Precision = (1.0 + 0.0 + 0.67) / (1 + 0 + 1) = **0.83**. 
 
@@ -83,20 +91,22 @@ Note that this context precision value is not a perfect 1.0 score. Why? Because 
 
 </details>
 
+<!-- fold:break -->
+
 **Score interpretation**:
 - **0.9-1.0**: Excellent - nearly all retrieved documents are relevant
 - **0.7-0.9**: Good - most documents are relevant with few irrelevant ones
 - **0.5-0.7**: Fair - significant noise in retrieval results
 - **Below 0.5**: Poor - retrieval is returning mostly irrelevant documents
 
-**Improving context precision**:
+**Optimization Strategies**
 - Fine-tune your retrieval parameters (similarity threshold, top-k)
 - Improve embedding model quality
 - Add reranking as a second stage
 - Use metadata filtering to narrow search scope
 
 <details>
-<summary><strong>Click to See an Example</strong></summary>
+<summary><strong>Click to See Another Example</strong></summary>
 
 ```
 Question: "How do I reset my password?"
@@ -114,9 +124,11 @@ Better retrieval: [Password reset guide, Password reset FAQ, Account security, L
 
 ### Context Recall
 
-**What it measures**: Whether all the necessary information to answer the question was retrieved. It evaluates completeness rather than precision.
+**Definition**: Whether all the necessary information to answer the question was retrieved. It evaluates completeness rather than precision.
 
-**Why it matters**: Low context recall means your agent is missing important information, leading to incomplete or incorrect answers. Even with perfect generation, missing context will result in gaps in the response.
+**Why it matters**: This is your system's "Upper Bound" of knowledge. Low context recall means your agent is missing important information, leading to incomplete or incorrect answers. Even with perfect generation, missing context will result in gaps in the response.
+
+<!-- fold:break -->
 
 **How it works**: Given a *ground truth* answer, RAGAS uses an LLM to extract claims/statements from that answer, then checks if each claim can be attributed to at least one of the retrieved contexts. The score is:
 
@@ -124,16 +136,18 @@ Better retrieval: [Password reset guide, Password reset FAQ, Account security, L
 Context Recall = (Number of claims attributable to contexts) / (Total number of claims in ground truth)
 ```
 
+<!-- fold:break -->
+
 **Score interpretation**:
 - **0.9-1.0**: Excellent - all critical information was retrieved
 - **0.7-0.9**: Good - most information retrieved, minor gaps
 - **0.5-0.7**: Fair - significant information gaps
 - **Below 0.5**: Poor - major information gaps, answer will be incomplete
 
-**Improving context recall**:
-- Increase the number of retrieved documents (k parameter)
+**Optimization Strategies**:
+- Increase the number of retrieved documents (top-k parameter)
 - Improve query formulation (query expansion, reformulation)
-- Ensure a comprehensive knowledge base with extensive coverage
+- Check your chunking strategy (chunks might be too small and losing context)
 
 <details>
 <summary><strong>Click to See an Example</strong></summary>
@@ -153,9 +167,13 @@ For high recall, contexts must cover all three steps.
 
 ### Faithfulness
 
-**What it measures**: Whether the generated answer is factually consistent with the retrieved context. It's essentially a measure of hallucination - lower faithfulness means more hallucinated content.
+**Definition**: Whether the generated answer is factually consistent with the retrieved context, eg. whether every claim can be inferred from somewhere in the retrieved context. It's essentially a measure of hallucination - lower faithfulness means more hallucinated content.
 
-**Why it matters**: Faithfulness is critical for production RAG systems. It prevents hallucination and ensures users can trust the agent's responses. Low faithfulness means the model is "making things up" rather than grounding answers in retrieved knowledge.
+**Why it matters**: Faithfulness is critical for production RAG systems since safety is paramount. It prevents hallucination and ensures users can trust the agent's responses. Low faithfulness means the model is "making things up" rather than grounding answers in retrieved knowledge.
+
+A faithful answer might be "I don't know" (if the context is empty). An unfaithful answer invents facts. At the end of the day, **an honest "I don't know" is preferable over a confident lie.**
+
+<!-- fold:break -->
 
 **How it works**: RAGAS uses an LLM to:
 1. Extract individual claims/statements from the *generated answer*
@@ -166,13 +184,15 @@ For high recall, contexts must cover all three steps.
 Faithfulness = (Number of claims supported by context) / (Total number of claims in answer)
 ```
 
+<!-- fold:break -->
+
 **Score interpretation**:
 - **0.9-1.0**: Excellent - answer is fully grounded in context
 - **0.7-0.9**: Good - mostly grounded with minor extrapolations
 - **0.5-0.7**: Fair - significant unsupported claims
 - **Below 0.5**: Poor - frequent hallucination, unreliable
 
-**Improving faithfulness**:
+**Optimization Strategies**:
 - Strengthen system prompts to emphasize grounding in context
 - Lower model temperature for more deterministic outputs
 - Add explicit "cite your sources" instructions
@@ -196,9 +216,11 @@ Unfaithful answer: "Contact your manager to reset passwords immediately." (Faith
 
 ### Answer Relevancy
 
-**What it measures**: How well the generated answer addresses the original question. It evaluates whether the response is on-topic and directly answers what was asked.
+**Definition**: How well the generated answer addresses the original question. It evaluates whether the response is on-topic and directly answers what was originally asked, and penalizes answers that are true and possibly even well-grounded, but off-topic.
 
 **Why it matters**: An agent might generate a factually correct, faithful response that still doesn't answer what the user asked. High relevancy ensures users get actionable answers to their specific questions, improving user satisfaction and reducing follow-up queries.
+
+<!-- fold:break -->
 
 **How it works**: RAGAS uses an LLM to generate potential questions that the answer would be appropriate for, then measures the semantic similarity between these generated questions and the original question using embeddings:
 
@@ -208,13 +230,15 @@ Answer Relevancy = mean(cosine_similarity(original_question, generated_question_
 
 where `i` indicates the index of a generated question derived from the generated response.
 
+<!-- fold:break -->
+
 **Score interpretation**:
 - **0.9-1.0**: Excellent - answer directly addresses the question
 - **0.7-0.9**: Good - mostly relevant with minor tangents
 - **0.5-0.7**: Fair - partially addresses question
 - **Below 0.5**: Poor - answer is off-topic or too generic
 
-**Improving answer relevancy**:
+**Optimization Strategies**:
 - Add examples of relevant vs. irrelevant answers in system prompt
 - Implement answer validation that checks alignment with question
 - Use instruction-tuned models that follow user intent better
@@ -243,33 +267,13 @@ Low relevancy: "Passwords are important for security. Our company requires passw
 
 <!-- fold:break -->
 
-## Additional RAG Metrics
-
-Beyond RAGAS, there are other potentially useful metrics for RAG evaluation:
-
-### Context Relevance
-
-**What it measures**: The proportion of relevant information in the retrieved contexts.
-
-**Formula**: (Relevant sentences in context) / (Total sentences in context)
-
-**Why it matters**: Even if you retrieve the right documents, excessive irrelevant content can confuse the LLM or waste tokens.
-
-### Answer Correctness
-
-**What it measures**: Factual accuracy of the answer compared to ground truth.
-
-**How it works**: Combines semantic similarity with factual overlap between generated and ground truth answers.
-
-**Why it matters**: Provides an objective measure when you have labeled test data.
-
-<!-- fold:break -->
-
-## Evaluating General Agents
+## Evaluating General Task Agents
 
 <img src="_static/robots/wrench.png" alt="Tool Usage" style="float:right;max-width:300px;margin:25px;" />
 
-For agents like the Report Generation Agent from Module 1, we need different metrics that focus on task completion and tool usage:
+For agents like the Report Generation Agent from Module 1, we need different metrics that focus on task completion and tool usage. 
+
+<!-- fold:break -->
 
 ### Task Completion Rate
 
@@ -282,6 +286,8 @@ For agents like the Report Generation Agent from Module 1, we need different met
 - Does the report have all requested sections?
 - Is each section substantive (not just placeholders)?
 
+<!-- fold:break -->
+
 ### Tool Usage Accuracy
 
 **What it measures**: Whether the agent uses the right tools at the right time.
@@ -293,11 +299,13 @@ For agents like the Report Generation Agent from Module 1, we need different met
 - Did it avoid unnecessary searches?
 - Did it use appropriate search queries?
 
+<!-- fold:break -->
+
 ### Output Quality
 
-**What it measures**: Subjective quality of the agent's final output.
+**What it measures**: Subjective quality of the agent's final output. This can be largely user-defined based on the particular task the agent is asked to do. 
 
-**How to measure**: Use LLM-as-a-judge with specific criteria:
+**How to measure**: Use LLM-as-a-judge with specific criteria, such as:
 - Coherence and structure
 - Factual accuracy
 - Completeness
@@ -307,14 +315,13 @@ For agents like the Report Generation Agent from Module 1, we need different met
 
 ## Combining Metrics
 
-<img src="_static/robots/supervisor.png" alt="Holistic View" style="float:left;max-width:300px;margin:25px;" />
+<img src="_static/robots/supervisor.png" alt="Holistic View" style="float:right;max-width:300px;margin:25px;" />
 
 No single metric tells the whole story. Effective evaluation combines multiple metrics to provide a comprehensive view:
 
 ### For RAG Agents:
 1. **Context Precision** + **Context Recall** = Retrieval quality
 2. **Faithfulness** + **Answer Relevancy** = Generation quality
-3. **Answer Correctness** = Overall accuracy (when ground truth available)
 
 ### For Task Agents:
 1. **Task Completion Rate** = Core functionality
@@ -332,34 +339,12 @@ No single metric tells the whole story. Effective evaluation combines multiple m
 
 When deciding which metrics to use, consider:
 
-1. **Your Agent's Purpose**: What is it trying to accomplish?
+1. **Your Agent's Purpose**: What is it trying to accomplish? What do good outcomes look like? Bad outcomes? 
 2. **Available Resources**: Do you have ground truth data? Budget for LLM-based evaluation?
 3. **Stakeholder Needs**: What do your users and business care about most?
 4. **Development Stage**: Early development might focus on basic functionality; production needs comprehensive monitoring
 
 **Start simple**: Begin with 2-3 key metrics that directly relate to your agent's core function. Add more sophisticated metrics as your evaluation pipeline matures.
-
-<!-- fold:break -->
-
-## Other Practical Considerations
-
-### Metric Computation Cost
-
-Some metrics are expensive to compute:
-- **LLM-based metrics** (RAGAS, LLM-as-judge): Require API calls, add latency and cost
-- **Similarity-based metrics**: Fast and cheap, but may miss nuance
-- **Human evaluation**: Most expensive, but most accurate for subjective qualities
-
-**Strategy**: Use fast metrics for continuous monitoring, expensive metrics for periodic deep evaluation.
-
-### Metric Reliability
-
-Not all metrics are equally reliable:
-- **Deterministic metrics** (exact match, length): Consistent but limited
-- **LLM-based metrics**: Powerful but can be inconsistent across runs
-- **Human metrics**: Subject to bias and fatigue
-
-**Strategy**: Validate your automated metrics against human judgment periodically.
 
 <!-- fold:break -->
 

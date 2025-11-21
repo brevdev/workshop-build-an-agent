@@ -2,25 +2,13 @@
 
 <img src="_static/robots/study.png" alt="Understanding Evaluation" style="float:right;max-width:300px;margin:25px;" />
 
-Building AI agents is exciting, but how do you know if they're actually working well? Manual testing can only take you so far. As your agents become more complex and handle more use cases, you need systematic ways to measure their performance, identify weaknesses, and track improvements over time.
+Building AI agents is exciting. Seeing them in action for the first time feels like magic. But as we move closer from prototypes to production, "magic" isn't enough. We need **trust**.
 
-In this lesson, we'll explore why evaluation is critical for production AI agents and introduce the key concepts you'll need to build robust evaluation pipelines.
+Building AI agents is exciting, but how do you know if your agent is actually working? Is it hallucinating? Is it rude? Is it getting better or worse as you tweak the prompts? 
 
-<!-- fold:break -->
+Manual testing ("vibe checking") can only take you so far. As your agents become more complex and handle more use cases, you need systematic ways to measure their performance, identify weaknesses, and track improvements over time. You need to treat evaluation not as an afterthought, but as a core engineering discipline.
 
-## Why Evaluate AI Agents?
-
-<img src="_static/robots/controls.png" alt="Quality Control" style="float:left;max-width:300px;margin:25px;" />
-
-AI agents are non-deterministic systems. The same input can produce different outputs, and agents make autonomous decisions about which tools to use and how to respond. This makes traditional software testing approaches insufficient.
-
-Systematic evaluation helps you:
-
-- **Measure Quality**: Quantify how well your agent performs across different scenarios
-- **Identify Weaknesses**: Discover edge cases and failure modes before users do
-- **Track Improvements**: Measure the impact of changes to prompts, models, or architecture
-- **Ensure Consistency**: Verify that agents maintain quality as they evolve
-- **Build Confidence**: Provide stakeholders with concrete metrics about agent performance
+In this module, we will transform your agent development process from an art into a science.
 
 <!-- fold:break -->
 
@@ -28,116 +16,154 @@ Systematic evaluation helps you:
 
 <img src="_static/robots/debug.png" alt="Debugging Complexity" style="float:right;max-width:300px;margin:25px;" />
 
-Evaluating AI agents is more complex than traditional software testing because:
-
-1. **Non-Determinism**: Agents can produce different valid responses to the same input
-2. **Subjective Quality**: Many agent outputs require human judgment (helpfulness, tone, relevance)
-3. **Multi-Step Reasoning**: Agents make multiple decisions, and failures can occur at any step
-4. **Tool Usage**: Agents interact with external systems, adding complexity to evaluation
-5. **Context Dependence**: Agent performance varies based on conversation history and retrieved information
-
-Traditional metrics like exact string matching don't work well for evaluating natural language outputs. We need more sophisticated approaches.
+Evaluating AI agents is more complex than traditional software testing because of several factors:
 
 <!-- fold:break -->
 
-## Types of Evaluation Metrics
+**Non-Determinism**: AI agents are non-deterministic, meaning they can produce different valid responses to the same input. 
 
-There are several categories of metrics we can use to evaluate AI agents:
-
-### Retrieval Metrics (for RAG Systems)
-
-For agents that use retrieval augmented generation, we need to evaluate both the retrieval quality and the generation quality:
-
-- **Context Precision**: Are the retrieved documents relevant to the query?
-- **Context Recall**: Did we retrieve all the relevant information?
-- **Context Relevance**: How well does the retrieved context match the question?
-
-### Generation Metrics
-
-For evaluating the quality of agent responses:
-
-- **Faithfulness**: Is the response grounded in the provided context?
-- **Answer Relevance**: Does the response actually address the user's question?
-- **Answer Correctness**: Is the factual content accurate?
-
-### Task-Specific Metrics
-
-Depending on your agent's purpose, you might measure:
-
-- **Task Completion Rate**: Did the agent successfully complete the requested task?
-- **Tool Usage Accuracy**: Did the agent use the right tools at the right time?
-- **Response Time**: How long did the agent take to respond?
+Unlike traditional software where the same input conditions will always lead to the same output, an agent might answer the same question differently every time. This variability is a feature, not a bug; it allows for creativity and flexibility in responses. But it can also make evaluation difficult.
 
 <!-- fold:break -->
 
-## Evaluation Approaches
+**Subjective Quality**: Agent quality is often subjective, depending on attributes like tone, style, and helpfulness. 
 
-### 1. Ground Truth Comparison
-
-The most straightforward approach: compare agent outputs against known correct answers.
-
-**Pros**: Objective, easy to automate, clear pass/fail criteria  
-**Cons**: Requires labeled datasets, doesn't capture nuance, may miss valid alternative responses
-
-### 2. LLM-as-a-Judge
-
-Use a powerful LLM to evaluate the quality of agent outputs based on defined criteria.
-
-**Pros**: Can assess subjective qualities, handles variation in correct responses, scalable  
-**Cons**: Adds cost and latency, inherits biases from the judge model, requires careful prompt engineering
-
-### 3. Human Evaluation
-
-Have human reviewers assess agent performance.
-
-**Pros**: Most accurate for subjective qualities, catches issues automated metrics miss  
-**Cons**: Expensive, slow, not scalable, subject to human bias and inconsistency
-
-### 4. Hybrid Approaches
-
-Combine multiple evaluation methods for comprehensive assessment.
-
-**Pros**: Balances objectivity and nuance, provides multiple perspectives  
-**Cons**: More complex to implement and maintain
+Unlike a binary assertion in code testing, there isn't always one "right" answer. One response might be factually true but unhelpful or rude. Another response might appear helpful and benign but content-wise is not rooted in ground truth. These complexities require evaluation methods that can capture nuance rather than just strict string matching.
 
 <!-- fold:break -->
 
-## RAGAS: A Framework for RAG Evaluation
+**Multi-Step Reasoning**: Agents typically perform multi-step reasoning, chaining together thoughts and actions to solve complex problems. 
 
-<img src="_static/robots/supervisor.png" alt="RAGAS Framework" style="float:right;max-width:300px;margin:25px;" />
-
-[RAGAS](https://docs.ragas.io/) (Retrieval Augmented Generation Assessment) is an open-source framework specifically designed for evaluating RAG systems. It provides several key metrics:
-
-- **Faithfulness**: Measures whether the generated answer is factually consistent with the retrieved context
-- **Answer Relevancy**: Evaluates how well the answer addresses the original question
-- **Context Precision**: Assesses whether all retrieved contexts are relevant to the question
-- **Context Recall**: Measures whether all necessary information was retrieved
-
-RAGAS uses LLMs to compute these metrics, making it practical for evaluating systems where traditional metrics fall short.
+Unlike unit testing a single isolated function, you must evaluate the entire chain of logic. A minor error in an early step, like misinterpreting a user's intent, can cascade into a completely incorrect result, even if the later steps were technically flawless under traditional unit testing standards.
 
 <!-- fold:break -->
 
-## Building an Evaluation Mindset
+**Tool Usage**: Agents often engage in tool usage, interacting with external APIs, databases, and environments. 
 
-<img src="_static/robots/blueprint.png" alt="Planning Evaluation" style="float:left;max-width:300px;margin:25px;" />
-
-Effective evaluation starts with clear thinking about what you're measuring and why:
-
-1. **Define Success Criteria**: What does "good" look like for your agent?
-2. **Create Representative Datasets**: Include diverse examples that cover edge cases
-3. **Start Simple**: Begin with basic metrics, then add sophistication
-4. **Iterate**: Use evaluation results to guide improvements
-5. **Monitor Continuously**: Evaluation isn't just for development—track production performance too
+Unlike testing pure software logic, this introduces side effects and dependencies on external systems. Evaluation must verify not only the final text response but also that the agent selected the appropriate tool, retrieved the appropriate information, formatted the arguments correctly, and handled the tool's output properly in response generation.
 
 <!-- fold:break -->
 
-## What's Next
+**Context Dependence**: Agents exhibit context dependence, meaning their behavior changes based on conversation history or retrieved data. 
 
-In the following lessons, we'll put these concepts into practice:
+Unlike stateless functions that process inputs in a vacuum in traditional software, an agent's answer might change based on what was said three turns ago. Ensuring consistency requires testing across varied conversational flows and data retrieval contexts, not just single-turn inputs and outputs.
 
-- **Evaluation Metrics**: Deep dive into implementing specific metrics
-- **Running Evaluations**: Create automated evaluation workflows for your agents
-- **Continuous Improvement**: Use evaluation results to systematically improve agent quality
+<!-- fold:break -->
 
-Ready to start measuring your agents? Let's continue to [Understanding Evaluation Metrics](evaluation_metrics.md) to configure the tools we'll need.
+<img src="_static/robots/controls.png" alt="How to Measure" style="float:right;max-width:300px;margin:25px;" />
+
+## What Should We Measure?
+
+To trust our agents, we need to measure their performance across two key dimensions: **Process** (how they got the answer) and **Outcome** (the quality of the answer itself).
+
+When debugging a RAG agent, for example, a wrong answer could come from two places:
+1. **Bad Retrieval**: The agent didn't find the relevant documents.
+2. **Bad Generation**: The agent found the documents but hallucinated the answer.
+
+We break these down into specific signals.
+
+<!-- fold:break -->
+
+### Retrieval Metrics (Did we find the right data?)
+
+* **Context Precision**: Is the stuff we found actually useful?
+* **Context Recall**: Did we miss anything important?
+
+### Generation Metrics (Did we write a good answer?)
+
+* **Faithfulness**: Is the answer grounded in the facts we found? (No hallucinations!)
+* **Answer Relevance**: Did we actually answer the user's question?
+
+<!-- fold:break -->
+
+### Other Agents
+
+For more traditional autonomous agents (like the researcher from Module 1), we also track metrics such as:
+* **Tool Usage**: Did the agent use the search tool correctly?
+* **Task Completion**: Did we get a final report that meets the requirements?
+
+We'll get a better understanding of how these metrics work in the next section, as well as get a chance to work with these metrics in the hands-on lab notebooks later in this module! 
+
+<!-- fold:break -->
+
+<img src="_static/robots/wrench.png" alt="Judge" style="float:left;max-width:250px;margin:25px;" />
+
+## The "Judge" Problem
+
+If an agent writes a poem or summarizes a document, how do you write a unit test for that? Testing for `assert response == "The cat sat on the mat"` rarely works in the age of LLMs.
+
+We generally rely on three approaches: 
+
+<!-- fold:break -->
+
+### 1. LLM-as-a-Judge (The Modern Standard)
+
+We use a specialized NVIDIA Nemotron model to grade the output of our agent. We prompt the judge a special rubric (e.g., "Is this helpful? 1-5"), and it scales well. 
+
+**Pros**
+
+- Can assess subjective qualities
+- Handles variation in correct responses
+- Scalable
+
+**Cons**
+
+- Adds cost and latency
+- Can inherit biases from the judge model
+- Requires careful prompt engineering
+
+**This is the primary method we will use in this module.**
+
+<!-- fold:break -->
+
+### 2. Human Evaluation (The Gold Standard)
+
+Real humans reviewing logs. This is the most accurate signal for subjective qualities but it can be the slowest and most expensive method. It's best used to "grade the grader", meaning ensuring your LLM Judge aligns with human preferences. 
+
+**Pros**
+
+- Most accurate for subjective qualities
+- Catches issues automated metrics miss
+
+**Cons**
+
+- Expensive, slow, not scalable
+- Subject to human bias and inconsistency
+
+In practice, we use human evaluation sparingly to align the LLM judge to human preference rather than a go-to method. 
+
+<!-- fold:break -->
+
+### 3. Deterministic Checks
+
+Good old-fashioned code-based unit testing. Did the generated SQL query execute without error? Did the JSON parse correctly? Does the response have a specific keyword? 
+
+These are binary pass/fail checks that are essential for reliable agents. These are objective and easy to automate with clear pass/fail criteria, but does not capture nuance well and may miss valid alternative responses. 
+
+**Pros**
+
+- Objective
+- Easiest to automate
+- Clear pass/fail criteria
+
+**Cons**
+
+- Doesn't capture nuance
+- May miss valid alternative responses
+
+Often, evaluation workflows will take on a hybrid approach. For example, use an LLM-as-a-judge to evaluate the agent's thought process, a deterministic check to verify an agent's outputs are valid, and an occasional calibration with a human evaluator to ensure alignment of judging standards with subjective human preferences. 
+
+<!-- fold:break -->
+
+<img src="_static/robots/surf.png" alt="Judge" style="float:right;max-width:300px;margin:25px;" />
+
+## Your Journey in this Module
+
+We will guide you through the following steps to build your evaluation pipeline:
+
+1.  **[Understanding Evaluation Metrics](evaluation_metrics.md)**: Learn the specific signals we look for, like "Faithfulness" and "Context Recall".
+2.  **[Running Evaluations](running_evaluations.md)**: Execute the pipeline on your own agents and interpret the results.
+3.  **[Continuous Improvement](continuous_improvement.md)**: Close the loop by using data to make your agents smarter.
+
+Ready to turn your "vibe checks" into rigorous engineering? Let's continue to [Understanding Evaluation Metrics](evaluation_metrics.md) to learn about the tools we'll need.
 

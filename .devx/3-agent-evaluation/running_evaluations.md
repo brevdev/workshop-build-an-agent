@@ -83,7 +83,7 @@ Include all relevant information the judge needs:
 
 ### 3. Request Structured Output
 
-Ask for empirical and quantifiable scores, as well as leverage reasoning judge models for justification:
+Ask for empirical and quantifiable scores and leverage reasoning capabilities of judge models for justification:
 
 ```
 For each criterion, provide:

@@ -45,10 +45,9 @@ Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag
 <!-- fold:break -->
 
 For the Report Generation task agent from Module 1, each of our evaluation test cases should include:
-- Task description
-- Expected tools to be used
-- Success criteria
-- Example of good output
+- Report Topic
+- Expected Report Sections
+- Output Quality Criteria
 
 Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Evaluation Dataset</button> to take a look at some examples we will use in our evaluation pipeline. 
 

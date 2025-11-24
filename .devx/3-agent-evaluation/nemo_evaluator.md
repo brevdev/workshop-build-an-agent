@@ -1,4 +1,4 @@
-# Path to Production (Optional)
+# NeMo Evaluator (Optional)
 
 <img src="_static/robots/magician.png" alt="LLM Judge" style="float:right;max-width:300px;margin:25px;" />
 

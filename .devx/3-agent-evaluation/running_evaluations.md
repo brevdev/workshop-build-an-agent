@@ -118,7 +118,7 @@ Explanation: Discusses passwords but doesn't answer the question.
 
 <!-- fold:break -->
 
-Let's take a look at some example evaluation prompt templates in <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', '# Evaluation Prompt Templates');"><i class="fas fa-code"></i> evaluation_framework.py </button> just to get a better idea of these principles in action in our evaluation pipeline.
+Let's take a look at some example evaluation prompt templates in <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluation_framework.py');"><i class="fa-brands fa-python"></i> code/3-agent-evaluation/evaluation_framework.py</button> just to get a better idea of these principles in action in our evaluation pipeline.
 
 Your task is to complete the prompts in this file according to the principles outlined above and improve our evaluation prompts to best support the evaluation pipeline we are building together.
 
@@ -142,29 +142,6 @@ Rate faithfulness on a scale of 1-5:
 
 <!-- fold:break -->
 
-## Setting Up the Evaluation Environment
-
-Before we start evaluating, let's set up our environment. Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluation_framework.py');"><i class="fa-brands fa-python"></i> code/3-agent-evaluation/evaluation_framework.py</button> file.
-
-This file contains the evaluation framework we'll use. Let's walk through the key components:
-
-### Import Dependencies
-
-The evaluation framework uses several libraries:
-- **RAGAS**: For RAG-specific metrics
-- **LangChain**: For agent interaction and evaluation chains
-- **NVIDIA AI Endpoints**: For models used in evaluation
-- **LangSmith** (optional): For tracking and analyzing results
-
-### Configure Models
-
-We'll use NVIDIA models for evaluation:
-- **Judge Model**: NVIDIA Nemotron for LLM-as-a-judge evaluation
-- **Embedding Model**: For semantic similarity metrics
-- **RAGAS Models**: For computing RAGAS metrics
-
-<!-- fold:break -->
-
 ## Evaluating the RAG Agent
 
 <img src="_static/robots/datacenter.png" alt="RAG Evaluation" style="float:right;max-width:300px;margin:25px;" />
@@ -177,10 +154,13 @@ We've prepared a test dataset with common IT help desk questions. Each test case
 - **Question**: The user's query
 - **Ground Truth Answer**: The expected response
 - **Expected Contexts**: Documents that should be retrieved
+- **Category**: The type of question (password_management, network_access, etc.)
 
-Load the dataset at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', 'test_dataset =');"><i class="fas fa-code"></i> test_dataset</button>.
+Load the dataset under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', 'test_dataset =');"><i class="fas fa-code"></i> Load Test Dataset</button> section.
 
 <!-- fold:break -->
+
+> Before proceeding, ensure ``code/2-agentic-rag/rag_agent.py`` has been completed if not done so already in the previous module. Need help? Check out the <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.answers.py');"><i class="fa-solid fa-flask"></i> RAG Agent Answer Key</button>. 
 
 ### Run the Agent on Test Cases
 
@@ -190,60 +170,36 @@ For each test case, we'll:
 3. Record which contexts were retrieved
 4. Store the results for evaluation
 
-Execute the cell at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Run agent on test cases');"><i class="fas fa-code"></i> Run agent on test cases</button>.
+Execute the cell under <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Run agent on test cases');"><i class="fas fa-code"></i> Run Agent on Test Cases</button>.
 
 This may take a few minutes as the agent processes each question.
 
 <!-- fold:break -->
 
+Ok, great! Looks like at this point, we have our generated responses from the IT Help Desk RAG agent. 
+
+Let's evaluate these responses using our LLM judge and the above prompts and see what kind of results we get. We'll evaluate these qualities for now: 
+
+1. Faithfulness - groundedness to the retrieved context
+2. Relevancy - addresses the user's question
+3. Helpfulness - actionable and useful advice
+
+This may take a few minutes as the judge processes each response.
+
+<!-- fold:break -->
+
 ### Compute RAGAS Metrics
 
-Now let's evaluate the agent's performance using RAGAS metrics. We'll compute:
+We had to create our own metrics above, but what is a more industry-standard evaluation framework for RAG agents?
+
+Next, let's explore and evaluate the agent's performance using RAGAS metrics. We'll compute:
 
 - **Context Precision**: Are retrieved documents relevant?
 - **Context Recall**: Did we retrieve all necessary information?
 - **Faithfulness**: Is the answer grounded in the context?
 - **Answer Relevancy**: Does the answer address the question?
 
-Run the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Compute RAGAS metrics');"><i class="fas fa-code"></i> Compute RAGAS metrics</button>.
-
-<details>
-<summary>🆘 Need some help?</summary>
-
-```python
-from ragas import evaluate
-from ragas.metrics import (
-    context_precision,
-    context_recall,
-    faithfulness,
-    answer_relevancy,
-)
-
-# Prepare data for RAGAS
-ragas_dataset = {
-    "question": [case["question"] for case in results],
-    "answer": [case["agent_response"] for case in results],
-    "contexts": [case["retrieved_contexts"] for case in results],
-    "ground_truth": [case["ground_truth"] for case in results],
-}
-
-# Run evaluation
-ragas_results = evaluate(
-    dataset=ragas_dataset,
-    metrics=[
-        context_precision,
-        context_recall,
-        faithfulness,
-        answer_relevancy,
-    ],
-    llm=judge_llm,
-    embeddings=embeddings,
-)
-
-print(ragas_results)
-```
-
-</details>
+Run the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Compute RAGAS metrics');"><i class="fas fa-code"></i> Compute RAGAS Metrics</button>.
 
 <!-- fold:break -->
 
@@ -251,25 +207,7 @@ print(ragas_results)
 
 <img src="_static/robots/debug.png" alt="Analyzing Results" style="float:right;max-width:300px;margin:25px;" />
 
-The evaluation results show aggregate scores across all test cases. Let's dig deeper:
-
-**Overall Metrics**: Look at the mean scores for each metric. Generally:
-- **Above 0.8**: Excellent
-- **0.6 - 0.8**: Good
-- **0.4 - 0.6**: Needs improvement
-- **Below 0.4**: Significant issues
-
-**Per-Question Analysis**: Identify which questions performed poorly:
-
-```python
-# Find low-scoring questions
-for i, case in enumerate(results):
-    if case["faithfulness_score"] < 0.6:
-        print(f"Low faithfulness: {case['question']}")
-        print(f"Answer: {case['agent_response']}")
-        print(f"Score: {case['faithfulness_score']}")
-        print("---")
-```
+TODO
 
 **Common Failure Patterns**: Look for patterns in failures:
 - Are certain topics consistently problematic?
@@ -280,48 +218,11 @@ for i, case in enumerate(results):
 
 ### Custom Evaluation Criteria
 
-Beyond RAGAS metrics, let's add custom evaluation for IT help desk specific qualities. Add a custom evaluator at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Custom evaluation');"><i class="fas fa-code"></i> Custom evaluation</button>.
+Beyond RAGAS metrics, let's add custom evaluation for IT help desk specific qualities. Let's explore how to evaluate a custom metric under <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '# Custom evaluation');"><i class="fas fa-code"></i> Custom Evaluation </button>.
 
 We'll evaluate:
 - **Citation Quality**: Does the agent properly cite sources?
 - **Actionability**: Does the response include clear next steps?
-- **Tone**: Is the response professional and helpful?
-
-<details>
-<summary>🆘 Need some help?</summary>
-
-```python
-from langchain_core.prompts import ChatPromptTemplate
-
-custom_eval_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are evaluating IT help desk responses."),
-    ("user", """
-Evaluate this response on a scale of 1-5:
-
-Question: {question}
-Response: {response}
-
-Criteria:
-1. Citation Quality: Does it cite sources with [KB]?
-2. Actionability: Are next steps clear?
-3. Tone: Is it professional and helpful?
-
-Provide scores and brief explanations as JSON.
-""")
-])
-
-custom_eval_chain = custom_eval_prompt | judge_llm
-
-# Run custom evaluation
-for case in results:
-    custom_score = custom_eval_chain.invoke({
-        "question": case["question"],
-        "response": case["agent_response"]
-    })
-    case["custom_evaluation"] = custom_score.content
-```
-
-</details>
 
 <!-- fold:break -->
 
@@ -333,39 +234,20 @@ Now let's evaluate the Report Generation Agent from Module 1. Open the <button o
 
 ### Define Test Cases
 
-For the report agent, test cases are different:
+For the report generation agent, test cases are a bit different:
 - **Topic**: The report subject
 - **Expected Sections**: Sections that should appear
 - **Quality Criteria**: What makes a good report on this topic
 
-Load the test cases at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', 'report_test_cases =');"><i class="fas fa-code"></i> report_test_cases</button>.
+Load the evaluation test cases under <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', 'report_test_cases =');"><i class="fas fa-code"></i> Load Test Cases </button>.
 
 <!-- fold:break -->
 
 ### Generate Reports
 
-Run the agent on each test topic:
+Run the agent on each test topic. Execute the cell under <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '# Generate Reports');"><i class="fas fa-code"></i> Generate Reports</button>.
 
-```python
-from docgen_agent import agent
-
-results = []
-for test_case in report_test_cases:
-    # Generate report
-    result = agent.graph.invoke({
-        "topic": test_case["topic"],
-        "report_structure": "standard",
-        "messages": []
-    })
-    
-    results.append({
-        "topic": test_case["topic"],
-        "report": result["report"],
-        "expected_sections": test_case["expected_sections"]
-    })
-```
-
-This will take several minutes per report.
+This may take a few minutes as the agent processes each task.
 
 <!-- fold:break -->
 
@@ -388,76 +270,15 @@ For report evaluation, we'll use LLM-as-a-judge with specific criteria:
 - Is the tone appropriate for the topic?
 - Are there grammatical or formatting issues?
 
-Implement the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '# Evaluate reports');"><i class="fas fa-code"></i> Evaluate reports</button>.
-
-<details>
-<summary>🆘 Need some help?</summary>
-
-```python
-report_eval_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are an expert at evaluating research reports."),
-    ("user", """
-Evaluate this report on the topic: {topic}
-
-Report:
-{report}
-
-Expected sections: {expected_sections}
-
-Evaluate on these criteria (1-5 scale):
-1. Structure: Are all expected sections present and well-organized?
-2. Content Quality: Is the information substantive and relevant?
-3. Accuracy: Are claims well-supported?
-4. Writing Quality: Is it clear and professional?
-
-Provide scores and explanations as JSON:
-{{
-  "structure": {{"score": X, "explanation": "..."}},
-  "content": {{"score": X, "explanation": "..."}},
-  "accuracy": {{"score": X, "explanation": "..."}},
-  "writing": {{"score": X, "explanation": "..."}}
-}}
-""")
-])
-
-report_eval_chain = report_eval_prompt | judge_llm
-
-for result in results:
-    evaluation = report_eval_chain.invoke({
-        "topic": result["topic"],
-        "report": result["report"],
-        "expected_sections": ", ".join(result["expected_sections"])
-    })
-    result["evaluation"] = evaluation.content
-```
-
-</details>
+Let's run the evaluation under <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Evaluate Report Quality');"><i class="fas fa-code"></i> Evaluate Report Quality </button>.
 
 <!-- fold:break -->
 
-### Tool Usage Analysis
+### Analyze Results
 
 <img src="_static/robots/wrench.png" alt="Tool Analysis" style="float:right;max-width:300px;margin:25px;" />
 
-For the report agent, we should also analyze tool usage patterns:
-
-```python
-# Analyze search patterns
-for result in results:
-    # Extract tool calls from trace
-    trace = result.get("trace", {})
-    searches = [call for call in trace if call["tool"] == "search_tavily"]
-    
-    print(f"Topic: {result['topic']}")
-    print(f"Number of searches: {len(searches)}")
-    print(f"Search queries: {[s['query'] for s in searches]}")
-    print("---")
-```
-
-Good tool usage patterns:
-- Appropriate number of searches (not too few or too many)
-- Relevant search queries
-- Searches at logical points in the workflow
+TODO
 
 <!-- fold:break -->
 
@@ -521,7 +342,7 @@ Evaluation results should drive improvements. Here's how to act on common findin
 
 ## What's Next
 
-Now that you have a basic understanding of how to evaluate your agents, let's dive deeper by seeing how we can take this to production using NVIDIA open source tooling, like NeMo Evaluator. In the next lesson, [Path to Production (Optional)](production.md), we'll explore: 
+Now that you have a basic understanding of how to evaluate your agents, let's dive deeper by seeing how we can take this to production using NVIDIA open source tooling, like NeMo Evaluator. In the next lesson, [NeMo Evaluator (Optional)](nemo_evaluator.md), we'll explore: 
 
 - NeMo Evaluator as an open source platform for agent evaluation
 - Robust, reproducible, and scalable evaluation of agents and models

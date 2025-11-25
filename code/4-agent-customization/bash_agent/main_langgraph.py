@@ -5,6 +5,9 @@ from langchain_openai import ChatOpenAI
 
 from config import Config
 from bash import Bash
+import os
+
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 class ExecOnConfirm:
     """

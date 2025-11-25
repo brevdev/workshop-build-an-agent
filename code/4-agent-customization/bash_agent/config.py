@@ -13,7 +13,7 @@ class Config:
 
     llm_base_url: str = "https://integrate.api.nvidia.com/v1"
     llm_model_name: str = "nvidia/nvidia-nemotron-nano-9b-v2"
-    llm_api_key: str = "(replace with your key, not needed for local models)"
+    llm_api_key: str = os.environ["NVIDIA_API_KEY"]
     # Sampling parameters (we've reduced the temperature to make the model more deterministic)
     llm_temperature: float = 0.1
     llm_top_p: float = 0.95

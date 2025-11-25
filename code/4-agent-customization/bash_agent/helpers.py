@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Tuple
 from openai import OpenAI
 
-from config import Config
+from .config import Config
 
 class Messages:
     """

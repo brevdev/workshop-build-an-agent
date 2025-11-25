@@ -1,11 +1,11 @@
+import os
 from typing import Dict
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain_openai import ChatOpenAI
 
-from config import Config
-from bash import Bash
-import os
+from .config import Config
+from .bash import Bash
 
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 

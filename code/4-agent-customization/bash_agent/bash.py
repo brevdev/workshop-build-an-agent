@@ -3,7 +3,7 @@ import re
 import shlex
 import subprocess
 
-from config import Config
+from .config import Config
 
 class Bash:
     """

@@ -1,8 +1,8 @@
 import json
 
-from config import Config
-from bash import Bash
-from helpers import Messages, LLM
+from .config import Config
+from .bash import Bash
+from .helpers import Messages, LLM
 
 def confirm_execution(cmd: str) -> bool:
     """Ask the user whether the suggested command should be executed."""

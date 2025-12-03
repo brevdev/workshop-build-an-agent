@@ -4,7 +4,7 @@
 
 Building AI agents is exciting. Seeing them in action for the first time feels like magic. But as we move closer from prototypes to production, "magic" isn't enough. We need **trust**.
 
-Building AI agents is exciting, but how do you know if your agent is actually working? Is it hallucinating? Is it rude? Is it getting better or worse as you tweak the prompts? 
+How do you know if your agent is actually working? Is it hallucinating? Is it rude? Is it getting better or worse as you tweak the prompts? 
 
 Manual testing ("vibe checking") can only take you so far. As your agents become more complex and handle more use cases, you need systematic ways to measure their performance, identify weaknesses, and track improvements over time. You need to treat evaluation not as an afterthought, but as a core engineering discipline.
 

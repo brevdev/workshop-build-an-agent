@@ -88,4 +88,4 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 ## Ready to Evaluate!
 
-Once you have your Hugging Face API Key configured (and assuming you have the secrets from previous modules), you're ready to start building evaluation pipelines. Continue to [Introduction to Evaluation](intro.md).
+Once you have your Hugging Face API Key configured (and assuming you have the secrets from previous modules), you're ready to start building evaluation pipelines. Continue to [Introduction to Evaluation](intro_evaluation.md).

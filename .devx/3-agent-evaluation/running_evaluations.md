@@ -18,17 +18,6 @@ A robust evaluation pipeline consists of several key components:
 
 In Module 1 ("Build an Agent") and Module 2 ("Agentic RAG"), you learned about RAG and agents, building two agents of your own. In this module, you've learned about building trust, defining evaluation metrics, and using LLM-as-a-Judge. Let's put those pieces together and build out your first full evaluation pipeline!
 
-<!-- fold:break -->
-
-## Creating Evaluation Datasets
-
-Effective evaluation metrics require high-quality test data. When creating evaluation datasets, here are some key considerations and best practices to keep in mind:
-
-1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
-2. **Include Ground Truth**: Where possible, provide correct answers for comparison
-3. **Represent Real Usage**: Base test cases on actual user interactions
-4. **Start Small**: Begin with 20-30 high-quality examples and expand over time
-5. **Version Control**: Track your datasets alongside your code
 
 <!-- fold:break -->
 <img src="_static/robots/operator.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
@@ -406,13 +395,73 @@ Evaluation results should drive improvements. Here's how to act on common findin
 
 <!-- fold:break -->
 
+## NeMo Evaluator (Optional)
+
+Congratulations! You have successfully ran evaluations manually using Python scripts to test your agents. This works great for development and experimentation. But what if you need to evaluate not just a few, but <i>thousands</i> of responses? 
+
+Once you’re scoring large volumes of outputs, comparing multiple agent versions, or running evaluations on a schedule in production, you need a more robust, reproducible, and scalable workflow.
+
+That's where **NVIDIA NeMo Evaluator**, an open source framework for evaluation at scale, comes in. NeMo Evaluator supports automated agent evaluation using academic benchmarks, custom metrics, and LLM-as-a-judge workflows, so you can measure and monitor agent performance in real-world environments.
+
+<!-- fold:break -->
+
+### Should You Do This Section?
+
+This module is **optional**.
+
+- **Do if**: You want to deploy agents to production and need automated evaluation
+- **Do if**: You're curious about enterprise evaluation infrastructure
+- **Skip if**: You're focused on learning core concepts and will add production tooling later
+
+Keep reading to learn how NeMo Evaluator works.
+
+<!-- fold:break -->
+
+### What is NeMo Evaluator?
+
+By now, you've designed evaluation datasets and scoring rubrics and have seen how LLMs can judge agent outputs with nuance and speed. 
+
+NeMo Evaluator brings structure and automation to this process. It runs as an independent microservice, keeping evaluation isolated from your agent code and enabling consistent, repeatable testing at any scale.
+
+You submit evaluation jobs to NeMo Evaluator, and it provides:
+
+- **Scalability & Automation**: Run thousands of evaluations efficiently without manual triggering
+- **Isolation & Consistency**: Microservice architecture ensures repeatable, decoupled testing
+- **Error Handling**: Built-in retries, rate limiting, and monitoring for reliability
+- **Result Tracking**: Store and compare evaluation results across iterations
+
+<!-- fold:break -->
+
+### What You'll Learn
+
+Recall that a robust evaluation pipeline requires an agent under test, a judging mechanism, a test dataset, evaluation prompts and metrics, and analysis of results.
+
+In this hands-on tutorial, you'll learn how to implement these components using NeMo Evaluator. You'll use the **HelpSteer2** dataset, a collection of prompts and sample agent responses, to set up an example LLM-as-a-Judge workflow.
+
+1. **Set Up the Infrastructure** - Deploy NeMo Evaluator as a Docker microservice
+2. **Prepare the Test Dataset** - Load HelpSteer2 prompt-response pairs
+3. **Configure Your Judge** - Define custom metrics (helpfulness, correctness, coherence)
+4. **Submit Evaluation Jobs** - Send jobs to NeMo Evaluator and monitor progress
+5. **Analyze Results** - Retrieve scores and identify patterns
+6. **Batch Process Efficiently** - Run evaluations on larger datasets
+
+<!-- fold:break -->
+
+### Get Started
+
+<img src="_static/robots/datacenter.png" alt="Production Infrastructure" style="float:left;max-width:300px;margin:25px;" />
+
+Ready to get started?
+
+Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluator.ipynb');"><i class="fa-solid fa-flask"></i> NeMo Evaluator Tutorial</button> notebook to begin!
+
+<!-- fold:break -->
+
 ## What's Next
 
-Now that you know how to evaluate your agents, you can optionally dive deeper by learning how to take evaluation workflows to production with NVIDIA's open-source tooling. The next lesson, [NeMo Evaluator (Optional)](nemo_evaluator.md), covers:
+Congrats! You now have a comprehensive evaluation framework for your agents! In the next lesson, [Continuous Improvement](continuous_improvement.md), we'll explore:
 
-- Setting up and deploying NVIDIA NeMo Evaluator as a microservice
-- Automating evaluation workflows, including configurable scoring metrics, evaluation jobs, and error recovery
-- Techniques for batch processing to scale evaluations for production environments
-
-Or, skip ahead to [Continuous Improvement](continuous_improvement.md) to learn how to systematically improve your agents based on evaluation results.
+- Systematic approaches to improving agent performance
+- Building a culture of quality around AI agents
+- Wrapping up the learnings and best practices from this module
 

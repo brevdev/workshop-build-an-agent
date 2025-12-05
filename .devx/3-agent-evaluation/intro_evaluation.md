@@ -34,7 +34,7 @@ Unlike a binary assertion in code testing, there isn't always one "right" answer
 
 **Multi-Step Reasoning**: Agents typically perform multi-step reasoning, chaining together thoughts and actions to solve complex problems. 
 
-Unlike unit testing a single isolated function, you must evaluate the entire chain of logic. A minor error in an early step, like misinterpreting a user's intent, can cascade into a completely incorrect result, even if the later steps were technically flawless under traditional unit testing standards.
+Unlike unit testing a single isolated function, you must evaluate the entire chain of logic. A minor error in an early step, like misinterpreting a user's intent, can cascade into a completely incorrect result, even if the later steps were technically flawless under traditional standards.
 
 <!-- fold:break -->
 

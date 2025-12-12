@@ -9,6 +9,8 @@ To produce high-quality, meaningful evaluation metrics, you need a well-designed
 - **IT Help Desk RAG Agent** (Module 2)
 - **Report Generation Agent** (Module 1)
 
+We'll start with the RAG agent since it has a simpler evaluation structure, then move to the more complex Report Generation agent.
+
 <!-- fold:break -->
 
 ## Dataset Design for Your Agents
@@ -21,7 +23,7 @@ Evaluation datasets work best when they align with the following principles:
 4. **Start Small**: Begin with 20-30 high-quality examples and expand over time
 5. **Version Control**: Track your datasets alongside your code
 
-In addition to these general principles, you'll need to make sure your data is tailored to your particular evaluation use-case. Different agent tasks, and different metrics, require different types of evaluation data.
+In addition to these general principles, you'll need to make sure your data is tailored to your particular evaluation use case. Different agent tasks, and different metrics, require different types of evaluation data.
 
 To understand dataset design, let's look at what you'll need to evaluate the agents you've built.
 
@@ -38,9 +40,7 @@ For the IT Help Desk RAG agent from Module 2, each evaluation test case should i
 
 In your evaluation pipeline, you'll query the agent with your user question. The agent's generated response can then be compared to the test data, to evaluate multiple dimensions of your agent's performance.
 
-<todo>
-
-We've provided a starter dataset with examples for you. Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to see the structure.
+**Want to see an example?** Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to see the structure of the starter dataset we've provided.
 
 ### Dataset for the Report Generation Agent (Module 1)
 
@@ -53,15 +53,17 @@ Like for the IT Help Desk agent, in your evaluation pipeline, you'll query the R
 
 Instead, the test cases include expected section names and quality criteria, which we'll use to evaluate each report's structure and content. You'll dive into using these quality criteria in the next lesson, [Running Evaluations](running_evaluations.md).
 
-Check out the starter <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Evaluation Dataset</button> to see the structure.
+**Want to see an example?** Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Evaluation Dataset</button> to see the structure of the starter dataset we've provided.
 
 <!-- fold:break -->
 
 ## How to Create Your Evaluation Datasets
 
+<img src="_static/robots/study.png" alt="Building Datasets" style="float:right;max-width:300px;margin:25px;" />
+
 Now that you understand what evaluation datasets look like for each agent, let's explore strategies for creating them.
 
-### Dataset Creation Strategies
+<!-- fold:break -->
 
 ### Strategy 1: Real-World Data Collection
 
@@ -69,40 +71,53 @@ The first strategy is to use existing, real-world data. This approach is often c
 
 However, real-world data comes with trade-offs. Manual collection requires substantial human labor and time. Privacy concerns may limit what data you can use, and quality issues, like biased or inappropriate content, can compromise your evaluation. Further, real-world data may simply not exist for your specific use case, particularly for complex or niche applications.
 
-**Use When**: <todo>
+**Use When**: You have access to existing user interactions or logs, need maximum realism and authenticity, have resources for manual curation and privacy review, or when your application is already deployed and collecting real usage data.
 
-### Strategy 2: Synthetic Data Generation
+<!-- fold:break -->
+
+### Strategy 2: Synthetic Data Generation (SDG)
 
 The second strategy is to generate synthetic data using an LLM. This type of data is highly versatile: it enables developers to rapidly create large datasets, control diversity and coverage, and support use cases where real-world data is difficult or impossible to obtain.
 
 However, synthetic data has its weaknesses as well. It typically requires careful human validation before use, and it may fail to accurately capture real-world behaviors, edge cases, or distributions, which can reduce the reliability of any evaluations that rely on it.
 
-**Use When**: <todo>
+**Use When**: You need to rapidly create test cases, want to control for specific scenarios or edge cases, lack access to real-world data, or need to expand coverage beyond what real data provides.
+
+<!-- fold:break -->
 
 ### Strategy 3: Hybrid Approach
 
 A hybrid approach combines real-world and synthetic data to leverage the strengths of both while mitigating their weaknesses. It allows developers to ground systems in realistic data, then augment coverage with synthetic examples.
 
+**Use When**: You have some real-world data but need more coverage, want to balance realism with controlled test scenarios, need to fill gaps in your real-world dataset, or want the most robust evaluation approach combining authenticity with comprehensive coverage.
+
 <!-- fold:break -->
 
 ## Generate Evaluation Data for Your Agents
 
-Now it's time to create evaluation datasets for the agents you built! We'll use **Synthetic Data Generation (SDG)** with **NVIDIA NeMo Data Designer**, an open source tool for generating high-quality synthetic data, to quickly create test cases.
+<img src="_static/robots/typewriter.png" alt="Tools for Generation" style="float:left;max-width:250px;margin:25px;" />
 
-Start with generating data for your RAG agent from Module 2 to get familiar with SDG concepts:
+Now it's time to create evaluation datasets for the agents you built!
+
+For this workshop, we'll use **Synthetic Data Generation** with **NVIDIA NeMo Data Designer**, an open source tool for generating high-quality synthetic data. This approach is ideal for getting started with agent evaluation and learning the fundamentals.
+
+When you're ready, follow the first notebook to generate data for your RAG agent from Module 2 and get familiar with SDG concepts:
 <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/generate_rag_eval_dataset.ipynb');"><i class="fa-solid fa-flask"></i> RAG Evaluation Data Notebook</button>
 
 Next, generate data for your Report Generation agent from Module 1: 
 <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/generate_report_eval_dataset.ipynb');"><i class="fa-solid fa-flask"></i> Report Generation Evaluation Data Notebook</button>
 
-<!-- fold:break -->
+<details>
+<summary>💡 NEED SOME HELP?</summary>
 
-## Using Pre-Made Datasets
-
-If you prefer to start with pre-made datasets, we've provided starter sets for both agents:
+We recommend generating your own datasets using the notebooks above to get hands-on experience with the synthetic data generation process. However, if you're running into issues or want to move ahead quickly, we've provided starter datasets you can use:
 
 - <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Test Cases</button> - 12 IT help desk questions across common categories
 - <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Test Cases</button> - 6 report topics with quality criteria
+
+These pre-made datasets can also serve as reference examples when you create your own.
+
+</details>
 
 <!-- fold:break -->
 

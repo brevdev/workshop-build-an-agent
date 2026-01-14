@@ -2,7 +2,23 @@
 
 <img src="_static/robots/blueprint.png" alt="Running Evaluations" style="float:left;max-width:300px;margin:25px;" />
 
-Now it's time to put everything together and run comprehensive evaluations on your agents! In this hands-on lesson, you'll build evaluation pipelines for both the RAG agent from Module 2 and the report generation agent from Module 1.
+It's time to put everything together and run comprehensive evaluations on your agents! In this hands-on lesson, you'll build evaluation pipelines for both the RAG agent from Module 2 and the report generation agent from Module 1.
+
+<!-- fold:break -->
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+**Evaluation datasets ready** - You should have created or reviewed test datasets from the previous lesson ([Creating Evaluation Datasets](evaluation_data.md)). You can use:
+- Your own generated datasets from the `generate_eval_dataset.ipynb` notebook
+- The pre-made datasets: `rag_agent_test_cases.json` and `report_agent_test_cases.json`
+
+✅ **Agents built** - Your RAG agent from Module 2 and Report Generation agent from Module 1 should be functional
+
+✅ **Metrics selected** - You've learned about evaluation metrics and LLM-as-a-Judge techniques
+
+Now let's execute the evaluations!
 
 <!-- fold:break -->
 
@@ -11,37 +27,13 @@ Now it's time to put everything together and run comprehensive evaluations on yo
 A robust evaluation pipeline consists of several key components:
 
 1. **Agent Under Test**: The agent you're evaluating
-2. **Judging Mechanism**: The LLM (or human) that will judge the agent
-3. **Test Dataset**: Collection of test cases with inputs and expected outputs
+2. **Judging Mechanism**: The LLM that will judge the agent
+3. **Test Dataset**: Collection of test cases with inputs and expected outputs (from previous lesson)
 4. **Evaluation Prompts and Metrics**: Instructions on how to score agent outputs
 5. **Analysis of Results**: Interpret results for areas of improvement
 
-In Module 1 ("Build an Agent") and Module 2 ("Agentic RAG"), you learned about RAG and agents, building two agents of your own. In this module, you've learned about building trust, defining evaluation metrics, and using LLM-as-a-Judge. Let's put those pieces together and build out your first full evaluation pipeline!
+Let's start by crafting effective evaluation prompts!
 
-
-<!-- fold:break -->
-<img src="_static/robots/operator.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
-
-In this module, you will work with two evaluation datasets, one for each agent. Each dataset contains a series of test cases that compare the agent’s output to a human-authored “ground truth” or ideal answer, or to clearly defined quality criteria.
-
-For the IT Help Desk RAG agent from Module 2, each of our evaluation test cases should include:
-- Question
-- Ground truth answer (if available)
-- Expected retrieved contexts (if available)
-- Success criteria
-
-Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to take a look at some examples we will use in our first evaluation pipeline. 
-
-<!-- fold:break -->
-
-For the Report Generation task agent from Module 1, each of our evaluation test cases should include:
-- Report Topic
-- Expected Report Sections
-- Output Quality Criteria
-
-Note that the Report Generation dataset does not contain a complete ground truth answer. The length and variability of generated reports makes this impractical for evaluation. Instead, the test cases include expected section names and quality criteria, which we'll use to evaluate each report's structure and content.
-
-Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Evaluation Dataset</button> to take a look at some examples we will use in our second evaluation pipeline. 
 
 <!-- fold:break -->
 
@@ -150,11 +142,9 @@ Let's start by evaluating the IT Help Desk agent from Module 2. Open the <button
 
 ### Load the Test Dataset
 
-We'll need to load our IT Help Desk test dataset for use in evaluation. Recall that each test case includes:
-- **Question**: The user's query (common IT help desk questions)
-- **Ground Truth Answer**: The expected response
-- **Expected Contexts**: Documents that should be retrieved
-- **Category**: The type of question (password_management, network_access, etc.)
+Load your evaluation dataset - either the one you generated in the previous lesson or the pre-made dataset provided. 
+
+The dataset should be located at `data/evaluation/rag_agent_test_cases.json` (or use your custom-generated file).
 
 Load the dataset under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', 'test_dataset =');"><i class="fas fa-code"></i> Load Test Dataset</button> section.
 
@@ -263,16 +253,11 @@ Now that you've thoroughly evaluated your IT Help Desk agent using both standard
 
 Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluate_report_agent.ipynb');"><i class="fa-solid fa-flask"></i> Report Agent Evaluation</button> notebook.
 
-### Define Test Cases
+### Load Test Cases
 
-The report generation agent will need a different test dataset than the IT Help Desk agent. Our test cases will include:
-- **Topic**: The report subject
-- **Expected Sections**: Sections that should appear in the report
-- **Quality Criteria**: Custom metrics that define what makes a "good" report on the given topic
+Load your report generation test dataset - either one you created or the pre-made dataset at `data/evaluation/report_agent_test_cases.json`.
 
-We've set up some example test cases for you to use in your evaluation. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', 'report_test_cases =');"><i class="fas fa-code"></i> Load Test Cases </button> to view details about the test cases. 
-
-Check which sections we expect the agent to include/exclude, and what quality criteria we've defined.
+Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', 'report_test_cases =');"><i class="fas fa-code"></i> Load Test Cases </button> to load and view the test cases.
 
 <!-- fold:break -->
 
@@ -397,7 +382,7 @@ Evaluation results should drive improvements. Here's how to act on common findin
 
 ## NeMo Evaluator (Optional)
 
-Congratulations! You have successfully ran evaluations manually using Python scripts to test your agents. This works great for development and experimentation. But what if you need to evaluate not just a few, but <i>thousands</i> of responses? 
+Congratulations! You have successfully run evaluations manually using Python scripts to test your agents. This works great for development and experimentation. But what if you need to evaluate not just a few, but <i>thousands</i> of responses? 
 
 Once you’re scoring large volumes of outputs, comparing multiple agent versions, or running evaluations on a schedule in production, you need a more robust, reproducible, and scalable workflow.
 

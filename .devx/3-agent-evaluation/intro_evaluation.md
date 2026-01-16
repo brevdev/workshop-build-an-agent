@@ -124,6 +124,19 @@ We use a specialized NVIDIA Nemotron model to grade the output of our agent. We 
 
 <!-- fold:break -->
 
+#### Calibrating Your LLM Judge
+
+An LLM judge is only useful if it agrees with human judgment. Before trusting automated scores, you should **calibrate** your judge by comparing its ratings to human ratings on a small sample.
+
+**A simple calibration workflow:**
+1. Select 5-10 representative agent responses
+2. Have a human rate each response on your rubric (e.g., 1-5 for helpfulness)
+3. Run the same responses through your LLM judge
+4. Compare: Do scores align? Where do they disagree?
+5. If alignment is poor, refine your evaluation prompt or add examples
+
+Even a quick spot-check on 5 samples can reveal systematic biases in your judge—like being too lenient, too harsh, or misunderstanding your criteria. We'll practice this calibration step in the hands-on notebooks later in the module.
+
 ### 2. Human Evaluation (The Gold Standard)
 
 Real humans reviewing logs. This is the most accurate signal for subjective qualities but it can be the slowest and most expensive method. It's best used to "grade the grader", meaning ensuring your LLM Judge aligns with human preferences. 

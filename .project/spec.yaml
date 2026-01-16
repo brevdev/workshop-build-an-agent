@@ -77,7 +77,17 @@ environment:
             target: ""
     compose_file_path: ""
 execution:
-    apps: []
+    apps:
+        - name: VS Code
+          type: vs-code
+          class: native
+          start_command: ""
+          health_check_command: '[ \$(ps aux | grep ".vscode-server" | grep -v grep | wc -l ) -gt 4 ] && [ \$(ps aux | grep "/.vscode-server/bin/.*/node .* net.createConnection" | grep -v grep | wc -l) -gt 0 ]'
+          stop_command: ""
+          user_msg: ""
+          logfile_path: ""
+          timeout_seconds: 120
+          icon_url: ""
     resources:
         gpu:
             requested: 1

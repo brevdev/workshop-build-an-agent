@@ -7,26 +7,22 @@ For this agent to work, we will need to configure a few secrets. Use the <button
 
 You can also launch the Secrets Manager from the launcher.
 
-## OpenRouter API Key
+## NGC API Key
 
-OpenRouter is a unified API that provides access to multiple AI models from different providers, including NVIDIA's models. For this workshop, we will use OpenRouter to access the NVIDIA Nemotron Nano 9B v2 model.
+NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
 <details>
-<summary>⚠️ Don't have an account?</summary>
+<summary>⚠️ Dont have an account?</summary>
 
-You can get free access to OpenRouter with an [OpenRouter Account](https://openrouter.ai/). Nemotron Nano 9B v2 is a free to use model.
+You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>
 
 <details>
 <summary>⚠️ Don't have an API Key?</summary>
 
-Manage your API Keys from the [OpenRouter Keys page](https://openrouter.ai/keys) after logging into your account.
+Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api-keys).
 
 </details>
-
-## NGC API Key
-
-NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. You do **not** need to set this API Key for the Introduction to Agents workshop. 
 
 ## Tavily API Key
 
@@ -61,4 +57,3 @@ You can get free access to LangSmith with a [LangSmith Account](https://smith.la
 Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).
 
 </details>
-

@@ -20,6 +20,14 @@ Evaluating AI agents is more complex than traditional software testing because o
 
 <!-- fold:break -->
 
+**Malicious Behavior**: Unlike traditional software with predictable failure modes,agents can exhibit harmful behaviors, either through their own outputs or when manipulated by bad actors. Evaluation must include "red teaming" with adversarial test cases to ensure your agent behaves safely even under attack.
+
+- *Toxic outputs* occur when an agent generates offensive, harmful, or inappropriate content—even when not explicitly prompted to do so. 
+- *Prompt injection* happens when malicious users craft inputs designed to override the agent's instructions, potentially causing it to ignore safety guidelines, leak system prompts, or perform unintended actions. 
+- *Adversarial queries* are carefully designed inputs that exploit model weaknesses to produce incorrect or dangerous responses. 
+
+<!-- fold:break -->
+
 **Non-Determinism**: AI agents are non-deterministic, meaning they can produce different valid responses to the same input. 
 
 Unlike traditional software where the same input conditions will always lead to the same output, an agent might answer the same question differently every time. This variability is a feature, not a bug; it allows for creativity and flexibility in responses. But it can also make evaluation difficult.

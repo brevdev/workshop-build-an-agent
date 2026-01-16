@@ -72,7 +72,7 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
 <details>
-<summary>⚠️ Dont have an account?</summary>
+<summary>⚠️ Don't have an account?</summary>
 
 You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>

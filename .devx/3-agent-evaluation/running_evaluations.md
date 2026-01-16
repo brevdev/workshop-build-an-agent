@@ -11,7 +11,7 @@ It's time to put everything together and run comprehensive evaluations on your a
 Before starting, ensure you have:
 
 **Evaluation datasets ready** - You should have created or reviewed test datasets from the previous lesson ([Creating Evaluation Datasets](evaluation_data.md)). You can use:
-- Your own generated datasets from the `generate_eval_dataset.ipynb` notebook
+- Your own generated datasets from the `generate_rag_eval_dataset.ipynb` and `generate_report_eval_dataset.ipynb` notebooks
 - The pre-made datasets: `rag_agent_test_cases.json` and `report_agent_test_cases.json`
 
 ✅ **Agents built** - Your RAG agent from Module 2 and Report Generation agent from Module 1 should be functional
@@ -241,7 +241,7 @@ Your results should contain the percent of responses that include citations. Is 
 
 Next, evaluate the agent on actionability. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom Evaluation: Actionability');"><i class="fas fa-code"></i> Actionability </button> to see the results. 
 
-Your results should score the responses on a scale of 1-5. Do your agent's responses contain clear, actionable steps?
+Your results should score the responses on a raw scale of 1-5. Do your agent's responses contain clear, actionable steps?
 
 <!-- fold:break -->
 
@@ -299,7 +299,7 @@ Once you're ready, run the cell <button onclick="goToLineAndSelect('code/3-agent
 
 Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Analyze Results');"><i class="fas fa-code"></i> Analyze Results</button> to create a readable overview of your evaluation results. 
 
-Check the overall results. Like in the previous example, scores should range from 0-1. How did your agent perform in each category?
+Check the overall results. Like in the previous example, the final scores should range from 0-1. How did your agent perform in each category?
 
 Examine the statistical breakdown to identify:
 - Consistency across different report topics
@@ -377,68 +377,6 @@ Evaluation results should drive improvements. Here's how to act on common findin
 - Add tool usage examples
 - Implement tool selection validation
 - Adjust model parameters
-
-<!-- fold:break -->
-
-## NeMo Evaluator (Optional)
-
-Congratulations! You have successfully run evaluations manually using Python scripts to test your agents. This works great for development and experimentation. But what if you need to evaluate not just a few, but <i>thousands</i> of responses? 
-
-Once you’re scoring large volumes of outputs, comparing multiple agent versions, or running evaluations on a schedule in production, you need a more robust, reproducible, and scalable workflow.
-
-That's where **NVIDIA NeMo Evaluator**, an open source framework for evaluation at scale, comes in. NeMo Evaluator supports automated agent evaluation using academic benchmarks, custom metrics, and LLM-as-a-judge workflows, so you can measure and monitor agent performance in real-world environments.
-
-<!-- fold:break -->
-
-### Should You Do This Section?
-
-This module is **optional**.
-
-- **Do if**: You want to deploy agents to production and need automated evaluation
-- **Do if**: You're curious about enterprise evaluation infrastructure
-- **Skip if**: You're focused on learning core concepts and will add production tooling later
-
-Keep reading to learn how NeMo Evaluator works.
-
-<!-- fold:break -->
-
-### What is NeMo Evaluator?
-
-By now, you've designed evaluation datasets and scoring rubrics and have seen how LLMs can judge agent outputs with nuance and speed. 
-
-NeMo Evaluator brings structure and automation to this process. It runs as an independent microservice, keeping evaluation isolated from your agent code and enabling consistent, repeatable testing at any scale.
-
-You submit evaluation jobs to NeMo Evaluator, and it provides:
-
-- **Scalability & Automation**: Run thousands of evaluations efficiently without manual triggering
-- **Isolation & Consistency**: Microservice architecture ensures repeatable, decoupled testing
-- **Error Handling**: Built-in retries, rate limiting, and monitoring for reliability
-- **Result Tracking**: Store and compare evaluation results across iterations
-
-<!-- fold:break -->
-
-### What You'll Learn
-
-Recall that a robust evaluation pipeline requires an agent under test, a judging mechanism, a test dataset, evaluation prompts and metrics, and analysis of results.
-
-In this hands-on tutorial, you'll learn how to implement these components using NeMo Evaluator. You'll use the **HelpSteer2** dataset, a collection of prompts and sample agent responses, to set up an example LLM-as-a-Judge workflow.
-
-1. **Set Up the Infrastructure** - Deploy NeMo Evaluator as a Docker microservice
-2. **Prepare the Test Dataset** - Load HelpSteer2 prompt-response pairs
-3. **Configure Your Judge** - Define custom metrics (helpfulness, correctness, coherence)
-4. **Submit Evaluation Jobs** - Send jobs to NeMo Evaluator and monitor progress
-5. **Analyze Results** - Retrieve scores and identify patterns
-6. **Batch Process Efficiently** - Run evaluations on larger datasets
-
-<!-- fold:break -->
-
-### Get Started
-
-<img src="_static/robots/datacenter.png" alt="Production Infrastructure" style="float:left;max-width:300px;margin:25px;" />
-
-Ready to get started?
-
-Open the <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluator.ipynb');"><i class="fa-solid fa-flask"></i> NeMo Evaluator Tutorial</button> notebook to begin!
 
 <!-- fold:break -->
 

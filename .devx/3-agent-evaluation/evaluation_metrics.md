@@ -14,23 +14,6 @@ LLM-as-a-judge provides a neat middle ground.
 
 <!-- fold:break -->
 
-**Advantages**:
-- **Scalable**: Evaluate thousands of outputs quickly
-- **Consistent**: More consistent than human reviewers
-- **Flexible**: Can assess any criteria you define
-- **Nuanced**: Understands semantic meaning and context
-- **Cost-Effective**: Cheaper than human evaluation at scale
-
-<!-- fold:break -->
-
-**Limitations**:
-- **Not Perfect**: Judge models can make mistakes
-- **Biased**: May favor outputs similar to their own style
-- **Costly**: More expensive than simple metrics
-- **Requires Validation**: Should be spot-checked against human judgment
-
-<!-- fold:break -->
-
 ## Evaluating RAG Agents
 
 The IT Help Desk agent you built in Module 2 is a Retrieval Augmented Generation (RAG) system. RAG agents have two distinct components that need evaluation:
@@ -348,11 +331,12 @@ When deciding which metrics to use, consider:
 
 <!-- fold:break -->
 
-## Hands-On: Implementing Metrics
+## Hands-On: Evaluating your Agents
 
-Ready to implement these evaluation metrics? In the next lesson, we'll get hands-on with [Running Evaluations](running_evaluations.md) using NVIDIA models to evaluate agent outputs.
+Ready to implement these evaluation metrics? In the next lesson, we'll get hands-on with [Creating Evaluation Datasets](evaluation_data.md) using synthetic data generation to evaluate agent outputs.
 
-You'll learn how to:
+Over the next sections, you'll learn how to:
+- Use SDG to generate synthetic datasets for evaluation
 - Use NVIDIA Nemotron models as evaluation judges
 - Design effective evaluation prompts
 - Implement custom evaluation criteria

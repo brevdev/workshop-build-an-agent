@@ -318,12 +318,12 @@ def validate_response(response: str, contexts: str) -> dict:
 
 <!-- fold:break -->
 
-### Step 5: Final Results
+### Step 5: Offline Evaluation Results
 
-After 3 iterations:
+After 3 iterations of offline evaluation:
 
 ```
-FINAL SCORES (after improvements):
+OFFLINE EVALUATION SCORES:
   Faithfulness:  0.88 (Excellent) ✅
   Relevancy:     0.79 (Good) ✅
   Helpfulness:   0.85 (Excellent) ✅
@@ -336,19 +336,29 @@ Improvement Summary:
   0 Regression issues
 
 Time invested: 4 hours
-Production impact: Reduced user complaints by 40%
 ```
 
-### Key Takeaways from This Example
+Your offline metrics look great! But how do you know these improvements translate to real-world performance? Time for the final validation step.
 
-1. **Measure first**: Evaluation revealed the specific problem (low faithfulness)
-2. **Diagnose deeply**: Found root cause (adding training knowledge)
-3. **Targeted fix**: Updated prompt with explicit constraints
-4. **Verify impact**: Re-evaluated to confirm improvement
-5. **Iterate**: Added validation layer for remaining issues
-6. **Monitor**: Continued tracking to ensure sustained improvement
+<!-- fold:break -->
 
-This systematic approach turns vague "improve the agent" goals into concrete, measurable improvements.
+### Step 6: Validate with A/B Testing
+
+Before rolling out the improved agent to all users, deploy an A/B test to validate real-world impact:
+
+```
+7-Day A/B TEST RESULTS (10% traffic to improved agent):
+
+                          Control (v1)    Treatment (v2)    Change
+Task Completion Rate:        72%              84%           +12% ✅
+User Satisfaction:           3.2/5            4.1/5         +0.9 ✅
+Escalation Rate:             18%              11%           -7%  ✅
+Avg Session Length:          4.2 min          3.1 min       -26% ✅
+
+Statistical Significance: p < 0.01 for all metrics
+```
+
+The A/B test confirms that offline improvements translate to real-world gains. Ship it!
 
 <!-- fold:break -->
 
@@ -360,11 +370,13 @@ You've completed the Agent Evaluation module! Let's recap what you've accomplish
 
 ### What You Learned
 
-**In the Introduction**, you discovered why systematic evaluation matters—moving beyond "vibe checks" to rigorous, data-driven quality assessment. You learned about the unique challenges of evaluating AI agents: non-determinism, subjective quality, multi-step reasoning, and context dependence.
+**In the Introduction**, you discovered why systematic evaluation matters—moving beyond "vibe checks" to rigorous, data-driven quality assessment. You learned about the unique challenges of agent evaluation.
 
 **In Understanding Evaluation Metrics**, you dove deep into RAGAS metrics for RAG agents (Context Precision, Context Recall, Faithfulness, Answer Relevancy) and learned how to evaluate task agents on completion rate, tool usage, and output quality.
 
-**In Running Evaluations**, you got hands-on with evaluation pipelines, using NVIDIA Nemotron models as judges to evaluate both the IT Help Desk agent and the Report Generation agent. You learned to create test datasets, design evaluation prompts, and analyze results.
+**In Creating Evaluation Datasets**, you learned strategies for building high-quality test datasets. You designed evaluation datasets tailored to both the IT Help Desk RAG agent and the Report Generation agent.
+
+**In Running Evaluations**, you got hands-on with evaluation pipelines, using judge models to evaluate both the IT Help Desk agent and the Report Generation agent. You learned to create test datasets, design evaluation prompts, and analyze results.
 
 **In this lesson**, you learned how to close the loop—using evaluation results to systematically improve your agents through targeted strategies and iterative refinement.
 
@@ -382,6 +394,22 @@ You've completed the Agent Evaluation module! Let's recap what you've accomplish
 ✅ Systematic debugging techniques  
 
 You've transformed from relying on intuition to having a rigorous, data-driven approach to agent quality.
+
+<!-- fold:break -->
+
+### Alternative Evaluation Frameworks
+
+While this module focused on RAGAS and custom LLM-as-a-judge pipelines, the evaluation ecosystem is rich with other tools worth exploring as you scale your agent development:
+
+- **[LangSmith](https://smith.langchain.com/)**: LangChain's platform for debugging, testing, and monitoring LLM applications. Offers tracing, dataset management, and evaluation features tightly integrated with LangChain agents.
+
+- **[Weights & Biases (W&B)](https://wandb.ai/)**: A popular MLOps platform that supports experiment tracking, model versioning, and evaluation dashboards. Great for comparing agent versions over time.
+
+- **[Arize Phoenix](https://phoenix.arize.com/)**: An open-source observability tool for LLM applications with built-in support for tracing, evaluation, and debugging retrieval and generation quality.
+
+- **[DeepEval](https://docs.confident-ai.com/)**: An open-source evaluation framework with pre-built metrics for hallucination, relevancy, toxicity, and more. Integrates well with CI/CD pipelines.
+
+Each tool has different strengths—some excel at real-time monitoring, others at offline batch evaluation, and some offer better integration with specific agent frameworks. As your evaluation needs grow, consider how these tools might complement the techniques and concepts you've learned here.
 
 <!-- fold:break -->
 

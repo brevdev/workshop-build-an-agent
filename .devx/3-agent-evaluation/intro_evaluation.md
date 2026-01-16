@@ -137,6 +137,8 @@ An LLM judge is only useful if it agrees with human judgment. Before trusting au
 
 Even a quick spot-check on 5 samples can reveal systematic biases in your judge—like being too lenient, too harsh, or misunderstanding your criteria. We'll practice this calibration step in the hands-on notebooks later in the module.
 
+<!-- fold:break -->
+
 ### 2. Human Evaluation (The Gold Standard)
 
 Real humans reviewing logs. This is the most accurate signal for subjective qualities but it can be the slowest and most expensive method. It's best used to "grade the grader", meaning ensuring your LLM Judge aligns with human preferences. 
@@ -172,7 +174,7 @@ These are binary pass/fail checks that are essential for reliable agents. These 
 - Doesn't capture nuance
 - May miss valid alternative responses
 
-Often, evaluation workflows will take on a hybrid approach. For example, use an LLM-as-a-judge to evaluate the agent's thought process, a deterministic check to verify an agent's outputs are valid, and an occasional calibration with a human evaluator to ensure alignment of judging standards with subjective human preferences. 
+Often, evaluation workflows will take on a hybrid approach. For example, use an LLM-as-a-judge to evaluate the agent's thought process, a deterministic check to verify an agent's intermediate and/or final outputs are valid, and an occasional calibration with a human evaluator to ensure alignment of judging standards with subjective human preferences. 
 
 <!-- fold:break -->
 

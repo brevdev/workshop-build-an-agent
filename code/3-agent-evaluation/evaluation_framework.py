@@ -16,7 +16,7 @@ from pydantic import BaseModel
 _LOGGER = logging.getLogger(__name__)
 
 # Model Configuration
-JUDGE_MODEL = "nvidia/nvidia-nemotron-nano-9b-v2"
+JUDGE_MODEL = "nvidia/nemotron-3-nano-30b-a3b"
 EMBEDDING_MODEL = "nvidia/llama-3.2-nv-embedqa-1b-v2"
 
 

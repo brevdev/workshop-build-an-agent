@@ -20,7 +20,7 @@ Evaluating AI agents is more complex than traditional software testing because o
 
 <!-- fold:break -->
 
-**Malicious Behavior**: Unlike traditional software with predictable failure modes,agents can exhibit harmful behaviors, either through their own outputs or when manipulated by bad actors. Evaluation must include "red teaming" with adversarial test cases to ensure your agent behaves safely even under attack.
+**Malicious Behavior**: Unlike traditional software with predictable failure modes, agents can exhibit harmful behaviors, either through their own outputs or when manipulated by bad actors. Evaluation must include "red teaming" with adversarial test cases to ensure your agent behaves safely even under attack.
 
 - *Toxic outputs* occur when an agent generates offensive, harmful, or inappropriate content—even when not explicitly prompted to do so. 
 - *Prompt injection* happens when malicious users craft inputs designed to override the agent's instructions, potentially causing it to ignore safety guidelines, leak system prompts, or perform unintended actions. 
@@ -170,8 +170,9 @@ Often, evaluation workflows will take on a hybrid approach. For example, use an 
 We will guide you through the following steps to build your evaluation pipeline:
 
 1.  **[Understanding Evaluation Metrics](evaluation_metrics.md)**: Learn the specific signals we look for, like "Faithfulness" and "Context Recall".
-2.  **[Running Evaluations](running_evaluations.md)**: Execute the pipeline on your own agents and interpret the results.
-3.  **[Continuous Improvement](continuous_improvement.md)**: Close the loop by using data to make your agents smarter.
+2.  **[Creating Evaluation Datasets](evaluation_data.md)**: Create a dataset for agent evaluation using synthetic data generation. 
+3.  **[Running Evaluations](running_evaluations.md)**: Execute the pipeline on your own agents and interpret the results.
+4.  **[Continuous Improvement](continuous_improvement.md)**: Close the loop by using data to make your agents smarter.
 
 Ready to turn your "vibe checks" into rigorous engineering? Let's continue to [Understanding Evaluation Metrics](evaluation_metrics.md) to learn about the tools we'll need.
 

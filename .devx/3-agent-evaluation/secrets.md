@@ -2,36 +2,12 @@
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right; max-width:300px;margin:25px;" />
 
+We will be evaluating the previous agents that you built in Modules 1 and 2. This means that you should have the keys for these modules set for these agents to function properly. The good news is if you had set these previously, they should persist in the Secrets Manager!
 
-For this evaluation module to work, we will need to configure the Hugging Face API Key. Use the <button onclick="openVoila('code/secrets_management/secrets_management_3.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set this up. Note that the secrets you already set for Modules 1 and 2 should persist here as well. 
-
-You can also launch the Secrets Manager directly from the Jupyterlab launcher.
-
-## Hugging Face API Key
-
-We need a Hugging Face Token to access datasets and models for evaluation. Make sure you have both **read** and **write** permissions enabled for your key!
+Use the <button onclick="openVoila('code/secrets_management/secrets_management_3.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set this up. You can also launch the Secrets Manager directly from the Jupyterlab launcher.
 
 <details>
-<summary>⚠️ Don't have an account?</summary>
-
-You can get free access with a [Hugging Face Account](https://huggingface.co/join).
-</details>
-
-<details>
-<summary>⚠️ Don't have an API Key?</summary>
-
-Manage your Access Tokens from the [Hugging Face Settings](https://huggingface.co/settings/tokens).
-
-</details>
-
-## Previous API Keys
-
-We will be evaluating the previous agents that you built in Modules 1 and 2. This means that you should have the keys for these modules set for these agents to function properly. 
-
-The good news is if you had set these previously, they should persist in the Secrets Manager!
-
-<details>
-<summary>⚠️ Still Need to Set These? Expand Me! </summary>
+<summary>⚠️ Still Need to Set These? Expand for details! </summary>
 
 ## OpenRouter API Key
 

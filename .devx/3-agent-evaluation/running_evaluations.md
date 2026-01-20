@@ -175,7 +175,7 @@ Now we have our generated responses from the IT Help Desk agent. We can use the 
 
 Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Evaluate with LLM-as-a-Judge');"><i class="fas fa-code"></i> Evaluate with LLM-as-a-Judge</button> to evaluate each response.
 
-For the first pass, we'll evaluate these qualities: 
+Let's get used to what it means to use an LLM as a judge for agent evaluation. For this first pass, we'll evaluate these qualities: 
 1. **Faithfulness**: Whether responses are grounded in the retrieved context
 2. **Relevancy**: Whether responses address the user's question
 3. **Helpfulness**: Whether responses contain actionable and useful advice
@@ -186,9 +186,9 @@ This may take a few minutes as the judge processes each response.
 
 ### Compute RAGAS Metrics
 
-Creating custom metrics helps you evaluate performance on criteria specific to your use case. However, you may be wondering: are there industry-standard frameworks for evaluating RAG agents?
+Defining your own metrics helps you evaluate performance on criteria specific to your use case. However, you may also be wondering: are there industry-standard frameworks for evaluating RAG agents?
 
-RAGAS is a popular open-source framework for evaluating the performance of LLM applications. It provides a library of built-in metrics for common applications like agentic pipelines or RAG systems, as well as custom metrics.
+RAGAS is a popular open-source framework for evaluating the performance of RAG-based applications. It provides a library of built-in metrics for common applications like agentic pipelines or RAG systems, as well as custom metrics.
 
 Let's explore and evaluate the agent's performance using RAGAS metrics. We'll use the ``ragas`` python library to compute:
 

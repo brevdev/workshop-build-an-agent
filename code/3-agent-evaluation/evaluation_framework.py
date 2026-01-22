@@ -49,6 +49,7 @@ def create_judge_llm(temperature: float = 0.0) -> ChatNVIDIA:
     return ChatNVIDIA(
         model=JUDGE_MODEL,
         temperature=temperature,
+        max_tokens=4096,
     )
 
 

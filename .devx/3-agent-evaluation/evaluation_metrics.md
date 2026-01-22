@@ -77,10 +77,15 @@ Note that this context precision value is not a perfect 1.0 score. Why? Because 
 <!-- fold:break -->
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - nearly all retrieved documents are relevant
-- **0.7-0.9**: Good - most documents are relevant with few irrelevant ones
-- **0.5-0.7**: Fair - significant noise in retrieval results
-- **Below 0.5**: Poor - retrieval is returning mostly irrelevant documents
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | Nearly all retrieved documents are relevant | Production-ready for most use cases |
+| **0.70 - 0.89** | Good 👍 | Most documents relevant, minor noise | Acceptable for many applications |
+| **0.50 - 0.69** | Fair ⚠️ | Significant noise in retrieval results | Needs improvement before production |
+| **Below 0.50** | Poor ❌ | Retrieval returning mostly irrelevant docs | Urgent attention required |
+
+💡 **Tip**: For production RAG systems, aim for context precision ≥ 0.70. Even leading commercial systems rarely exceed 0.90 on all queries.
 
 **Optimization Strategies**
 - Fine-tune your retrieval parameters (similarity threshold, top-k)
@@ -122,10 +127,15 @@ Context Recall = (Number of claims attributable to contexts) / (Total number of 
 <!-- fold:break -->
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - all critical information was retrieved
-- **0.7-0.9**: Good - most information retrieved, minor gaps
-- **0.5-0.7**: Fair - significant information gaps
-- **Below 0.5**: Poor - major information gaps, answer will be incomplete
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | All critical information was retrieved | Upper bound is optimal |
+| **0.70 - 0.89** | Good 👍 | Most information retrieved, minor gaps | Acceptable, monitor for specific gaps |
+| **0.50 - 0.69** | Fair ⚠️ | Significant information gaps | Increase retrieval coverage |
+| **Below 0.50** | Poor ❌ | Major gaps, answers will be incomplete | Critical - expand retrieval or knowledge base |
+
+💡 **Tip**: Context recall sets your agent's "upper bound" of knowledge. Low recall means even perfect generation can't produce complete answers.
 
 **Optimization Strategies**:
 - Increase the number of retrieved documents (top-k parameter)
@@ -170,10 +180,15 @@ Faithfulness = (Number of claims supported by context) / (Total number of claims
 <!-- fold:break -->
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - answer is fully grounded in context
-- **0.7-0.9**: Good - mostly grounded with minor extrapolations
-- **0.5-0.7**: Fair - significant unsupported claims
-- **Below 0.5**: Poor - frequent hallucination, unreliable
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | Answer fully grounded in context | Production-ready, trustworthy |
+| **0.75 - 0.89** | Good 👍 | Mostly grounded, minor extrapolations | Acceptable, monitor for hallucinations |
+| **0.60 - 0.74** | Fair ⚠️ | Significant unsupported claims | Strengthen grounding in prompts |
+| **Below 0.60** | Poor ❌ | Frequent hallucination, unreliable | Urgent - agent is making things up |
+
+💡 **Tip**: For production RAG systems, aim for faithfulness ≥ 0.80. This is critical for user trust and safety.
 
 **Optimization Strategies**:
 - Strengthen system prompts to emphasize grounding in context
@@ -216,10 +231,15 @@ where `i` indicates the index of a generated question derived from the generated
 <!-- fold:break -->
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - answer directly addresses the question
-- **0.7-0.9**: Good - mostly relevant with minor tangents
-- **0.5-0.7**: Fair - partially addresses question
-- **Below 0.5**: Poor - answer is off-topic or too generic
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | Answer directly addresses the question | High user satisfaction expected |
+| **0.75 - 0.89** | Good 👍 | Mostly relevant with minor tangents | Acceptable, minor prompt tuning |
+| **0.60 - 0.74** | Fair ⚠️ | Partially addresses question | Improve question understanding |
+| **Below 0.60** | Poor ❌ | Off-topic or too generic | Critical - users won't get answers they need |
+
+💡 **Tip**: Answer relevancy impacts user satisfaction. Aim for ≥ 0.75 to ensure users feel their questions are being answered.
 
 **Optimization Strategies**:
 - Add examples of relevant vs. irrelevant answers in system prompt

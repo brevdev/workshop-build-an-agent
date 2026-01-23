@@ -25,7 +25,7 @@ Evaluation datasets work best when they align with the following principles:
 
 In addition to these general principles, you'll need to make sure your data is tailored to your particular evaluation use case. Different agent tasks, and different metrics, require different types of evaluation data.
 
-To understand dataset design, let's look at what you'll need to evaluate the agents you've built.
+To understand dataset design, let's look at what you'll need to evaluate the agents you've built. Let's explore how to craft different test datasets depending on the agent and task we want to evaluate. 
 
 <!-- fold:break -->
 
@@ -51,7 +51,7 @@ For the Report Generation agent from Module 1, each evaluation test case should 
 - **Expected Sections**: Sections that should appear in the report
 - **Quality Criteria**: Custom metrics that define what makes a "good" report on this topic
 
-Like for the IT Help Desk agent, in your evaluation pipeline, you'll query the Report Generation agent with each test **Topic**. However, note that unlike with the previous agent, the Report Generation dataset does not contain a complete ground truth answer. This is an example of a task where the length and variability of the generated reports makes this form of ground-truth evaluation impractical. 
+Just like for the IT Help Desk agent above, you'll also query the Report Generation agent with each test **Topic** in your evaluation pipeline. However, note that unlike with the previous agent, the Report Generation dataset does not contain ground truth answers. This is an example of a task where the length and variability of the outputs makes this form of ground truth evaluation impractical. 
 
 Instead, the test cases include expected section names and quality criteria, which we'll use to evaluate each report's structure and content. You'll dive into using these quality criteria in the next lesson, [Running Evaluations](running_evaluations.md).
 

@@ -39,9 +39,10 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 
 Crucially, LLMs can suffer from the "Lost in the Middle" phenomenon where relevant information buried in the middle of a context window can be ignored. This is why **ranking** is important as the model can see the right data first for best results. 
 
-<!-- fold:break -->
+<details>
+<summary><strong>How do I calculate this? Click me!</strong></summary>
 
-**How it works**: RAGAS uses an LLM to determine if each retrieved chunk is relevant or irrelevant to answering the question. It then calculates precision at each position (precision@k) in the ranked results and averages them. The formula weighs higher-ranked relevant documents more heavily:
+RAGAS uses an LLM to determine if each retrieved chunk is relevant or irrelevant to answering the question. It then calculates precision at each position (precision@k) in the ranked results and averages them. The formula weighs higher-ranked relevant documents more heavily:
 
 ```
 Context Precision = (Σ (Precision@k × relevance_k)) / Total number of relevant items in retrieved contexts
@@ -53,8 +54,10 @@ where `relevance_k` is the relevance indicator (0 or 1) for the item at rank `k`
 Precision@k = true positives @ k / (true positives @ k + false positives @k) 
 ```
 
+</details>
+
 <details>
-<summary><strong>I'm Confused, Click Me to See a Sample Calculation!</strong></summary>
+<summary><strong>I'm still confused, Click me for a sample calculation!</strong></summary>
 
 Consider a sample RAG query in which we have retrieved 2 relevant chunks from ``K=3`` total retrieved chunks. First, label each of the 3 chunks as either relevant or irrelevant for the query. Let's assume relevant-irrelevant-relevant ordering for this exercise. Then: 
 
@@ -74,13 +77,17 @@ Note that this context precision value is not a perfect 1.0 score. Why? Because 
 
 </details>
 
-<!-- fold:break -->
+<details>
+<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - nearly all retrieved documents are relevant
-- **0.7-0.9**: Good - most documents are relevant with few irrelevant ones
-- **0.5-0.7**: Fair - significant noise in retrieval results
-- **Below 0.5**: Poor - retrieval is returning mostly irrelevant documents
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | Nearly all retrieved documents are relevant | Production-ready for most use cases |
+| **0.70 - 0.89** | Good 👍 | Most documents relevant, minor noise | Acceptable for many applications |
+| **0.50 - 0.69** | Fair ⚠️ | Significant noise in retrieval results | Needs improvement before production |
+| **Below 0.50** | Poor ❌ | Retrieval returning mostly irrelevant docs | Urgent attention required |
 
 **Optimization Strategies**
 - Fine-tune your retrieval parameters (similarity threshold, top-k)
@@ -88,8 +95,10 @@ Note that this context precision value is not a perfect 1.0 score. Why? Because 
 - Add reranking as a second stage
 - Use metadata filtering to narrow search scope
 
+</details>
+
 <details>
-<summary><strong>Click to See Another Example</strong></summary>
+<summary><strong>Want to see another example? Click me!</strong></summary>
 
 ```
 Question: "How do I reset my password?"
@@ -111,29 +120,38 @@ Better retrieval: [Password reset guide, Password reset FAQ, Account security, L
 
 **Why it matters**: This is your system's "Upper Bound" of knowledge. Low context recall means your agent is missing important information, leading to incomplete or incorrect answers. Even with perfect generation, missing context will result in gaps in the response.
 
-<!-- fold:break -->
+<details>
+<summary><strong>How do I calculate this? Click me!</strong></summary>
 
-**How it works**: Given a *ground truth* answer, RAGAS uses an LLM to extract claims/statements from that answer, then checks if each claim can be attributed to at least one of the retrieved contexts. The score is:
+Given a *ground truth* answer, RAGAS uses an LLM to extract claims/statements from that answer, then checks if each claim can be attributed to at least one of the retrieved contexts. The score is:
 
 ```
 Context Recall = (Number of claims attributable to contexts) / (Total number of claims in ground truth)
 ```
 
-<!-- fold:break -->
+</details>
+
+<details>
+<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - all critical information was retrieved
-- **0.7-0.9**: Good - most information retrieved, minor gaps
-- **0.5-0.7**: Fair - significant information gaps
-- **Below 0.5**: Poor - major information gaps, answer will be incomplete
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | All critical information was retrieved | Upper bound is optimal |
+| **0.70 - 0.89** | Good 👍 | Most information retrieved, minor gaps | Acceptable, monitor for specific gaps |
+| **0.50 - 0.69** | Fair ⚠️ | Significant information gaps | Increase retrieval coverage |
+| **Below 0.50** | Poor ❌ | Major gaps, answers will be incomplete | Critical - expand retrieval or knowledge base |
 
 **Optimization Strategies**:
 - Increase the number of retrieved documents (top-k parameter)
 - Improve query formulation (query expansion, reformulation)
 - Check your chunking strategy (chunks might be too small and losing context)
 
+</details>
+
 <details>
-<summary><strong>Click to See an Example</strong></summary>
+<summary><strong>Want to see an example? Click me!</strong></summary>
 
 ```
 Question: "What are the steps to request a virtual desktop?"
@@ -156,9 +174,10 @@ For high recall, contexts must cover all three steps.
 
 A faithful answer might be "I don't know" (if the context is empty). An unfaithful answer invents facts. At the end of the day, **an honest "I don't know" is preferable over a confident lie.**
 
-<!-- fold:break -->
+<details>
+<summary><strong>How do I calculate this? Click me!</strong></summary>
 
-**How it works**: RAGAS uses an LLM to:
+RAGAS uses an LLM to:
 1. Extract individual claims/statements from the *generated answer*
 2. For each claim, verify if it's supported by the retrieved contexts
 3. Calculate the ratio of supported claims to total claims:
@@ -167,13 +186,19 @@ A faithful answer might be "I don't know" (if the context is empty). An unfaithf
 Faithfulness = (Number of claims supported by context) / (Total number of claims in answer)
 ```
 
-<!-- fold:break -->
+</details>
+
+<details>
+<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - answer is fully grounded in context
-- **0.7-0.9**: Good - mostly grounded with minor extrapolations
-- **0.5-0.7**: Fair - significant unsupported claims
-- **Below 0.5**: Poor - frequent hallucination, unreliable
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | Answer fully grounded in context | Production-ready, trustworthy |
+| **0.75 - 0.89** | Good 👍 | Mostly grounded, minor extrapolations | Acceptable, monitor for hallucinations |
+| **0.60 - 0.74** | Fair ⚠️ | Significant unsupported claims | Strengthen grounding in prompts |
+| **Below 0.60** | Poor ❌ | Frequent hallucination, unreliable | Urgent - agent is making things up |
 
 **Optimization Strategies**:
 - Strengthen system prompts to emphasize grounding in context
@@ -181,8 +206,10 @@ Faithfulness = (Number of claims supported by context) / (Total number of claims
 - Add explicit "cite your sources" instructions
 - Implement a validation layer that checks for unsupported claims
 
+</details>
+
 <details>
-<summary><strong>Click to See an Example</strong></summary>
+<summary><strong>Want to see an example? Click me!</strong></summary>
 
 ```
 Context: "Password resets take 5-10 minutes to propagate across all systems. Use the self-service portal."
@@ -203,9 +230,10 @@ Unfaithful answer: "Contact your manager to reset passwords immediately." (Faith
 
 **Why it matters**: An agent might generate a factually correct, faithful response that still doesn't answer what the user asked. High relevancy ensures users get actionable answers to their specific questions, improving user satisfaction and reducing follow-up queries.
 
-<!-- fold:break -->
+<details>
+<summary><strong>How do I calculate this? Click me!</strong></summary>
 
-**How it works**: RAGAS uses an LLM to generate potential questions that the answer would be appropriate for, then measures the semantic similarity between these generated questions and the original question using embeddings:
+RAGAS uses an LLM to generate potential questions that the answer would be appropriate for, then measures the semantic similarity between these generated questions and the original question using embeddings:
 
 ```
 Answer Relevancy = mean(cosine_similarity(original_question, generated_question_i))
@@ -213,13 +241,19 @@ Answer Relevancy = mean(cosine_similarity(original_question, generated_question_
 
 where `i` indicates the index of a generated question derived from the generated response.
 
-<!-- fold:break -->
+</details>
+
+<details>
+<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
 
 **Score interpretation**:
-- **0.9-1.0**: Excellent - answer directly addresses the question
-- **0.7-0.9**: Good - mostly relevant with minor tangents
-- **0.5-0.7**: Fair - partially addresses question
-- **Below 0.5**: Poor - answer is off-topic or too generic
+
+| Score Range | Interpretation | What It Means | Action Needed |
+|-------------|----------------|---------------|---------------|
+| **0.90 - 1.00** | Excellent ✅ | Answer directly addresses the question | High user satisfaction expected |
+| **0.75 - 0.89** | Good 👍 | Mostly relevant with minor tangents | Acceptable, minor prompt tuning |
+| **0.60 - 0.74** | Fair ⚠️ | Partially addresses question | Improve question understanding |
+| **Below 0.60** | Poor ❌ | Off-topic or too generic | Critical - users won't get answers they need |
 
 **Optimization Strategies**:
 - Add examples of relevant vs. irrelevant answers in system prompt
@@ -227,8 +261,10 @@ where `i` indicates the index of a generated question derived from the generated
 - Use instruction-tuned models that follow user intent better
 - Add a reformulation step to ensure question is understood correctly
 
+</details>
+
 <details>
-<summary><strong>Click to See an Example</strong></summary>
+<summary><strong>Want to see an example? Click me!</strong></summary>
 
 ```
 Question: "How do I reset my password?"

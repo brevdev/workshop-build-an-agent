@@ -49,6 +49,7 @@ def create_judge_llm(temperature: float = 0.0) -> ChatNVIDIA:
     return ChatNVIDIA(
         model=JUDGE_MODEL,
         temperature=temperature,
+        max_tokens=4096,
     )
 
 
@@ -190,27 +191,35 @@ def evaluate_faithfulness(
 ) -> EvaluationResult:
     """
     Evaluate faithfulness of a response to context using LLM-as-a-judge.
-    
+
     Args:
         question: The user's question
         response: The agent's response
         context: The context provided to the agent
         judge_llm: Optional judge model (creates one if not provided)
-        
+
     Returns:
         EvaluationResult with score and explanation
     """
     if judge_llm is None:
         judge_llm = create_judge_llm()
-    
+
     chain = FAITHFULNESS_PROMPT | judge_llm
-    
-    result = chain.invoke({
-        "question": question,
-        "response": response,
-        "context": context
-    })
-    
+
+    try:
+        result = chain.invoke({
+            "question": question,
+            "response": response,
+            "context": context
+        })
+    except Exception as e:
+        _LOGGER.error(f"LLM invocation failed: {type(e).__name__}: {e}")
+        return EvaluationResult(
+            score=0.0,
+            explanation=f"LLM call failed: {type(e).__name__}",
+            metric_name="faithfulness"
+        )
+
     try:
         parsed = json.loads(result.content)
         return EvaluationResult(
@@ -218,20 +227,30 @@ def evaluate_faithfulness(
             explanation=parsed["explanation"],
             metric_name="faithfulness"
         )
-    except (json.JSONDecodeError, KeyError) as e:
-        _LOGGER.warning(f"Failed to parse faithfulness evaluation: {e}")
+    except json.JSONDecodeError:
+        _LOGGER.warning(f"Judge returned invalid JSON for faithfulness evaluation")
+        _LOGGER.debug(f"Raw output: {result.content[:200]}")
         # Fallback: try to extract score from text
         import re
-        score_match = re.search(r'"score":\s*(\d+)', result.content)
+        score_match = re.search(r'"?score"?\s*:\s*(\d+)', result.content)
         if score_match:
+            _LOGGER.info(f"Extracted score from text: {score_match.group(1)}")
             return EvaluationResult(
                 score=float(score_match.group(1)),
-                explanation="Parsed from text",
+                explanation="Extracted from malformed JSON",
                 metric_name="faithfulness"
             )
         return EvaluationResult(
             score=0.0,
-            explanation="Failed to parse evaluation",
+            explanation="Failed to parse evaluation - invalid JSON format",
+            metric_name="faithfulness"
+        )
+    except KeyError as e:
+        _LOGGER.warning(f"Missing expected field in faithfulness evaluation: {e}")
+        _LOGGER.debug(f"Parsed content: {parsed}")
+        return EvaluationResult(
+            score=0.0,
+            explanation=f"Missing required field: {e}",
             metric_name="faithfulness"
         )
 
@@ -243,25 +262,33 @@ def evaluate_relevancy(
 ) -> EvaluationResult:
     """
     Evaluate relevancy of a response to the question using LLM-as-a-judge.
-    
+
     Args:
         question: The user's question
         response: The agent's response
         judge_llm: Optional judge model (creates one if not provided)
-        
+
     Returns:
         EvaluationResult with score and explanation
     """
     if judge_llm is None:
         judge_llm = create_judge_llm()
-    
+
     chain = RELEVANCY_PROMPT | judge_llm
-    
-    result = chain.invoke({
-        "question": question,
-        "response": response
-    })
-    
+
+    try:
+        result = chain.invoke({
+            "question": question,
+            "response": response
+        })
+    except Exception as e:
+        _LOGGER.error(f"LLM invocation failed: {type(e).__name__}: {e}")
+        return EvaluationResult(
+            score=0.0,
+            explanation=f"LLM call failed: {type(e).__name__}",
+            metric_name="relevancy"
+        )
+
     try:
         parsed = json.loads(result.content)
         return EvaluationResult(
@@ -269,19 +296,26 @@ def evaluate_relevancy(
             explanation=parsed["explanation"],
             metric_name="relevancy"
         )
-    except (json.JSONDecodeError, KeyError) as e:
-        _LOGGER.warning(f"Failed to parse relevancy evaluation: {e}")
+    except json.JSONDecodeError:
+        _LOGGER.warning(f"Judge returned invalid JSON for relevancy evaluation")
         import re
-        score_match = re.search(r'"score":\s*(\d+)', result.content)
+        score_match = re.search(r'"?score"?\s*:\s*(\d+)', result.content)
         if score_match:
             return EvaluationResult(
                 score=float(score_match.group(1)),
-                explanation="Parsed from text",
+                explanation="Extracted from malformed JSON",
                 metric_name="relevancy"
             )
         return EvaluationResult(
             score=0.0,
-            explanation="Failed to parse evaluation",
+            explanation="Failed to parse evaluation - invalid JSON format",
+            metric_name="relevancy"
+        )
+    except KeyError as e:
+        _LOGGER.warning(f"Missing expected field in relevancy evaluation: {e}")
+        return EvaluationResult(
+            score=0.0,
+            explanation=f"Missing required field: {e}",
             metric_name="relevancy"
         )
 
@@ -293,25 +327,33 @@ def evaluate_helpfulness(
 ) -> EvaluationResult:
     """
     Evaluate helpfulness of a response using LLM-as-a-judge.
-    
+
     Args:
         question: The user's question
         response: The agent's response
         judge_llm: Optional judge model (creates one if not provided)
-        
+
     Returns:
         EvaluationResult with score and explanation
     """
     if judge_llm is None:
         judge_llm = create_judge_llm()
-    
+
     chain = HELPFULNESS_PROMPT | judge_llm
-    
-    result = chain.invoke({
-        "question": question,
-        "response": response
-    })
-    
+
+    try:
+        result = chain.invoke({
+            "question": question,
+            "response": response
+        })
+    except Exception as e:
+        _LOGGER.error(f"LLM invocation failed: {type(e).__name__}: {e}")
+        return EvaluationResult(
+            score=0.0,
+            explanation=f"LLM call failed: {type(e).__name__}",
+            metric_name="helpfulness"
+        )
+
     try:
         parsed = json.loads(result.content)
         return EvaluationResult(
@@ -319,19 +361,26 @@ def evaluate_helpfulness(
             explanation=parsed["explanation"],
             metric_name="helpfulness"
         )
-    except (json.JSONDecodeError, KeyError) as e:
-        _LOGGER.warning(f"Failed to parse helpfulness evaluation: {e}")
+    except json.JSONDecodeError:
+        _LOGGER.warning(f"Judge returned invalid JSON for helpfulness evaluation")
         import re
-        score_match = re.search(r'"score":\s*(\d+)', result.content)
+        score_match = re.search(r'"?score"?\s*:\s*(\d+)', result.content)
         if score_match:
             return EvaluationResult(
                 score=float(score_match.group(1)),
-                explanation="Parsed from text",
+                explanation="Extracted from malformed JSON",
                 metric_name="helpfulness"
             )
         return EvaluationResult(
             score=0.0,
-            explanation="Failed to parse evaluation",
+            explanation="Failed to parse evaluation - invalid JSON format",
+            metric_name="helpfulness"
+        )
+    except KeyError as e:
+        _LOGGER.warning(f"Missing expected field in helpfulness evaluation: {e}")
+        return EvaluationResult(
+            score=0.0,
+            explanation=f"Missing required field: {e}",
             metric_name="helpfulness"
         )
 

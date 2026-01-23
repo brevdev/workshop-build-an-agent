@@ -40,6 +40,8 @@ For the IT Help Desk RAG agent from Module 2, each evaluation test case should i
 
 In your evaluation pipeline, you'll query the RAG agent with each generated test **Question**. The RAG agent's generated response can then be compared to the test data to evaluate multiple dimensions of the agent's performance.
 
+Evaluation datasets can contain real, ground-truth responses to compare to, or it may not. It just depends on your agent and task at hand. Since this is a RAG agent use case that leverages brief responses for a task with an objective sense of correctness, having real, ground-truth answers to compare to is reasonable, and so we include them as part of this agent's evaluation exercise. 
+
 **Want to see an example?** Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to see the structure of the starter dataset we've provided.
 
 ### Dataset for the Report Generation Agent (Module 1)
@@ -49,7 +51,7 @@ For the Report Generation agent from Module 1, each evaluation test case should 
 - **Expected Sections**: Sections that should appear in the report
 - **Quality Criteria**: Custom metrics that define what makes a "good" report on this topic
 
-Like for the IT Help Desk agent, in your evaluation pipeline, you'll query the Report Generation agent with each test **Topic**. However, note that the Report Generation dataset does not contain a complete ground truth answer. The length and variability of reports makes this form of evaluation impractical.
+Like for the IT Help Desk agent, in your evaluation pipeline, you'll query the Report Generation agent with each test **Topic**. However, note that unlike with the previous agent, the Report Generation dataset does not contain a complete ground truth answer. This is an example of a task where the length and variability of the generated reports makes this form of ground-truth evaluation impractical. 
 
 Instead, the test cases include expected section names and quality criteria, which we'll use to evaluate each report's structure and content. You'll dive into using these quality criteria in the next lesson, [Running Evaluations](running_evaluations.md).
 

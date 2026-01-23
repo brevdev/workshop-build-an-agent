@@ -9,15 +9,14 @@ config:
 
 flowchart LR
 
+    Prompt --> LLM
 
-    START --> researcher
-    researcher --> report_planner -->
-    author --> report_author --> END
-    researcher([researcher agent])
-    author([author agent])
+    subgraph agent[ReAct Agent]
+        direction LR
+        LLM  --> has_tools{has tool<br />calls?} -.yes.-> tools --> LLM
+    end
 
-    author:::cluster
-    researcher:::cluster
+    has_tools -.no .-> Response
 
     classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
     classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

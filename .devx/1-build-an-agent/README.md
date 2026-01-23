@@ -12,7 +12,7 @@ This workshop will help you get started building AI agents from scratch. At the 
 * A turn-key, portable development environment
 * Your own customized agent ready to share as a launchable
 
-The entire workshop can take anywhere from 2 to 4 hours to complete.
+The entire workshop can take about 1 hour to complete.
 
 ## Learning Objectives
 

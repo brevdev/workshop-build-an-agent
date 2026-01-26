@@ -11,9 +11,9 @@ The report generation agent will automatically research any topic and write a pr
 
 Remember, there are four primary components to an agent: the model, tools, memory/state, and message routing.
 
-In this excercise, we will use a tool that allows the model to search Tavily for research. Instead of routing messages from scratch, we will use LangChain to orchestrate the agent internals.
+In this exercise, we will use a tool that allows the model to search Tavily for research. Instead of routing messages from scratch, we will use LangChain to orchestrate the agent internals.
 
-Now is also a good time to introduce a new concept: `System Prompts`. System Prompts are special messages in the history that are only read by the model. They are used to define the agent's job. Changing the System Prompt will change how the agent responds. 
+Now is also a good time to introduce a new concept: **System Prompts**. System prompts are special messages that define the agent's role, behavior, and constraints. They tell the model what it is and how it should act. Changing the system prompt will fundamentally change how the agent responds. 
 
 <!-- fold:break -->
 
@@ -31,9 +31,9 @@ Because we are using LangGraph, we can use the `@tool` decorator to automaticall
 
 <img src="_static/robots/operator.png" alt="Routing Robot" style="float:right; max-width:300px;margin:25px;" />
 
-In the last excercise, we manually routed messages in a Jupyter notebook. 
+In the last exercise, we manually routed messages in a Jupyter notebook. 
 
-The user message went to the model. The model's response included tool calls. Those tools were called and the results sent back to the model. When the model dedicided it was complete, the final response was returned.
+The user message went to the model. The model's response included tool calls. Those tools were called and the results sent back to the model. When the model decided it was complete, the final response was returned.
 
 Because this logic is so common, we will use LangChain to handle this routing automatically. This logic is constructed in <button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/docgen_agent.py');"><i class="fa-brands fa-python"></i> docgen_agent.py</button>. Let's review that code.
 
@@ -59,4 +59,4 @@ Now that are agent code is built, we just need to build the client that invokes 
 
 ## Complete!
 
-In this excercise, you were introduced to production ready agent code with LangChain and wrote the client code that invoked that agent. This code was a far cry simpler than our first agent, but its actually doing the same steps under the hood!
+In this exercise, you were introduced to production-ready agent code with LangChain and wrote the client code that invokes that agent. This code is simpler than our first agent, but it's doing the same steps under the hood!

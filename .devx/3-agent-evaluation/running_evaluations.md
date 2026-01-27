@@ -29,7 +29,7 @@ A robust evaluation pipeline consists of several key components:
 
 1. **Agent Under Test**: The agent you're evaluating
 2. **Judging Mechanism**: The LLM, human, or other mechanism that will judge the agent
-3. **Test Dataset**: Collection of test cases with inputs and ground truth
+3. **Test Dataset**: Collection of test cases with inputs and optional ground truth
 4. **Evaluation Prompts and Metrics**: Instructions on how to score agent outputs
 5. **Analysis of Results**: Interpret results for areas of improvement
 
@@ -45,7 +45,9 @@ The quality of an agent evaluation pipeline depends not only on your test data, 
 
 ### 1. Be Specific About Criteria
 
-Clear and specific prompts result in precise and objective responses from LLMs. When possible, ask for empirical and quantifiable scores. Additionally, consider requesting the model to explain its justification for each score to get more detailed evaluation information.
+Clear and specific prompts result in precise and objective responses from LLMs. When possible, ask for empirical and quantifiable scores. 
+
+Additionally, consider requesting the model to explain its justification for each score to get more detailed evaluation information.
 
 **Ineffective example:**
 ```
@@ -111,7 +113,7 @@ Explanation: Discusses passwords but doesn't answer the question.
 
 Let’s take a look at some example evaluation prompt templates in <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluation_framework.py');"><i class="fa-brands fa-python"></i> evaluation_framework.py </button> so you can see these principles in action in our evaluation pipeline.
 
-**The faithfulness metric prompt in this file is currently incomplete!** Your task is to complete the prompt by briefly defining each “faithfulness” score level, giving the judge model clearer guidance on when to assign each score. Make sure your definitions follow the design principles outlined above.
+**The faithfulness metric prompt in this file is currently incomplete!** Your task is to complete the prompt by briefly defining each “faithfulness” score level, giving the judge model clearer guidance on when to assign each score. 
 
 #### Exercise
 
@@ -186,9 +188,9 @@ This may take a few minutes as the judge processes each response.
 
 ### Compute RAGAS Metrics
 
-Defining your own metrics helps you evaluate performance on criteria specific to your use case. However, you may also be wondering: are there industry-standard frameworks for evaluating RAG agents?
+Custom metrics let you evaluate criteria specific to your use case. But are there industry-standard frameworks?
 
-RAGAS is a popular open-source framework for evaluating the performance of RAG-based applications. It provides a library of built-in metrics for common applications like agentic pipelines or RAG systems, as well as custom metrics.
+**RAGAS** is a popular open-source framework for evaluating RAG applications, providing built-in metrics for agentic pipelines and RAG systems.
 
 Let's explore and evaluate the agent's performance using RAGAS metrics. We'll use the ``ragas`` python library to compute:
 
@@ -242,7 +244,9 @@ View the results. Which categories does the agent handle well? Which categories 
 
 By now, you have a pretty good set of metrics to use to understand your IT Help Desk agent's performance in retrieval and generation. 
 
-However, the metrics we discussed so far alone may miss key performance indicators specific to your use case. For example, you may need your agent to properly cite knowledge base sources with `[KB]` tags, so users can verify crucial information. This specific requirement won't be captured by general RAG system metrics.
+However, the metrics we discussed so far alone may miss key performance indicators specific to your use case. 
+
+For example, you may need your agent to properly cite knowledge base sources with `[KB]` tags, so users can verify crucial information. This specific requirement won't be captured by general RAG system metrics.
 
 To address these use-case-specific needs, let's explore one final custom evaluation.
 
@@ -310,8 +314,6 @@ Once you're ready, run the cell <button onclick="goToLineAndSelect('code/3-agent
 
 Once again, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores to verify alignment with human judgment.
 
-If the judge mechanism we use systematically disagrees with human intuition, our entire evaluation pipeline can become unreliable. So let's double check and see whether the results we see are acceptable. 
-
 Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Judge Calibration Check');"><i class="fas fa-code"></i> Judge Calibration Check</button>. Take a moment to review these and consider: Do you agree with the judge's scores?
 
 <!-- fold:break -->
@@ -329,12 +331,16 @@ Examine the statistical breakdown to identify:
 - Which dimensions show the most variance
 - Whether certain types of topics are harder for the agent
 
+<!-- fold:break -->
+
 Next, let's review any low-scoring responses. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Identify Problem Areas');"><i class="fas fa-code"></i> Identify Problem Areas</button>.
 
 Consider:
 - Are there missing sections?
 - Do reports contain placeholder content, like "will be drafted"?
 - Are there overly vague or unsupported claims?
+
+<!-- fold:break -->
 
 Finally, let's check the length of the generated reports. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Report Length Analysis');"><i class="fas fa-code"></i> Report Length Analysis</button>.
 

@@ -6,9 +6,9 @@ Now that we understand why evaluation is important, let's dive into the specific
 
 <!-- fold:break -->
 
-One of the most powerful techniques for evaluating AI agents is using another LLM to judge the quality of outputs. This approach, called "LLM-as-a-judge," allows us to evaluate subjective qualities like helpfulness, coherence, and relevance at scale. 
+**LLM-as-a-judge**: One of the most powerful techniques for evaluating AI agents is using another LLM to judge the quality of outputs, allowing us to evaluate subjective qualities like helpfulness, coherence, and relevance at scale. 
 
-Traditional deterministic metrics like string matching, keyword searching, or BLEU scores don't work well for evaluating natural language outputs. Human evaluation is a lot more accurate and captures subjectivity well, but is expensive and slow. 
+Traditional deterministic metrics like string or keyword matching don't work well for evaluating natural language outputs. Human evaluation is a lot more accurate and captures subjectivity well, but is expensive and slow. 
 
 LLM-as-a-judge provides a neat middle ground. 
 
@@ -35,9 +35,9 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 
 **Definition**: Whether the retrieved chunks are relevant or irrelevant to the question (signal-to-noise ratio). Crucially, it accounts for **ranking**. It's not enough to retrieve the right document; it also needs to be at the top of the list. 
 
-**Why it matters**: High context precision means your retrieval system isn't wasting the LLM's context window with irrelevant information. High context precision improves both generation quality and cost-efficiency. It also reduces the risk of the model being distracted by off-topic content.
+**Why it matters**: High context precision means your retrieval system isn't wasting the LLM's context window with irrelevant information, improving both generation quality and cost-efficiency. It also reduces the risk of the model being distracted by off-topic content.
 
-Crucially, LLMs can suffer from the "Lost in the Middle" phenomenon where relevant information buried in the middle of a context window can be ignored. This is why **ranking** is important as the model can see the right data first for best results. 
+Crucially, LLMs can suffer from the "Lost in the Middle" phenomenon where relevant information buried in the middle of a context window may be ignored. This is why **ranking** matters: the model should see the right data first. 
 
 <details>
 <summary><strong>How do I calculate this? Click me!</strong></summary>
@@ -160,7 +160,7 @@ Ground truth answer includes: "Submit form, manager approval, IT provisioning"
 
 If retrieved contexts only mention the form submission, context recall would be low (eg. approximately 0.33)
 
-For high recall, contexts must cover all three steps.
+For high recall, retrieved contexts must cover all three ground truth steps.
 
 </details>
 
@@ -376,5 +376,4 @@ Over the next sections, you'll learn how to:
 - Use NVIDIA Nemotron models as evaluation judges
 - Design effective evaluation prompts
 - Implement custom evaluation criteria
-- Balance cost and quality in evaluation pipelines
 

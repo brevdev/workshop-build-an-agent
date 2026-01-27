@@ -9,7 +9,7 @@ To produce high-quality, meaningful evaluation metrics, you need a well-designed
 - **IT Help Desk RAG Agent** (Module 2)
 - **Report Generation Agent** (Module 1)
 
-We'll start with the RAG agent since it has a simpler evaluation structure, then move to the more complex Report Generation agent.
+We'll start with the RAG agent since it has a simpler evaluation structure, then move to the more open-ended Report Generation agent.
 
 <!-- fold:break -->
 
@@ -23,7 +23,7 @@ Evaluation datasets work best when they align with the following principles:
 4. **Start Small**: Begin with a small set of high-quality examples and expand over time
 5. **Version Control**: Track your datasets alongside your code
 
-In addition to these general principles, you'll need to make sure your data is tailored to your particular evaluation use case. Different agent tasks, and different metrics, require different types of evaluation data.
+In addition to these general principles, you'll need to make sure your data is tailored to your particular evaluation use case. Different agent tasks require different types of evaluation data.
 
 To understand dataset design, let's look at what you'll need to evaluate the agents you've built. Let's explore how to craft different test datasets depending on the agent and task we want to evaluate. 
 
@@ -40,7 +40,7 @@ For the IT Help Desk RAG agent from Module 2, each evaluation test case should i
 
 In your evaluation pipeline, you'll query the RAG agent with each generated test **Question**. The RAG agent's generated response can then be compared to the test data to evaluate multiple dimensions of the agent's performance.
 
-Evaluation datasets can contain real, ground-truth responses to compare to, or it may not. It just depends on your agent and task at hand. Since this is a RAG agent use case that leverages brief responses for a task with an objective sense of correctness, having real, ground-truth answers to compare to is reasonable, and so we include them as part of this agent's evaluation exercise. 
+Since this RAG agent produces brief responses with an objective sense of correctness, we'll create a dataset with ground-truth answers included for comparison. 
 
 **Want to see an example?** Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to see the structure of the starter dataset we've provided.
 
@@ -51,7 +51,7 @@ For the Report Generation agent from Module 1, each evaluation test case should 
 - **Expected Sections**: Sections that should appear in the report
 - **Quality Criteria**: Custom metrics that define what makes a "good" report on this topic
 
-Just like for the IT Help Desk agent above, you'll also query the Report Generation agent with each test **Topic** in your evaluation pipeline. However, note that unlike with the previous agent, the Report Generation dataset does not contain ground truth answers. This is an example of a task where the length and variability of the outputs makes this form of ground truth evaluation impractical. 
+Unlike the Help Desk agent, this dataset we'll create doesn't include ground truth answers - the length and variability of reports makes exact comparison impractical. 
 
 Instead, the test cases include expected section names and quality criteria, which we'll use to evaluate each report's structure and content. You'll dive into using these quality criteria in the next lesson, [Running Evaluations](running_evaluations.md).
 
@@ -71,9 +71,14 @@ Now that you understand what evaluation datasets look like for each agent, let's
 
 The first strategy is to use existing, real-world data. This approach is often considered the "gold standard" for realism because it captures authentic user experiences and needs. You can either collect this data yourself or leverage existing datasets from online repositories like HuggingFace. 
 
-However, real-world data comes with trade-offs. Manual collection requires substantial human labor and time. Privacy concerns may limit what data you can use, and quality issues, like biased or inappropriate content, can compromise your evaluation. Further, real-world data may simply not exist for your specific use case, particularly for complex or niche applications.
+However, real-world data comes with trade-offs. 
 
-**Use When**: You have access to existing user interactions or logs, need maximum realism and authenticity, have resources for manual curation and privacy review, or when your application is already deployed and collecting real usage data.
+* Manual collection requires substantial human labor and time. 
+* Privacy concerns may limit what data you can use.
+* Quality issues, like biased or inappropriate content, can compromise your evaluation.
+* Real-world data may simply not exist for your specific use case, particularly for complex or niche applications.
+
+**Use When**: You have access to existing user interactions or logs, have resources for manual curation and privacy review, or when your application is already deployed and collecting real usage data.
 
 <!-- fold:break -->
 

@@ -20,41 +20,41 @@ Evaluating AI agents is more complex than traditional software testing because o
 
 <!-- fold:break -->
 
-**Malicious Behavior**: Unlike traditional software with predictable failure modes, agents can exhibit harmful behaviors, either through their own outputs or when manipulated by bad actors. Evaluation must include "red teaming" with adversarial test cases to ensure your agent behaves safely even under attack.
+**Malicious Behavior**: Agents can exhibit harmful behaviors on their own or when manipulated by bad actors. Evaluation should include adversarial test cases to ensure safe behavior.
 
-- *Toxic outputs* occur when an agent generates offensive, harmful, or inappropriate content—even when not explicitly prompted to do so. 
-- *Prompt injection* happens when malicious users craft inputs designed to override the agent's instructions, potentially causing it to ignore safety guidelines, leak system prompts, or perform unintended actions. 
-- *Adversarial queries* are carefully designed inputs that exploit model weaknesses to produce incorrect or dangerous responses. 
-
-<!-- fold:break -->
-
-**Non-Determinism**: AI agents are non-deterministic, meaning they can produce different valid responses to the same input. 
-
-Unlike traditional software where the same input conditions will always lead to the same output, an agent might answer the same question differently every time. This variability is a feature, not a bug; it allows for creativity and flexibility in responses. But it can also make evaluation difficult.
+- *Toxic outputs*: Offensive or inappropriate content, even when not prompted
+- *Prompt injection*: Malicious inputs that override instructions or leak system prompts
+- *Adversarial queries*: Inputs designed to exploit model weaknesses 
 
 <!-- fold:break -->
 
-**Subjective Quality**: Agent quality is often subjective, depending on attributes like tone, style, and helpfulness. 
+**Non-Determinism**: Agents can produce different valid responses to the same input.
 
-Unlike a binary assertion in code testing, there isn't always one "right" answer. One response might be factually true but unhelpful or rude. Another response might appear helpful and benign but content-wise is not rooted in ground truth. These complexities require evaluation methods that can capture nuance rather than just strict string matching.
-
-<!-- fold:break -->
-
-**Multi-Step Reasoning**: Agents typically perform multi-step reasoning, chaining together thoughts and actions to solve complex problems. 
-
-Unlike unit testing a single isolated function, you must evaluate the entire chain of logic. A minor error in an early step, like misinterpreting a user's intent, can cascade into a completely incorrect result, even if the later steps were technically flawless under traditional standards.
+This variability is a feature that allows creativity and flexibility, but also makes evaluation tricky - you can't just check for an exact expected output.
 
 <!-- fold:break -->
 
-**Tool Usage**: Agents often engage in tool usage, interacting with external APIs, databases, and environments. 
+**Subjective Quality**: Agent quality often depends on subjective attributes like tone, style, and helpfulness.
 
-Unlike testing pure software logic, this introduces side effects and dependencies on external systems. Evaluation must verify not only the final text response but also that the agent selected the appropriate tool, retrieved the appropriate information, formatted the arguments correctly, and handled the tool's output properly in response generation.
+There isn't always one "right" answer. A response might be factually correct but unhelpful, or seem helpful but contain hallucinations. Evaluation methods need to capture this nuance.
 
 <!-- fold:break -->
 
-**Context Dependence**: Agents exhibit context dependence, meaning their behavior changes based on conversation history or retrieved data. 
+**Multi-Step Reasoning**: Agents chain together complex thoughts and actions to solve problems.
 
-Unlike stateless functions that process inputs in a vacuum in traditional software, an agent's answer might change based on what was said three turns ago. Ensuring consistency requires testing across varied conversational flows and data retrieval contexts, not just single-turn inputs and outputs.
+You must evaluate the entire chain, not just isolated steps. A minor early error (like misinterpreting intent) can cascade into a completely wrong result, even if later steps were technically correct.
+
+<!-- fold:break -->
+
+**Tool Usage**: Agents interact with external APIs, databases, and other systems.
+
+Evaluation must verify not just the final response, but also that the agent selected the right tool, used correct arguments, and properly incorporated the tool's output.
+
+<!-- fold:break -->
+
+**Context Dependence**: Agent behavior changes based on conversation history and retrieved data.
+
+An agent's answer might differ based on what was said three turns ago. Testing should cover varied conversational flows and retrieval contexts, not just single-turn inputs.
 
 <!-- fold:break -->
 
@@ -75,7 +75,7 @@ We break these down into specific signals.
 ### Retrieval Metrics (Did we find the right data?)
 
 * **Context Precision**: Is the stuff we found actually useful?
-* **Context Recall**: Did we miss anything important?
+* **Context Recall**: Did we miss anything else important?
 
 ### Generation Metrics (Did we write a good answer?)
 
@@ -86,7 +86,7 @@ We break these down into specific signals.
 
 ### Other Agents
 
-For more traditional autonomous agents (like the researcher from Module 1), we also track metrics such as:
+For more traditional autonomous agents (like the report generator from Module 1), we also track metrics such as:
 * **Tool Usage**: Did the agent use the search tool correctly?
 * **Task Completion**: Did we get a final report that meets the requirements?
 
@@ -97,6 +97,8 @@ We'll get a better understanding of how these metrics work in the next section, 
 <img src="_static/robots/wrench.png" alt="Judge" style="float:left;max-width:250px;margin:25px;" />
 
 ## The "Judge" Problem
+
+In addition to what it is we should be evaluating, there's also a question of who should be the one doing the evaluating. 
 
 If an agent writes a poem or summarizes a document, how do you write a unit test for that? Testing for `assert response == "The cat sat on the mat"` rarely works in the age of LLMs.
 
@@ -135,13 +137,17 @@ An LLM judge is only useful if it agrees with human judgment. Before trusting au
 4. Compare: Do scores align? Where do they disagree?
 5. If alignment is poor, refine your evaluation prompt or add examples
 
-Even a quick spot-check on 5 samples can reveal systematic biases in your judge—like being too lenient, too harsh, or misunderstanding your criteria. We'll practice this calibration step in the hands-on notebooks later in the module.
+Even a quick spot-check on 5 samples can reveal systematic biases in your judge—like being too lenient, too harsh, or misunderstanding your criteria. 
+
+We'll practice this calibration step in the hands-on notebooks later in the module.
 
 <!-- fold:break -->
 
 ### 2. Human Evaluation (The Gold Standard)
 
-Real humans reviewing logs. This is the most accurate signal for subjective qualities but it can be the slowest and most expensive method. It's best used to "grade the grader", meaning ensuring your LLM Judge aligns with human preferences. 
+Real humans reviewing outputs: this is the most accurate signal for subjective qualities but it can be the slowest and most expensive method. 
+
+It's best used to "grade the grader", meaning ensuring your LLM Judge aligns with human preferences. 
 
 **Pros**
 
@@ -153,7 +159,7 @@ Real humans reviewing logs. This is the most accurate signal for subjective qual
 - Expensive, slow, not scalable
 - Subject to human bias and inconsistency
 
-In practice, we use human evaluation sparingly to align the LLM judge to human preference rather than a go-to method. 
+In practice, we use human evaluation sparingly to align the LLM judge to human preference rather than as a go-to method. 
 
 <!-- fold:break -->
 
@@ -161,7 +167,7 @@ In practice, we use human evaluation sparingly to align the LLM judge to human p
 
 Good old-fashioned code-based unit testing. Did the generated SQL query execute without error? Did the JSON parse correctly? Does the response have a specific keyword? 
 
-These are binary pass/fail checks that are essential for reliable agents. These are objective and easy to automate with clear pass/fail criteria, but does not capture nuance well and may miss valid alternative responses. 
+These are objective, easy to automate pass/fail checks that are essential for reliable agents, though on their own they may not capture nuance well and may miss valid alternative responses. 
 
 **Pros**
 
@@ -174,7 +180,11 @@ These are binary pass/fail checks that are essential for reliable agents. These 
 - Doesn't capture nuance
 - May miss valid alternative responses
 
-Often, evaluation workflows will take on a hybrid approach. For example, use an LLM-as-a-judge to evaluate the agent's thought process, a deterministic check to verify an agent's intermediate and/or final outputs are valid, and an occasional calibration with a human evaluator to ensure alignment of judging standards with subjective human preferences. 
+Often, evaluation workflows will take on a hybrid approach. 
+
+* LLM-as-a-judge to evaluate the agent's thought process
+* Deterministic checks to verify an agent's intermediate and/or final outputs are well-formed
+* Occasional calibration with a human evaluator to ensure alignment of judging standards with subjective human preferences. 
 
 <!-- fold:break -->
 

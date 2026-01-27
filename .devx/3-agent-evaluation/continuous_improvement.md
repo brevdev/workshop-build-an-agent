@@ -72,6 +72,8 @@ retriever = vectordb.as_retriever(
 )
 ```
 
+<!-- fold:break -->
+
 **Improve Chunking**:
 ```python
 # Experiment with chunk size and overlap
@@ -80,6 +82,8 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=120  # Try: 50, 120, 200
 )
 ```
+
+<!-- fold:break -->
 
 **Enhance Metadata**:
 ```python
@@ -159,6 +163,8 @@ workflow.add_conditional_edges(
 )
 ```
 
+<!-- fold:break -->
+
 **Implement Multi-Step Reasoning**:
 ```python
 # Break complex tasks into steps
@@ -166,6 +172,8 @@ workflow.add_node("understand_question", understand_question)
 workflow.add_node("gather_information", gather_information)
 workflow.add_node("synthesize_answer", synthesize_answer)
 ```
+
+<!-- fold:break -->
 
 **Add Self-Correction**:
 ```python
@@ -182,7 +190,7 @@ def self_review(state):
 
 <!-- fold:break -->
 
-### Strategy 5: Training Data Enhancement
+### Strategy 5: Data Enhancement
 
 Improve the knowledge base or training data.
 
@@ -220,6 +228,8 @@ Problem areas identified:
 - Inconsistent citation usage
 - Some responses include general knowledge beyond KB
 ```
+
+<!-- fold:break -->
 
 ### Step 1: Investigate Root Causes
 
@@ -292,7 +302,7 @@ Citation Rate: 45% → 82% (+37% ✅)
 Relevancy: 0.78 → 0.76 (-0.02, acceptable)
 ```
 
-### Step 4: Address Remaining Issues
+### Step 4: Address Remaining Issues, Iterate
 
 Citation rate still below 90%. Add enforcement:
 
@@ -370,28 +380,11 @@ You've completed the Agent Evaluation module! Let's recap what you've accomplish
 
 ### What You Learned
 
-**In the Introduction**, you discovered why systematic evaluation matters—moving beyond "vibe checks" to rigorous, data-driven quality assessment. You learned about the unique challenges of agent evaluation.
-
-**In Understanding Evaluation Metrics**, you dove deep into RAGAS metrics for RAG agents (Context Precision, Context Recall, Faithfulness, Answer Relevancy) and learned how to evaluate task agents on completion rate, tool usage, and output quality.
-
-**In Creating Evaluation Datasets**, you learned strategies for building high-quality test datasets. You designed evaluation datasets tailored to both the IT Help Desk RAG agent and the Report Generation agent.
-
-**In Running Evaluations**, you got hands-on with evaluation pipelines, using judge models to evaluate both the IT Help Desk agent and the Report Generation agent. You learned to create test datasets, design evaluation prompts, and analyze results.
-
-**In this lesson**, you learned how to close the loop—using evaluation results to systematically improve your agents through targeted strategies and iterative refinement.
-
-<!-- fold:break -->
-
-### Skills You're Taking Away
-
-<img src="_static/robots/party.png" alt="Celebration" style="float:left;max-width:300px;margin:25px;" />
-
-✅ Understanding of evaluation metrics and when to use them  
-✅ Experience with RAGAS for RAG evaluation  
-✅ Skills in LLM-as-a-judge techniques with NVIDIA models  
-✅ Practical evaluation pipelines for your agents  
-✅ Strategies for continuous improvement  
-✅ Systematic debugging techniques  
+- **Introduction**: Why systematic evaluation matters and the unique challenges of evaluating agents
+- **Evaluation Metrics**: RAGAS metrics for RAG agents (Context Precision, Context Recall, Faithfulness, Answer Relevancy) and custom metrics for task agents
+- **Creating Evaluation Datasets**: Strategies for building test datasets tailored to different agent types
+- **Running Evaluations**: Hands-on evaluation pipelines with judge models, prompt design, and result analysis
+- **Continuous Improvement**: Closing the loop with targeted strategies and iterative refinement
 
 You've transformed from relying on intuition to having a rigorous, data-driven approach to agent quality.
 

@@ -16,7 +16,7 @@ The simplest approach: send a prompt, get a response.
 
 ```
 User: "What's the capital of France?"
-LLM: "Paris"
+LLM: "The capital of France is Paris"
 ```
 
 This works great for simple questions, but the model is limited to what it learned during training. It can't look up current information, perform calculations, or take actions in the world.

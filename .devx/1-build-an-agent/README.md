@@ -17,9 +17,12 @@ This module takes approximately 1-2 hours to complete.
 ## Learning Objectives
 
 By the end of this module, you'll understand:
+- Why agents exist and what problems they solve
 - The four core components of any AI agent (model, tools, memory, routing)
 - How agents differ from simple LLM calls and workflows
 - The ReAct pattern for reasoning and acting
+- How system prompts shape agent behavior
+- When to use agents vs simpler approaches
 - How to build agents both from scratch and with LangChain
 
 > Head over to [Setting up Secrets](secrets) to get started!

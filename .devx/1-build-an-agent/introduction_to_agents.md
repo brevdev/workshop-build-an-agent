@@ -37,9 +37,35 @@ There are **four key components** fundamental to all agents:
 
 <!-- fold:break -->
 
-## Tool Schemas
+## The Model
 
-Tools are just functions, but the LLM needs to know how to use them. A **tool schema** describes each tool's name, purpose, and parameters:
+The model is your agent's brain - it reads the conversation, decides what to do next, and generates responses. Not all LLMs are equally suited for agent work. You want a model that:
+
+- **Supports tool/function calling**: The model needs to output structured tool requests, not just text
+- **Follows instructions reliably**: Agents depend on the model respecting system prompts and constraints
+- **Reasons well**: Multi-step tasks require the model to plan and adapt
+
+In this workshop, we use **NVIDIA Nemotron 3 Nano (30B)** - a model tuned for a good balance of speed, cost, and reasoning ability. It's hosted on NVIDIA's API catalog, so you can get started without local GPU setup.
+
+### System Prompts
+
+Every agent has a **system prompt** - a special message that defines the agent's personality and behavior. It tells the model:
+
+- **Who it is**: "You are a research assistant..."
+- **How to behave**: "Always cite your sources..."
+- **When to use tools**: "Search the web when you need current information..."
+
+The same model with different system prompts will behave very differently. We'll see this in action when we build the Report Generation Agent.
+
+<!-- fold:break -->
+
+## Tools
+
+Tools are functions that let your agent interact with the world - searching the web, querying databases, making calculations, or calling APIs. The model doesn't run tools directly; it requests them, and your code executes them.
+
+### Tool Schemas
+
+The LLM needs to know how to use each tool. A **tool schema** describes a tool's name, purpose, and parameters:
 
 ```json
 {
@@ -51,7 +77,25 @@ Tools are just functions, but the LLM needs to know how to use them. A **tool sc
 }
 ```
 
-The quality of your tool descriptions directly affects how well your agent uses them.
+The quality of your tool descriptions directly affects how well your agent uses them. A vague description like "does stuff with data" won't help the model know when to use it. Be specific about what the tool does and when it should be used.
+
+<!-- fold:break -->
+
+## Memory and State
+
+Memory is what allows agents to maintain context across the conversation. There are two main types:
+
+**Short-term Memory** (Conversation History)
+- Everything said in the current conversation
+- Tool calls made and their results
+- Resets when the conversation ends
+
+**Long-term Memory** (Persistent Knowledge)
+- Information that persists across conversations
+- Often implemented with databases or vector stores
+- Enables personalization and learning
+
+In this module, we focus on short-term memory - the conversation log. In Module 2, you'll see how agents can access external knowledge bases, which is a form of long-term memory.
 
 <!-- fold:break -->
 
@@ -70,8 +114,6 @@ This loop continues until the model decides it has enough information. The model
 
 ## The ReAct Pattern
 
-<img src="_static/robots/study.png" alt="Research Robot" style="float:right; max-width:300px;margin:25px;" />
-
 **ReAct** (Reasoning + Acting) is the most common agent architecture. The agent alternates between:
 
 - **Thought**: "I need current data on this topic"
@@ -80,21 +122,59 @@ This loop continues until the model decides it has enough information. The model
 - **Thought**: "Now I can answer the question"
 - **Action**: Generate response
 
-ReAct agents can adapt their approach based on intermediate results, retry failed actions, and decompose complex tasks into steps.
+<center>
+
+![ReAct Agent Architecture](img/react_agent.png)
+
+</center>
+
+ReAct agents can adapt their approach based on intermediate results, retry failed actions, and decompose complex tasks into steps. This flexibility is what separates agents from fixed workflows.
 
 <!-- fold:break -->
 
 ## When to Use Agents
 
-**Good fit for agents:**
-- Tasks requiring dynamic decisions based on intermediate results
-- Open-ended questions needing research
-- Integration of real-time information
+Agents are powerful, but they're not always the right choice. Here's a quick decision framework:
 
-**Consider simpler approaches when:**
-- The task sequence is fixed and predictable
-- Latency or cost is critical
-- Simple classification or generation suffices
+| Use an Agent When... | Use a Simpler Approach When... |
+|---------------------|-------------------------------|
+| The task path varies based on input | The steps are always the same |
+| You need to combine multiple tools dynamically | A single API call or chain suffices |
+| Real-time or external information is required | Static data or model knowledge is enough |
+| The problem requires multi-step reasoning | Simple transformation or classification |
+| User queries are open-ended | Inputs are well-structured |
+
+**Examples of Good Agent Use Cases:**
+- Research assistants that search, synthesize, and cite sources
+- Customer support bots that check multiple systems (orders, inventory, FAQs)
+- Data analysts that choose appropriate queries and visualizations
+
+**Examples Better Suited for Workflows:**
+- Document summarization (input → summarize → output)
+- Sentiment classification (single model call)
+- Template-based content generation
+
+### The Tradeoff
+
+Agents add **flexibility** but also add **cost**:
+- **More latency**: Multiple LLM calls take time
+- **More tokens**: Reasoning traces use context window
+- **More complexity**: More decision points mean more ways to fail
+
+The key question: Does the adaptability justify the overhead for your use case?
+
+<!-- fold:break -->
+
+## Things That Can Go Wrong
+
+Agents aren't perfect. A few things to be aware of:
+
+- **Hallucination**: The model might make up information, especially when tools return no results
+- **Infinite loops**: An agent might keep calling tools without making progress
+- **Tool misuse**: The model might call tools with incorrect arguments or at the wrong time
+- **Cost runaway**: Complex queries can trigger many tool calls, increasing API costs
+
+These aren't reasons to avoid agents - they're reasons to test and monitor them. In Module 3, you'll learn systematic ways to catch these issues.
 
 <!-- fold:break -->
 
@@ -105,5 +185,7 @@ Ready to see these components in action?
 Check out the
 <button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/intro_to_agents.ipynb');"><i class="fa-solid fa-flask"></i> Introduction to Agents</button>
 notebook where you'll build your first agent from scratch!
+
+Once you've completed the notebook, continue to [Report Generation Agent](report_generation_agent.md) to see a production-ready implementation using LangChain.
 
 

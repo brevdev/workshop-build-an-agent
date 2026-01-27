@@ -57,3 +57,7 @@ You can get free access to LangSmith with a [LangSmith Account](https://smith.la
 Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).
 
 </details>
+
+---
+
+Once your secrets are configured, continue to [Why Agents?](why_agents.md) to learn about the problem agents solve and when to use them.

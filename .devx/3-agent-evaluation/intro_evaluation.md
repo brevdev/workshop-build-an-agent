@@ -18,15 +18,11 @@ In this module, we will transform your agent development process from an art int
 
 Evaluating AI agents is more complex than traditional software testing because of several factors:
 
-<!-- fold:break -->
-
 **Malicious Behavior**: Agents can exhibit harmful behaviors on their own or when manipulated by bad actors. Evaluation should include adversarial test cases to ensure safe behavior.
 
 - *Toxic outputs*: Offensive or inappropriate content, even when not prompted
 - *Prompt injection*: Malicious inputs that override instructions or leak system prompts
 - *Adversarial queries*: Inputs designed to exploit model weaknesses 
-
-<!-- fold:break -->
 
 **Non-Determinism**: Agents can produce different valid responses to the same input.
 
@@ -38,19 +34,13 @@ This variability is a feature that allows creativity and flexibility, but also m
 
 There isn't always one "right" answer. A response might be factually correct but unhelpful, or seem helpful but contain hallucinations. Evaluation methods need to capture this nuance.
 
-<!-- fold:break -->
-
 **Multi-Step Reasoning**: Agents chain together complex thoughts and actions to solve problems.
 
 You must evaluate the entire chain, not just isolated steps. A minor early error (like misinterpreting intent) can cascade into a completely wrong result, even if later steps were technically correct.
 
-<!-- fold:break -->
-
 **Tool Usage**: Agents interact with external APIs, databases, and other systems.
 
 Evaluation must verify not just the final response, but also that the agent selected the right tool, used correct arguments, and properly incorporated the tool's output.
-
-<!-- fold:break -->
 
 **Context Dependence**: Agent behavior changes based on conversation history and retrieved data.
 

@@ -23,7 +23,8 @@ This systematic approach ensures that improvements are data-driven and measurabl
 
 ## Common Improvement Strategies
 
-### Strategy 1: Prompt Engineering
+<details>
+<summary>1. Prompt Engineering - Expand me!</summary>
 
 Often the fastest way to improve agent performance is refining prompts.
 
@@ -50,9 +51,10 @@ system_prompt = """You are an IT help desk assistant.
 
 **Validation**: Re-run evaluation focusing on metrics that were low.
 
-<!-- fold:break -->
+</details>
 
-### Strategy 2: Retrieval Optimization
+<details>
+<summary>2. Retrieval Optimization - Expand me!</summary>
 
 For RAG agents, improving retrieval quality often has the biggest impact.
 
@@ -72,8 +74,6 @@ retriever = vectordb.as_retriever(
 )
 ```
 
-<!-- fold:break -->
-
 **Improve Chunking**:
 ```python
 # Experiment with chunk size and overlap
@@ -82,8 +82,6 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=120  # Try: 50, 120, 200
 )
 ```
-
-<!-- fold:break -->
 
 **Enhance Metadata**:
 ```python
@@ -102,7 +100,10 @@ retriever = vectordb.as_retriever(
 
 **Validation**: Focus on context precision and recall metrics.
 
-<!-- fold:break -->
+</details>
+
+<details>
+<summary>3. Model Selection - Expand me!</summary>
 
 ### Strategy 3: Model Selection
 
@@ -138,9 +139,10 @@ for model_name in llm_options:
 
 **Validation**: Compare evaluation scores across models.
 
-<!-- fold:break -->
+</details>
 
-### Strategy 4: Architecture Changes
+<details>
+<summary>4. Architecture Changes - Expand me!</summary>
 
 Sometimes you need to modify the agent's structure.
 
@@ -163,8 +165,6 @@ workflow.add_conditional_edges(
 )
 ```
 
-<!-- fold:break -->
-
 **Implement Multi-Step Reasoning**:
 ```python
 # Break complex tasks into steps
@@ -172,8 +172,6 @@ workflow.add_node("understand_question", understand_question)
 workflow.add_node("gather_information", gather_information)
 workflow.add_node("synthesize_answer", synthesize_answer)
 ```
-
-<!-- fold:break -->
 
 **Add Self-Correction**:
 ```python
@@ -188,9 +186,10 @@ def self_review(state):
 
 **Validation**: Run comprehensive evaluation on the new architecture.
 
-<!-- fold:break -->
+</details>
 
-### Strategy 5: Data Enhancement
+<details>
+<summary>5. Data Enhancement - Expand me!</summary>
 
 Improve the knowledge base or training data.
 
@@ -203,6 +202,8 @@ Improve the knowledge base or training data.
 - Add metadata and tags
 
 **Validation**: Context recall should improve if information gaps were the issue.
+
+</details>
 
 <!-- fold:break -->
 
@@ -301,6 +302,8 @@ Faithfulness: 0.65 → 0.85 (+0.20 ✅)
 Citation Rate: 45% → 82% (+37% ✅)
 Relevancy: 0.78 → 0.76 (-0.02, acceptable)
 ```
+
+<!-- fold:break -->
 
 ### Step 4: Address Remaining Issues, Iterate
 

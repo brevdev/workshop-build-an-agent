@@ -37,13 +37,14 @@ Let's start by crafting effective evaluation prompts!
 
 <!-- fold:break -->
 
+<img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
+
 ## Designing Evaluation Prompts
 
 The quality of an agent evaluation pipeline depends not only on your test data, but also on your evaluation prompts. Consider the following key design principles when crafting evaluation prompts:
 
-<img src="_static/robots/typewriter.png" alt="Crafting Prompts" style="float:right;max-width:300px;margin:25px;" />
-
-### 1. Be Specific About Criteria
+<details>
+<summary>1. Be Specific About Criteria - Expand me!</summary>
 
 Clear and specific prompts result in precise and objective responses from LLMs. When possible, ask for empirical and quantifiable scores. 
 
@@ -63,9 +64,10 @@ Evaluate this answer on the following criteria:
 4. Clarity: Is it easy to understand?
 ```
 
-<!-- fold:break -->
+</details>
 
-### 2. Provide Context
+<details>
+<summary>2. Provide Context - Expand me!</summary>
 
 Include all relevant information the judge needs:
 - The original question or task
@@ -73,9 +75,10 @@ Include all relevant information the judge needs:
 - Retrieved context (for RAG systems)
 - Ground truth answer (if available)
 
-<!-- fold:break -->
+</details>
 
-### 3. Request Structured Output
+<details>
+<summary>3. Request Structured Output - Expand me!</summary>
 
 LLMs tend to provide better, more actionable output when prompted to generate responses in a structured format like JSON.
 
@@ -91,9 +94,10 @@ Format your response as JSON:
 }
 ```
 
-<!-- fold:break -->
+</details>
 
-### 4. Include Examples
+<details>
+<summary>4. Include Examples - Expand me!</summary>
 
 Few-shot examples can help the judge understand your standards:
 
@@ -109,15 +113,17 @@ Answer: "Passwords are important for security..."
 Explanation: Discusses passwords but doesn't answer the question.
 ```
 
+</details>
+
 <!-- fold:break -->
 
 Let’s take a look at some example evaluation prompt templates in <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/evaluation_framework.py');"><i class="fa-brands fa-python"></i> evaluation_framework.py </button> so you can see these principles in action in our evaluation pipeline.
 
-**The faithfulness metric prompt in this file is currently incomplete!** Your task is to complete the prompt by briefly defining each “faithfulness” score level, giving the judge model clearer guidance on when to assign each score. 
+### Exercise
 
-#### Exercise
+**The faithfulness metric prompt in this file is currently incomplete!** Under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', 'TODO: ...');"><i class="fas fa-code"></i> FAITHFULNESS_PROMPT </button>, complete the FAITHFULNESS_PROMPT.
 
-Under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', 'TODO: ...');"><i class="fas fa-code"></i> FAITHFULNESS_PROMPT </button>, complete the FAITHFULNESS_PROMPT.
+Your task is to complete the prompt by briefly defining each “faithfulness” score level, giving the judge model clearer guidance on when to assign each score. 
 
 Once you're finished, save the file and compare your answer to the solution in the dropdown below.
 
@@ -173,7 +179,7 @@ This may take a few minutes as the agent processes each question.
 
 <!-- fold:break -->
 
-Now we have our generated responses from the IT Help Desk agent. We can use the results to evaluate the agent's responses in comparison to the expected retrieved contexts and ground truth answers in our test dataset.
+Once this completes, we can use the results to evaluate the agent's responses in comparison to the expected retrieved contexts and ground truth answers in our test dataset.
 
 Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Evaluate with LLM-as-a-Judge');"><i class="fas fa-code"></i> Evaluate with LLM-as-a-Judge</button> to evaluate each response.
 
@@ -331,16 +337,12 @@ Examine the statistical breakdown to identify:
 - Which dimensions show the most variance
 - Whether certain types of topics are harder for the agent
 
-<!-- fold:break -->
-
 Next, let's review any low-scoring responses. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Identify Problem Areas');"><i class="fas fa-code"></i> Identify Problem Areas</button>.
 
 Consider:
 - Are there missing sections?
 - Do reports contain placeholder content, like "will be drafted"?
 - Are there overly vague or unsupported claims?
-
-<!-- fold:break -->
 
 Finally, let's check the length of the generated reports. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Report Length Analysis');"><i class="fas fa-code"></i> Report Length Analysis</button>.
 

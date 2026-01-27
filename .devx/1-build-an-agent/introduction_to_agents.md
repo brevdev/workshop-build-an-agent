@@ -154,6 +154,8 @@ Agents are powerful, but they're not always the right choice. Here's a quick dec
 - Sentiment classification (single model call)
 - Template-based content generation
 
+<!-- fold:break -->
+
 ### The Tradeoff
 
 Agents add **flexibility** but also add **cost**:

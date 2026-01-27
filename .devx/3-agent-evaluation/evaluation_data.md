@@ -44,6 +44,8 @@ Since this RAG agent produces brief responses with an objective sense of correct
 
 **Want to see an example?** Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to see the structure of the starter dataset we've provided.
 
+<!-- fold:break -->
+
 ### Dataset for the Report Generation Agent (Module 1)
 
 For the Report Generation agent from Module 1, each evaluation test case should include:

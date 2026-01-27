@@ -41,10 +41,12 @@ Let's start by crafting effective evaluation prompts!
 
 ## Designing Evaluation Prompts
 
-The quality of an agent evaluation pipeline depends not only on your test data, but also on your evaluation prompts. Consider the following key design principles when crafting evaluation prompts:
+The quality of an agent evaluation pipeline depends not only on your test data, but also on your evaluation prompts. Consider the following key design principles when crafting evaluation prompts.
+
+**Click to expand each design principle to learn more.**
 
 <details>
-<summary>1. Be Specific About Criteria - Expand me!</summary>
+<summary><strong>1. Be Specific About Criteria</strong></summary>
 
 Clear and specific prompts result in precise and objective responses from LLMs. When possible, ask for empirical and quantifiable scores. 
 
@@ -67,7 +69,7 @@ Evaluate this answer on the following criteria:
 </details>
 
 <details>
-<summary>2. Provide Context - Expand me!</summary>
+<summary><strong>2. Provide Context</strong></summary>
 
 Include all relevant information the judge needs:
 - The original question or task
@@ -78,7 +80,7 @@ Include all relevant information the judge needs:
 </details>
 
 <details>
-<summary>3. Request Structured Output - Expand me!</summary>
+<summary><strong>3. Request Structured Output</strong></summary>
 
 LLMs tend to provide better, more actionable output when prompted to generate responses in a structured format like JSON.
 
@@ -97,7 +99,7 @@ Format your response as JSON:
 </details>
 
 <details>
-<summary>4. Include Examples - Expand me!</summary>
+<summary><strong>4. Include Examples</strong></summary>
 
 Few-shot examples can help the judge understand your standards:
 
@@ -121,11 +123,9 @@ Let’s take a look at some example evaluation prompt templates in <button oncli
 
 ### Exercise
 
-**The faithfulness metric prompt in this file is currently incomplete!** Under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', 'TODO: ...');"><i class="fas fa-code"></i> FAITHFULNESS_PROMPT </button>, complete the FAITHFULNESS_PROMPT.
+**The faithfulness metric prompt in this file is currently incomplete!** Under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluation_framework.py', 'TODO: ...');"><i class="fas fa-code"></i> FAITHFULNESS_PROMPT </button>, complete the FAITHFULNESS_PROMPT and save the file.
 
 Your task is to complete the prompt by briefly defining each “faithfulness” score level, giving the judge model clearer guidance on when to assign each score. 
-
-Once you're finished, save the file and compare your answer to the solution in the dropdown below.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -234,6 +234,8 @@ Next, check the statistical distribution to understand:
 - Are there outliers (very high or very low scores)?
 - What's the variance across test cases?
 
+<!-- fold:break -->
+
 Finally, run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Performance by Category');"><i class="fas fa-code"></i> Performance by Category </button> to break down scores by question type.
 
 View the results. Which categories does the agent handle well? Which categories need improvement?
@@ -254,17 +256,13 @@ However, the metrics we discussed so far alone may miss key performance indicato
 
 For example, you may need your agent to properly cite knowledge base sources with `[KB]` tags, so users can verify crucial information. This specific requirement won't be captured by general RAG system metrics.
 
-To address these use-case-specific needs, let's explore one final custom evaluation.
-
-<!-- fold:break -->
-
-First, we'll evaluate the agent on citation quality. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom Evaluation: Citation Quality');"><i class="fas fa-code"></i> Citation Quality </button> to see the results. 
+To address these use-case-specific needs, let's explore some final custom evaluations. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom Evaluation: Citation Quality');"><i class="fas fa-code"></i> Citation Quality </button> to see the results. 
 
 Your results should contain the percent of responses that include citations. Is your agent regularly citing its sources?
 
-Next, evaluate the agent on actionability. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom Evaluation: Actionability');"><i class="fas fa-code"></i> Actionability </button> to see the results. 
+Next, evaluate the agent on a custom metric we define for actionability. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom Evaluation: Actionability');"><i class="fas fa-code"></i> Actionability </button> to see the results. 
 
-Your results should score the responses on a raw scale of 1-5. Do your agent's responses contain clear, actionable steps?
+Your results should score the responses on a raw scale of 1-5. Do your agent's responses contain clear, actionable steps for the user?
 
 <!-- fold:break -->
 

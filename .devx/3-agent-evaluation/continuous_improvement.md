@@ -23,8 +23,10 @@ This systematic approach ensures that improvements are data-driven and measurabl
 
 ## Common Improvement Strategies
 
+**Click to expand each improvement strategy to learn more.** 
+
 <details>
-<summary>1. Prompt Engineering - Expand me!</summary>
+<summary><strong>1. Prompt Engineering</strong></summary>
 
 Often the fastest way to improve agent performance is refining prompts.
 
@@ -54,7 +56,7 @@ system_prompt = """You are an IT help desk assistant.
 </details>
 
 <details>
-<summary>2. Retrieval Optimization - Expand me!</summary>
+<summary><strong>2. Retrieval Optimization</strong></summary>
 
 For RAG agents, improving retrieval quality often has the biggest impact.
 
@@ -103,7 +105,7 @@ retriever = vectordb.as_retriever(
 </details>
 
 <details>
-<summary>3. Model Selection - Expand me!</summary>
+<summary><strong>3. Model Selection</strong></summary>
 
 ### Strategy 3: Model Selection
 
@@ -142,7 +144,7 @@ for model_name in llm_options:
 </details>
 
 <details>
-<summary>4. Architecture Changes - Expand me!</summary>
+<summary><strong>4. Architecture Changes</strong></summary>
 
 Sometimes you need to modify the agent's structure.
 
@@ -189,7 +191,7 @@ def self_review(state):
 </details>
 
 <details>
-<summary>5. Data Enhancement - Expand me!</summary>
+<summary><strong>5. Data Enhancement</strong></summary>
 
 Improve the knowledge base or training data.
 
@@ -397,15 +399,17 @@ You've transformed from relying on intuition to having a rigorous, data-driven a
 
 While this module focused on RAGAS and custom LLM-as-a-judge pipelines, the evaluation ecosystem is rich with other tools worth exploring as you scale your agent development:
 
-- **[LangSmith](https://smith.langchain.com/)**: LangChain's platform for debugging, testing, and monitoring LLM applications. Offers tracing, dataset management, and evaluation features tightly integrated with LangChain agents.
+- **[NVIDIA NeMo Agent Toolkit](https://github.com/NVIDIA/NeMo-Agent-Toolkit)**: Open-source, framework-agnostic library for connecting, evaluating, and profiling AI agents. Includes built-in RAG evaluators, agent trajectory evaluation, and custom evaluator support. Works with LangChain, LlamaIndex, CrewAI, and other frameworks.
 
-- **[Weights & Biases (W&B)](https://wandb.ai/)**: A popular MLOps platform that supports experiment tracking, model versioning, and evaluation dashboards. Great for comparing agent versions over time.
+- **[NVIDIA NeMo Evaluator](https://developer.nvidia.com/nemo-evaluator)**: Enterprise-grade evaluation microservice supporting 100+ academic benchmarks, LLM-as-a-judge scoring, RAG metrics, and agent evaluation. Designed for CI/CD integration and production workflows at scale.
+
+- **[LangSmith](https://smith.langchain.com/)**: LangChain's platform for debugging, testing, and monitoring LLM applications. Offers tracing, dataset management, and evaluation features tightly integrated with LangChain agents.
 
 - **[Arize Phoenix](https://phoenix.arize.com/)**: An open-source observability tool for LLM applications with built-in support for tracing, evaluation, and debugging retrieval and generation quality.
 
 - **[DeepEval](https://docs.confident-ai.com/)**: An open-source evaluation framework with pre-built metrics for hallucination, relevancy, toxicity, and more. Integrates well with CI/CD pipelines.
 
-Each tool has different strengths—some excel at real-time monitoring, others at offline batch evaluation, and some offer better integration with specific agent frameworks. As your evaluation needs grow, consider how these tools might complement the techniques and concepts you've learned here.
+Each tool has different strengths. As your evaluation needs grow, consider how these tools might complement the techniques and concepts you've learned here.
 
 <!-- fold:break -->
 

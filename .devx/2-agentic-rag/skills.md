@@ -2,7 +2,7 @@
 
 <img src="_static/robots/study.png" alt="Skills Robot Character" style="float:right;max-width:300px;margin:25px;" />
 
-Skills are folders of instructions, scripts, and resources that Claude loads dynamically to improve performance on specialized tasks. Think of them as teaching Claude *how* to do something in a repeatable, consistent way.
+Skills are folders of instructions, scripts, and resources that your agent loads dynamically to improve performance on specialized tasks. Think of them as teaching your agent *how* to do something in a repeatable, consistent way.
 
 In this lesson, we'll explore what Skills are, how they differ from MCP, and how to create your own.
 
@@ -12,7 +12,7 @@ In this lesson, we'll explore what Skills are, how they differ from MCP, and how
 
 <img src="_static/robots/typewriter.png" alt="Writing Robot" style="float:left;max-width:250px;margin:25px;" />
 
-Skills teach Claude how to complete specific tasks:
+Skills teach your agent how to complete specific tasks:
 
 - Creating documents with your company's brand guidelines
 - Analyzing data using your organization's workflows
@@ -42,12 +42,12 @@ description: A clear description of what this skill does
 ---
 ```
 
-**2. Markdown Instructions** — What Claude should follow:
+**2. Markdown Instructions** — What the agent should follow:
 
 ```markdown
 # My Skill Name
 
-Instructions that Claude will follow when this skill is active.
+Instructions that the agent will follow when this skill is active.
 
 ## Examples
 - Example usage 1
@@ -74,9 +74,9 @@ Skills offer advantages:
 - **Reusability** — Share skills across projects and teams
 - **Organization** — Keep complex instructions out of your main prompt
 - **Versioning** — Track changes to instructions over time
-- **Discovery** — Claude can select relevant skills automatically
+- **Discovery** — The agent can select relevant skills automatically
 
-Think of skills as a library of expertise that Claude can draw from.
+Think of skills as a library of expertise that your agent can draw from.
 
 <!-- fold:break -->
 
@@ -142,16 +142,11 @@ You are a code reviewer following our team's standards.
 
 Skills can be loaded in multiple ways:
 
-**In Claude Code:**
-```
-/plugin install my-skill
-```
+**Via Agent Tools:**
+Your agent can use tools like `list_available_skills()` and `get_skill()` to discover and load skills dynamically.
 
-**In Claude.ai:**
-Upload the skill folder or reference from a repository.
-
-**Via API:**
-Include the skill content in your API request context.
+**Via System Prompt:**
+Include the skill content directly in your agent's system prompt.
 
 **With MCP:**
 Skills and MCP work together — MCP provides the tools, Skills provide the expertise to use them effectively.

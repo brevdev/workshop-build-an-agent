@@ -1,5 +1,5 @@
 ---
-name: code-review
+name: code_review
 description: Systematic approach to reviewing code for quality and correctness
 ---
 

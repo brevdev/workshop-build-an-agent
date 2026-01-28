@@ -13,8 +13,8 @@ Add two new tools:
 - `get_skill` — Load a skill for expertise
 
 **Available Skills:**
-- `code-review` — Systematic code review with checklist
-- `technical-writing` — Guidelines for clear documentation
+- `code_review` — Systematic code review with checklist
+- `technical_writing` — Guidelines for clear documentation
 
 <!-- fold:break -->
 
@@ -94,8 +94,8 @@ Restart your agent and try these prompts:
 |--------|-------------------|
 | "How do I reset my password?" | Uses knowledge base [KB] |
 | "What are the latest AI trends?" | Uses web search [Web] |
-| "What skills do you have?" | Lists `code-review`, `technical-writing` |
-| "Review this code: `def add(a,b): return a+b`" | Loads code-review skill, gives structured feedback |
+| "What skills do you have?" | Lists `code_review`, `technical_writing` |
+| "Review this code: `def add(a,b): return a+b`" | Loads code_review skill, gives structured feedback |
 
 <!-- fold:break -->
 

@@ -11,9 +11,9 @@ import logging
 import os
 from pathlib import Path
 
-from langchain.retrievers import ContextualCompressionRetriever
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.tools.retriever import create_retriever_tool
+from langchain_classic.retrievers import ContextualCompressionRetriever
+from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
+from langchain_classic.tools.retriever import create_retriever_tool
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.tools import tool

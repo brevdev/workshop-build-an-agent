@@ -3,3 +3,7 @@
 * [Building Agentic RAG](agentic_rag.md)
 * [Running Your Agent](running.md)
 * [Migrate to Local NIM](migrate.md)
+* [Introduction to MCP](mcp.md)
+* [Using MCP](using_mcp.md)
+* [Introduction to Skills](skills.md)
+* [Using Skills with MCP](using_skills.md)

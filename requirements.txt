@@ -9,6 +9,7 @@ jupyterlab>3.0
 langchain-nvidia-ai-endpoints>1,<2
 langchain-openai>1,<2
 langchain>1,<2
+langchain-classic>=1.0.0
 langgraph-cli[inmem]
 langgraph>1,<2
 langsmith~=0.3.0

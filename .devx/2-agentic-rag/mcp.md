@@ -1,4 +1,4 @@
-# Introduction to MCP
+# Implementing MCP
 
 <img src="_static/robots/MCP.png" alt="MCP Robot Character" style="float:right;max-width:300px;margin:25px;" />
 
@@ -95,16 +95,122 @@ The tools appear seamlessly in the model's context, ready to be invoked when nee
 
 <!-- fold:break -->
 
+## MCP: A Hands-On Implementation
+
+<img src="_static/robots/magician.png" alt="MCP Magic Robot" style="float:right;max-width:300px;margin:25px;" />
+
+Your RAG agent is great for answering questions from the knowledge base. But what about questions it can't answer? Let's **add web search** to your agent using the MCP pattern.
+
+<!-- fold:break -->
+
+## The Goal
+
+Right now your agent only has one tool:
+- `company_llc_it_knowledge_base` — Internal IT policies
+
+We're going to add:
+- `web_search` — Search the web for current information
+
+**Same agent, more capabilities.**
+
+<!-- fold:break -->
+
+## Your Exercises
+
+Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/rag_agent.py</button> and fill in these blanks in the **MCP section**:
+
+### Exercise: Initialize the Tavily Client
+
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'tavily_client = ');"><i class="fas fa-code"></i> tavily_client</button> — Create the Tavily client with your API key.
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+```
+
+</details>
+
+<!-- fold:break -->
+
+### Exercise: Call the Search API
+
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'results = ');"><i class="fas fa-code"></i> results</button> — Inside `web_search()`, call the Tavily API.
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+results = tavily_client.search(query=query, max_results=5)
+```
+
+</details>
+
+<!-- fold:break -->
+
+### Exercise: Give New Tool to Agent
+
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button> — Make this new tool available to the agent. 
+
+In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built. 
+
+<details>
+<summary>🆘  Need some help?</summary>
+
+```python
+AGENT = create_react_agent(
+    model=llm,
+    tools=[RETRIEVER_TOOL, web_search],
+    prompt=SYSTEM_PROMPT,
+)
+```
+
+</details>
+
+<!-- fold:break -->
+
+## What This Enables
+
+After filling in these blanks, your agent can:
+
+| Question Type | Tool Used | Citation |
+|---------------|-----------|----------|
+| "How do I reset my password?" | Knowledge Base | [KB] |
+| "What are the latest AI trends?" | Web Search | [Web] |
+
+The agent decides which tool to use based on the question!
+
+<!-- fold:break -->
+
+## Test Your Agent
+
+After completing exercises 4-5, restart your agent:
+
+```bash
+cd code/2-agentic-rag
+langgraph dev
+```
+
+In the <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-rocket"></i> Simple Agents Client</button>, try:
+
+- "How do I connect to VPN?" → Should use [KB]
+- "What's happening in AI news today?" → Should use [Web]
+
+Congrats, you now know how to leverage MCP to integrate standardized tooling into your AI agents! 
+
+<!-- fold:break -->
+
 ## What's Next
 
 <img src="_static/robots/hiking.png" alt="Journey Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Now that you understand what MCP is and why it matters, you're ready to explore further:
+In this section, you learned how to: 
 
 - **Build your own MCP server** to expose custom tools
 - **Connect existing MCP servers** to your agents
 - **Explore the MCP ecosystem** of pre-built integrations
 
-The skills you learned building RAG tools transfer directly, MCP is just a standardized way to package and share those same capabilities.
+Now that you understand what MCP is, why it matters, and how to implement it in code, you're ready to explore further. 
 
-Welcome to the future of agent development! 🚀
+Continue to [Introduction to Skills](skills.md) to learn about agent skills. 

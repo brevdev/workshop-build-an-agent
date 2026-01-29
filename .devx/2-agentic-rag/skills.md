@@ -1,4 +1,4 @@
-# Introduction to Skills
+# Agent Skills
 
 <img src="_static/robots/study.png" alt="Skills Robot Character" style="float:left;max-width:300px;margin:25px;" />
 
@@ -173,14 +173,109 @@ This separation of concerns makes agents more maintainable and adaptable.
 
 <!-- fold:break -->
 
-## What's Next
+## Skills: A Hands-On Implementation with MCP
 
-<img src="_static/robots/hiking.png" alt="Journey Robot" style="float:right;max-width:300px;margin:25px;" />
+<img src="_static/robots/magician.png" alt="Skills Magic Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Now that you understand Skills:
+Your RAG agent currently has **tools** (knowledge base + web search). Let's add **skills** — specialized expertise your agent can load on demand.
 
-- **Explore the [Anthropic Skills repo](https://github.com/anthropics/skills)** for examples and patterns
-- **Create a skill** for a task you do repeatedly
-- **Combine Skills with MCP** to build powerful, knowledgeable agents
+<!-- fold:break -->
+
+## The Goal
+
+Add two new tools:
+- `list_available_skills` — See what skills exist
+- `get_skill` — Load a skill for expertise
+
+**Available Skills:**
+- `code_review` — Systematic code review with checklist
+- `technical_writing` — Guidelines for clear documentation
+
+<!-- fold:break -->
+
+## Your Exercises
+
+Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/rag_agent.py</button> and fill in these blanks in the **Skills section**:
+
+### Exercise: Load a Skill
+
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def get_skill');"><i class="fas fa-code"></i> get_skill return</button> — Return the loaded skill content.
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+return load_skill(skill_name)
+```
+
+</details>
+
+<!-- fold:break -->
+
+### Exercise: List Available Skills
+
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def list_available_skills');"><i class="fas fa-code"></i> list_available_skills return</button> — Return the list of skills.
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+return list_skills()
+```
+
+</details>
+
+<!-- fold:break -->
+
+### Exercise: Create the Agent with ALL Tools
+
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT = ');"><i class="fas fa-code"></i> AGENT</button> — Wire up all four tools!
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+AGENT = create_react_agent(
+    model=llm,
+    tools=[RETRIEVER_TOOL, web_search, get_skill, list_available_skills],
+    prompt=SYSTEM_PROMPT,
+)
+```
+
+</details>
+
+<!-- fold:break -->
+
+## Test Your Complete Agent
+
+```bash
+cd code/2-agentic-rag
+langgraph dev
+```
+
+Restart your agent and try these prompts in the <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-rocket"></i> Simple Agents Client</button>:
+
+| Prompt | Expected Behavior |
+|--------|-------------------|
+| "How do I reset my password?" | Uses knowledge base [KB] |
+| "What are the latest AI trends?" | Uses web search [Web] |
+| "What skills do you have?" | Lists `code_review`, `technical_writing` |
+| "Review this code: `def add(a,b): return a+b`" | Loads code_review skill, gives structured feedback |
+
+<!-- fold:break -->
+
+## Congratulations!
+
+<img src="_static/robots/strong.png" alt="Strong Robot" style="float:right;max-width:250px;margin:25px;" />
+
+Your agent now has:
+
+- ✅ **RAG** — Knowledge base retrieval (Exercises 1-3)
+- ✅ **MCP** — Web search (Exercises 4-5)
+- ✅ **Skills** — Dynamic expertise (Exercises 6-9)
+
+All in ONE agent! Check `rag_agent.answers.py` for the complete solution. 
+
+Now that you understand Skills, explore the [Anthropic Skills repo](https://github.com/anthropics/skills)** for other examples and patterns. 
 
 Skills and MCP together represent the future of agent development — agents that not only *can* do things, but *know how* to do them well. 🚀

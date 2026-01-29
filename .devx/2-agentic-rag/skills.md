@@ -29,7 +29,7 @@ Unlike MCP (which provides *tools* and *data*), Skills provide *instructions* an
 
 <!-- fold:break -->
 
-## Anatomy of a Skill
+### Anatomy of a Skill
 
 Every skill is simply a folder containing a `SKILL.md` file. The file has two parts:
 
@@ -62,7 +62,7 @@ That's it! Skills are intentionally simple.
 
 <!-- fold:break -->
 
-## Skills vs Prompts
+### Skills vs Prompts
 
 <img src="_static/robots/blueprint.png" alt="Blueprint Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -153,7 +153,7 @@ Skills and MCP work together — MCP provides the tools, Skills provide the expe
 
 <!-- fold:break -->
 
-## Skills + MCP = Powerful Agents
+### Skills + MCP = Powerful Agents
 
 <img src="_static/robots/strong.png" alt="Power Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -181,7 +181,7 @@ Your RAG agent currently has **tools** (knowledge base + web search). Let's add 
 
 <!-- fold:break -->
 
-## The Goal
+### The Goal
 
 Add two new tools:
 - `list_available_skills` — See what skills exist
@@ -193,11 +193,11 @@ Add two new tools:
 
 <!-- fold:break -->
 
-## Your Exercises
+### Your Exercises
 
 Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/rag_agent.py</button> and fill in these blanks in the **Skills section**:
 
-### Exercise: Load a Skill
+#### Exercise: Load a Skill
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def get_skill');"><i class="fas fa-code"></i> get_skill return</button> — Return the loaded skill content.
 
@@ -212,7 +212,7 @@ return load_skill(skill_name)
 
 <!-- fold:break -->
 
-### Exercise: List Available Skills
+#### Exercise: List Available Skills
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def list_available_skills');"><i class="fas fa-code"></i> list_available_skills return</button> — Return the list of skills.
 
@@ -227,7 +227,7 @@ return list_skills()
 
 <!-- fold:break -->
 
-### Exercise: Create the Agent with ALL Tools
+#### Exercise: Create the Agent with ALL Tools
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT = ');"><i class="fas fa-code"></i> AGENT</button> — Wire up all four tools!
 
@@ -264,11 +264,11 @@ Restart your agent and try these prompts in the <button onclick="launch('Simple 
 
 <!-- fold:break -->
 
-## Congratulations!
+## Next Steps
 
 <img src="_static/robots/strong.png" alt="Strong Robot" style="float:right;max-width:250px;margin:25px;" />
 
-Your agent now has:
+Congratulations! Your agent now has:
 
 - ✅ **RAG** — Knowledge base retrieval (Exercises 1-3)
 - ✅ **MCP** — Web search (Exercises 4-5)

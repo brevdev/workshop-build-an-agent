@@ -40,7 +40,7 @@ MCP solves this by standardizing how agents communicate with external capabiliti
 
 <!-- fold:break -->
 
-## MCP Architecture
+### MCP Architecture
 
 <img src="_static/robots/datacenter.png" alt="Architecture Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -58,7 +58,7 @@ The protocol defines three core primitives:
 
 <!-- fold:break -->
 
-## Why MCP Matters
+### Why MCP Matters
 
 <img src="_static/robots/strong.png" alt="Power Robot" style="float:left;max-width:250px;margin:25px;" />
 
@@ -81,7 +81,7 @@ MCP is transforming the agent ecosystem:
 
 <!-- fold:break -->
 
-## MCP in Practice
+### MCP in Practice
 
 You may already be using MCP without realizing it. If you've used:
 
@@ -103,7 +103,7 @@ Your RAG agent is great for answering questions from the knowledge base. But wha
 
 <!-- fold:break -->
 
-## The Goal
+### The Goal
 
 Right now your agent only has one tool:
 - `company_llc_it_knowledge_base` — Internal IT policies
@@ -115,11 +115,11 @@ We're going to add:
 
 <!-- fold:break -->
 
-## Your Exercises
+### Your Exercises
 
 Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/rag_agent.py</button> and fill in these blanks in the **MCP section**:
 
-### Exercise: Initialize the Tavily Client
+#### Exercise: Initialize the Tavily Client
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'tavily_client = ');"><i class="fas fa-code"></i> tavily_client</button> — Create the Tavily client with your API key.
 
@@ -134,7 +134,7 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 
 <!-- fold:break -->
 
-### Exercise: Call the Search API
+#### Exercise: Call the Search API
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'results = ');"><i class="fas fa-code"></i> results</button> — Inside `web_search()`, call the Tavily API.
 
@@ -149,7 +149,7 @@ results = tavily_client.search(query=query, max_results=5)
 
 <!-- fold:break -->
 
-### Exercise: Give New Tool to Agent
+#### Exercise: Give New Tool to Agent
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button> — Make this new tool available to the agent. 
 
@@ -170,7 +170,7 @@ AGENT = create_react_agent(
 
 <!-- fold:break -->
 
-## What This Enables
+### What This Enables
 
 After filling in these blanks, your agent can:
 

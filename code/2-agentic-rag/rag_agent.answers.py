@@ -28,8 +28,8 @@ _LOGGER = logging.getLogger(__name__)
 # =============================================================================
 
 # Data Ingestion Configuration
-DATA_DIR = Path(__file__).parent.parent / "data" / "it-knowledge-base"
-SKILLS_DIR = Path(__file__).parent.parent / "skills"
+DATA_DIR = Path(__file__).parent.parent.parent / "data" / "it-knowledge-base"
+SKILLS_DIR = Path(__file__).parent.parent.parent / "skills"
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
 

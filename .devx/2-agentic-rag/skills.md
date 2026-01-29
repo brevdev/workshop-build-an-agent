@@ -1,6 +1,6 @@
 # Introduction to Skills
 
-<img src="_static/robots/study.png" alt="Skills Robot Character" style="float:right;max-width:300px;margin:25px;" />
+<img src="_static/robots/study.png" alt="Skills Robot Character" style="float:left;max-width:300px;margin:25px;" />
 
 Skills are folders of instructions, scripts, and resources that your agent loads dynamically to improve performance on specialized tasks. Think of them as teaching your agent *how* to do something in a repeatable, consistent way.
 
@@ -10,7 +10,7 @@ In this lesson, we'll explore what Skills are, how they differ from MCP, and how
 
 ## What Are Skills?
 
-<img src="_static/robots/typewriter.png" alt="Writing Robot" style="float:left;max-width:250px;margin:25px;" />
+<img src="_static/robots/typewriter.png" alt="Writing Robot" style="float:right;max-width:250px;margin:25px;" />
 
 Skills teach your agent how to complete specific tasks:
 

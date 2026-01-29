@@ -28,8 +28,8 @@ _LOGGER = logging.getLogger(__name__)
 # =============================================================================
 
 # Data Ingestion Configuration
-DATA_DIR = Path(__file__).parent.parent / "data" / "it-knowledge-base"
-SKILLS_DIR = Path(__file__).parent.parent / "skills"
+DATA_DIR = Path(__file__).parent.parent.parent / "data" / "it-knowledge-base"
+SKILLS_DIR = Path(__file__).parent.parent.parent / "skills"
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
 
@@ -58,12 +58,12 @@ docs = data_loader.load()
 # Split the data into chunks and ingest into FAISS vector database
 _LOGGER.info(f"Ingesting {len(docs)} documents into FAISS vector database.")
 
-# EXERCISE 1: Create the text splitter
+# EXERCISE: Create the text splitter
 splitter = ...
 
 chunks = splitter.split_documents(docs)
 
-# EXERCISE 2: Create the embeddings model
+# EXERCISE: Create the embeddings model
 embeddings = ...
 
 vectordb = FAISS.from_documents(chunks, embeddings)
@@ -71,7 +71,7 @@ vectordb = FAISS.from_documents(chunks, embeddings)
 # Create a document retriever and reranker
 kb_retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 6})
 
-# EXERCISE 3: Create the reranker
+# EXERCISE: Create the reranker
 reranker = ...
 
 # Combine those to create the final document retriever
@@ -93,7 +93,7 @@ RETRIEVER_TOOL = create_retriever_tool(
 # PART 2: MCP - Web Search Tool
 # =============================================================================
 
-# EXERCISE 4: Initialize the Tavily client
+# EXERCISE: Initialize the Tavily client
 tavily_client = ...
 
 
@@ -106,7 +106,7 @@ def web_search(query: str) -> dict:
     - User asks about current events or recent information
     - User needs information beyond internal IT policies
     """
-    # EXERCISE 5: Call the Tavily search API
+    # EXERCISE: Call the Tavily search API
     results = ...
     return results
 
@@ -138,7 +138,7 @@ def get_skill(skill_name: str) -> str:
     Skills provide specialized instructions for tasks like code review,
     technical writing, etc.
     """
-    # EXERCISE 6: Load the skill
+    # EXERCISE: Load the skill
     return ...
 
 
@@ -148,7 +148,7 @@ def list_available_skills() -> list[str]:
     
     Returns a list of skill names. Use get_skill(name) to load one.
     """
-    # EXERCISE 7: Return the list of skills
+    # EXERCISE: Return the list of skills
     return ...
 
 
@@ -156,7 +156,7 @@ def list_available_skills() -> list[str]:
 # AGENT SETUP
 # =============================================================================
 
-# EXERCISE 8: Define the LLM model
+# EXERCISE: Define the LLM model
 llm = ...
 
 # Define the system prompt with all capabilities
@@ -187,5 +187,5 @@ SYSTEM_PROMPT = """You are an IT help desk support agent with enhanced capabilit
 - Be concise and helpful
 """
 
-# EXERCISE 9: Create the ReAct agent with ALL tools
+# EXERCISE: Create the ReAct agent with tools
 AGENT = ...

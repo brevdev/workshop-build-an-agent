@@ -20,11 +20,11 @@ We're going to add:
 
 ## Your Exercises
 
-Open <button onclick="openOrCreateFileInJupyterLab('code/rag_agent.py');"><i class="fa-brands fa-python"></i> code/rag_agent.py</button> and fill in these blanks in the **MCP section**:
+Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/rag_agent.py</button> and fill in these blanks in the **MCP section**:
 
-### Exercise 4: Initialize the Tavily Client
+### Exercise: Initialize the Tavily Client
 
-<button onclick="goToLineAndSelect('code/rag_agent.py', 'tavily_client = ');"><i class="fas fa-code"></i> tavily_client</button> — Create the Tavily client with your API key.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'tavily_client = ');"><i class="fas fa-code"></i> tavily_client</button> — Create the Tavily client with your API key.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -37,15 +37,36 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 
 <!-- fold:break -->
 
-### Exercise 5: Call the Search API
+### Exercise: Call the Search API
 
-<button onclick="goToLineAndSelect('code/rag_agent.py', 'results = ');"><i class="fas fa-code"></i> results</button> — Inside `web_search()`, call the Tavily API.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'results = ');"><i class="fas fa-code"></i> results</button> — Inside `web_search()`, call the Tavily API.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
 results = tavily_client.search(query=query, max_results=5)
+```
+
+</details>
+
+<!-- fold:break -->
+
+### Exercise: Give New Tool to Agent
+
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button> — Make this new tool available to the agent. 
+
+In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built. 
+
+<details>
+<summary>🆘  Need some help?</summary>
+
+```python
+AGENT = create_react_agent(
+    model=llm,
+    tools=[RETRIEVER_TOOL, web_search],
+    prompt=SYSTEM_PROMPT,
+)
 ```
 
 </details>
@@ -70,7 +91,7 @@ The agent decides which tool to use based on the question!
 After completing exercises 4-5, restart your agent:
 
 ```bash
-cd code
+cd code/2-agentic-rag
 langgraph dev
 ```
 

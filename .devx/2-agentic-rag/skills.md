@@ -195,7 +195,7 @@ Add two new tools:
 
 ### Your Exercises
 
-Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/rag_agent.py</button> and fill in these blanks in the **Skills section**:
+Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/2-agentic-rag/rag_agent.py</button> and fill in these blanks in the **Skills section**:
 
 #### Exercise: Load a Skill
 

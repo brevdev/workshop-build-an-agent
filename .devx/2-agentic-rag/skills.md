@@ -274,8 +274,8 @@ Congratulations! Your agent now has:
 - ✅ **MCP** — Web search (Exercises 4-5)
 - ✅ **Skills** — Dynamic expertise (Exercises 6-9)
 
-All in ONE agent! Check `rag_agent.answers.py` for the complete solution. 
+Skills and MCP together represent the future of agent development — agents that not only *can* do things, but *know how* to do them well. Now that you understand Skills, explore the [Anthropic Skills repo](https://github.com/anthropics/skills)** for other examples and patterns. 
 
-Now that you understand Skills, explore the [Anthropic Skills repo](https://github.com/anthropics/skills)** for other examples and patterns. 
+## Operations Ready
 
-Skills and MCP together represent the future of agent development — agents that not only *can* do things, but *know how* to do them well. 🚀
+Our agent is now ready for day 2 operations. To control costs, we would like to run our own models before going to production. Let's explore how we can do that in [Migrate to Local NIM](migrate.md).

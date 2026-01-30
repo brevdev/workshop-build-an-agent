@@ -213,4 +213,4 @@ In this section, you learned how to:
 
 Now that you understand what MCP is, why it matters, and how to implement it in code, you're ready to explore further. 
 
-Continue to [Introduction to Skills](skills.md) to learn about agent skills. 
+Continue to [Agent Skills](skills.md) to learn about how to impart your agent with custom defined skills to better align its tool calling. 

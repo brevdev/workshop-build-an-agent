@@ -76,7 +76,7 @@ Skills offer advantages:
 - **Versioning** — Track changes to instructions over time
 - **Discovery** — The agent can select relevant skills automatically
 
-Think of skills as a library of expertise that your agent can draw from.
+Think of skills as a library of standardized expertise that your agent can draw from.
 
 <!-- fold:break -->
 

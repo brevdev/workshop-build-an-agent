@@ -185,7 +185,7 @@ The agent decides which tool to use based on the question!
 
 ## Test Your Agent
 
-After completing exercises 4-5, restart your agent:
+After completing the exercises, restart your agent:
 
 ```bash
 cd code/2-agentic-rag
@@ -197,13 +197,15 @@ In the <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-r
 - "How do I connect to VPN?" → Should use [KB]
 - "What's happening in AI news today?" → Should use [Web]
 
-Congrats, you now know how to leverage MCP to integrate standardized tooling into your AI agents! 
+Wow! That was so much simpler than custom defining our tool implementation for Tavily web search back in Module 1. That's the value of MCP!
 
 <!-- fold:break -->
 
 ## What's Next
 
 <img src="_static/robots/hiking.png" alt="Journey Robot" style="float:right;max-width:300px;margin:25px;" />
+
+Congrats, you now know how to leverage MCP to integrate standardized tooling into your AI agents! 
 
 In this section, you learned how to: 
 

@@ -34,7 +34,7 @@ CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
 
 # Model Configuration
-LLM_MODEL = "nvidia/llama-3.3-nemotron-super-49b-v1"
+LLM_MODEL = "nvidia/nemotron-3-nano-30b-a3b"
 RETRIEVER_RERANK_MODEL = "nvidia/llama-3.2-nv-rerankqa-1b-v2"
 RETRIEVER_EMBEDDING_MODEL = "nvidia/llama-3.2-nv-embedqa-1b-v2"
 

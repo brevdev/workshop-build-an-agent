@@ -136,7 +136,7 @@ Every agent uses an LLM for decision making and communicating. For this example,
 <summary>🆘 Need some help?</summary>
 
 ```
-llm = ChatNVIDIA(model=LLM_MODEL)
+llm = ChatNVIDIA(model=LLM_MODEL, temperature=0.6, max_tokens=4096)
 ```
 
 </details>

@@ -110,6 +110,37 @@ def web_search(query: str) -> dict:
     results = ...
     return results
 
+# Exercise (Optional): Swap to the below implementation to use a local MCP server
+# TIP: Make sure mcp_server.py is running! `cd code/2-agentic-rag && uvicorn mcp_server:app --reload --port 8000`
+    
+# @tool
+# async def web_search(query: str) -> str:
+#     """
+#     Search the web for current information using Tavily (via persistent SSE server).
+#     """
+#     from langchain_mcp_adapters.client import MultiServerMCPClient
+
+#     # Configuration for SSE (HTTP) connection
+#     mcp_config = {
+#         "tavily": {
+#             "transport": "sse",  
+#             "url": "http://localhost:8000/sse"
+#         }
+#     }
+
+#     try:
+#         # Connect to the running server
+#         client = MultiServerMCPClient(mcp_config)
+#         async with client.session("tavily") as session:
+#             result = await session.call_tool("tavily_search", {"query": query})
+            
+#             if result and result.content:
+#                 return result.content[0].text
+#             return "No results found."
+            
+#     except Exception as e:
+#         # Fallback message that actually helps you debug
+#         return f"Search failed. Is the server running? (Error: {str(e)})"
 
 # =============================================================================
 # PART 3: SKILLS - Dynamic Expertise Loading

@@ -248,8 +248,17 @@ AGENT = create_react_agent(
 
 ## Test Your Complete Agent
 
+After completing the exercises, restart your agent in the <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>:
+
+Make sure you're in the `code/2-agentic-rag` directory:
+
 ```bash
 cd code/2-agentic-rag
+```
+
+And start your Agent API with the LangGraph CLI.
+
+```bash
 langgraph dev
 ```
 

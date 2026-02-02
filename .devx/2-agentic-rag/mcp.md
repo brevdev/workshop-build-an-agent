@@ -200,10 +200,17 @@ The agent decides which tool to use based on the question!
 
 ## Test Your Agent
 
-After completing the exercises, restart your agent:
+After completing the exercises, restart your agent in the <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>:
+
+Make sure you're in the `code/2-agentic-rag` directory:
 
 ```bash
 cd code/2-agentic-rag
+```
+
+And start your Agent API with the LangGraph CLI.
+
+```bash
 langgraph dev
 ```
 

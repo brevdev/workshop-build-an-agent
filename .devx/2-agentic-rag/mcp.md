@@ -101,6 +101,11 @@ The tools appear seamlessly in the model's context, ready to be invoked when nee
 
 Your RAG agent is great for answering questions from the knowledge base. But what about questions it can't answer? Let's **add web search** to your agent using the MCP pattern.
 
+1. **Remote MCP Server** — Connect to Tavily's hosted MCP server at `mcp.tavily.com` via SSE.
+2. **Local MCP Server** — Spin up your own MCP server locally using `mcp_server.py` and connect to it. 
+
+We'll see how to do both. 
+
 <!-- fold:break -->
 
 ### The Goal
@@ -119,31 +124,42 @@ We're going to add:
 
 Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/2-agentic-rag/rag_agent.py</button> and fill in these blanks in the **MCP section**:
 
-#### Exercise: Initialize the Tavily Client
+#### Exercise: Configure the MCP Connection
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'tavily_client = ');"><i class="fas fa-code"></i> tavily_client</button> — Create the Tavily client with your API key.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'MCP_CONFIG = ');"><i class="fas fa-code"></i> MCP_CONFIG</button> — Configure the MCP client to connect to Tavily's remote MCP server using SSE transport.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+MCP_CONFIG = {
+    "tavily": {
+        "transport": "sse",
+        "url": f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}",
+    }
+}
 ```
+
+This configuration connects to Tavily's hosted MCP server via SSE (Server-Sent Events). No local server installation required — just provide your API key in the URL.
 
 </details>
 
 <!-- fold:break -->
 
-#### Exercise: Call the Search API
+#### Exercise: Call the Search Tool via MCP
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'results = ');"><i class="fas fa-code"></i> results</button> — Inside `web_search()`, call the Tavily API.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'result = ...');"><i class="fas fa-code"></i> result</button> — Inside `web_search()`, call the Tavily search tool through the MCP client.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-results = tavily_client.search(query=query, max_results=5)
+tools = client.get_tools()
+tavily_tool = next((t for t in tools if "search" in t.name.lower()), None)
+result = await client.call_tool(tavily_tool.name, {"query": query})
 ```
+
+The MCP client discovers available tools from the server, then invokes the search tool with your query.
 
 </details>
 
@@ -151,9 +167,9 @@ results = tavily_client.search(query=query, max_results=5)
 
 #### Exercise: Give New Tool to Agent
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button> — Make this new tool available to the agent. 
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button> — Make this new tool available to the agent.
 
-In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built. 
+In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built.
 
 <details>
 <summary>🆘  Need some help?</summary>
@@ -201,6 +217,22 @@ Wow! That was so much simpler than custom defining our tool implementation for T
 
 <!-- fold:break -->
 
+#### (Optional) Exercise: Run your MCP Server Locally
+
+For security and offline functionality, sometimes it may be useful to run your own MCP servers. Let's see how we can do that. 
+
+In <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '# PART 2B');"><i class="fas fa-code"></i> # PART 2B</button> of ``rag_agent.py`` do the following: 
+
+1. Comment out `PART 2A`
+2. Uncomment `PART 2B`. Save the file.
+3. Run the local MCP server: `cd code/2-agentic-rag && uvicorn mcp_server:app --reload --port 8000`
+4. Restart the RAG agent: `cd code/2-agentic-rag && langgraph dev`
+5. Test the agent in the Simple Agents Client.
+
+You can see how to set up your local MCP server in the <button onclick="goToLineAndSelect('code/2-agentic-rag/mcp_server.py', 'mcp_server =');"><i class="fas fa-code"></i> mcp_server.py</button> file. 
+
+<!-- fold:break -->
+
 ## What's Next
 
 <img src="_static/robots/hiking.png" alt="Journey Robot" style="float:right;max-width:300px;margin:25px;" />
@@ -211,7 +243,7 @@ In this section, you learned how to:
 
 - **Build your own MCP server** to expose custom tools
 - **Connect existing MCP servers** to your agents
-- **Explore the MCP ecosystem** of pre-built integrations
+- **Connect locally running MCP servers** to your agents
 
 Now that you understand what MCP is, why it matters, and how to implement it in code, you're ready to explore further. 
 

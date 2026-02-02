@@ -17,9 +17,9 @@ from langchain_classic.tools.retriever import create_retriever_tool
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.tools import tool
+from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_nvidia_ai_endpoints import ChatNVIDIA, NVIDIAEmbeddings, NVIDIARerank
 from langgraph.prebuilt import create_react_agent
-from tavily import TavilyClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -84,23 +84,43 @@ RETRIEVER_TOOL = create_retriever_tool(
 )
 
 # =============================================================================
-# PART 2: MCP - Web Search Tool
+# PART 2A: MCP (Remote Server) - Web Search Tool via MCP Protocol
 # =============================================================================
+# This demonstrates connecting to Tavily's hosted MCP server.
+# No local server installation required - just connect via SSE transport.
 
-tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+# Configure MCP connection to Tavily's remote MCP server
+MCP_CONFIG = {
+    "tavily": {
+        "transport": "sse",
+        "url": f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}",
+    }
+}
 
 
 @tool
-def web_search(query: str) -> dict:
+async def web_search(query: str) -> str:
     """Search the web for current information on any topic.
-    
+
     Use this when:
     - The knowledge base doesn't have the answer
     - User asks about current events or recent information
     - User needs information beyond internal IT policies
     """
-    results = tavily_client.search(query=query, max_results=5)
-    return results
+    try:
+        async with MultiServerMCPClient(MCP_CONFIG) as client:
+            tools = client.get_tools()
+            tavily_tool = next((t for t in tools if "search" in t.name.lower()), None)
+            if not tavily_tool:
+                return "Tavily search tool not found on MCP server."
+
+            result = await client.call_tool(tavily_tool.name, {"query": query})
+
+            if result and result.content:
+                return result.content[0].text
+            return "No results found."
+    except Exception as e:
+        return f"Search failed: {str(e)}"
 
 # Exercise (Optional): Swap to the below implementation to use a local MCP server
 # TIP: Make sure mcp_server.py is running! `cd code/2-agentic-rag && uvicorn mcp_server:app --reload --port 8000`

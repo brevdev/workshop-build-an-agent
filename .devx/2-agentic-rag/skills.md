@@ -258,7 +258,7 @@ Restart your agent and try these prompts in the <button onclick="launch('Simple 
 | Prompt | Expected Behavior |
 |--------|-------------------|
 | "How do I reset my password?" | Uses knowledge base [KB] |
-| "What are the latest AI trends?" | Uses web search [Web] |
+| "What's happening in AI news today?" | Uses web search [Web] |
 | "What skills do you have?" | Lists `code_review`, `technical_writing` |
 | "Review this code: `def add(a,b): return a+b`" | Loads code_review skill, gives structured feedback |
 

@@ -118,8 +118,16 @@ async def web_search(query: str) -> str:
     except Exception as e:
         return f"Search failed: {str(e)}"
 
-# Exercise (Optional): Swap to the below implementation to use a local MCP server
-# TIP: Make sure mcp_server.py is running! `cd code/2-agentic-rag && uvicorn mcp_server:app --reload --port 8000`
+# =============================================================================
+# PART 2B: MCP (local server) - Web Search Tool
+# =============================================================================
+
+# EXERCISE (Optional): Swap to the below implementation to use a local MCP server
+# 1. Comment out PART 2A
+# 2. Uncomment PART 2B below. Save the file.
+# 3. Run the local MCP server: `cd code/2-agentic-rag && uvicorn mcp_server:app --reload --port 8000`
+# 4. Restart the agent: `cd code/2-agentic-rag && langgraph dev`
+# 5. Test the agent in the Simple Agents Client.
     
 # @tool
 # async def web_search(query: str) -> str:

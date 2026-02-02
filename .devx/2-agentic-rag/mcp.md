@@ -134,8 +134,9 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 ```python
 MCP_CONFIG = {
     "tavily": {
-        "transport": "sse",
-        "url": f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}",
+        "transport": "stdio",
+        "command": "npx",
+        "args": ["-y", "mcp-remote", f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}"]
     }
 }
 ```
@@ -154,7 +155,7 @@ This configuration connects to Tavily's hosted MCP server via SSE (Server-Sent E
 <summary>🆘 Need some help?</summary>
 
 ```python
-result = await session.call_tool("tavily-search", {"query": query})
+result = await session.call_tool("tavily_search", {"query": query})
 ```
 
 The `session.call_tool()` method invokes the Tavily search tool on the remote MCP server with your query.

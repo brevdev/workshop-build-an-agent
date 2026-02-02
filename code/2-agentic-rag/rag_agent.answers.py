@@ -87,13 +87,14 @@ RETRIEVER_TOOL = create_retriever_tool(
 # PART 2A: MCP (Remote Server) - Web Search Tool via MCP Protocol
 # =============================================================================
 # This demonstrates connecting to Tavily's hosted MCP server.
-# No local server installation required - just connect via SSE transport.
+# No local server installation required - just connect via stdio transport.
 
 # Configure MCP connection to Tavily's remote MCP server
 MCP_CONFIG = {
     "tavily": {
-        "transport": "sse",
-        "url": f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}",
+        "transport": "stdio",
+        "command": "npx",
+        "args": ["-y", "mcp-remote", f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}"]
     }
 }
 
@@ -110,7 +111,7 @@ async def web_search(query: str) -> str:
     try:
         client = MultiServerMCPClient(MCP_CONFIG)
         async with client.session("tavily") as session:
-            result = await session.call_tool("tavily-search", {"query": query})
+            result = await session.call_tool("tavily_search", {"query": query})
 
             if result and result.content:
                 return result.content[0].text

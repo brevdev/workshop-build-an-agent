@@ -93,7 +93,7 @@ RETRIEVER_TOOL = create_retriever_tool(
 # PART 2A: MCP (Remote Server) - Web Search Tool via MCP Protocol
 # =============================================================================
 # This demonstrates connecting to Tavily's hosted MCP server.
-# No local server installation required - just connect via SSE transport.
+# No local server installation required - just connect via stdio transport.
 
 # EXERCISE: Configure the MCP connection to Tavily's remote MCP server
 # Hint: Use "transport" and "url" keys for SSE connection

@@ -6,3 +6,5 @@ git
 git-lfs
 jq
 vim
+nodejs
+npm

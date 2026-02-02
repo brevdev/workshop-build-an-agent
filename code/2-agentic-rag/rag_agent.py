@@ -58,12 +58,12 @@ docs = data_loader.load()
 # Split the data into chunks and ingest into FAISS vector database
 _LOGGER.info(f"Ingesting {len(docs)} documents into FAISS vector database.")
 
-# EXERCISE: Create the text splitter
+# EXERCISE: Create the text splitter with chunk size and overlap parameters.
 splitter = ...
 
 chunks = splitter.split_documents(docs)
 
-# EXERCISE: Create the embeddings model
+# EXERCISE: Create the embeddings model. Set truncate to 'END'.
 embeddings = ...
 
 vectordb = FAISS.from_documents(chunks, embeddings)
@@ -96,7 +96,8 @@ RETRIEVER_TOOL = create_retriever_tool(
 # No local server installation required - just connect via stdio transport.
 
 # EXERCISE: Configure the MCP connection to Tavily's remote MCP server
-# Hint: Use "transport" and "url" keys for SSE connection
+# Hint: set 'transport' to 'stdio' and 'command' to 'npx'.
+# Hint: set 'args' to ['-y', 'mcp-remote', f'https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}']
 MCP_CONFIG = ...
 
 
@@ -112,7 +113,7 @@ async def web_search(query: str) -> str:
     try:
         client = MultiServerMCPClient(MCP_CONFIG)
         async with client.session("tavily") as session:
-            # EXERCISE: Call the Tavily search tool via MCP
+            # EXERCISE: Call the Tavily search tool (tavily_search) via MCP
             result = ...
 
             if result and result.content:
@@ -206,7 +207,7 @@ def list_available_skills() -> list[str]:
 # AGENT SETUP
 # =============================================================================
 
-# EXERCISE: Define the LLM model
+# EXERCISE: Define the LLM model. Set temperature to 0.6 and max_tokens to 4096.
 llm = ...
 
 # Define the system prompt with all capabilities
@@ -237,5 +238,5 @@ SYSTEM_PROMPT = """You are an IT help desk support agent with enhanced capabilit
 - Be concise and helpful
 """
 
-# EXERCISE: Create the ReAct agent with tools
+# EXERCISE: Create the ReAct agent with tools. Define 'model', 'tools', and 'prompt'.
 AGENT = ...

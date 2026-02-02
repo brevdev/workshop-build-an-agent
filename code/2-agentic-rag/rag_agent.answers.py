@@ -108,13 +108,9 @@ async def web_search(query: str) -> str:
     - User needs information beyond internal IT policies
     """
     try:
-        async with MultiServerMCPClient(MCP_CONFIG) as client:
-            tools = client.get_tools()
-            tavily_tool = next((t for t in tools if "search" in t.name.lower()), None)
-            if not tavily_tool:
-                return "Tavily search tool not found on MCP server."
-
-            result = await client.call_tool(tavily_tool.name, {"query": query})
+        client = MultiServerMCPClient(MCP_CONFIG)
+        async with client.session("tavily") as session:
+            result = await session.call_tool("tavily-search", {"query": query})
 
             if result and result.content:
                 return result.content[0].text

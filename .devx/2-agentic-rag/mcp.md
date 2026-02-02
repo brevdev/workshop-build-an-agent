@@ -154,12 +154,10 @@ This configuration connects to Tavily's hosted MCP server via SSE (Server-Sent E
 <summary>🆘 Need some help?</summary>
 
 ```python
-tools = client.get_tools()
-tavily_tool = next((t for t in tools if "search" in t.name.lower()), None)
-result = await client.call_tool(tavily_tool.name, {"query": query})
+result = await session.call_tool("tavily-search", {"query": query})
 ```
 
-The MCP client discovers available tools from the server, then invokes the search tool with your query.
+The `session.call_tool()` method invokes the Tavily search tool on the remote MCP server with your query.
 
 </details>
 

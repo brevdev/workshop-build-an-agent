@@ -42,6 +42,9 @@ description: Reviews code following team standards and best practices
 ---
 ```
 
+<!-- fold:break -->
+
+
 **Body:** The main body contains the detailed instructions the agent follows once the skill is activated. This can include role/instructions, workflow, examples, and constraints. 
 
 ```markdown

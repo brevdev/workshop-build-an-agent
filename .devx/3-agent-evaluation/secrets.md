@@ -9,20 +9,20 @@ Use the <button onclick="openVoila('code/secrets_management/secrets_management_3
 <details>
 <summary>⚠️ Still Need to Set These? Expand for details! </summary>
 
-## OpenRouter API Key
+## NVIDIA API Key
 
-OpenRouter is a unified API that provides access to multiple AI models from different providers, including NVIDIA's models. For this workshop, we will use OpenRouter to access the NVIDIA Nemotron Nano 9B v2 model.
+NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
 <details>
 <summary>⚠️ Don't have an account?</summary>
 
-You can get free access to OpenRouter with an [OpenRouter Account](https://openrouter.ai/). Nemotron Nano 9B v2 is a free to use model.
+You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>
 
 <details>
 <summary>⚠️ Don't have an API Key?</summary>
 
-Manage your API Keys from the [OpenRouter Keys page](https://openrouter.ai/keys) after logging into your account.
+Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api-keys).
 
 </details>
 
@@ -43,20 +43,20 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 </details>
 
-## NGC API Key
+## LangSmith API Key (Optional)
 
-NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
+LangSmith is LangChain's platform for testing, evaluating, and monitoring LLM applications. It provides tracing and debugging capabilities for your AI agents. Get your LangSmith API Key down below!
 
 <details>
 <summary>⚠️ Don't have an account?</summary>
 
-You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
+You can get free access to LangSmith with a [LangSmith Account](https://smith.langchain.com/).
 </details>
 
 <details>
 <summary>⚠️ Don't have an API Key?</summary>
 
-Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api-keys).
+Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).
 
 </details>
 

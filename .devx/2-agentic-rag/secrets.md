@@ -24,21 +24,4 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 </details>
 
-## LangSmith API Key (Optional)
-
-LangSmith is LangChain's platform for testing, evaluating, and monitoring LLM applications. It provides tracing and debugging capabilities for your AI agents. Get your LangSmith API Key down below!
-
-<details>
-<summary>⚠️ Don't have an account?</summary>
-
-You can get free access to LangSmith with a [LangSmith Account](https://smith.langchain.com/).
-</details>
-
-<details>
-<summary>⚠️ Don't have an API Key?</summary>
-
-Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).
-
-</details>
-
 Once you're ready, continue to the [Introduction to RAG](intro.md) section to get started with agentic RAG.

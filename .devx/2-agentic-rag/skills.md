@@ -110,7 +110,7 @@ The [Anthropic Skills Repository](https://github.com/anthropics/skills) contains
 
 <img src="_static/robots/plumber.png" alt="Building Robot" style="float:left;max-width:250px;margin:25px;" />
 
-Let's create a simple skill. Create a folder called `my-skill/` with a `SKILL.md` file:
+Let's create a simple skill together. Create a folder called `code_review/` with a `SKILL.md` file:
 
 ```yaml
 ---

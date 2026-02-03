@@ -1,4 +1,4 @@
-# Agent Customization Workshop
+# Agent Sandboxing and Security Workshop
 
 <img src="_static/robots/magician.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 

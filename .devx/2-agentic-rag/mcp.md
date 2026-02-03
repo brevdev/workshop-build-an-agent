@@ -227,17 +227,24 @@ Wow! Remember that custom, complicated Tavily tool implementation from Module 1?
 
 #### (Optional) Exercise: Run your MCP Server Locally
 
-For security and offline functionality, sometimes it may be useful to run your own MCP servers. Let's see how we can do that. 
+For security and offline functionality, sometimes it may be useful to run your own MCP servers locally. Let's see how we can do that.
+
+Take a look at the local MCP server implementation in the <button onclick="goToLineAndSelect('code/2-agentic-rag/mcp_server.py', 'mcp_server =');"><i class="fas fa-code"></i> mcp_server.py</button> file. 
+
+Once you're ready, run the MCP server locally in a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> window. 
+
+```bash
+cd code/2-agentic-rag && uvicorn mcp_server:app --reload --port 8000
+```
 
 In <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '# PART 2B');"><i class="fas fa-code"></i> # PART 2B</button> of ``rag_agent.py`` do the following: 
 
 1. Comment out `PART 2A`
 2. Uncomment `PART 2B`. Save the file.
-3. Run the local MCP server: `cd code/2-agentic-rag && uvicorn mcp_server:app --reload --port 8000`
-4. Restart the RAG agent: `cd code/2-agentic-rag && langgraph dev`
-5. Test the agent in the Simple Agents Client.
+3. Restart the RAG agent: `cd code/2-agentic-rag && langgraph dev`
+4. Test the agent in the Simple Agents Client. 
 
-You can see how to set up your local MCP server in the <button onclick="goToLineAndSelect('code/2-agentic-rag/mcp_server.py', 'mcp_server =');"><i class="fas fa-code"></i> mcp_server.py</button> file. 
+Responses should now use the tool located on our locally running MCP server! 
 
 <!-- fold:break -->
 

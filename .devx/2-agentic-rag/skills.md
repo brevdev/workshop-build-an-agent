@@ -33,85 +33,6 @@ Unlike MCP (which provides *tools* and *data*), Skills provide *instructions* an
 
 Every skill is simply a folder containing a `SKILL.md` file. The file has two parts:
 
-**1. YAML Frontmatter** — Metadata about the skill:
-
-```yaml
----
-name: my-skill-name
-description: A clear description of what this skill does
----
-```
-
-**2. Markdown Instructions** — What the agent should follow:
-
-```markdown
-# My Skill Name
-
-Instructions that the agent will follow when this skill is active.
-
-## Examples
-- Example usage 1
-- Example usage 2
-
-## Guidelines
-- Guideline 1
-- Guideline 2
-```
-
-That's it! Skills are intentionally simple.
-
-<!-- fold:break -->
-
-### Skills vs Prompts
-
-<img src="_static/robots/blueprint.png" alt="Blueprint Robot" style="float:right;max-width:300px;margin:25px;" />
-
-You might wonder: "Why not just put instructions in the system prompt?"
-
-Skills offer advantages:
-
-- **Modularity** — Load only what's needed for each task
-- **Reusability** — Share skills across projects and teams
-- **Organization** — Keep complex instructions out of your main prompt
-- **Versioning** — Track changes to instructions over time
-- **Discovery** — The agent can select relevant skills automatically
-
-Think of skills as a library of standardized expertise that your agent can draw from.
-
-<!-- fold:break -->
-
-## Real-World Examples
-
-The [Anthropic Skills Repository](https://github.com/anthropics/skills) contains many examples:
-
-**Creative & Design:**
-- Art generation guidelines
-- Music composition patterns
-- Design system standards
-
-**Development & Technical:**
-- Testing web applications
-- MCP server generation
-- Code review workflows
-
-**Enterprise & Communication:**
-- Brand voice guidelines
-- Document formatting standards
-- Communication templates
-
-**Document Skills:**
-- PDF extraction and creation
-- PowerPoint generation
-- Excel data manipulation
-
-<!-- fold:break -->
-
-## Understanding Skill Structure
-
-<img src="_static/robots/plumber.png" alt="Building Robot" style="float:left;max-width:250px;margin:25px;" />
-
-Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', '');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'AGENT = ');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
-
 **Header:** The YAML frontmatter must be at the very top of the file, enclosed between triple dashes (---). This part is always loaded into the agent's memory so it knows when to trigger the skill.
 
 ```yaml
@@ -139,6 +60,58 @@ You are a code reviewer following our team's standards.
 - Suggest improvements, don't just criticize
 - Include code examples when helpful
 ```
+
+That's it! Skills are intentionally simple.
+
+<!-- fold:break -->
+
+Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', '');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'AGENT = ');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
+
+<!-- fold:break -->
+
+### Skills vs Prompts
+
+<img src="_static/robots/blueprint.png" alt="Blueprint Robot" style="float:right;max-width:300px;margin:25px;" />
+
+You might wonder: "Why not just put instructions in the system prompt?"
+
+Skills offer advantages:
+
+- **Modularity** — Load only what's needed for each task
+- **Reusability** — Share skills across projects and teams
+- **Organization** — Keep complex instructions out of your main prompt
+- **Versioning** — Track changes to instructions over time
+- **Discovery** — The agent can select relevant skills automatically
+
+Think of skills as a library of standardized expertise that your agent can draw from.
+
+<!-- fold:break -->
+
+## Real-World Examples
+
+<img src="_static/robots/plumber.png" alt="Building Robot" style="float:right;max-width:250px;margin:25px;" />
+
+The [Anthropic Skills Repository](https://github.com/anthropics/skills) contains many examples:
+
+**Creative & Design:**
+- Art generation guidelines
+- Music composition patterns
+- Design system standards
+
+**Development & Technical:**
+- Testing web applications
+- MCP server generation
+- Code review workflows
+
+**Enterprise & Communication:**
+- Brand voice guidelines
+- Document formatting standards
+- Communication templates
+
+**Document Skills:**
+- PDF extraction and creation
+- PowerPoint generation
+- Excel data manipulation
 
 <!-- fold:break -->
 

@@ -126,7 +126,7 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 
 #### Exercise: Configure the MCP Connection
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'MCP_CONFIG = ');"><i class="fas fa-code"></i> MCP_CONFIG</button> — Configure the MCP client to connect to Tavily's remote MCP server using SSE transport.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'MCP_CONFIG = ');"><i class="fas fa-code"></i> MCP_CONFIG</button> — Configure the MCP client to connect to Tavily's remote MCP server using stdio transport.
 
 <details>
 <summary>🆘 Need some help?</summary>

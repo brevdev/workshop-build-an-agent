@@ -187,7 +187,7 @@ AGENT = create_react_agent(
 
 ### What This Enables
 
-After filling in these blanks, your agent can:
+After filling in these blanks, your agent can now differentiate between the following queries:
 
 | Question Type | Tool Used | Citation |
 |---------------|-----------|----------|
@@ -219,7 +219,7 @@ In the <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-r
 - "How do I connect to VPN?" → Should use [KB]
 - "What's happening in AI news today?" → Should use [Web]
 
-Wow! That was so much simpler than custom defining our tool implementation for Tavily web search back in Module 1. That's the value of MCP!
+Wow! Remember that custom, complicated Tavily tool implementation from Module 1? Now, we can eliminate the need for that. Build once, use anywhere - That's the value of MCP!
 
 <!-- fold:break -->
 

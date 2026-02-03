@@ -110,7 +110,9 @@ The [Anthropic Skills Repository](https://github.com/anthropics/skills) contains
 
 <img src="_static/robots/plumber.png" alt="Building Robot" style="float:left;max-width:250px;margin:25px;" />
 
-Let's create a simple skill together. Create a folder called `code_review/` with a `SKILL.md` file:
+Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', '');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'AGENT = ');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
+
+**Header:** The YAML frontmatter must be at the very top of the file, enclosed between triple dashes (---). This part is always loaded into the agent's memory so it knows when to trigger the skill.
 
 ```yaml
 ---
@@ -118,6 +120,8 @@ name: code-reviewer
 description: Reviews code following team standards and best practices
 ---
 ```
+
+**Body:** The main body contains the detailed instructions the agent follows once the skill is activated. This can include role/instructions, workflow, examples, and constraints. 
 
 ```markdown
 # Code Reviewer
@@ -191,9 +195,7 @@ Add two new tools:
 - `code_review` — Systematic code review with checklist
 - `technical_writing` — Guidelines for clear documentation
 
-The following skills have been preconfigured for your agent's use and stored in the ``skills`` directory at the project root. 
-
-Feel free to take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', '');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'AGENT = ');"><i class="fas fa-code"></i> Technical Writing</button> skill files. 
+Some skills have been preconfigured for your agent's use and are stored in the ``skills`` directory at the project root. 
 
 <!-- fold:break -->
 

@@ -141,7 +141,7 @@ MCP_CONFIG = {
 }
 ```
 
-This configuration connects to Tavily's hosted MCP server via SSE (Server-Sent Events). No local server installation required — just provide your API key in the URL.
+This configuration connects to Tavily's hosted MCP server URL. No local server installation required — just provide your API key in the URL.
 
 </details>
 

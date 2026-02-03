@@ -219,7 +219,7 @@ In the <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-r
 - "How do I connect to VPN?" → Should use [KB]
 - "What's happening in AI news today?" → Should use [Web]
 
-Wow! Remember that custom, complicated Tavily tool implementation from Module 1? Now, we can eliminate the need for that. Build once, use anywhere - That's the value of MCP!
+Wow! Remember that custom, complicated Tavily tool implementation from Module 1? Now, we can eliminate the need for that by decoupling the tool from the agent. Build once, use anywhere - That's the value of MCP!
 
 <!-- fold:break -->
 

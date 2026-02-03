@@ -4,7 +4,19 @@
 
 **SDG** uses AI to generate training data when real usage logs don't exist.
 
-## Pipeline
+## Choose Your Path
+
+> **Option A: Use Pre-Generated Data** (Recommended for time-limited workshops)
+> 
+> We've included 250 training examples in `data/langgraph_cli/`. Skip to [GRPO Training](grpo_training.md).
+
+> **Option B: Generate Your Own Data** (15-20 min)
+> 
+> Learn how SDG works by generating your own dataset. Continue below.
+
+<!-- fold:break -->
+
+## How SDG Works
 
 1. **Seed values** — Define command distributions (new, dev, build)
 2. **Natural language** — LLM generates diverse user requests
@@ -80,9 +92,9 @@ train_data, val_data = train_test_split(data, test_size=0.1, random_state=42)
 
 <!-- fold:break -->
 
-## Run the Notebook
+## Output
 
-After completing exercises 4-6, run all cells to generate:
+After running the notebook (or using pre-generated data):
 
 ```
 data/langgraph_cli/
@@ -93,7 +105,7 @@ data/langgraph_cli/
 Example record:
 ```json
 {"input": "Create a new project at ./assistant using react-agent-python", 
- "output": {"command": "new", "template": "react-agent-python", "path": "./assistant", "port": null, ...}}
+ "output": {"command": "new", "template": "react-agent-python", "path": "./assistant", ...}}
 ```
 
 **Next:** [GRPO Training](grpo_training.md)

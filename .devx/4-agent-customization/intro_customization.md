@@ -47,9 +47,11 @@ After:  "Create a react agent" → langgraph new ./project --template react-agen
 | Part | Time | Exercises |
 |------|------|-----------|
 | Base bash agent | 20 min | 1-3 |
-| Generate training data | 15 min | 4-6 |
+| Generate training data | 15 min *or skip* | 4-6 |
 | GRPO training | 60-70 min | 7-9 |
 | Test customized agent | 15 min | 10-12 |
+
+> 💡 **Short on time?** Pre-generated training data is included in `data/langgraph_cli/`. You can skip SDG exercises and go straight to GRPO training.
 
 ## Exercises Overview
 

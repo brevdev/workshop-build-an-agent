@@ -101,7 +101,7 @@ The tools appear seamlessly in the model's context, ready to be invoked when nee
 
 Your RAG agent is great for answering questions from the knowledge base. But what about questions it can't answer? Let's **add web search** to your agent using the MCP pattern.
 
-1. **Remote MCP Server** — Connect to Tavily's hosted MCP server at `mcp.tavily.com` via SSE.
+1. **Remote MCP Server** — Connect to Tavily's hosted MCP server at `mcp.tavily.com` via stdio.
 2. **Local MCP Server** — Spin up your own MCP server locally using `mcp_server.py` and connect to it. 
 
 We'll see how to do both. 
@@ -127,6 +127,8 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 #### Exercise: Configure the MCP Connection
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'MCP_CONFIG = ');"><i class="fas fa-code"></i> MCP_CONFIG</button> — Configure the MCP client to connect to Tavily's remote MCP server using stdio transport.
+
+The mcp-remote package acts as a bridge, allowing stdio-based clients to connect to remote MCP servers over HTTP.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -247,9 +249,9 @@ Congrats, you now know how to leverage MCP to integrate standardized tooling int
 
 In this section, you learned how to: 
 
-- **Build your own MCP server** to expose custom tools
-- **Connect existing MCP servers** to your agents
-- **Connect locally running MCP servers** to your agents
+- **Connect remote MCP servers** to your agents
+- **Connect local MCP servers** to your agents
+- **Explore how MCP servers are built** to expose custom tools
 
 Now that you understand what MCP is, why it matters, and how to implement it in code, you're ready to explore further. 
 

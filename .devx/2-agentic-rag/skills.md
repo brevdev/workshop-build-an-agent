@@ -106,7 +106,7 @@ The [Anthropic Skills Repository](https://github.com/anthropics/skills) contains
 
 <!-- fold:break -->
 
-## Creating Your First Skill
+## Understanding Skill Structure
 
 <img src="_static/robots/plumber.png" alt="Building Robot" style="float:left;max-width:250px;margin:25px;" />
 
@@ -190,6 +190,10 @@ Add two new tools:
 **Available Skills:**
 - `code_review` — Systematic code review with checklist
 - `technical_writing` — Guidelines for clear documentation
+
+The following skills have been preconfigured for your agent's use and stored in the ``skills`` directory at the project root. 
+
+Feel free to take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', '');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'AGENT = ');"><i class="fas fa-code"></i> Technical Writing</button> skill files. 
 
 <!-- fold:break -->
 
@@ -279,9 +283,9 @@ Restart your agent and try these prompts in the <button onclick="launch('Simple 
 
 Congratulations! Your agent now has:
 
-- ✅ **RAG** — Knowledge base retrieval (Exercises 1-3)
-- ✅ **MCP** — Web search (Exercises 4-5)
-- ✅ **Skills** — Dynamic expertise (Exercises 6-9)
+- ✅ **RAG** — Knowledge base retrieval
+- ✅ **MCP** — Web search
+- ✅ **Skills** — Dynamic expertise
 
 Skills and MCP together represent the future of agent development — agents that not only *can* do things, but *know how* to do them well. Now that you understand Skills, explore the [Anthropic Skills repo](https://github.com/anthropics/skills)** for other examples and patterns. 
 

@@ -4,28 +4,20 @@
 
 General-purpose models know a little about everything, but not enough about **your specific domain**. This module teaches you to customize a bash agent to understand the **LangGraph CLI**.
 
-## Two Paths to Specialization
+## MCP/Skills vs Training
 
-| Approach | How It Works | Trade-offs |
-|----------|--------------|------------|
-| **MCP / Skills** | Add tools at runtime | ⚠️ Diminishing returns as tool count grows |
-| **Training (SDG + GRPO)** | Bake knowledge into the model | ⚠️ Requires compute, less flexible |
+When specializing an agent, you have two paths:
 
-### The Diminishing Returns Problem
+| Approach | Best For | Trade-off |
+|----------|----------|-----------|
+| **MCP / Skills** | Breadth (many simple tools) | Each tool competes for attention |
+| **Training** | Depth (expert-level domain knowledge) | Upfront investment, permanent capability |
 
-With MCP/Skills, each new tool competes for the model's attention:
-- **5 tools** → Model picks the right one ~90% of the time
-- **20 tools** → Accuracy drops, confused tool selection
-- **50+ tools** → Significant performance degradation
+**Why not just add more tools?** Every tool you add increases the decision space. With 5 tools, selection is easy. With 50+, models start picking wrong tools, hallucinating parameters, or getting confused about which tool handles what. This is **diminishing returns**—more tools means worse per-tool accuracy.
 
-### Why Training Wins for Deep Specialization
+**Training solves this differently.** Instead of giving the model a menu of 50 options at runtime, you bake the knowledge directly into the weights. The model *becomes* an expert rather than *consulting* expert tools. No selection overhead, no parameter confusion—just native understanding.
 
-Training teaches the model **how to think** about a domain, not just what tools exist:
-- No tool selection overhead at inference
-- Knowledge is compressed into weights
-- Consistent performance regardless of capability breadth
-
-**Best practice:** Use MCP/Skills for breadth (many simple tools), use training for depth (expert-level domain knowledge).
+> 💡 **Rule of thumb**: Use MCP/Skills for breadth (calendar, email, search). Use training for depth (your CLI, your API, your domain).
 
 ## The Pattern
 
@@ -35,31 +27,15 @@ Training teaches the model **how to think** about a domain, not just what tools 
 | Define success metrics | **NeMo Gym** |
 | Fine-tune with RL | **GRPO** |
 
-## Before vs After
+## Timeline
 
-```
-Before: "Create a new project" → "I can help with bash commands..."
-After:  "Create a react agent" → langgraph new ./project --template react-agent-python
-```
+| Part | Time |
+|------|------|
+| Base bash agent | 20 min |
+| SDG *(or skip)* | 15 min |
+| GRPO training | 60-70 min |
+| Test agent | 15 min |
 
-## Module Timeline
-
-| Part | Time | Exercises |
-|------|------|-----------|
-| Base bash agent | 20 min | 1-3 |
-| Generate training data | 15 min *or skip* | 4-6 |
-| GRPO training | 60-70 min | 7-9 |
-| Test customized agent | 15 min | 10-12 |
-
-> 💡 **Short on time?** Pre-generated training data is included in `data/langgraph_cli/`. You can skip SDG exercises and go straight to GRPO training.
-
-## Exercises Overview
-
-| # | Topic | Skill |
-|---|-------|-------|
-| 1-3 | Bash Agent | ReAct pattern, HITL safety |
-| 4-6 | SDG | Pydantic schemas, data sampling |
-| 7-9 | GRPO | Reward functions, RL training |
-| 10-12 | Customized Agent | Model loading, inference |
+> 💡 **Short on time?** Pre-generated data included—skip straight to GRPO.
 
 **Next:** [The Bash Agent](bash_agent.md)

@@ -52,6 +52,19 @@
   icon: /project/.devx/_static/img/nvidia-icon.svg
   catalog: NVIDIA DevX Learning Path
 
+- title: "5. Sandboxing and Security"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/project/.devx/5-sandboxing-and-security"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /project/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
 - title: "Secrets Manager"
   source: /project/code/secrets_management/secrets_management_master.ipynb
   cwd: /projects

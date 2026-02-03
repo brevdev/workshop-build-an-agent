@@ -2,90 +2,78 @@
 
 <img src="_static/robots/operator.png" alt="Bash Agent" style="float:right;max-width:250px;margin:15px;" />
 
-The **Bash Agent** translates natural language into shell commands. It uses the **ReAct** pattern (Reason → Act → Observe → Repeat) and includes **human-in-the-loop** confirmation for safety.
+## What It Does
 
-## Key Components
+The **Bash Agent** translates natural language → shell commands. Say *"list all Python files"* and it generates `find . -name "*.py"`.
 
-| File | Purpose |
-|------|---------|
-| `bash_agent/config.py` | Allowed commands, system prompt |
-| `bash_agent/bash.py` | Command execution with safety checks |
-| `bash_agent.ipynb` | LangGraph agent implementation |
+## Why We Build It
+
+This is our **starting point**—a working agent we can later customize. It uses:
+
+- **ReAct pattern** — Reason → Act → Observe in a loop until done
+- **Human-in-the-loop** — User approves each command before execution (safety net)
+- **LangGraph** — Orchestrates the agent's state machine
+
+The base agent handles generic bash, but it doesn't know specialized CLIs. That's what we'll fix with training.
+
+## Exercises
+
+Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent.ipynb');"><i class="fa-solid fa-flask"></i> bash_agent.ipynb</button>
 
 <!-- fold:break -->
 
-## Your Exercises
+### Exercise 1: HITL Wrapper
 
-Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent.ipynb');"><i class="fa-solid fa-flask"></i> bash_agent.ipynb</button> and complete these exercises:
-
-### Exercise 1: Create the Human-in-the-Loop Wrapper
-
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'class ExecOnConfirm');"><i class="fas fa-code"></i> ExecOnConfirm class</button> — The agent needs user confirmation before running commands. Fill in the return statement.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'class ExecOnConfirm');"><i class="fas fa-code"></i> ExecOnConfirm</button> — Require user approval before running commands.
 
 <details>
-<summary>🆘 Need some help?</summary>
+<summary>🆘 Hint</summary>
 
 ```python
-def exec_bash_command(self, cmd: str) -> Dict[str, str]:
-    if self._confirm_execution(cmd):
-        return self.bash.exec_bash_command(cmd)
-    return {"error": "The user declined the execution of this command."}
+if self._confirm_execution(cmd):
+    return self.bash.exec_bash_command(cmd)
+return {"error": "User declined."}
 ```
-
 </details>
 
 <!-- fold:break -->
 
-### Exercise 2: Create the ReAct Agent
+### Exercise 2: Create Agent
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'agent = create_react_agent');"><i class="fas fa-code"></i> create_react_agent</button> — Wire up the LLM, tool, and system prompt.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'agent = create_react_agent');"><i class="fas fa-code"></i> create_react_agent</button> — Wire up LLM, tool, and prompt.
 
 <details>
-<summary>🆘 Need some help?</summary>
+<summary>🆘 Hint</summary>
 
 ```python
 agent = create_react_agent(
     model=llm,
     tools=[ExecOnConfirm(bash).exec_bash_command],
     prompt=config.system_prompt,
-    checkpointer=InMemorySaver(),
 )
 ```
-
 </details>
 
 <!-- fold:break -->
 
-### Exercise 3: Run the Agent Loop
+### Exercise 3: Run Loop
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send the user message to the agent.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send user message to agent.
 
 <details>
-<summary>🆘 Need some help?</summary>
+<summary>🆘 Hint</summary>
 
 ```python
-result = agent.invoke(
-    {"messages": [{"role": "user", "content": user}]},
-    config={"configurable": {"thread_id": "cli"}},
-)
+result = agent.invoke({"messages": [{"role": "user", "content": user}]})
 ```
-
 </details>
 
-<!-- fold:break -->
-
-## Test Your Agent
-
-After completing exercises 1-3, run the agent:
+## Test It
 
 ```bash
 cd code/4-agent-customization && python3 -m bash_agent.main_langgraph
 ```
 
-| Prompt | Expected |
-|--------|----------|
-| "List all files here" | `ls` or `ls -la` |
-| "Find all Python files" | `find . -name "*.py"` |
-| "What's my current directory?" | `pwd` |
+Try: `"List all files"` → `ls`
 
 **Next:** [Synthetic Data Generation](sdg.md)

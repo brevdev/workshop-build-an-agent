@@ -2,110 +2,88 @@
 
 <img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
 
-**SDG** uses AI to generate training data when real usage logs don't exist.
+## What It Does
+
+**SDG (Synthetic Data Generation)** creates training examples automatically. Instead of manually writing hundreds of input/output pairs, we define *what kind* of data we want and let the system generate variations.
+
+## Why We Need It
+
+Training requires data—lots of it. For a new domain (like LangGraph CLI), we don't have real user logs yet. SDG solves the cold-start problem:
+
+1. **Define the schema** — What does a valid CLI command look like?
+2. **Set the variations** — Which templates? Which paths? Which ports?
+3. **Generate at scale** — 250 diverse examples in minutes
+
+The result: training data that teaches the model *"when user says X, output Y"*.
 
 ## Choose Your Path
 
-> **Option A: Use Pre-Generated Data** (Recommended for time-limited workshops)
-> 
-> We've included 250 training examples in `data/langgraph_cli/`. Skip to [GRPO Training](grpo_training.md).
+| Option | Time |
+|--------|------|
+| **A: Use pre-generated data** | Skip to [GRPO Training](grpo_training.md) |
+| **B: Generate your own** | 15-20 min (continue below) |
 
-> **Option B: Generate Your Own Data** (15-20 min)
-> 
-> Learn how SDG works by generating your own dataset. Continue below.
-
-<!-- fold:break -->
-
-## How SDG Works
-
-1. **Seed values** — Define command distributions (new, dev, build)
-2. **Natural language** — LLM generates diverse user requests
-3. **Structured output** — Validated JSON tool calls
+> 📁 Pre-generated: `data/langgraph_cli/` (250 examples)
 
 <!-- fold:break -->
 
-## Your Exercises
+## Exercises
 
-Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/01_synthetic_data_generation.ipynb');"><i class="fa-solid fa-flask"></i> 01_synthetic_data_generation.ipynb</button> and complete these exercises:
+Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/01_synthetic_data_generation.ipynb');"><i class="fa-solid fa-flask"></i> 01_synthetic_data_generation.ipynb</button>
 
-### Exercise 4: Define the Output Schema
+### Exercise 4: Output Schema
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall schema</button> — Define the Pydantic model for CLI commands.
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define Pydantic model for CLI commands.
 
 <details>
-<summary>🆘 Need some help?</summary>
+<summary>🆘 Hint</summary>
 
 ```python
 class CLIToolCall(BaseModel):
-    command: str = Field(..., description="CLI command: new, dev, up, build, or dockerfile")
-    template: Optional[str] = Field(None, description="Template name for 'new' command")
-    path: Optional[str] = Field(None, description="Project path for 'new' command")
-    port: Optional[int] = Field(None, description="Port for 'dev' or 'up' command")
-    no_browser: Optional[bool] = Field(None, description="Skip browser for 'dev' command")
-    watch: Optional[bool] = Field(None, description="Watch mode for 'up' command")
-    tag: Optional[str] = Field(None, description="Image tag for 'build' command")
+    command: str
+    template: Optional[str] = None
+    path: Optional[str] = None
+    port: Optional[int] = None
 ```
-
 </details>
 
 <!-- fold:break -->
 
-### Exercise 5: Configure the Template Sampler
+### Exercise 5: Template Sampler
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'name=\"template\"');"><i class="fas fa-code"></i> template sampler</button> — Set up the template values for the `new` command.
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'name=\"template\"');"><i class="fas fa-code"></i> template sampler</button> — Configure template values.
 
 <details>
-<summary>🆘 Need some help?</summary>
+<summary>🆘 Hint</summary>
 
 ```python
-config_builder.add_column(
-    SamplerColumnConfig(
-        name="template",
-        sampler_type=SamplerType.CATEGORY,
-        params=CategorySamplerParams(values=[
-            "react-agent-python", 
-            "memory-agent-python", 
-            "retrieval-agent-python", 
-            "data-enrichment-agent-python",
-            "new-langgraph-project-python"
-        ])
-    )
-)
+params=CategorySamplerParams(values=[
+    "react-agent-python", 
+    "memory-agent-python"
+])
 ```
-
 </details>
 
 <!-- fold:break -->
 
-### Exercise 6: Split Train/Validation Data
+### Exercise 6: Train/Val Split
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button> — Split the dataset for training and validation.
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button>
 
 <details>
-<summary>🆘 Need some help?</summary>
+<summary>🆘 Hint</summary>
 
 ```python
-train_data, val_data = train_test_split(data, test_size=0.1, random_state=42)
+train_data, val_data = train_test_split(data, test_size=0.1)
 ```
-
 </details>
-
-<!-- fold:break -->
 
 ## Output
-
-After running the notebook (or using pre-generated data):
 
 ```
 data/langgraph_cli/
 ├── train.jsonl    # 225 examples
 └── val.jsonl      # 25 examples
-```
-
-Example record:
-```json
-{"input": "Create a new project at ./assistant using react-agent-python", 
- "output": {"command": "new", "template": "react-agent-python", "path": "./assistant", ...}}
 ```
 
 **Next:** [GRPO Training](grpo_training.md)

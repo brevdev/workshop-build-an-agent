@@ -4,4 +4,3 @@
 * [Synthetic Data Generation](sdg.md)
 * [GRPO Training](grpo_training.md)
 * [Running the Customized Agent](run_customized.md)
-* [Safe Execution & Sandboxing](sandboxing.md)

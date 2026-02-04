@@ -72,5 +72,3 @@ cd code/4-agent-customization && python3 -m bash_agent.main_hf
 | "List files" | `ls` |
 | "Create react agent at ./myapp" | `langgraph new ./myapp --template react-agent-python` |
 | "Build image tagged v2" | `langgraph build --tag v2` |
-
-**Extension:** [Sandboxing](sandboxing.md)

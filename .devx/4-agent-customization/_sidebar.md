@@ -1,7 +1,6 @@
 * [Setting up Secrets](secrets.md)
-* [Intro to Customization](intro_customization.md)
-* [Customization Deep Dive](customize.md)
+* [Why Customize Agents?](intro_customization.md)
 * [The Bash Agent](bash_agent.md)
-* [Customizing the Agent](bash_customize.md)
-* [Page Five](page_five.md)
-
+* [Synthetic Data Generation](sdg.md)
+* [GRPO Training](grpo_training.md)
+* [Running the Customized Agent](run_customized.md)

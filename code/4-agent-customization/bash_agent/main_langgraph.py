@@ -6,6 +6,7 @@ from langchain_openai import ChatOpenAI
 
 from .config import Config
 from .bash import Bash
+from .skills import get_skill, list_available_skills
 
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
@@ -38,10 +39,14 @@ def main(config: Config):
     )
     # Create the tool
     bash = Bash(config)
-    # Create the agent
+    # Create the agent with bash tool and skill tools
     agent = create_react_agent(
         model=llm,
-        tools=[ExecOnConfirm(bash).exec_bash_command],
+        tools=[
+            ExecOnConfirm(bash).exec_bash_command,
+            get_skill,              # Load skills for structured workflows
+            list_available_skills,  # List available skills
+        ],
         prompt=config.system_prompt,
         checkpointer=InMemorySaver(),
     )

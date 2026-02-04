@@ -1,0 +1,48 @@
+[project]
+name = "agent-customization"
+version = "1.0.0"
+description = "Module 4: Agent Customization - Train CLI agents using NeMo Data Designer, NeMo Gym, and GRPO"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # Data generation
+    "data-designer>=0.3.0",
+    "jupyter>=1.0.0",
+    "scikit-learn>=1.0.0",
+    # NeMo Gym resource server
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.24.0",
+    # PyTorch + CUDA (assumes GPU)
+    "torch>=2.0.0",
+    "triton>=3.0.0",
+    # Unsloth + GRPO training
+    "transformers>=4.40.0",
+    "tokenizers",
+    "trl>=0.8.0",
+    "datasets>=2.18.0",
+    "peft>=0.10.0",
+    "accelerate>=0.28.0",
+    "bitsandbytes>=0.43.0",
+    # Testing
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[project.optional-dependencies]
+training = [
+    # These require special installation - see README
+    # unsloth @ git+https://github.com/unslothai/unsloth.git
+    # mamba_ssm and causal_conv1d must be installed with --no-build-isolation
+    "vllm>=0.4.0",
+    "flash-attn>=2.5.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["nemo_gym_resources/langgraph_cli/tests"]
+asyncio_mode = "auto"

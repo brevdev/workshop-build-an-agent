@@ -1,185 +1,129 @@
 # The Bash Agent
 
-<img src="_static/robots/operator.png" alt="Bash Agent Robot" style="float:right;max-width:300px;margin:25px;" />
+<img src="_static/robots/operator.png" alt="Bash Agent" style="float:right;max-width:250px;margin:15px;" />
 
-Before we can customize an agent, we need to truly understand how it works. In this lesson, you'll get hands-on experience with a **Bash Agent**—an AI assistant that translates natural language into shell commands.
+## What It Does
 
-This isn't just any demo agent. The Bash Agent was carefully chosen as our customization target because it produces clear, observable behavior that makes it easy to identify where improvements are needed.
+The **Bash Agent** translates natural language → shell commands. Say *"list all Python files"* and it generates `find . -name "*.py"`.
 
-<!-- fold:break -->
+This is the same agentic pattern from Module 1, applied to a different domain. The agent reasons about your request, selects appropriate commands, and executes them—with your approval.
 
 ## Why a Bash Agent?
 
-Think about how you interact with your computer's terminal. Commands like `ls -la`, `grep -r "error" ./logs`, or `find . -name "*.py"` are powerful—but they require you to remember exact syntax, flags, and options.
+We chose this agent for customization training because:
 
-A Bash Agent flips this paradigm. Instead of memorizing arcane command syntax, you simply describe what you want:
+1. **Observable outputs** — Shell commands are concrete and verifiable. Unlike creative writing, we can objectively check if `langgraph new --template react-agent-python` is correct.
 
-- *"Show me all the Python files in this directory"*
-- *"Find the largest files here"*  
-- *"Create a folder called 'experiments' and list what's inside"*
+2. **Clear improvement target** — The base model knows generic bash but not LangGraph CLI. This gap is measurable and fixable with training.
 
-The agent understands your intent and translates it into the appropriate shell commands.
+3. **Real-world applicability** — Many developers want agents that understand their specific CLIs, APIs, and toolchains.
 
-<!-- fold:break -->
+## Architecture
 
-## The Perfect Customization Candidate
+The agent uses patterns you've seen before:
 
-<img src="_static/robots/wrench.png" alt="Customization" style="float:left;max-width:300px;margin:25px;" />
+- **ReAct pattern** — Reason → Act → Observe in a loop until done
+- **Human-in-the-loop** — User approves each command before execution (safety net)
+- **LangGraph** — Orchestrates the agent's state machine
 
-We chose a Bash Agent for this customization module for several important reasons:
+## The Gap We'll Fix
 
-**Observable Behavior**: Shell commands produce clear, measurable outputs. When the agent runs `ls`, you can see exactly what it did and whether it succeeded. This makes evaluation straightforward.
+Try asking the base agent: *"Create a new LangGraph project with the react-agent template"*
 
-**Safety Boundaries**: The agent operates within a restricted set of allowed commands—no `rm -rf /` disasters here! This teaches an important lesson about designing safe, constrained agents.
+It might:
+- Hallucinate a command that doesn't exist
+- Use wrong parameter names
+- Miss required arguments
 
-**Real-World Applicability**: Many AI engineers use agents like this daily to automate repetitive system tasks, explore codebases, and manage files.
-
-**Clear Improvement Opportunities**: As you'll discover, the agent sometimes makes suboptimal choices. These "rough edges" are perfect targets for the customization techniques you'll learn.
-
-<!-- fold:break -->
-
-## Agent Architecture Overview
-
-The Bash Agent follows the **ReAct (Reason + Act)** pattern, one of the most powerful and widely-used agent architectures:
-
-<center>
-
-| Step | Description |
-|------|-------------|
-| **Reason** | The LLM analyzes your request and thinks about what needs to be done |
-| **Act** | The agent calls a tool (in this case, executes a bash command) |
-| **Observe** | The agent sees the result of the command |
-| **Repeat** | If the task isn't complete, the cycle continues |
-
-</center>
-
-This architecture is implemented using **LangGraph**, a framework for building stateful, multi-step AI applications. You'll see how the pieces fit together in the hands-on notebook.
-
-<!-- fold:break -->
-
-## Safety First: Human-in-the-Loop
-
-<img src="_static/robots/debug.png" alt="Safety Check" style="float:right;max-width:300px;margin:25px;" />
-
-Running arbitrary shell commands is inherently risky. What if the agent misunderstands your request?
-
-The Bash Agent implements a **Human-in-the-Loop (HITL)** pattern. Before executing any command, it asks for your explicit approval:
-
-```
-You: "List all files here"
-   ↓
-Agent thinks: "I should run 'ls -la'"
-   ↓
-System: "Execute 'ls -la'? [y/N]:"
-   ↓
-You type 'y' → Command runs
-You type 'n' → Command blocked
-```
-
-This pattern is essential for any agent that can take real-world actions. You'll see exactly how this is implemented in the code.
-
-<!-- fold:break -->
-
-## Key Components
-
-The agent is built from several modular components that work together:
-
-| Component | File | Purpose |
-|-----------|------|---------|
-| **Config** | `bash_agent/config.py` | Model settings, allowed commands, system prompt |
-| **Bash Tool** | `bash_agent/bash.py` | Executes commands with security checks |
-| **Helpers** | `bash_agent/helpers.py` | Message handling and LLM abstraction |
-| **Agent** | `bash_agent.ipynb` | Brings everything together with LangGraph |
-
-Take a moment to explore these files to understand how the pieces fit together:
-
-<button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent/config.py');"><i class="fa-brands fa-python"></i> bash_agent/config.py</button> — See the system prompt and allowed commands
-
-<button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent/bash.py');"><i class="fa-brands fa-python"></i> bash_agent/bash.py</button> — Explore the tool implementation with safety checks
-
-<!-- fold:break -->
-
-## Hands-On: Meet Your Agent
-
-<img src="_static/robots/magician.png" alt="Showtime!" style="float:left;max-width:300px;margin:25px;" />
-
-Now it's time to interact with the Bash Agent! Open the notebook and work through each section:
-
-<button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent.ipynb');"><i class="fa-solid fa-flask"></i> Bash Agent Notebook</button>
-
-In this notebook, you will:
-
-1. **Set up the environment** and load your API keys
-2. **Understand the architecture** by examining the imports and components
-3. **See the human-in-the-loop pattern** in action with the `ExecOnConfirm` class
-4. **Create the agent** using LangGraph's `create_react_agent`
-5. **Interact with the agent** to observe its behavior and decision-making
-
-<!-- fold:break -->
-
-## What to Watch For
-
-As you interact with the agent, pay close attention to these aspects of its behavior:
-
-**Command Selection**: Does the agent always choose the most efficient command? Sometimes a simpler command would work just as well, or a more powerful one would be more appropriate.
-
-**Handling Ambiguity**: When your request isn't perfectly clear, does the agent ask for clarification or make assumptions? How reasonable are those assumptions?
-
-**Error Recovery**: What happens when a command fails? Does the agent adapt gracefully or get stuck?
-
-**Response Clarity**: Are the agent's explanations helpful? Does it provide context about what it did and why?
-
-> 💡 **Pro Tip**: Take notes on any behaviors that seem suboptimal. These observations will directly inform the customization work in the next lesson!
-
-<!-- fold:break -->
-
-## Things to Try
-
-Here are some requests to test different aspects of the agent's capabilities:
-
-| Request | What It Tests |
-|---------|---------------|
-| "List all files here" | Basic command translation |
-| "Show me the contents of config.py" | File reading with `cat` |
-| "Find all Python files in this directory" | Pattern matching with `find` |
-| "How big are the files in this folder?" | Using `du` for disk usage |
-| "Create a folder called 'test' and show what's inside" | Multi-step task execution |
-| "What's the current directory?" | Simple state awareness |
-
-Try combining multiple requests or asking follow-up questions to see how the agent handles conversational context.
-
-<!-- fold:break -->
-
-## Alternative: Command Line Interface
-
-<img src="_static/robots/typewriter.png" alt="CLI" style="float:right;max-width:300px;margin:25px;" />
-
-Prefer working in a terminal? You can run the same agent as a standalone CLI application.
-
-**Using LangGraph (same as the notebook):**
+After training, the same request reliably produces:
 ```bash
-cd /project/code/4-agent-customization && python -m bash_agent.main_langgraph
+langgraph new ./myapp --template react-agent-python
 ```
 
-**Using a from-scratch implementation:**
-```bash
-cd /project/code/4-agent-customization && python -m bash_agent.main_from_scratch
-```
+This transformation—from unreliable to expert—is what customization achieves.
 
-Comparing these two implementations is a great way to understand what LangGraph provides out of the box versus building the agent loop yourself!
+## Exercises
+
+Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent.ipynb');"><i class="fa-solid fa-flask"></i> bash_agent.ipynb</button>
 
 <!-- fold:break -->
 
-## What's Next?
+### Exercise 1: HITL Wrapper
 
-<img src="_static/robots/gitfu.png" alt="Next Steps" style="float:right;max-width:300px;margin:25px;" />
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'class ExecOnConfirm');"><i class="fas fa-code"></i> ExecOnConfirm</button> — Require user approval before running commands.
 
-After completing the hands-on notebook, you should have a solid understanding of:
+<details>
+<summary>🆘 Hint</summary>
 
-- ✅ How the Bash Agent is architected using LangGraph
-- ✅ The role of human-in-the-loop confirmation for safe tool execution
-- ✅ The agent's strengths and areas where it could be improved
+```python
+if self._confirm_execution(cmd):
+    return self.bash.exec_bash_command(cmd)
+return {"error": "User declined."}
+```
+</details>
 
-These observations are crucial! In the next lesson, [Customizing the Agent](bash_customize.md), you'll learn how to use **Synthetic Data Generation (SDG)** and **Reinforcement Learning (RL)** to systematically improve the agent's behavior.
+<!-- fold:break -->
 
-The "rough edges" you identified aren't bugs—they're opportunities for customization. Let's turn them into training signal!
+### Exercise 2: Create Agent
+
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'agent = create_react_agent');"><i class="fas fa-code"></i> create_react_agent</button> — Wire up LLM, tool, and prompt.
+
+<details>
+<summary>🆘 Hint</summary>
+
+```python
+agent = create_react_agent(
+    model=llm,
+    tools=[ExecOnConfirm(bash).exec_bash_command],
+    prompt=config.system_prompt,
+)
+```
+</details>
+
+<!-- fold:break -->
+
+### Exercise 3: Run Loop
+
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send user message to agent.
+
+<details>
+<summary>🆘 Hint</summary>
+
+```python
+result = agent.invoke({"messages": [{"role": "user", "content": user}]})
+```
+</details>
+
+## Test It
+
+```bash
+cd code/4-agent-customization && python3 -m bash_agent.main_langgraph
+```
+
+Try: `"List all files"` → `ls`
+
+## Superpowers Skills
+
+The Bash Agent includes skills from the [Superpowers](https://github.com/obra/superpowers) framework—structured workflows that guide the agent through complex tasks.
+
+### Available Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `systematic-debugging` | 4-phase root cause analysis before fixing bugs |
+| `test-driven-development` | RED-GREEN-REFACTOR workflow |
+| `brainstorming` | Socratic design refinement |
+| `writing-plans` | Create detailed implementation plans |
+| `executing-plans` | Execute plans with checkpoints |
+
+### How to Use
+
+The agent can load skills on demand:
+
+- *"List available skills"* — See all skills
+- *"Load the systematic-debugging skill"* — Get the full workflow
+- *"I have a bug, what skill should I use?"* — Get recommendations
+
+Skills transform the agent from a simple command executor into a methodical problem-solver that follows proven workflows.
+
+**Next:** [Synthetic Data Generation](sdg.md)

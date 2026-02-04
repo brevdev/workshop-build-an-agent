@@ -16,7 +16,9 @@ But where do these examples come from?
 | **Manual writing** | High quality | Slow, expensive, limited diversity |
 | **Synthetic generation** | Fast, scalable, diverse | Requires careful design |
 
-For a new domain like LangGraph CLI, we don't have real logs. Manual writing doesn't scale. **SDG is the answer.**
+For a new domain like the LangGraph CLI, we don't have the real logs from the agent. Manual writing doesn't scale. **SDG is the answer.**
+
+<!-- fold:break -->
 
 ## How SDG Works
 
@@ -36,8 +38,10 @@ This is different from just prompting an LLM to "make up examples." Data Designe
 
 ## Why Synthetic Data Works
 
+Click on each of the following items to learn more. 
+
 <details>
-<summary><strong>The cold-start problem in detail</strong></summary>
+<summary><strong>The Cold Start Problem</strong></summary>
 
 New CLI tools face a chicken-and-egg problem:
 - You need training data to build a good agent
@@ -56,7 +60,7 @@ New CLI tools face a chicken-and-egg problem:
 </details>
 
 <details>
-<summary><strong>SDG vs. prompting an LLM to generate examples</strong></summary>
+<summary><strong>SDG vs. LLM Prompting</strong></summary>
 
 You might wonder: "Why not just ask GPT to generate 200 training examples?"
 
@@ -80,7 +84,7 @@ inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixe
 </details>
 
 <details>
-<summary><strong>What makes training data "good enough"?</strong></summary>
+<summary><strong>What makes Training Data "Good Enough"?</strong></summary>
 
 Training data quality matters more than quantity. Here's what to aim for:
 
@@ -99,16 +103,24 @@ Training data quality matters more than quantity. Here's what to aim for:
 
 </details>
 
+<!-- fold:break -->
+
 ## Data Quality Checklist
 
-Before training, verify your synthetic data meets these criteria:
+Before training, verify your synthetic data meets these criteria. **Click each item to learn more.**
 
-### Coverage
+<details>
+<summary><strong>Coverage</strong></summary>
+
 - [ ] Does every command type appear? (`new`, `dev`, `up`, `build`, `dockerfile`)
 - [ ] Does every flag appear for each relevant command?
 - [ ] Are edge cases represented? (null values, boundary values)
 
-### Balance
+</details>
+
+<details>
+<summary><strong>Balance</strong></summary>
+
 - [ ] Are command types roughly balanced?
 - [ ] No single command should be > 40% of data unless that matches real usage
 
@@ -120,6 +132,11 @@ print(Counter(commands))
 # Good: Counter({'new': 55, 'dev': 48, 'up': 52, 'build': 45, 'dockerfile': 50})
 # Bad:  Counter({'new': 180, 'dev': 10, 'up': 5, 'build': 3, 'dockerfile': 2})
 ```
+
+</details>
+
+<details>
+<summary><strong>Diversity</strong></summary>
 
 ### Diversity
 - [ ] Do inputs vary in phrasing, not just slot values?
@@ -134,6 +151,11 @@ print(Counter(commands))
 "Initialize react-agent-python in ./myapp"      (technical)
 ```
 
+</details>
+
+<details>
+<summary><strong>Validity</strong></summary>
+
 ### Validity
 - [ ] Do all outputs parse as valid JSON?
 - [ ] Do all outputs pass schema validation?
@@ -147,15 +169,9 @@ for ex in data:
 print("All outputs valid!")
 ```
 
-## Connection to Evaluation
+</details>
 
-Remember Module 3's evaluation metrics? The same principles apply here:
-
-- **Ground truth** — SDG gives you known-correct outputs to train against
-- **Structured verification** — JSON schema ensures outputs are machine-checkable
-- **Train/val split** — Hold out data to measure generalization
-
-The evaluation dataset from Module 3 could even become training data for Module 4.
+<!-- fold:break -->
 
 ## Choose Your Path
 
@@ -172,7 +188,7 @@ The evaluation dataset from Module 3 could even become training data for Module 
 
 Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/01_synthetic_data_generation.ipynb');"><i class="fa-solid fa-flask"></i> 01_synthetic_data_generation.ipynb</button>
 
-### Exercise 4: Output Schema
+### Exercise: Output Schema
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define Pydantic model for CLI commands.
 
@@ -190,7 +206,7 @@ class CLIToolCall(BaseModel):
 
 <!-- fold:break -->
 
-### Exercise 5: Template Sampler
+### Exercise: Template Sampler
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure template values.
 
@@ -207,7 +223,7 @@ params=CategorySamplerParams(values=[
 
 <!-- fold:break -->
 
-### Exercise 6: Train/Val Split
+### Exercise: Train/Val Split
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button>
 
@@ -219,7 +235,11 @@ train_data, val_data = train_test_split(data, test_size=0.1)
 ```
 </details>
 
+<!-- fold:break -->
+
 ## Output
+
+Double check that you have successfully generated synthetic data for the LangGraph CLI.
 
 ```
 data/langgraph_cli/
@@ -227,4 +247,4 @@ data/langgraph_cli/
 └── val.jsonl      # 25 examples
 ```
 
-**Next:** [GRPO Training](grpo_training.md)
+With this data, we are now ready to begin the customization. Check out [GRPO Training](grpo_training.md) to learn more and get started!

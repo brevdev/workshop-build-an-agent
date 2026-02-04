@@ -4,19 +4,23 @@
 
 ## What It Does
 
-The **Bash Agent** translates natural language → shell commands. Say *"list all Python files"* and it generates `find . -name "*.py"`.
+The **Bash Agent** translates natural language into shell commands to be executed in a terminal window. Ask the agent *"list all Python files"* and it generates `find . -name "*.py"`.
 
-This is the same agentic pattern from Module 1, applied to a different domain. The agent reasons about your request, selects appropriate commands, and executes them—with your approval.
+This is the same ReAct agentic pattern from Module 1, applied to a different domain. The agent reasons about your request, selects appropriate commands, and executes them—with your approval.
+
+<!-- fold:break -->
 
 ## Why a Bash Agent?
 
-We chose this agent for customization training because:
+We chose this agent use case for customization because:
 
-1. **Observable outputs** — Shell commands are concrete and verifiable. Unlike creative writing, we can objectively check if `langgraph new --template react-agent-python` is correct.
+1. **Observable outputs** — Shell commands are concrete and verifiable. Unlike creative writing, we can objectively check if a command like `langgraph new --template react-agent-python` is correct.
 
 2. **Clear improvement target** — The base model knows generic bash but not LangGraph CLI. This gap is measurable and fixable with training.
 
 3. **Real-world applicability** — Many developers want agents that understand their specific CLIs, APIs, and toolchains.
+
+<!-- fold:break -->
 
 ## Architecture
 
@@ -26,27 +30,105 @@ The agent uses patterns you've seen before:
 - **Human-in-the-loop** — User approves each command before execution (safety net)
 - **LangGraph** — Orchestrates the agent's state machine
 
-## The Gap We'll Fix
+<!-- fold:break -->
 
-Try asking the base agent: *"Create a new LangGraph project with the react-agent template"*
+## Human-in-the-Loop: A Critical Safety Pattern
 
-It might:
-- Hallucinate a command that doesn't exist
-- Use wrong parameter names
-- Miss required arguments
+A bash agent that can execute arbitrary shell commands is powerful—and dangerous. Without safeguards, a single hallucinated command could delete files, expose secrets, or corrupt your system. 
 
-After training, the same request reliably produces:
-```bash
-langgraph new ./myapp --template react-agent-python
+**Human-in-the-loop (HITL)** execution is an essential design pattern for agents that take real-world actions.
+
+<!-- fold:break -->
+
+### The Problem with Autonomous Execution
+
+Consider what happens when an agent executes commands immediately:
+
+```
+User: "Clean up old log files"
+Agent thinks: "I'll remove files older than 7 days"
+Agent executes: rm -rf /var/log/*    ← Oops, deleted everything!
 ```
 
-This transformation—from unreliable to expert—is what customization achieves.
+Even well-trained models can:
+- **Hallucinate dangerous commands** — Especially for unfamiliar domains
+- **Misinterpret intent** — "Clean up" could mean archive, compress, or delete
+- **Make subtle errors** — Wrong path, missing flags, incorrect arguments
+
+The consequences range from inconvenient to catastrophic. For agents with real-world capabilities, **failing safely is more important than succeeding quickly**.
+
+<!-- fold:break -->
+
+### The HITL Pattern
+
+Human-in-the-loop execution adds a confirmation step between generation and execution:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    HITL EXECUTION FLOW                      │
+│                                                             │
+│   ┌────────┐    ┌───────────┐    ┌────────┐    ┌─────────┐  │
+│   │  User  │ →  │   Agent   │ →  │ Human  │ →  │ Execute │  │
+│   │Request │    │ Proposes  │    │Reviews │    │   or    │  │
+│   │        │    │ Command   │    │& Approves   │  Abort  │  │
+│   └────────┘    └───────────┘    └────────┘    └─────────┘  │
+│                                       │                     │
+│                                       ▼                     │
+│                              [Modify if needed]             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**The agent never executes directly.** Instead, it proposes a command and waits for human approval. This simple change provides:
+
+| Benefit | Description |
+|---------|-------------|
+| **Catch errors** | Human spots hallucinated or incorrect commands |
+| **Verify intent** | Confirm the command matches what you actually wanted |
+| **Learn from mistakes** | See what the agent gets wrong before it causes harm |
+| **Build trust** | Gain confidence in the agent's capabilities over time |
+| **Modify on the fly** | Adjust the proposed command before execution |
+
+<!-- fold:break -->
+
+### What HITL Looks Like in Practice
+
+When you run the bash agent, every command goes through confirmation:
+
+```
+You: Create a new react agent project
+
+Agent: I'll create a new LangGraph project with the react-agent template.
+
+Proposed command: langgraph new ./myapp --template react-agent-python
+
+Execute? [y/N]: _
+```
+
+You can:
+- **Approve (`y`)** — Execute the command as proposed
+- **Reject (`n` or Enter)** — Abort without executing
+- **Review** — Take time to verify the command is correct
+
+This pause is intentional. It forces you to read and understand what's about to happen.
+
+<!-- fold:break -->
+
+### Beyond HITL: Defense in Depth
+
+HITL is your first line of defense, but production systems often add more layers:
+
+1. **Allowlists** — Only permit known-safe commands (implemented in our agent's config)
+2. **Input validation** — Parse and verify command structure before execution
+3. **Sandboxing** — Execute in isolated environments where damage is contained
+4. **Audit logging** — Record all commands for review and accountability
+
+> 💡 **Coming later**: Module 5 covers **sandboxing**—running agents in isolated containers where even dangerous commands can't harm your real system. HITL catches mistakes; sandboxing contains them.
+
+<!-- fold:break -->
 
 ## Exercises
 
 Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent.ipynb');"><i class="fa-solid fa-flask"></i> bash_agent.ipynb</button>
-
-<!-- fold:break -->
 
 ### Exercise 1: HITL Wrapper
 
@@ -94,6 +176,8 @@ result = agent.invoke({"messages": [{"role": "user", "content": user}]})
 ```
 </details>
 
+<!-- fold:break -->
+
 ## Test It
 
 ```bash
@@ -101,6 +185,8 @@ cd code/4-agent-customization && python3 -m bash_agent.main_langgraph
 ```
 
 Try: `"List all files"` → `ls`
+
+<!-- fold:break -->
 
 ## Superpowers Skills
 
@@ -116,6 +202,8 @@ The Bash Agent includes skills from the [Superpowers](https://github.com/obra/su
 | `writing-plans` | Create detailed implementation plans |
 | `executing-plans` | Execute plans with checkpoints |
 
+<!-- fold:break -->
+
 ### How to Use
 
 The agent can load skills on demand:
@@ -126,4 +214,23 @@ The agent can load skills on demand:
 
 Skills transform the agent from a simple command executor into a methodical problem-solver that follows proven workflows.
 
-**Next:** [Synthetic Data Generation](sdg.md)
+<!-- fold:break -->
+
+## The Gap We'll Fix
+
+Now that we've built our baseline bash agent, let's identify a core gap. Try asking the base agent: *"Create a new LangGraph project with the react-agent template"*
+
+It might:
+- Hallucinate a command that doesn't exist
+- Use wrong parameter names
+- Miss required arguments
+
+After training, the same request should reliably produce:
+
+```bash
+langgraph new ./myapp --template react-agent-python
+```
+
+This transformation—from unreliable to expert—is what customization achieves.
+
+Now that we have a good understanding of our baseline bash agent, let's take a look at [Synthetic Data Generation](sdg.md) to get started with the customization pipeline. 

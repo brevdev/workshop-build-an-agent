@@ -2,13 +2,11 @@
 
 <img src="_static/robots/study.png" alt="Understanding Customization" style="float:right;max-width:250px;margin:15px;" />
 
-## From Evaluation to Improvement
-
 In Module 3, you learned to **measure** agent performance—faithfulness, relevance, tone, and so on. But what happens when the metrics reveal problems?
 
-You have three options:
+Typically, you may have three overarching options:
 1. **Prompt engineering** — Tweak agent instructions (quick but limited)
-2. **Add tools/skills** — Give the model more capabilities (expand capability)
+2. **Add tools/skills** — Give the agent more functionality (expand capability)
 3. **Train the model** — Fundamentally improve its understanding (specialize knowledge)
 
 Options 1 and 2 have already been discussed in Modules 1 and 2, respectively. This module teaches Option 3: how to **customize a model** so it natively understands your domain. 
@@ -39,7 +37,7 @@ In Module 2, you added **Skills** (dynamic instructions the agent loads) and **M
 Training writes knowledge directly into the model's weights. The model doesn't *consult* an expert—it *becomes* one. This works well for:
 
 - Stable, well-defined domains (your specific CLI, your API)
-- Workflows that are set-and-forget and don't change frequently
+- Workflows that are one-time, set-and-forget, or don't change frequently
 - Tasks requiring precise structured output
 - High-frequency use cases where latency matters
 
@@ -77,7 +75,7 @@ A reward server checks:
 - Is `<command>` a real CLI command?
 - Are the parameters correct for that command?
 
-This is **RLVR (Reinforcement Learning with Verifiable Rewards)**—objective, consistent, and scalable.
+This is **RLVR (Reinforcement Learning with Verifiable Rewards)** — objective, consistent, and scalable.
 
 <!-- fold:break -->
 

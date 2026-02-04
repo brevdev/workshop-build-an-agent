@@ -12,12 +12,14 @@ This workshop demonstrates a **generalizable pattern** that applies to customizi
 - The **GRPO training workflow** for RL-based model customization
 - A **reusable pattern** you can apply for customizing your own AI agents
 
+This learning module can take around 3 to 4 hours to complete.
+
 ## Learning Objectives
 
 By the end of this workshop, you'll know how to:
 - **WHY** we need to customize agents (domain expertise vs general-purpose)
 - **WHAT** customization looks like (SDG → RLVR → Deployment)
 - **HOW** to do it (NeMo Data Designer, NeMo Gym, GRPO)
-- How to implement **safe execution** with keeping the human-in-the-loop
+- How to implement **safe execution** of agents by keeping the human in the loop
 
 > Head over to [Setting up Secrets](secrets) to get started!

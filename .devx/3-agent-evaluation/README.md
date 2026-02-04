@@ -13,7 +13,7 @@ This workshop will help you understand how to evaluate AI agents in production. 
 * A comprehensive evaluation framework for your agents
 * Best practices for continuous agent improvement
 
-The entire workshop can take anywhere from 1.5 to 3 hours to complete.
+This learning module can take around 2 to 3 hours to complete.
 
 ## Learning Objectives
 

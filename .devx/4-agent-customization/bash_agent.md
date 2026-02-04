@@ -2,9 +2,7 @@
 
 <img src="_static/robots/operator.png" alt="Bash Agent" style="float:right;max-width:250px;margin:15px;" />
 
-## What It Does
-
-The **Bash Agent** translates natural language into shell commands to be executed in a terminal window. Ask the agent *"list all Python files"* and it generates `find . -name "*.py"`.
+A **Bash Agent** translates natural language into shell commands to be executed in a terminal window. Ask the agent *"list all Python files"* and it generates `find . -name "*.py"`.
 
 This is the same ReAct agentic pattern from Module 1, applied to a different domain. The agent reasons about your request, selects appropriate commands, and executes them—with your approval.
 

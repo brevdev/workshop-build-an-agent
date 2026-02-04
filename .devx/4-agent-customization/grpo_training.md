@@ -2,19 +2,39 @@
 
 <img src="_static/robots/debug.png" alt="Training" style="float:right;max-width:250px;margin:15px;" />
 
-## What It Does
+## Two Ways to Train
 
-**GRPO (Group Relative Policy Optimization)** teaches the model through trial and feedback. The model generates multiple answers, a verifier scores them, and the model learns to produce higher-scoring outputs.
+You have your data. Now how do you teach the model?
 
-## Why GRPO Works
+| Approach | How It Works | Best For |
+|----------|--------------|----------|
+| **SFT (Supervised Fine-Tuning)** | "Memorize: input X → output Y" | Simple tasks, abundant data |
+| **GRPO (RL-based)** | "Try multiple outputs, learn which score highest" | Complex tasks, verifiable correctness |
 
-Traditional fine-tuning says *"memorize this answer."* GRPO says *"try things and learn what works."*
+**GRPO (Group Relative Policy Optimization)** generates multiple candidate responses per prompt, scores them with a reward function, and reinforces the better ones. This exploration often discovers solutions that pure imitation would miss.
 
-- **Verifiable rewards** — Code checks if the output is valid JSON, has correct fields, uses real CLI commands. No human judges needed.
-- **Multiple attempts** — Model generates 4+ responses per prompt, learns from the best ones.
-- **Reinforcement signal** — Good outputs get reinforced, bad outputs get suppressed.
+## Why Verifiable Rewards Matter
 
-This is **RLVR (RL with Verifiable Rewards)**—perfect for structured outputs like CLI commands where correctness is objective.
+In Module 3, you learned about LLM-as-judge for evaluation. That works for subjective qualities (helpfulness, tone). But for **structured outputs**, we can do better.
+
+CLI commands are either correct or wrong—no subjectivity. A reward server can check:
+- Is the JSON valid?
+- Is `command` one of `[new, dev, up, build, dockerfile]`?
+- Are the parameters correct for that command type?
+
+This is **RLVR (RL with Verifiable Rewards)**:
+- **Objective** — No judge bias or inconsistency
+- **Fast** — Milliseconds per verification
+- **Scalable** — No human annotators needed
+
+The NeMo Gym server runs these checks and returns reward scores to guide training.
+
+## The Training Loop
+
+1. Model generates 4+ responses to each prompt
+2. Reward server scores each response (0.0 to 1.0)
+3. GRPO computes gradients that favor higher-scoring responses
+4. Repeat for 50+ steps until the model reliably produces correct outputs
 
 ## Setup
 

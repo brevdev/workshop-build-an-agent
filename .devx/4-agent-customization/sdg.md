@@ -2,19 +2,45 @@
 
 <img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
 
-## What It Does
+## The Data Problem
 
-**SDG (Synthetic Data Generation)** creates training examples automatically. Instead of manually writing hundreds of input/output pairs, we define *what kind* of data we want and let the system generate variations.
+Training requires examples—lots of them. Each example shows the model:
+- **Input**: What the user says (*"Create a new project with the react template"*)
+- **Output**: What the agent should produce (`{"command": "new", "template": "react-agent-python", ...}`)
 
-## Why We Need It
+But where do these examples come from?
 
-Training requires data—lots of it. For a new domain (like LangGraph CLI), we don't have real user logs yet. SDG solves the cold-start problem:
+| Source | Pros | Cons |
+|--------|------|------|
+| **Real user logs** | Authentic patterns | You don't have them yet |
+| **Manual writing** | High quality | Slow, expensive, limited diversity |
+| **Synthetic generation** | Fast, scalable, diverse | Requires careful design |
 
-1. **Define the schema** — What does a valid CLI command look like?
-2. **Set the variations** — Which templates? Which paths? Which ports?
-3. **Generate at scale** — 250 diverse examples in minutes
+For a new domain like LangGraph CLI, we don't have real logs. Manual writing doesn't scale. **SDG is the answer.**
 
-The result: training data that teaches the model *"when user says X, output Y"*.
+## How SDG Works
+
+**NeMo Data Designer** generates training data programmatically:
+
+1. **Define the output schema** — A Pydantic model describing valid CLI commands
+2. **Configure samplers** — Distributions for each field (which commands? which templates? which ports?)
+3. **Generate natural language** — An LLM creates realistic user requests for each command
+4. **Combine into examples** — Input/output pairs ready for training
+
+This is different from just prompting an LLM to "make up examples." Data Designer ensures:
+- **Coverage** — Every command type appears in training
+- **Diversity** — Varied phrasing, not repetitive patterns
+- **Validity** — Outputs match your schema exactly
+
+## Connection to Evaluation
+
+Remember Module 3's evaluation metrics? The same principles apply here:
+
+- **Ground truth** — SDG gives you known-correct outputs to train against
+- **Structured verification** — JSON schema ensures outputs are machine-checkable
+- **Train/val split** — Hold out data to measure generalization
+
+The evaluation dataset from Module 3 could even become training data for Module 4.
 
 ## Choose Your Path
 

@@ -2,19 +2,32 @@
 
 <img src="_static/robots/typewriter.png" alt="Running" style="float:right;max-width:250px;margin:15px;" />
 
-## What Changed
+## The Payoff
 
-Your model is no longer generic—it's been **specialized**. The training baked LangGraph CLI knowledge directly into the weights. It now:
+You've completed the customization pipeline:
+1. ✅ Built a base agent (generic bash knowledge)
+2. ✅ Generated training data (SDG for LangGraph CLI)
+3. ✅ Trained with GRPO (verifiable rewards)
 
-- Knows `langgraph new`, `dev`, `build`, `up`, `dockerfile` commands
-- Understands which templates exist (`react-agent-python`, `memory-agent-python`)
-- Generates correct parameters without hallucinating
+Now you have a **specialized model**. The training baked LangGraph CLI knowledge directly into the weights.
 
-## Why This Matters
+## Before vs After
 
-Before training, asking *"create a react agent"* might produce gibberish or a wrong command. After training, the model reliably produces `langgraph new ./myapp --template react-agent-python`.
+| Request | Before Training | After Training |
+|---------|-----------------|----------------|
+| "Create a react agent" | ❌ Hallucinated command | ✅ `langgraph new ./myapp --template react-agent-python` |
+| "Start dev server on 8080" | ❌ Wrong parameters | ✅ `langgraph dev --port 8080` |
+| "Build image tagged v2" | ❌ Missing flags | ✅ `langgraph build --tag v2` |
 
-This is the payoff: **domain expertise without tool overhead**. No MCP server, no skill definitions—just a model that *knows* your CLI.
+## Connecting Back to Evaluation
+
+Remember Module 3's evaluation pipeline? You can now measure the improvement:
+
+1. Run the **same test cases** against base vs trained model
+2. Check **tool usage accuracy** — Does it pick the right command?
+3. Verify **parameter correctness** — Are arguments valid?
+
+The reward function from GRPO training can serve as your production evaluation metric.
 
 ## Exercises
 

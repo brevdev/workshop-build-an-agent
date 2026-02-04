@@ -6,15 +6,41 @@
 
 The **Bash Agent** translates natural language → shell commands. Say *"list all Python files"* and it generates `find . -name "*.py"`.
 
-## Why We Build It
+This is the same agentic pattern from Module 1, applied to a different domain. The agent reasons about your request, selects appropriate commands, and executes them—with your approval.
 
-This is our **starting point**—a working agent we can later customize. It uses:
+## Why a Bash Agent?
+
+We chose this agent for customization training because:
+
+1. **Observable outputs** — Shell commands are concrete and verifiable. Unlike creative writing, we can objectively check if `langgraph new --template react-agent-python` is correct.
+
+2. **Clear improvement target** — The base model knows generic bash but not LangGraph CLI. This gap is measurable and fixable with training.
+
+3. **Real-world applicability** — Many developers want agents that understand their specific CLIs, APIs, and toolchains.
+
+## Architecture
+
+The agent uses patterns you've seen before:
 
 - **ReAct pattern** — Reason → Act → Observe in a loop until done
 - **Human-in-the-loop** — User approves each command before execution (safety net)
 - **LangGraph** — Orchestrates the agent's state machine
 
-The base agent handles generic bash, but it doesn't know specialized CLIs. That's what we'll fix with training.
+## The Gap We'll Fix
+
+Try asking the base agent: *"Create a new LangGraph project with the react-agent template"*
+
+It might:
+- Hallucinate a command that doesn't exist
+- Use wrong parameter names
+- Miss required arguments
+
+After training, the same request reliably produces:
+```bash
+langgraph new ./myapp --template react-agent-python
+```
+
+This transformation—from unreliable to expert—is what customization achieves.
 
 ## Exercises
 

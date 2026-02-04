@@ -51,7 +51,7 @@ class CLIToolCall(BaseModel):
 
 ### Exercise 5: Template Sampler
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'name=\"template\"');"><i class="fas fa-code"></i> template sampler</button> — Configure template values.
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure template values.
 
 <details>
 <summary>🆘 Hint</summary>

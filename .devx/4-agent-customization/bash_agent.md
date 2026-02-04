@@ -162,7 +162,7 @@ agent = create_react_agent(
 
 <!-- fold:break -->
 
-### Exercise 3: Run Loop
+### Exercise: Run Loop
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send user message to agent using the invoke method.
 

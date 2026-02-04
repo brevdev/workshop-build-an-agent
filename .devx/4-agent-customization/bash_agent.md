@@ -102,4 +102,28 @@ cd code/4-agent-customization && python3 -m bash_agent.main_langgraph
 
 Try: `"List all files"` → `ls`
 
+## Superpowers Skills
+
+The Bash Agent includes skills from the [Superpowers](https://github.com/obra/superpowers) framework—structured workflows that guide the agent through complex tasks.
+
+### Available Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `systematic-debugging` | 4-phase root cause analysis before fixing bugs |
+| `test-driven-development` | RED-GREEN-REFACTOR workflow |
+| `brainstorming` | Socratic design refinement |
+| `writing-plans` | Create detailed implementation plans |
+| `executing-plans` | Execute plans with checkpoints |
+
+### How to Use
+
+The agent can load skills on demand:
+
+- *"List available skills"* — See all skills
+- *"Load the systematic-debugging skill"* — Get the full workflow
+- *"I have a bug, what skill should I use?"* — Get recommendations
+
+Skills transform the agent from a simple command executor into a methodical problem-solver that follows proven workflows.
+
 **Next:** [Synthetic Data Generation](sdg.md)

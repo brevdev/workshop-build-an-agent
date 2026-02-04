@@ -1,17 +1,19 @@
-# Why Customize Agents?
+# Introduction to Customization
 
 <img src="_static/robots/study.png" alt="Understanding Customization" style="float:right;max-width:250px;margin:15px;" />
 
 ## From Evaluation to Improvement
 
-In Module 3, you learned to **measure** agent performance—faithfulness, relevance, tool usage. But what happens when the metrics reveal problems?
+In Module 3, you learned to **measure** agent performance—faithfulness, relevance, tone, and so on. But what happens when the metrics reveal problems?
 
 You have three options:
-1. **Prompt engineering** — Tweak instructions (quick but limited)
-2. **Add tools/skills** — Give the model more capabilities (Module 2 approach)
-3. **Train the model** — Fundamentally improve its understanding (this module)
+1. **Prompt engineering** — Tweak agent instructions (quick but limited)
+2. **Add tools/skills** — Give the model more capabilities (expand capability)
+3. **Train the model** — Fundamentally improve its understanding (specialize knowledge)
 
-This module teaches option 3: how to **customize a model** so it natively understands your domain. We'll take a bash agent and train it to expertly handle the **LangGraph CLI**.
+Options 1 and 2 have already been discussed in Modules 1 and 2, respectively. This module teaches Option 3: how to **customize a model** so it natively understands your domain. 
+
+We'll take a bash agent and train it to expertly handle the **LangGraph CLI**.
 
 <!-- fold:break -->
 
@@ -21,11 +23,12 @@ When your agent needs domain expertise, you have two architectural choices:
 
 ### Path A: Skills & MCP (Runtime Knowledge)
 
-In Module 2, you added **Skills** (instructions the agent loads) and **MCP** (tools the agent calls). This works well for:
+In Module 2, you added **Skills** (dynamic instructions the agent loads) and **MCP** (tools the agent calls). This works well for:
 
 - General-purpose capabilities (web search, calendar, email)
-- Procedures that change frequently
+- Workflows that are repeatable and/or change frequently
 - Knowledge that's too large to train on
+- Use cases that can afford a bit of latency
 
 **The limitation**: Every skill and tool competes for the model's attention. With 5 tools, selection is easy. With 50+, models start picking wrong tools, hallucinating parameters, or forgetting which tool does what.
 
@@ -35,7 +38,8 @@ In Module 2, you added **Skills** (instructions the agent loads) and **MCP** (to
 
 Training writes knowledge directly into the model's weights. The model doesn't *consult* an expert—it *becomes* one. This works well for:
 
-- Stable, well-defined domains (your CLI, your API)
+- Stable, well-defined domains (your specific CLI, your API)
+- Workflows that are set-and-forget and don't change frequently
 - Tasks requiring precise structured output
 - High-frequency use cases where latency matters
 
@@ -66,11 +70,11 @@ You need examples of what the agent should do. For a CLI agent:
 
 ### 2. Success Metrics (NeMo Gym)
 
-How does the model know if its output is good? In Module 3, you used LLM-as-judge. For structured outputs like CLI commands, we can do better: **code-based verification**.
+How does the model know if its output is good? In Module 3, you used LLM-as-judge. For well-structured outputs like CLI commands, we can do better: **code-based verification**.
 
 A reward server checks:
 - Is the JSON valid?
-- Is `command` a real CLI command?
+- Is `<command>` a real CLI command?
 - Are the parameters correct for that command?
 
 This is **RLVR (Reinforcement Learning with Verifiable Rewards)**—objective, consistent, and scalable.
@@ -81,7 +85,7 @@ This is **RLVR (Reinforcement Learning with Verifiable Rewards)**—objective, c
 
 Traditional fine-tuning says "memorize this answer." **GRPO (Group Relative Policy Optimization)** says "try multiple answers and learn which ones score higher."
 
-The model generates 4+ responses per prompt. The reward server scores each one. The model learns to produce higher-scoring outputs. This exploration-based learning often beats pure imitation.
+The model generates 4+ candidate responses per prompt. The reward server scores each one. The model learns to produce higher-scoring outputs. This exploration-based learning often beats pure imitation from other conventional methods like SFT.
 
 | Step | Tool | What It Does |
 |------|------|--------------|
@@ -90,18 +94,5 @@ The model generates 4+ responses per prompt. The reward server scores each one. 
 | Train model | **GRPO** | Learns from reward signals |
 
 <!-- fold:break -->
-
-## Timeline
-
-| Part | Time |
-|------|------|
-| Base bash agent | 20 min |
-| SDG *(or skip)* | 15 min |
-| GRPO training | 60-70 min |
-| Test agent | 15 min |
-
-> 💡 **Short on time?** Pre-generated data included—skip straight to GRPO.
-
-**Next:** [The Bash Agent](bash_agent.md)
 
 Ready to turn your built agents into specialized experts? Let's continue to [The Bash Agent](bash_agent.md) to learn about the agent example we'll use.

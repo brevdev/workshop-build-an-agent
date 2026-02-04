@@ -69,4 +69,4 @@ Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/s
 
 ## Ready to Customize!
 
-Once you have your NVIDIA API Key configured, you're ready to start customizing your agents. Continue to [Why Customize Agents?](intro_customization.md).
+Once you have your NVIDIA API Key configured, you're ready to start customizing your agents. Continue to [Introduction to Customization](intro_customization.md).

@@ -13,6 +13,8 @@ You have three options:
 
 This module teaches option 3: how to **customize a model** so it natively understands your domain. We'll take a bash agent and train it to expertly handle the **LangGraph CLI**.
 
+<!-- fold:break -->
+
 ## Two Paths to Specialization
 
 When your agent needs domain expertise, you have two architectural choices:
@@ -26,6 +28,8 @@ In Module 2, you added **Skills** (instructions the agent loads) and **MCP** (to
 - Knowledge that's too large to train on
 
 **The limitation**: Every skill and tool competes for the model's attention. With 5 tools, selection is easy. With 50+, models start picking wrong tools, hallucinating parameters, or forgetting which tool does what.
+
+<!-- fold:break -->
 
 ### Path B: Training (Baked-in Knowledge)
 
@@ -44,6 +48,8 @@ Training writes knowledge directly into the model's weights. The model doesn't *
 
 > 💡 **Rule of thumb**: Use Skills/MCP for breadth. Use training for depth. Many production systems combine both.
 
+<!-- fold:break -->
+
 ## The Customization Pipeline
 
 Training an agent requires three components working together:
@@ -56,6 +62,8 @@ You need examples of what the agent should do. For a CLI agent:
 
 **The cold-start problem**: You don't have real user logs yet. **Synthetic Data Generation (SDG)** solves this by programmatically creating diverse, realistic examples from templates and variations.
 
+<!-- fold:break -->
+
 ### 2. Success Metrics (NeMo Gym)
 
 How does the model know if its output is good? In Module 3, you used LLM-as-judge. For structured outputs like CLI commands, we can do better: **code-based verification**.
@@ -66,6 +74,8 @@ A reward server checks:
 - Are the parameters correct for that command?
 
 This is **RLVR (Reinforcement Learning with Verifiable Rewards)**—objective, consistent, and scalable.
+
+<!-- fold:break -->
 
 ### 3. Training Algorithm (GRPO)
 
@@ -79,6 +89,8 @@ The model generates 4+ responses per prompt. The reward server scores each one. 
 | Define rewards | **NeMo Gym** | Verifies outputs with code |
 | Train model | **GRPO** | Learns from reward signals |
 
+<!-- fold:break -->
+
 ## Timeline
 
 | Part | Time |
@@ -91,3 +103,5 @@ The model generates 4+ responses per prompt. The reward server scores each one. 
 > 💡 **Short on time?** Pre-generated data included—skip straight to GRPO.
 
 **Next:** [The Bash Agent](bash_agent.md)
+
+Ready to turn your built agents into specialized experts? Let's continue to [The Bash Agent](bash_agent.md) to learn about the agent example we'll use.

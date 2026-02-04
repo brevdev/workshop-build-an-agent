@@ -85,3 +85,74 @@ cd code/4-agent-customization && python3 -m bash_agent.main_hf
 | "List files" | `ls` |
 | "Create react agent at ./myapp" | `langgraph new ./myapp --template react-agent-python` |
 | "Build image tagged v2" | `langgraph build --tag v2` |
+
+<!-- fold:break -->
+
+## Module Wrap-Up
+
+<img src="_static/robots/finish.png" alt="Finish Line" style="float:right;max-width:250px;margin:15px;" />
+
+Congratulations! You've completed the Agent Customization module. Let's recap what you've accomplished.
+
+### What You Learned
+
+| Topic | Key Takeaway |
+|-------|--------------|
+| **Why Customize** | Training beats Skills/MCP for depth; use both for breadth + depth |
+| **The Pipeline** | SDG → GRPO → Deployment is a repeatable pattern |
+| **Synthetic Data** | Schema-driven generation ensures coverage, diversity, and validity |
+| **Verifiable Rewards** | Code-based verification is faster and more consistent than LLM judges |
+| **GRPO Training** | Exploration-based learning discovers better solutions than imitation |
+| **Safe Execution** | Allowlists and human-in-the-loop protect against dangerous commands |
+
+### The Generalizable Pattern
+
+Everything you learned extends beyond LangGraph CLI:
+
+| Domain | Output Schema | Verification |
+|--------|---------------|--------------|
+| **kubectl** | Kubernetes resource specs | `kubectl apply --dry-run` |
+| **terraform** | HCL resource definitions | `terraform validate` |
+| **SQL** | Query structure | Database execution / EXPLAIN |
+| **docker** | Container commands | Docker CLI validation |
+| **Your internal CLI** | Your Pydantic models | Your validation logic |
+
+The pattern is always:
+1. **Define schema** — What are valid outputs?
+2. **Generate data** — Cover the output space systematically
+3. **Design rewards** — How do you verify correctness with code?
+4. **Train with GRPO** — Let the model explore and learn
+
+### Skills You've Practiced
+
+- [x] Implementing human-in-the-loop safety wrappers
+- [x] Designing Pydantic schemas for structured outputs
+- [x] Configuring samplers for data diversity
+- [x] Building reward functions for verifiable correctness
+- [x] Running GRPO training with NeMo Gym
+- [x] Evaluating before/after training improvements
+
+### What's Next?
+
+**Immediate extensions:**
+- Expand SDG to cover more commands and edge cases
+- Increase training steps for better performance
+- Add more sophisticated reward components
+
+**Production considerations:**
+- Deploy trained model behind an API
+- Set up continuous evaluation monitoring
+- Plan retraining schedule as CLI evolves
+
+**Advanced topics:**
+- Multi-turn conversations with trained models
+- Combining Skills + trained models for breadth + depth
+- Distillation from larger models to smaller ones
+
+### Final Thought
+
+Agent customization isn't magic—it's engineering. You've learned a systematic approach: measure the gap (Module 3), generate targeted data (SDG), define success criteria (rewards), and train (GRPO). This cycle applies wherever you need agents with domain expertise.
+
+The best agents aren't built in one pass. They're refined iteratively through measurement and improvement. You now have the tools to make that process systematic.
+
+Happy building!

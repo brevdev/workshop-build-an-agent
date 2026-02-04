@@ -126,16 +126,16 @@ HITL is your first line of defense, but production systems often add more layers
 
 <!-- fold:break -->
 
-## Exercises
+## Build the Agent
 
-Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent.ipynb');"><i class="fa-solid fa-flask"></i> bash_agent.ipynb</button>
+Let's build out our baseline bash agent. Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/bash_agent.ipynb');"><i class="fa-solid fa-flask"></i> bash_agent.ipynb</button>
 
-### Exercise 1: HITL Wrapper
+### Exercise: Human-in-the-loop Wrapper
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'class ExecOnConfirm');"><i class="fas fa-code"></i> ExecOnConfirm</button> — Require user approval before running commands.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'class ExecOnConfirm');"><i class="fas fa-code"></i> ExecOnConfirm</button> — Implement requiring user approval before running commands.
 
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 if self._confirm_execution(cmd):
@@ -146,12 +146,12 @@ return {"error": "User declined."}
 
 <!-- fold:break -->
 
-### Exercise 2: Create Agent
+### Exercise: Create React Agent
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'agent = create_react_agent');"><i class="fas fa-code"></i> create_react_agent</button> — Wire up LLM, tool, and prompt.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'agent = create_react_agent');"><i class="fas fa-code"></i> create_react_agent</button> — Wire up the model, tools, and prompt.
 
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 agent = create_react_agent(
@@ -166,10 +166,10 @@ agent = create_react_agent(
 
 ### Exercise 3: Run Loop
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send user message to agent.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send user message to agent using the invoke method.
 
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 result = agent.invoke({"messages": [{"role": "user", "content": user}]})
@@ -178,13 +178,23 @@ result = agent.invoke({"messages": [{"role": "user", "content": user}]})
 
 <!-- fold:break -->
 
-## Test It
+## Running the Agent
+
+After completing the exercises, run your agent in the <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>:
+
+Make sure you're in the `code/4-agent-customization` directory:
 
 ```bash
-cd code/4-agent-customization && python3 -m bash_agent.main_langgraph
+cd code/4-agent-customization
 ```
 
-Try: `"List all files"` → `ls`
+And start the agent you just built: 
+
+```bash
+python3 -m bash_agent.main_langgraph
+```
+
+Try a sample query: `"List all files"` → `ls`
 
 <!-- fold:break -->
 
@@ -225,12 +235,10 @@ It might:
 - Use wrong parameter names
 - Miss required arguments
 
-After training, the same request should reliably produce:
+By the end of the module, that same request should reliably produce:
 
 ```bash
 langgraph new ./myapp --template react-agent-python
 ```
-
-This transformation—from unreliable to expert—is what customization achieves.
 
 Now that we have a good understanding of our baseline bash agent, let's take a look at [Synthetic Data Generation](sdg.md) to get started with the customization pipeline. 

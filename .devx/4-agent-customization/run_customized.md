@@ -2,14 +2,14 @@
 
 <img src="_static/robots/typewriter.png" alt="Running" style="float:right;max-width:250px;margin:15px;" />
 
-## The Payoff
-
 You've completed the customization pipeline:
 1. ✅ Built a base agent (generic bash knowledge)
 2. ✅ Generated training data (SDG for LangGraph CLI)
 3. ✅ Trained with GRPO (verifiable rewards)
 
 Now you have a **specialized model**. The training baked LangGraph CLI knowledge directly into the weights.
+
+<!-- fold:break -->
 
 ## Before vs After
 
@@ -18,6 +18,8 @@ Now you have a **specialized model**. The training baked LangGraph CLI knowledge
 | "Create a react agent" | ❌ Hallucinated command | ✅ `langgraph new ./myapp --template react-agent-python` |
 | "Start dev server on 8080" | ❌ Wrong parameters | ✅ `langgraph dev --port 8080` |
 | "Build image tagged v2" | ❌ Missing flags | ✅ `langgraph build --tag v2` |
+
+<!-- fold:break -->
 
 ## Connecting Back to Evaluation
 
@@ -28,6 +30,8 @@ Remember Module 3's evaluation pipeline? You can now measure the improvement:
 3. Verify **parameter correctness** — Are arguments valid?
 
 The reward function from GRPO training can serve as your production evaluation metric.
+
+<!-- fold:break -->
 
 ## Exercises
 
@@ -47,6 +51,8 @@ llm = HuggingFaceLLM(config)
 ```
 </details>
 
+<!-- fold:break -->
+
 ### Exercise 11: System Prompt
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Use JSON prompt (matches training).
@@ -58,6 +64,8 @@ llm = HuggingFaceLLM(config)
 messages = Messages(config.json_system_prompt)
 ```
 </details>
+
+<!-- fold:break -->
 
 ### Exercise 12: Execute
 
@@ -105,6 +113,8 @@ Congratulations! You've completed the Agent Customization module. Let's recap wh
 | **GRPO Training** | Exploration-based learning discovers better solutions than imitation |
 | **Safe Execution** | Allowlists and human-in-the-loop protect against dangerous commands |
 
+<!-- fold:break -->
+
 ### The Generalizable Pattern
 
 Everything you learned extends beyond LangGraph CLI:
@@ -123,6 +133,8 @@ The pattern is always:
 3. **Design rewards** — How do you verify correctness with code?
 4. **Train with GRPO** — Let the model explore and learn
 
+<!-- fold:break -->
+
 ### Skills You've Practiced
 
 - [x] Implementing human-in-the-loop safety wrappers
@@ -131,6 +143,8 @@ The pattern is always:
 - [x] Building reward functions for verifiable correctness
 - [x] Running GRPO training with NeMo Gym
 - [x] Evaluating before/after training improvements
+
+<!-- fold:break -->
 
 ### What's Next?
 
@@ -148,6 +162,8 @@ The pattern is always:
 - Multi-turn conversations with trained models
 - Combining Skills + trained models for breadth + depth
 - Distillation from larger models to smaller ones
+
+<!-- fold:break -->
 
 ### Final Thought
 

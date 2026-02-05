@@ -2,8 +2,6 @@
 
 <img src="_static/robots/debug.png" alt="Training" style="float:right;max-width:250px;margin:15px;" />
 
-## Two Ways to Train
-
 You have your data. Now how do you teach the model?
 
 | Approach | How It Works | Best For |
@@ -12,6 +10,8 @@ You have your data. Now how do you teach the model?
 | **GRPO (RL-based)** | "Try multiple outputs, learn which score highest" | Complex tasks, verifiable correctness |
 
 **GRPO (Group Relative Policy Optimization)** generates multiple candidate responses per prompt, scores them with a reward function, and reinforces the better ones. This exploration often discovers solutions that pure imitation would miss.
+
+<!-- fold:break -->
 
 ## Why Verifiable Rewards Matter
 
@@ -28,6 +28,8 @@ This is **RLVR (RL with Verifiable Rewards)**:
 - **Scalable** — No human annotators needed
 
 The NeMo Gym server runs these checks and returns reward scores to guide training.
+
+<!-- fold:break -->
 
 ## The Training Loop
 
@@ -301,6 +303,8 @@ This indicates **overfitting** — the model memorized training examples rather 
 
 </details>
 
+<!-- fold:break -->
+
 ## Setup
 
 **Terminal 1** — Start reward server:
@@ -365,6 +369,8 @@ trainer = GRPOTrainer(
 )
 ```
 </details>
+
+<!-- fold:break -->
 
 ## Run
 

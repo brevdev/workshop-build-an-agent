@@ -136,7 +136,6 @@ print(Counter(commands))
 <details>
 <summary><strong>Diversity</strong></summary>
 
-### Diversity
 - [ ] Do inputs vary in phrasing, not just slot values?
 - [ ] Mix of formal and casual language?
 - [ ] Different sentence structures (imperative, question, description)?
@@ -154,7 +153,6 @@ print(Counter(commands))
 <details>
 <summary><strong>Validity</strong></summary>
 
-### Validity
 - [ ] Do all outputs parse as valid JSON?
 - [ ] Do all outputs pass schema validation?
 - [ ] Do command/flag combinations make sense?
@@ -175,7 +173,7 @@ print("All outputs valid!")
 
 We recommend generating your own datasets to get hands-on experience with the synthetic data generation process. However, if you're running into issues or want to move ahead quickly, we've provided a starter dataset you can use. 
 
-> 📁 Sample Training Data (250 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>
+> 📁 Sample Training Data (225 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>
 
 These pre-made dataset can also serve as reference examples when you create your own.
 

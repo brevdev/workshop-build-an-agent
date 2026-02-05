@@ -2,8 +2,6 @@
 
 <img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
 
-## The Data Problem
-
 Training requires examples—lots of them. Each example shows the model:
 - **Input**: What the user says (*"Create a new project with the react template"*)
 - **Output**: What the agent should produce (`{"command": "new", "template": "react-agent-python", ...}`)
@@ -53,7 +51,7 @@ New CLI tools face a chicken-and-egg problem:
 1. **Define the space** — Your Pydantic schema describes all valid outputs
 2. **Sample systematically** — Samplers ensure every corner of the space is covered
 3. **Generate natural language** — An LLM creates realistic user phrasings
-4. **Result**: Training data without real users
+4. **Result**: Real training data without real users
 
 **Why this works**: The model doesn't need *authentic* user phrasing—it needs to learn the *mapping* from intent to command. Synthetic variations are sufficient to learn that mapping, and you can always fine-tune later with real data once you have it.
 
@@ -173,27 +171,28 @@ print("All outputs valid!")
 
 <!-- fold:break -->
 
-## Choose Your Path
+## Sample Datasets
 
-| Option | Time |
-|--------|------|
-| **A: Use pre-generated data** | Skip to [GRPO Training](grpo_training.md) |
-| **B: Generate your own** | 15-20 min (continue below) |
+We recommend generating your own datasets to get hands-on experience with the synthetic data generation process. However, if you're running into issues or want to move ahead quickly, we've provided a starter dataset you can use. 
 
-> 📁 Pre-generated: `data/langgraph_cli/` (250 examples)
+> 📁 Sample Training Data (250 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>
+
+These pre-made dataset can also serve as reference examples when you create your own.
 
 <!-- fold:break -->
 
-## Exercises
+## SDG: Hands On Implementation
 
-Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/01_synthetic_data_generation.ipynb');"><i class="fa-solid fa-flask"></i> 01_synthetic_data_generation.ipynb</button>
+Open the <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/01_synthetic_data_generation.ipynb');"><i class="fa-solid fa-flask"></i> 01_synthetic_data_generation.ipynb</button> notebook. 
 
 ### Exercise: Output Schema
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define Pydantic model for CLI commands.
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define Pydantic model for CLI commands. 
+
+Include `command` (str), `template` (optional str), `path` (optional str), and `port` (optional str) fields. 
 
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 class CLIToolCall(BaseModel):
@@ -210,8 +209,10 @@ class CLIToolCall(BaseModel):
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure template values.
 
+Include the `react-agent-python` and `memory-agent-python` parameters in the list of `values`.
+
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 params=CategorySamplerParams(values=[
@@ -227,8 +228,10 @@ params=CategorySamplerParams(values=[
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button>
 
+Split the `data` and set the `test_size` to 0.1.
+
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 train_data, val_data = train_test_split(data, test_size=0.1)

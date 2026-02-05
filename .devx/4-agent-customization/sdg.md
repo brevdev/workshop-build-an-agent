@@ -18,35 +18,14 @@ For a new domain like the LangGraph CLI, we don't have the real logs from the ag
 
 <!-- fold:break -->
 
-## How SDG Works
-
-**NeMo Data Designer** generates training data programmatically:
-
-1. **Define the output schema** — A Pydantic model describing valid CLI commands
-2. **Configure samplers** — Distributions for each field (which commands? which templates? which ports?)
-3. **Generate natural language** — An LLM creates realistic user requests for each command
-4. **Combine into examples** — Input/output pairs ready for training
-
-This is different from just prompting an LLM to "make up examples." Data Designer ensures:
-- **Coverage** — Every command type appears in training
-- **Diversity** — Varied phrasing, not repetitive patterns
-- **Validity** — Outputs match your schema exactly
-
-<!-- fold:break -->
-
 ## Why Synthetic Data Works
 
-Click on each of the following items to learn more. 
-
-<details>
-<summary><strong>The Cold Start Problem</strong></summary>
-
-New CLI tools face a chicken-and-egg problem:
+**The Cold Start Problem:** New CLI tools face a chicken-and-egg problem:
 - You need training data to build a good agent
 - You need users to generate real training data
 - You need a good agent to attract users
 
-**SDG breaks this cycle:**
+SDG breaks this cycle:
 
 1. **Define the space** — Your Pydantic schema describes all valid outputs
 2. **Sample systematically** — Samplers ensure every corner of the space is covered
@@ -55,12 +34,9 @@ New CLI tools face a chicken-and-egg problem:
 
 **Why this works**: The model doesn't need *authentic* user phrasing—it needs to learn the *mapping* from intent to command. Synthetic variations are sufficient to learn that mapping, and you can always fine-tune later with real data once you have it.
 
-</details>
+<!-- fold:break -->
 
-<details>
-<summary><strong>SDG vs. LLM Prompting</strong></summary>
-
-You might wonder: "Why not just ask GPT to generate 200 training examples?"
+**SDG vs. LLM Prompting:** You might wonder: "Why not just ask GPT to generate 200 training examples?"
 
 | Approach | Coverage | Validity | Diversity | Control |
 |----------|----------|----------|-----------|---------|
@@ -68,6 +44,9 @@ You might wonder: "Why not just ask GPT to generate 200 training examples?"
 | **NeMo Data Designer** | Guaranteed by samplers | Guaranteed by schema | Controlled by sampler config | High |
 
 **The key difference**: Data Designer generates outputs *first* (from your schema), then creates matching inputs. LLM prompting generates inputs and hopes the outputs are valid.
+
+<details>
+<summary><strong>Click me to see an example</strong></summary>
 
 ```python
 # LLM prompting approach (risky)
@@ -81,10 +60,7 @@ inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixe
 
 </details>
 
-<details>
-<summary><strong>What makes Training Data "Good Enough"?</strong></summary>
-
-Training data quality matters more than quantity. Here's what to aim for:
+**What makes Training Data "Good Enough"?** Training data quality matters more than quantity. Here's what to aim for:
 
 **Minimum viable dataset:**
 - At least 10-20 examples per command type
@@ -99,7 +75,27 @@ Training data quality matters more than quantity. Here's what to aim for:
 
 **Diminishing returns**: Beyond 500-1000 examples, adding more data helps less. Focus on diversity over quantity.
 
-</details>
+<!-- fold:break -->
+
+## How SDG Works
+
+**NeMo Data Designer** generates training data programmatically:
+
+1. **Define the output schema** — A Pydantic model describing valid CLI commands
+2. **Configure samplers** — Distributions for each field (which commands? which templates? which ports?)
+3. **Generate natural language** — An LLM creates realistic user requests for each command
+4. **Combine into examples** — Input/output pairs ready for training
+
+```
+  ┌───────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+  │ Define Output │    │   Sample     │    │  Generate    │    │   Combine    │
+  │ Schema        │ →  │   Valid      │ →  │  Natural     │ →  │  Training    │
+  │ (Pydantic)    │    │   Outputs    │    │  Language    │    │  Pairs       │
+  └───────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+      Outputs first (always valid)           Inputs second (varied phrasing)
+```
+
+This is different from just prompting an LLM to "make up examples." Data Designer ensures coverage, diversity and validity of training data. 
 
 <!-- fold:break -->
 
@@ -235,6 +231,18 @@ Split the `data` and set the `test_size` to 0.1.
 train_data, val_data = train_test_split(data, test_size=0.1)
 ```
 </details>
+
+<!-- fold:break -->
+
+## Inspecting Your Data
+
+Before moving to training, spot-check a few examples from your generated data in <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>:
+
+- **Do the inputs sound natural?** They should read like something a real user would type, not robotic templates.
+- **Do the outputs parse correctly?** Every output should be valid JSON matching the `CLIToolCall` schema.
+- **Is there variety?** Scan for repetitive phrasing. If many examples start with the same words, the model may learn to depend on those patterns rather than understanding intent.
+
+A few minutes of inspection now can save hours of debugging during training. If your data contains invalid outputs, the reward function will score them as failures—confusing the training signal rather than strengthening it.
 
 <!-- fold:break -->
 

@@ -22,11 +22,15 @@ We chose this agent use case for customization because:
 
 ## Architecture
 
-The agent uses patterns you've seen before:
+The agent follows the **ReAct pattern** from Module 1—Reason, Act, Observe in a loop—with a critical addition: human approval before any command runs.
 
-- **ReAct pattern** — Reason → Act → Observe in a loop until done
-- **Human-in-the-loop** — User approves each command before execution (safety net)
-- **LangGraph** — Orchestrates the agent's state machine
+```
+  User Request → LLM Reasons → Proposes Command → Human Approves? → Execute
+                      ↑                                                │
+                      └──────────────── Observe Output ────────────────┘
+```
+
+**LangGraph** orchestrates this state machine. The human-in-the-loop gate is what makes this agent safe to use on a real system—more on that below.
 
 <!-- fold:break -->
 
@@ -120,7 +124,7 @@ HITL is your first line of defense, but production systems often add more layers
 3. **Sandboxing** — Execute in isolated environments where damage is contained
 4. **Audit logging** — Record all commands for review and accountability
 
-> 💡 **Coming later**: Module 5 covers **sandboxing**—running agents in isolated containers where even dangerous commands can't harm your real system. HITL catches mistakes; sandboxing contains them.
+> 💡 **Looking Ahead**: Module 5 covers **sandboxing**—running agents in isolated containers where even dangerous commands can't harm your real system. HITL catches mistakes; sandboxing contains them.
 
 <!-- fold:break -->
 
@@ -226,17 +230,14 @@ Skills transform the agent from a simple command executor into a methodical prob
 
 ## The Gap We'll Fix
 
-Now that we've built our baseline bash agent, let's identify a core gap. Try asking the base agent: *"Create a new LangGraph project with the react-agent template"*
+Now that we've built our baseline bash agent, let's identify the gap we'll close through customization. Try these prompts and note what the base agent produces:
 
-It might:
-- Hallucinate a command that doesn't exist
-- Use wrong parameter names
-- Miss required arguments
+| Prompt | What You Might Get | What It Should Be |
+|--------|-------------------|-------------------|
+| *"Create a new LangGraph project with the react template"* | Hallucinated or generic command | `langgraph new ./myapp --template react-agent-python` |
+| *"Start a dev server on port 8080"* | Wrong flags or syntax | `langgraph dev --port 8080` |
+| *"Build a docker image tagged v2"* | Missing LangGraph-specific flags | `langgraph build --tag v2` |
 
-By the end of the module, that same request should reliably produce:
+The base model knows generic bash but has never seen the LangGraph CLI. It guesses—and guesses wrong. By the end of this module, that same agent will reliably produce correct commands because the knowledge will be **baked into the model's weights**.
 
-```bash
-langgraph new ./myapp --template react-agent-python
-```
-
-Now that we have a good understanding of our baseline bash agent, let's take a look at [Synthetic Data Generation](sdg.md) to get started with the customization pipeline. 
+Now let's take a look at [Synthetic Data Generation](sdg.md) to get started with the customization pipeline.

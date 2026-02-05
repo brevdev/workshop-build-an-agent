@@ -2,22 +2,37 @@
 
 <img src="_static/robots/study.png" alt="Understanding Customization" style="float:right;max-width:250px;margin:15px;" />
 
-In Module 3, you learned to **measure** agent performance—faithfulness, relevance, tone, and so on. But what happens when the metrics reveal problems?
+In Module 3, you learned to **measure** agent performance — faithfulness, relevance, tone, and so on. But what happens when the metrics reveal problems?
 
 Typically, you may have three overarching options:
-1. **Prompt engineering** — Tweak agent instructions (quick but limited)
+1. **Prompt engineering** — Tweak the agent's instructions (quick but limited)
 2. **Add tools/skills** — Give the agent more functionality (expand capability)
-3. **Train the model** — Fundamentally improve its understanding (specialize knowledge)
+3. **Train the agent** — Fundamentally improve its understanding (specialize knowledge)
 
-Options 1 and 2 have already been discussed in Modules 1 and 2, respectively. This module teaches Option 3: how to **customize a model** so it natively understands your domain. 
-
-We'll take a bash agent and train it to expertly handle the **LangGraph CLI**.
+Options 1 and 2 were covered in Modules 1 and 2. These work well for many issues, but some problems resist surface-level fixes. When a model fundamentally doesn't understand your domain, this is where training the agent shines. 
 
 <!-- fold:break -->
 
-## Two Paths to Specialization
+## Model Customization
 
-When your agent needs domain expertise, you have two architectural choices:
+Before diving into the specifics, let's build intuition for what "training" actually means in this context. Let's begin with models. 
+
+A pretrained language model already understands grammar, reasoning, and general knowledge. Customization doesn't start from scratch—it **specializes** what the model already knows. This is why customization works even with small datasets: you're teaching domain expertise, not language itself.
+
+There are two main approaches to training:
+
+| Approach | How It Learns |
+|----------|---------------|
+| **SFT (Supervised Fine-Tuning)** | "Memorize: input X → output Y" |
+| **GRPO (RL-based)** | "Try multiple answers, learn which score highest" |
+
+SFT works well with abundant, high-quality examples. **GRPO** works better when you can programmatically verify correctness—which is exactly our case with CLI commands.
+
+<!-- fold:break -->
+
+## Agent Customization
+
+Now, let's apply this to agents. When your agent needs domain expertise, you have two architectural choices:
 
 ### Path A: Skills & MCP (Runtime Knowledge)
 
@@ -29,6 +44,8 @@ In Module 2, you added **Skills** (dynamic instructions the agent loads) and **M
 - Use cases that can afford a bit of latency
 
 **The limitation**: Every skill and tool competes for the model's attention. With 5 tools, selection is easy. With 50+, models start picking wrong tools, hallucinating parameters, or forgetting which tool does what.
+
+> 💡 **Key question**: Can prompt engineering and tools get you 90% of the way? If so, the upfront cost of training may not be justified. If the model consistently fails despite high quality prompts, training is the right investment.
 
 <!-- fold:break -->
 
@@ -55,6 +72,16 @@ Training writes knowledge directly into the model's weights. The model doesn't *
 ## The Customization Pipeline
 
 Training an agent requires three components working together:
+
+```
+  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+  │  1. Generate │     │  2. Define   │     │   3. Train   │
+  │   Data (SDG) │ →   │   Rewards    │ →   │   (GRPO)     │
+  │              │     │  (NeMo Gym)  │     │              │
+  └──────────────┘     └──────────────┘     └──────────────┘
+   NeMo Data            Code-based           Exploration-based
+   Designer             verification         RL training
+```
 
 ### 1. Training Data (NeMo Data Designer)
 

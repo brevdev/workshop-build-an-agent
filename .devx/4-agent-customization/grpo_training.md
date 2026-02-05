@@ -2,14 +2,14 @@
 
 <img src="_static/robots/debug.png" alt="Training" style="float:right;max-width:250px;margin:15px;" />
 
-You have your data. Now how do you teach the model?
+You have your dataset. Now how do you teach the model with it?
 
 | Approach | How It Works | Best For |
 |----------|--------------|----------|
 | **SFT (Supervised Fine-Tuning)** | "Memorize: input X → output Y" | Simple tasks, abundant data |
 | **GRPO (RL-based)** | "Try multiple outputs, learn which score highest" | Complex tasks, verifiable correctness |
 
-**GRPO (Group Relative Policy Optimization)** generates multiple candidate responses per prompt, scores them with a reward function, and reinforces the better ones. This exploration often discovers solutions that pure imitation would miss.
+**GRPO (Group Relative Policy Optimization)** is a form of reinforcement learning with verifiable rewards (RLVR) that generates multiple candidate responses per prompt, scores them with a reward function, and reinforces the better ones. This exploration often discovers solutions that pure imitation would miss.
 
 <!-- fold:break -->
 
@@ -28,15 +28,6 @@ This is **RLVR (RL with Verifiable Rewards)**:
 - **Scalable** — No human annotators needed
 
 The NeMo Gym server runs these checks and returns reward scores to guide training.
-
-<!-- fold:break -->
-
-## The Training Loop
-
-1. Model generates 4+ responses to each prompt
-2. Reward server scores each response (0.0 to 1.0)
-3. GRPO computes gradients that favor higher-scoring responses
-4. Repeat for 50+ steps until the model reliably produces correct outputs
 
 <!-- fold:break -->
 
@@ -226,7 +217,104 @@ The NeMo Gym verifier computes a **composite reward** with multiple components:
 
 <!-- fold:break -->
 
-## Troubleshooting Training
+## The Full Training Loop
+
+```
+  ┌───────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+  │  Training │    │    Model     │    │   Reward     │    │    GRPO      │
+  │  Prompt   │ →  │  Generates   │ →  │   Server     │ →  │  Reinforces  │
+  │           │    │  4+ Outputs  │    │   Scores     │    │  Best Ones   │
+  └───────────┘    └──────────────┘    └──────────────┘    └──────┬───────┘
+                                                                  │
+                        ← ── ── ── ── Repeat for 50+ steps ── ── ┘
+```
+
+To make this concrete, here's what happens in a single training step. The model sees: *"Create a new project with the react template"* and generates 4 candidates:
+
+| # | Model Output | Reward |
+|---|-------------|--------|
+| 1 | `{"command": "new", "template": "react-agent-python", "path": "./myapp"}` | **0.95** |
+| 2 | `{"command": "new", "template": "wrong-template"}` | **0.50** |
+| 3 | `{"command": "create", "template": "react"}` | **0.20** |
+| 4 | `not valid json` | **0.00** |
+
+GRPO computes that Response #1 scored above the group average and reinforces its patterns. Response #4 scored far below, so those patterns are suppressed. Over many steps, the model converges toward reliably producing correct outputs.
+
+<!-- fold:break -->
+
+## GRPO: Hands-on Implementation
+
+Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> window — Start reward server:
+
+```bash
+cd code/4-agent-customization/nemo_gym_resources/langgraph_cli
+uvicorn app:app --host 0.0.0.0 --port 8000
+```
+
+Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/02_grpo_training.ipynb');"><i class="fa-solid fa-flask"></i> 02_grpo_training.ipynb</button>
+
+<!-- fold:break -->
+
+### Exercise: Reward Function
+
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'def reward_fn');"><i class="fas fa-code"></i> reward_fn</button> — Call NeMo Gym `/verify` endpoint.
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+resp = requests.post(verify_endpoint, json=verify_request)
+reward = resp.json().get("reward", 0.0)
+```
+</details>
+
+<!-- fold:break -->
+
+### Exercise: Training Config
+
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button>
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+training_args = GRPOConfig(
+    num_generations=4,
+    learning_rate=1e-5,
+    max_steps=50,
+)
+```
+</details>
+
+<!-- fold:break -->
+
+### Exercise: GRPO Trainer
+
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button>
+
+<details>
+<summary>🆘 Need some help?</summary>
+
+```python
+trainer = GRPOTrainer(
+    model=model,
+    reward_funcs=[reward_fn],
+    train_dataset=train_dataset,
+)
+```
+</details>
+
+<!-- fold:break -->
+
+## Train the Agent
+
+Run `trainer.train()` notebook cell — should take around **~60-70 min** to complete on an A100/H100.
+
+The customized model should appear in this location when completed: `outputs/grpo_langgraph_cli/merged_model/`
+
+<!-- fold:break -->
+
+## Troubleshooting
 
 <details>
 <summary><strong>Rewards not improving</strong></summary>
@@ -303,79 +391,4 @@ This indicates **overfitting** — the model memorized training examples rather 
 
 </details>
 
-<!-- fold:break -->
-
-## Setup
-
-**Terminal 1** — Start reward server:
-```bash
-cd code/4-agent-customization/nemo_gym_resources/langgraph_cli
-uvicorn app:app --host 0.0.0.0 --port 8000
-```
-
-**Terminal 2** — Open notebook:
-
-<button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/02_grpo_training.ipynb');"><i class="fa-solid fa-flask"></i> 02_grpo_training.ipynb</button>
-
-<!-- fold:break -->
-
-## Exercises
-
-### Exercise 7: Reward Function
-
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'def reward_fn');"><i class="fas fa-code"></i> reward_fn</button> — Call NeMo Gym `/verify` endpoint.
-
-<details>
-<summary>🆘 Hint</summary>
-
-```python
-resp = requests.post(verify_endpoint, json=verify_request)
-reward = resp.json().get("reward", 0.0)
-```
-</details>
-
-<!-- fold:break -->
-
-### Exercise 8: Config
-
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button>
-
-<details>
-<summary>🆘 Hint</summary>
-
-```python
-training_args = GRPOConfig(
-    num_generations=4,
-    learning_rate=1e-5,
-    max_steps=50,
-)
-```
-</details>
-
-<!-- fold:break -->
-
-### Exercise 9: Trainer
-
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button>
-
-<details>
-<summary>🆘 Hint</summary>
-
-```python
-trainer = GRPOTrainer(
-    model=model,
-    reward_funcs=[reward_fn],
-    train_dataset=train_dataset,
-)
-```
-</details>
-
-<!-- fold:break -->
-
-## Run
-
-Run `trainer.train()` — **~60-70 min** on A100/H100.
-
-Output: `outputs/grpo_langgraph_cli/merged_model/`
-
-**Next:** [Run Customized Agent](run_customized.md)
+Now that we've completed training the agent, let's run it again and see whether or not it's learned the new Langgraph CLI domain. Head over to [Run Customized Agent](run_customized.md) and get started!

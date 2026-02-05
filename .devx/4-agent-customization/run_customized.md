@@ -2,49 +2,25 @@
 
 <img src="_static/robots/typewriter.png" alt="Running" style="float:right;max-width:250px;margin:15px;" />
 
-You've completed the customization pipeline:
+Congratulations, you've now completed the customization pipeline:
 1. ✅ Built a base agent (generic bash knowledge)
 2. ✅ Generated training data (SDG for LangGraph CLI)
 3. ✅ Trained with GRPO (verifiable rewards)
 
-Now you have a **specialized model**. The training baked LangGraph CLI knowledge directly into the weights.
-
-<!-- fold:break -->
-
-## Before vs After
-
-| Request | Before Training | After Training |
-|---------|-----------------|----------------|
-| "Create a react agent" | ❌ Hallucinated command | ✅ `langgraph new ./myapp --template react-agent-python` |
-| "Start dev server on 8080" | ❌ Wrong parameters | ✅ `langgraph dev --port 8080` |
-| "Build image tagged v2" | ❌ Missing flags | ✅ `langgraph build --tag v2` |
-
-<!-- fold:break -->
-
-## Connecting Back to Evaluation
-
-Remember Module 3's evaluation pipeline? You can now measure the improvement:
-
-1. Run the **same test cases** against base vs trained model
-2. Check **tool usage accuracy** — Does it pick the right command?
-3. Verify **parameter correctness** — Are arguments valid?
-
-The reward function from GRPO training can serve as your production evaluation metric.
+Now you have a **specialized agent**. The training baked LangGraph CLI knowledge directly into the agent.
 
 <!-- fold:break -->
 
 ## Exercises
 
-Open <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/03_run_agent.ipynb');"><i class="fa-solid fa-flask"></i> 03_run_agent.ipynb</button>
+Open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/03_run_agent.ipynb');"><i class="fa-solid fa-flask"></i> 03_run_agent.ipynb</button>
 
-<!-- fold:break -->
-
-### Exercise 10: Load Model
+### Exercise: Load Model
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'llm = HuggingFaceLLM');"><i class="fas fa-code"></i> HuggingFaceLLM</button>
 
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 llm = HuggingFaceLLM(config)
@@ -53,12 +29,12 @@ llm = HuggingFaceLLM(config)
 
 <!-- fold:break -->
 
-### Exercise 11: System Prompt
+### Exercise: System Prompt
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Use JSON prompt (matches training).
 
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 messages = Messages(config.json_system_prompt)
@@ -67,12 +43,12 @@ messages = Messages(config.json_system_prompt)
 
 <!-- fold:break -->
 
-### Exercise 12: Execute
+### Exercise: Execute
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'tool_result = bash.exec_bash_command');"><i class="fas fa-code"></i> exec_bash_command</button>
 
 <details>
-<summary>🆘 Hint</summary>
+<summary>🆘 Need some help?</summary>
 
 ```python
 if confirm_execution(command):
@@ -82,17 +58,64 @@ if confirm_execution(command):
 
 <!-- fold:break -->
 
-## Test It
+## Run Agent Interactively
+
+### Run the Customized Agent
+
+After completing the exercises, start your new agent in the <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>:
+
+Make sure you're in the `code/4-agent-customization` directory:
 
 ```bash
-cd code/4-agent-customization && python3 -m bash_agent.main_hf
+code/4-agent-customization
 ```
 
-| Try | Expected |
-|-----|----------|
-| "List files" | `ls` |
-| "Create react agent at ./myapp" | `langgraph new ./myapp --template react-agent-python` |
-| "Build image tagged v2" | `langgraph build --tag v2` |
+And start your customized bash agent: 
+
+```bash
+python3 -m bash_agent.main_hf
+```
+
+<!-- fold:break -->
+
+### Test the Customized Agent
+
+Try some of the following commands and see how your agent has improved in its understanding with customization. 
+
+| Request | Before Training | After Training |
+|---------|-----------------|----------------|
+| "List files" | ✅ `ls` | ✅ `ls` |
+| "Create a react agent" | ❌ Hallucinated command | ✅ `langgraph new ./myapp --template react-agent-python` |
+| "Start dev server on 8080" | ❌ Wrong parameters | ✅ `langgraph dev --port 8080` |
+| "Build image tagged v2" | ❌ Missing flags | ✅ `langgraph build --tag v2` |
+
+<!-- fold:break -->
+
+## Measuring the Improvement
+
+The reward function you built for GRPO training doubles as an evaluation metric. Run your validation set against both the base and trained models to quantify the improvement:
+
+| Metric | Base Model | Trained Model |
+|--------|-----------|---------------|
+| **JSON Format Accuracy** | ~30% | ~95% |
+| **Command Correctness** | ~10% | ~90% |
+| **Flag Accuracy** | ~5% | ~85% |
+| **Overall Mean Reward** | ~0.15 | ~0.90 |
+
+This closes the loop with Module 3: the same evaluation mindset applies, but now your reward function provides **objective, automated scoring** rather than relying on an LLM judge.
+
+<!-- fold:break -->
+
+## What If Results Aren't Good Enough?
+
+If the trained model still makes mistakes, apply the iterative improvement cycle from Module 3:
+
+1. **Analyze failure patterns** — Which commands or flags fail most? Use the reward function's component scores (JSON format, command correctness, flag accuracy) to pinpoint weak spots.
+2. **Generate targeted data** — SDG can oversample weak areas. If `dockerfile` commands have low accuracy, generate more examples with diverse `output_path` values.
+3. **Adjust reward weights** — If the model gets commands right but flags wrong, increase the `flag_accuracy_reward` weight to focus training attention there.
+4. **Train longer** — 50 steps is a starting point. Extending to 100-200 steps often improves edge case handling.
+
+The pattern is always: **measure → diagnose → fix → retrain → re-measure**.
 
 <!-- fold:break -->
 
@@ -135,14 +158,18 @@ The pattern is always:
 
 <!-- fold:break -->
 
-### Skills You've Practiced
+### The Full Workshop Arc
 
-- [x] Implementing human-in-the-loop safety wrappers
-- [x] Designing Pydantic schemas for structured outputs
-- [x] Configuring samplers for data diversity
-- [x] Building reward functions for verifiable correctness
-- [x] Running GRPO training with NeMo Gym
-- [x] Evaluating before/after training improvements
+You've now traveled the complete agent development lifecycle:
+
+| Module | What You Learned | Key Capability |
+|--------|-----------------|----------------|
+| **Module 1** | Build agents with ReAct | Agent fundamentals |
+| **Module 2** | Extend with RAG, tools, and skills | Agent capabilities |
+| **Module 3** | Measure and evaluate systematically | Agent quality |
+| **Module 4** | Customize through training | Agent expertise |
+
+This is the same cycle production teams follow: build, extend, measure, improve. Each module's skills compound—evaluation informs customization, customization produces measurable improvement, and the cycle continues.
 
 <!-- fold:break -->
 

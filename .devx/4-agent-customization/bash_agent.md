@@ -124,7 +124,7 @@ HITL is your first line of defense, but production systems often add more layers
 3. **Sandboxing** — Execute in isolated environments where damage is contained
 4. **Audit logging** — Record all commands for review and accountability
 
-> 💡 **Looking Ahead**: Module 5 covers **sandboxing**—running agents in isolated containers where even dangerous commands can't harm your real system. HITL catches mistakes; sandboxing contains them.
+> 💡 **Looking Ahead**: Module 5 covers **deep agents**—autonomous agents that tackle complex, multi-step tasks. You'll also learn about **sandboxing**, running agents in isolated containers where even dangerous commands can't harm your real system. HITL catches mistakes; sandboxing contains them.
 
 <!-- fold:break -->
 

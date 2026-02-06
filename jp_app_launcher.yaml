@@ -52,10 +52,10 @@
   icon: /project/.devx/_static/img/nvidia-icon.svg
   catalog: NVIDIA DevX Learning Path
 
-- title: "5. Sandboxing and Security"
+- title: "5. Deep Agents"
   description: ""
   source: http://localhost:$PORT/
-  cwd: "/project/.devx/5-sandboxing-and-security"
+  cwd: "/project/.devx/5-deep-agents"
   type: local-server
   args:
     - "python3"

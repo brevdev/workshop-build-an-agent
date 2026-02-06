@@ -8,7 +8,7 @@ This workshop provides everything you need to become proficient in agentic AI de
 * **Module 2 - Agentic RAG**: Build an IT Help Desk agent using RAG with NVIDIA NeMo Retriever
 * **Module 3 - Agent Evaluation**: Learn to measure and improve agent quality using RAGAS metrics and LLM-as-a-judge techniques
 * **Module 4 - Agent Customization**: Customize your agent beyond prompt engineering and tools with agent skills and reinforcement learning (RL).
-* **Module 5 - Sandboxing and Security**: Run your deep agents safely and securely in production, in isolated sandbox environments. 
+* **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation. 
 
 At the end of this workshop, you will take home:
 

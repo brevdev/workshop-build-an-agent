@@ -99,7 +99,7 @@ This is different from just prompting an LLM to "make up examples." Data Designe
 
 <!-- fold:break -->
 
-## Data Quality Checklist
+### Data Quality Checklist
 
 Before training, verify your synthetic data meets these criteria. **Click each item to learn more.**
 
@@ -165,7 +165,7 @@ print("All outputs valid!")
 
 <!-- fold:break -->
 
-## Sample Datasets
+### Sample Datasets
 
 We recommend generating your own datasets to get hands-on experience with the synthetic data generation process. However, if you're running into issues or want to move ahead quickly, we've provided a starter dataset you can use. 
 
@@ -181,9 +181,9 @@ Open the <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customizati
 
 ### Exercise: Output Schema
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define Pydantic model for CLI commands. 
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define the Pydantic model for CLI commands.
 
-Include `command` (str), `template` (optional str), `path` (optional str), and `port` (optional str) fields. 
+This schema is what Data Designer samples from to generate valid outputs — every synthetic example is guaranteed to conform to it. Define `CLIToolCall` as a `BaseModel` with `command` (str), `template` (optional str), `path` (optional str), and `port` (optional int) fields. Optional fields should default to `None`.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -201,16 +201,16 @@ class CLIToolCall(BaseModel):
 
 ### Exercise: Template Sampler
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure template values.
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure the template values the sampler draws from.
 
-Include the `react-agent-python` and `memory-agent-python` parameters in the list of `values`.
+Samplers control the distribution of generated outputs — they're what ensures your dataset covers the full output space rather than clustering around common cases. Add `"react-agent-python"` and `"memory-agent-python"` to the `values` list in `CategorySamplerParams`.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
 params=CategorySamplerParams(values=[
-    "react-agent-python", 
+    "react-agent-python",
     "memory-agent-python"
 ])
 ```
@@ -220,9 +220,9 @@ params=CategorySamplerParams(values=[
 
 ### Exercise: Train/Val Split
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button>
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button> — Split the dataset for training and validation.
 
-Split the `data` and set the `test_size` to 0.1.
+The validation set is held out during GRPO training and used to detect overfitting — if training reward climbs but validation reward plateaus, the model is memorizing rather than generalizing. Split `data` with `test_size` set to `0.1` (10% for validation).
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -245,8 +245,6 @@ Before moving to training, spot-check a few examples from your generated data in
 A few minutes of inspection now can save hours of debugging during training. If your data contains invalid outputs, the reward function will score them as failures—confusing the training signal rather than strengthening it.
 
 <!-- fold:break -->
-
-## Output
 
 Double check that you have successfully generated synthetic data for the LangGraph CLI.
 

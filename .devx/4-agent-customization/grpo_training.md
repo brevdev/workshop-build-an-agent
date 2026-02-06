@@ -13,7 +13,7 @@ You have your dataset. Now how do you teach the model with it?
 
 <!-- fold:break -->
 
-## Why Verifiable Rewards Matter
+## Verifiable Rewards
 
 In Module 3, you learned about LLM-as-judge for evaluation. That works for subjective qualities (helpfulness, tone). But for **structured outputs**, we can do better.
 
@@ -31,7 +31,7 @@ The NeMo Gym server runs these checks and returns reward scores to guide trainin
 
 <!-- fold:break -->
 
-## Understanding GRPO In Depth
+## Understanding GRPO
 
 **Click on each of the following questions to learn more.**
 
@@ -246,9 +246,9 @@ Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab(
 
 ### Exercise: Reward Function
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'def reward_fn');"><i class="fas fa-code"></i> reward_fn</button> — Call NeMo Gym `/verify` endpoint.
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'def reward_fn');"><i class="fas fa-code"></i> reward_fn</button> — Call the NeMo Gym `/verify` endpoint to score model outputs.
 
-Implement `resp` by posting a request to the `verify_endpoint` with `json` set to the `verify_request`. Then `reward` should be the reward field in the `resp` json object.
+This is the bridge between GRPO and verifiable rewards: each model completion gets sent to the NeMo Gym server, which returns a composite reward score (JSON format + command correctness + flag accuracy). Implement `resp` by posting to `verify_endpoint` with `json` set to `verify_request`, then extract `reward` from the response JSON (defaulting to `0.0`).
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -263,9 +263,9 @@ reward = resp.json().get("reward", 0.0)
 
 ### Exercise: Training Config
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button> — Set the training arguments. 
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button> — Configure the GRPO hyperparameters.
 
-Implement `training_args` with `num_generations` set to 4, `learning_rate` set to 1e-5 and `max_steps` set to 50. 
+These three settings control the core training dynamics: `num_generations` is how many candidate outputs GRPO generates per prompt (more = richer comparison signal), `learning_rate` controls the step size for weight updates, and `max_steps` caps the total training iterations. Implement `training_args` with `num_generations=4`, `learning_rate=1e-5`, and `max_steps=50`.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -283,9 +283,9 @@ training_args = GRPOConfig(
 
 ### Exercise: GRPO Trainer
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button> - Define the trainer. 
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button> — Wire up the model, reward function, and dataset into the trainer.
 
-Implement `trainer` with the `model`, `reward_funcs` as a single item list, and the `train_dataset`. 
+The `GRPOTrainer` orchestrates the full training loop shown above: generate completions, score them via the reward function, and reinforce the best ones. Implement `trainer` with `model`, `reward_funcs` as a single-item list containing `reward_fn`, and `train_dataset`.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -301,7 +301,7 @@ trainer = GRPOTrainer(
 
 <!-- fold:break -->
 
-## Train the Agent
+### Train the Agent
 
 Run `trainer.train()` notebook cell — should take around **~60-70 min** to complete on an A100/H100.
 

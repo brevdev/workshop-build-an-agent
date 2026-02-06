@@ -7,17 +7,44 @@ Congratulations, you've now completed the customization pipeline:
 2. ✅ Generated training data (SDG for LangGraph CLI)
 3. ✅ Trained with GRPO (verifiable rewards)
 
-Now you have a **specialized agent**. The training baked LangGraph CLI knowledge directly into the agent.
+Now you have a **specialized agent**. The training baked LangGraph CLI knowledge directly into the model's weights—it doesn't need to consult tools or documentation to know LangGraph CLI commands.
 
 <!-- fold:break -->
 
-## Exercises
+But how do we actually *use* the trained model? The training notebook saved a merged model checkpoint. Now we need to:
+1. **Load the trained model** instead of the generic base model
+2. **Use the right prompt format** — the model was trained with a specific JSON system prompt, and we need to match that at inference time
+3. **Wire up the same HITL execution** — the model is smarter, but safety patterns still apply
+
+<!-- fold:break -->
+
+## From Training to Inference
+
+During GRPO training, the model learned to map natural language requests to structured JSON tool calls. At inference time, the flow looks like this:
+
+```
+  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+  │  User Input  │    │   Trained    │    │  JSON Tool   │    │   HITL       │
+  │  (natural    │ →  │   Model      │ →  │  Call Output │ →  │   Confirm &  │
+  │   language)  │    │ (HuggingFace)│    │  (structured)│    │   Execute    │
+  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+```
+
+The key difference from the base agent in `bash_agent.ipynb`: instead of calling a remote NIM model via API, we're running the trained model **locally** with HuggingFace Transformers. The `HuggingFaceLLM` class handles model loading, tokenization, and parsing the structured JSON output.
+
+<!-- fold:break -->
+
+## Run the Agent: Hands-on Implementation
 
 Open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/03_run_agent.ipynb');"><i class="fa-solid fa-flask"></i> 03_run_agent.ipynb</button>
 
 ### Exercise: Load Model
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'llm = HuggingFaceLLM');"><i class="fas fa-code"></i> HuggingFaceLLM</button>
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'llm = HuggingFaceLLM');"><i class="fas fa-code"></i> HuggingFaceLLM</button> — Load the trained model for local inference.
+
+The `HuggingFaceLLM` class wraps HuggingFace Transformers to provide the same interface as the NIM-based LLM from the base agent. It loads the trained checkpoint from `config.model_path` (which points to `outputs/grpo_langgraph_cli/merged_model`), handles tokenization, and parses structured JSON tool calls from the model's output.
+
+Implement `llm` by instantiating `HuggingFaceLLM` with the `config` object.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -31,7 +58,13 @@ llm = HuggingFaceLLM(config)
 
 ### Exercise: System Prompt
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Use JSON prompt (matches training).
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Initialize conversation with the JSON system prompt.
+
+This is a subtle but critical detail: the model was trained with `config.json_system_prompt`, which instructs it to produce **structured JSON tool calls**. If you use the generic `config.system_prompt` instead, the model's output format won't match what it learned during GRPO training, and performance will degrade.
+
+> 💡 **Why this matters**: During training, the system prompt was part of every input. The model learned to produce correct outputs *conditioned on that specific prompt*. Changing the prompt at inference time is like studying for one exam and sitting for a different one.
+
+Implement `messages` by creating a `Messages` instance with `config.json_system_prompt`.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -43,9 +76,13 @@ messages = Messages(config.json_system_prompt)
 
 <!-- fold:break -->
 
-### Exercise: Execute
+### Exercise: Execute with Human-in-the-Loop
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'tool_result = bash.exec_bash_command');"><i class="fas fa-code"></i> exec_bash_command</button>
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'tool_result = bash.exec_bash_command');"><i class="fas fa-code"></i> exec_bash_command</button> — Execute the command after user confirmation.
+
+Even though the trained model is more accurate, the HITL pattern from `bash_agent.md` still applies. A smarter model reduces the frequency of errors but doesn't eliminate them—especially for edge cases outside the training distribution. The `confirm_execution()` function prompts the user before any command runs.
+
+Implement the execution block: if the user confirms the command, execute it with `bash.exec_bash_command(command)` and store the result in `tool_result`.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -58,19 +95,17 @@ if confirm_execution(command):
 
 <!-- fold:break -->
 
-## Run Agent Interactively
-
-### Run the Customized Agent
+## Run the Agent Interactively
 
 After completing the exercises, start your new agent in the <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>:
 
 Make sure you're in the `code/4-agent-customization` directory:
 
 ```bash
-code/4-agent-customization
+cd code/4-agent-customization
 ```
 
-And start your customized bash agent: 
+And start your customized bash agent:
 
 ```bash
 python3 -m bash_agent.main_hf
@@ -80,7 +115,7 @@ python3 -m bash_agent.main_hf
 
 ### Test the Customized Agent
 
-Try some of the following commands and see how your agent has improved in its understanding with customization. 
+Try some of the following commands and compare how the trained agent performs versus the base agent you ran earlier:
 
 | Request | Before Training | After Training |
 |---------|-----------------|----------------|
@@ -88,6 +123,8 @@ Try some of the following commands and see how your agent has improved in its un
 | "Create a react agent" | ❌ Hallucinated command | ✅ `langgraph new ./myapp --template react-agent-python` |
 | "Start dev server on 8080" | ❌ Wrong parameters | ✅ `langgraph dev --port 8080` |
 | "Build image tagged v2" | ❌ Missing flags | ✅ `langgraph build --tag v2` |
+
+Notice that generic bash commands (like `ls`) work the same — GRPO training added LangGraph expertise without destroying existing capabilities. This is because GRPO's exploration-based learning reinforces correct patterns rather than overwriting the model's knowledge wholesale.
 
 <!-- fold:break -->
 
@@ -106,7 +143,7 @@ This closes the loop with Module 3: the same evaluation mindset applies, but now
 
 <!-- fold:break -->
 
-## What If Results Aren't Good Enough?
+### What If Results Aren't Good Enough?
 
 If the trained model still makes mistakes, apply the iterative improvement cycle from Module 3:
 
@@ -123,7 +160,11 @@ The pattern is always: **measure → diagnose → fix → retrain → re-measure
 
 <img src="_static/robots/finish.png" alt="Finish Line" style="float:right;max-width:250px;margin:15px;" />
 
-Congratulations! You've completed the Agent Customization module. Let's recap what you've accomplished.
+Training is powerful, but it's not the only way to customize an agent — and it's not always the right one. A well-prompted agent with the right tools solves most problems. Training fills the gap when the model fundamentally doesn't understand your domain, and no amount of prompting or tooling can bridge that gap. In practice, the best agents combine all of these: good prompts set the baseline, tools extend reach, training deepens expertise, and evaluation tells you when to invest in each.
+
+Congratulations! You've completed the Agent Customization module. Let's recap what you've accomplished. 
+
+<!-- fold:break -->
 
 ### What You Learned
 
@@ -160,14 +201,14 @@ The pattern is always:
 
 ### The Full Workshop Arc
 
-You've now traveled the complete agent development lifecycle:
+Each module in this workshop so far introduced a different customization lever while enabling you to complete agent development lifecycle: 
 
-| Module | What You Learned | Key Capability |
-|--------|-----------------|----------------|
-| **Module 1** | Build agents with ReAct | Agent fundamentals |
-| **Module 2** | Extend with RAG, tools, and skills | Agent capabilities |
-| **Module 3** | Measure and evaluate systematically | Agent quality |
-| **Module 4** | Customize through training | Agent expertise |
+| Module | What You Learned | Key Capability | Customization Lever |
+|--------|-----------------|----------------|----------------|
+| **Module 1** | Build agents with ReAct | Agent fundamentals | System Prompt Engineering | 
+| **Module 2** | Extend with RAG, tools, and skills | Agent capabilities | Adding MCP Tools and Skills | 
+| **Module 3** | Measure and evaluate systematically | Agent quality | Recognizing Customization Opportunities | 
+| **Module 4** | Customize through training | Agent expertise | Adding Domains of Knowledge | 
 
 This is the same cycle production teams follow: build, extend, measure, improve. Each module's skills compound—evaluation informs customization, customization produces measurable improvement, and the cycle continues.
 
@@ -192,7 +233,7 @@ This is the same cycle production teams follow: build, extend, measure, improve.
 
 <!-- fold:break -->
 
-### Final Thought
+### Final Thoughts
 
 Agent customization isn't magic—it's engineering. You've learned a systematic approach: measure the gap (Module 3), generate targeted data (SDG), define success criteria (rewards), and train (GRPO). This cycle applies wherever you need agents with domain expertise.
 

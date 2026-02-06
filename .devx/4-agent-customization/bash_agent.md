@@ -20,7 +20,7 @@ We chose this agent use case for customization because:
 
 <!-- fold:break -->
 
-## Architecture
+## Agent Architecture
 
 The agent follows the **ReAct pattern** from Module 1—Reason, Act, Observe in a loop—with a critical addition: human approval before any command runs.
 
@@ -34,7 +34,7 @@ The agent follows the **ReAct pattern** from Module 1—Reason, Act, Observe in 
 
 <!-- fold:break -->
 
-## Human-in-the-Loop: A Critical Safety Pattern
+## Human-in-the-Loop
 
 A bash agent that can execute arbitrary shell commands is powerful—and dangerous. Without safeguards, a single hallucinated command could delete files, expose secrets, or corrupt your system. 
 
@@ -134,7 +134,9 @@ Let's build out our baseline bash agent. Open <button onclick="openOrCreateFileI
 
 ### Exercise: Human-in-the-loop Wrapper
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'class ExecOnConfirm');"><i class="fas fa-code"></i> ExecOnConfirm</button> — Implement requiring user approval before running commands.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'class ExecOnConfirm');"><i class="fas fa-code"></i> ExecOnConfirm</button> — Implement the HITL confirmation gate for command execution.
+
+This is the HITL pattern from above, implemented as a wrapper around the `Bash` tool. If the user confirms via `self._confirm_execution(cmd)`, return `self.bash.exec_bash_command(cmd)`. Otherwise, return a dictionary with `"error"` set to `"User declined."` so the agent knows the command was rejected.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -150,7 +152,11 @@ return {"error": "User declined."}
 
 ### Exercise: Create React Agent
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'agent = create_react_agent');"><i class="fas fa-code"></i> create_react_agent</button> — Wire up the model, tools, and prompt.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'agent = create_react_agent');"><i class="fas fa-code"></i> create_react_agent</button> — Assemble the ReAct agent from model, tools, and prompt.
+
+LangGraph's `create_react_agent` wires together the Reason-Act-Observe loop from Module 1. Implement `agent` with `model` set to `llm`, `tools` set to a list containing your `ExecOnConfirm`-wrapped bash command, and `prompt` set to `config.system_prompt`.
+
+> 💡 We pass `ExecOnConfirm(bash).exec_bash_command` as the tool — not `bash.exec_bash_command` directly — so every command goes through human approval.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -168,7 +174,9 @@ agent = create_react_agent(
 
 ### Exercise: Run Loop
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send user message to agent using the invoke method.
+<button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent.ipynb', 'result = agent.invoke');"><i class="fas fa-code"></i> agent.invoke</button> — Send the user's message into the agent loop.
+
+`agent.invoke()` kicks off the full ReAct cycle — reason, propose a tool call, wait for HITL approval, observe the result, and repeat. Implement `result` by invoking the agent with a single message where `"role"` is `"user"` and `"content"` is the `user` input variable.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -200,11 +208,11 @@ Try a sample query: `"List all files"` → `ls`
 
 <!-- fold:break -->
 
-## Superpowers Skills
+### Superpowers Skills
 
 The Bash Agent includes skills from the [Superpowers](https://github.com/obra/superpowers) framework—structured workflows that guide the agent through complex tasks.
 
-### Available Skills
+**Available Skills: **
 
 | Skill | Purpose |
 |-------|---------|

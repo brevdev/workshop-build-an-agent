@@ -33,8 +33,10 @@ The NeMo Gym server runs these checks and returns reward scores to guide trainin
 
 ## Understanding GRPO In Depth
 
+**Click on each of the following questions to learn more.**
+
 <details>
-<summary><strong>How does GRPO actually work? Click to expand</strong></summary>
+<summary><strong>How does GRPO actually work?</strong></summary>
 
 GRPO (Group Relative Policy Optimization) is a form of reinforcement learning that learns from *relative* performance within a group of outputs:
 
@@ -58,7 +60,7 @@ Outputs that score above the group average get reinforced; below-average outputs
 </details>
 
 <details>
-<summary><strong>SFT vs GRPO: When to use which? Click to expand</strong></summary>
+<summary><strong>SFT vs GRPO: When to use which?</strong></summary>
 
 | Aspect | SFT (Supervised Fine-Tuning) | GRPO (RL-based) |
 |--------|------------------------------|-----------------|
@@ -83,7 +85,7 @@ Outputs that score above the group average get reinforced; below-average outputs
 </details>
 
 <details>
-<summary><strong>How do I know training is working? Click to expand</strong></summary>
+<summary><strong>How do I know training is working?</strong></summary>
 
 **Key metrics to monitor during training:**
 
@@ -94,20 +96,16 @@ Outputs that score above the group average get reinforced; below-average outputs
 | **Loss** | Decreasing, then stabilizing | Oscillating wildly or exploding |
 | **Gradient Norm** | Stable, typically < 10 | Exploding (> 100) or vanishing (< 0.001) |
 
-**Expected training trajectory:**
-
-| Steps | Expected Mean Reward | What's Happening |
-|-------|---------------------|------------------|
-| 1-10 | 0.1 - 0.3 | Model learning basic JSON format |
-| 10-25 | 0.3 - 0.6 | Model learning valid commands |
-| 25-40 | 0.6 - 0.8 | Model learning correct flags |
-| 40-50+ | 0.8 - 0.95 | Fine-tuning edge cases |
-
 **Red flags and what they mean:**
-- **Rewards plateau at < 0.3**: Reward function may be too strict, or data lacks diversity
-- **Rewards spike then crash**: Learning rate too high; reduce by 2-5x
-- **Rewards stay at 0**: Reward function bug; test it manually first
-- **Loss goes to NaN**: Numerical instability; check for inf/nan in data
+
+| Pitfall | Symptom | Solution |
+|---------|---------|----------|
+| **Sparse rewards** | Mean reward stuck near 0 | Add partial credit for almost-correct outputs |
+| **Reward hacking** | High training reward, poor real performance | Add more validation components; test on held-out data |
+| **Inconsistent rewards** | Same output gets different scores | Ensure reward function is deterministic |
+| **High Learning Rate** | Rewards spike and then crash | Learning rate too high; reduce by 2-5x |
+| **Slow verification** | Training takes forever | Optimize reward code; batch requests to server |
+| **Reward scale issues** | Gradients explode or vanish | Normalize rewards to [0, 1] range |
 
 </details>
 
@@ -118,6 +116,8 @@ Outputs that score above the group average get reinforced; below-average outputs
 Your reward function is the most important piece of GRPO training. It defines what "good" means—get it wrong, and your model learns the wrong behaviors.
 
 ### Principles of Good Rewards
+
+**Click on each of the following principles to learn more.**
 
 <details>
 <summary><strong>1. Verifiable — Check with code, not vibes</strong></summary>
@@ -190,6 +190,8 @@ Always test your reward function on edge cases before training.
 
 </details>
 
+<!-- fold:break -->
+
 ### Anatomy of Our Reward Function
 
 The NeMo Gym verifier computes a **composite reward** with multiple components:
@@ -201,19 +203,6 @@ The NeMo Gym verifier computes a **composite reward** with multiple components:
 | `flag_accuracy_reward` | 0.5 | Are the flags/parameters correct for this command? |
 
 **Why these weights?** Flags carry the most information (many possible values), so they get the highest weight. JSON format is easiest, so it gets the lowest. Commands are intermediate.
-
-<details>
-<summary><strong>Common reward pitfalls and solutions</strong></summary>
-
-| Pitfall | Symptom | Solution |
-|---------|---------|----------|
-| **Sparse rewards** | Mean reward stuck near 0 | Add partial credit for almost-correct outputs |
-| **Reward hacking** | High training reward, poor real performance | Add more validation components; test on held-out data |
-| **Inconsistent rewards** | Same output gets different scores | Ensure reward function is deterministic |
-| **Slow verification** | Training takes forever | Optimize reward code; batch requests to server |
-| **Reward scale issues** | Gradients explode or vanish | Normalize rewards to [0, 1] range |
-
-</details>
 
 <!-- fold:break -->
 
@@ -259,6 +248,8 @@ Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab(
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'def reward_fn');"><i class="fas fa-code"></i> reward_fn</button> — Call NeMo Gym `/verify` endpoint.
 
+Implement `resp` by posting a request to the `verify_endpoint` with `json` set to the `verify_request`. Then `reward` should be the reward field in the `resp` json object.
+
 <details>
 <summary>🆘 Need some help?</summary>
 
@@ -272,7 +263,9 @@ reward = resp.json().get("reward", 0.0)
 
 ### Exercise: Training Config
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button>
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button> — Set the training arguments. 
+
+Implement `training_args` with `num_generations` set to 4, `learning_rate` set to 1e-5 and `max_steps` set to 50. 
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -290,7 +283,9 @@ training_args = GRPOConfig(
 
 ### Exercise: GRPO Trainer
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button>
+<button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button> - Define the trainer. 
+
+Implement `trainer` with the `model`, `reward_funcs` as a single item list, and the `train_dataset`. 
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -310,11 +305,13 @@ trainer = GRPOTrainer(
 
 Run `trainer.train()` notebook cell — should take around **~60-70 min** to complete on an A100/H100.
 
-The customized model should appear in this location when completed: `outputs/grpo_langgraph_cli/merged_model/`
+The customized model should appear in this location when completed: `outputs/grpo_langgraph_cli/merged_model/`. 
 
 <!-- fold:break -->
 
 ## Troubleshooting
+
+If you're running into issues, click on any of the following to learn more. 
 
 <details>
 <summary><strong>Rewards not improving</strong></summary>
@@ -390,5 +387,11 @@ This indicates **overfitting** — the model memorized training examples rather 
 4. Ensure training and validation have similar distributions
 
 </details>
+
+<!-- fold:break -->
+
+<img src="_static/robots/wrench.png" alt="Bash Agent" style="float:right;max-width:300px;margin:15px;" />
+
+Congrats, you now have successfully customized your Bash agent using Reinforcement Learning with Verifiable Rewards (RLVR) and Group Relative Policy Optimization (GRPO)!
 
 Now that we've completed training the agent, let's run it again and see whether or not it's learned the new Langgraph CLI domain. Head over to [Run Customized Agent](run_customized.md) and get started!

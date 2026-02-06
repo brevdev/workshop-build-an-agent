@@ -24,11 +24,7 @@ We chose this agent use case for customization because:
 
 The agent follows the **ReAct pattern** from Module 1—Reason, Act, Observe in a loop—with a critical addition: human approval before any command runs.
 
-```
-  User Request → LLM Reasons → Proposes Command → Human Approves? → Execute
-                      ↑                                                │
-                      └──────────────── Observe Output ────────────────┘
-```
+![ReAct Loop](img/react_loop.png)
 
 **LangGraph** orchestrates this state machine. The human-in-the-loop gate is what makes this agent safe to use on a real system—more on that below.
 
@@ -65,20 +61,7 @@ The consequences range from inconvenient to catastrophic. For agents with real-w
 
 Human-in-the-loop execution adds a confirmation step between generation and execution:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    HITL EXECUTION FLOW                      │
-│                                                             │
-│   ┌────────┐    ┌───────────┐    ┌────────┐    ┌─────────┐  │
-│   │  User  │ →  │   Agent   │ →  │ Human  │ →  │ Execute │  │
-│   │Request │    │ Proposes  │    │Reviews │    │   or    │  │
-│   │        │    │ Command   │    │& Approves   │  Abort  │  │
-│   └────────┘    └───────────┘    └────────┘    └─────────┘  │
-│                                       │                     │
-│                                       ▼                     │
-│                              [Modify if needed]             │
-└─────────────────────────────────────────────────────────────┘
-```
+![HITL Execution Flow](img/hitl_flow.png)
 
 **The agent never executes directly.** Instead, it proposes a command and waits for human approval. This simple change provides:
 

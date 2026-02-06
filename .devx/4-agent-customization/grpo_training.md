@@ -208,15 +208,7 @@ The NeMo Gym verifier computes a **composite reward** with multiple components:
 
 ## The Full Training Loop
 
-```
-  ┌───────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-  │  Training │    │    Model     │    │   Reward     │    │    GRPO      │
-  │  Prompt   │ →  │  Generates   │ →  │   Server     │ →  │  Reinforces  │
-  │           │    │  4+ Outputs  │    │   Scores     │    │  Best Ones   │
-  └───────────┘    └──────────────┘    └──────────────┘    └──────┬───────┘
-                                                                  │
-                        ← ── ── ── ── Repeat for 50+ steps ── ── ┘
-```
+![GRPO Training Loop](img/grpo_training_loop.png)
 
 To make this concrete, here's what happens in a single training step. The model sees: *"Create a new project with the react template"* and generates 4 candidates:
 

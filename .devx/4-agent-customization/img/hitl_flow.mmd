@@ -1,0 +1,20 @@
+---
+config:
+  theme: 'base'
+  themeVariables:
+    primaryColor: '#eaf6e0'
+    secondaryColor: '#eaf6e0'
+    background: white
+---
+
+flowchart LR
+
+    subgraph hitl[HITL Execution Flow]
+        direction LR
+        request[User<br />Request] --> propose[Agent<br />Proposes<br />Command] --> review[Human<br />Reviews<br />& Approves] --> execute[Execute<br />or<br />Abort]
+        review -.-> modify[Modify<br />if needed]
+        modify -.-> propose
+    end
+
+    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
+    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

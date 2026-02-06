@@ -22,13 +22,7 @@ But how do we actually *use* the trained model? The training notebook saved a me
 
 During GRPO training, the model learned to map natural language requests to structured JSON tool calls. At inference time, the flow looks like this:
 
-```
-  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-  │  User Input  │    │   Trained    │    │  JSON Tool   │    │   HITL       │
-  │  (natural    │ →  │   Model      │ →  │  Call Output │ →  │   Confirm &  │
-  │   language)  │    │ (HuggingFace)│    │  (structured)│    │   Execute    │
-  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-```
+![Inference Pipeline](img/inference_pipeline.png)
 
 The key difference from the base agent in `bash_agent.ipynb`: instead of calling a remote NIM model via API, we're running the trained model **locally** with HuggingFace Transformers. The `HuggingFaceLLM` class handles model loading, tokenization, and parsing the structured JSON output.
 

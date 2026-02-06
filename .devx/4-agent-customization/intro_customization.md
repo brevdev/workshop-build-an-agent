@@ -73,15 +73,7 @@ Training writes knowledge directly into the model's weights. The model doesn't *
 
 Training an agent requires three components working together:
 
-```
-  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-  │  1. Generate │     │  2. Define   │     │   3. Train   │
-  │   Data (SDG) │ →   │   Rewards    │ →   │   (GRPO)     │
-  │              │     │  (NeMo Gym)  │     │              │
-  └──────────────┘     └──────────────┘     └──────────────┘
-   NeMo Data            Code-based           Exploration-based
-   Designer             verification         RL training
-```
+![Customization Pipeline](img/customization_pipeline.png)
 
 ### 1. Training Data (NeMo Data Designer)
 

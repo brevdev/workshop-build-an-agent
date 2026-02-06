@@ -1,0 +1,24 @@
+---
+config:
+  theme: 'base'
+  themeVariables:
+    primaryColor: '#eaf6e0'
+    secondaryColor: '#eaf6e0'
+    background: white
+---
+
+flowchart LR
+
+    subgraph pipeline[Customization Pipeline]
+        direction LR
+        sdg[1. Generate<br />Data #40;SDG#41;] --> rewards[2. Define<br />Rewards #40;NeMo Gym#41;] --> train[3. Train<br />#40;GRPO#41;]
+    end
+
+    sdg -.- sdg_label[NeMo Data<br />Designer]
+    rewards -.- rewards_label[Code-based<br />verification]
+    train -.- train_label[Exploration-based<br />RL training]
+
+    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
+    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;
+    classDef label fill:none,stroke:none,color:#666,font-size:12px;
+    class sdg_label,rewards_label,train_label label;

@@ -86,14 +86,7 @@ inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixe
 3. **Generate natural language** — An LLM creates realistic user requests for each command
 4. **Combine into examples** — Input/output pairs ready for training
 
-```
-  ┌───────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-  │ Define Output │    │   Sample     │    │  Generate    │    │   Combine    │
-  │ Schema        │ →  │   Valid      │ →  │  Natural     │ →  │  Training    │
-  │ (Pydantic)    │    │   Outputs    │    │  Language    │    │  Pairs       │
-  └───────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-      Outputs first (always valid)           Inputs second (varied phrasing)
-```
+![SDG Pipeline](img/sdg_pipeline.png)
 
 This is different from just prompting an LLM to "make up examples." Data Designer ensures coverage, diversity and validity of training data. 
 

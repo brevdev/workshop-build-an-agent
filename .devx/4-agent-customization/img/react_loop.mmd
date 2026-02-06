@@ -1,0 +1,20 @@
+---
+config:
+  theme: 'base'
+  themeVariables:
+    primaryColor: '#eaf6e0'
+    secondaryColor: '#eaf6e0'
+    background: white
+---
+
+flowchart LR
+
+    subgraph agent[ReAct Loop]
+        direction LR
+        request[User<br />Request] --> reason[LLM<br />Reasons] --> propose[Proposes<br />Command] --> approve{Human<br />Approves?} --> execute[Execute]
+        execute --> observe[Observe<br />Output]
+        observe --> reason
+    end
+
+    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
+    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

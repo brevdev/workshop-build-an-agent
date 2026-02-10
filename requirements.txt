@@ -1,4 +1,4 @@
-data-designer~=0.1.5
+data-designer~=0.3.7
 dotenv~=0.9.9
 faiss-cpu~=1.12.0
 fastapi~=0.116.1
@@ -16,9 +16,9 @@ langgraph>1,<2
 langsmith~=0.3.0
 nemo-microservices~=1.3.0
 OpenAI
-pandas~=2.2.0
+pandas~=2.3.0
 pydantic
 ragas~=0.2.0
-streamlit
+streamlit~=1.49.1
 tavily-python~=0.7.19
 voila

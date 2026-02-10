@@ -147,8 +147,13 @@ LangGraph's `create_react_agent` wires together the Reason-Act-Observe loop from
 ```python
 agent = create_react_agent(
     model=llm,
-    tools=[ExecOnConfirm(bash).exec_bash_command],
+    tools=[
+        ExecOnConfirm(bash).exec_bash_command,
+        get_skill,              # Load skills for structured workflows
+        list_available_skills,  # List available skills
+    ],
     prompt=config.system_prompt,
+    checkpointer=InMemorySaver(),
 )
 ```
 </details>
@@ -165,7 +170,10 @@ agent = create_react_agent(
 <summary>🆘 Need some help?</summary>
 
 ```python
-result = agent.invoke({"messages": [{"role": "user", "content": user}]})
+result = agent.invoke(
+    {"messages": [{"role": "user", "content": user}]},
+    config={"configurable": {"thread_id": "cli"}},  # one ongoing conversation
+)
 ```
 </details>
 
@@ -194,8 +202,6 @@ Try a sample query: `"List all files"` → `ls`
 ### Superpowers Skills
 
 The Bash Agent includes skills from the [Superpowers](https://github.com/obra/superpowers) framework—structured workflows that guide the agent through complex tasks.
-
-**Available Skills: **
 
 | Skill | Purpose |
 |-------|---------|

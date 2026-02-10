@@ -183,10 +183,10 @@ This schema is what Data Designer samples from to generate valid outputs — eve
 
 ```python
 class CLIToolCall(BaseModel):
-    command: str
-    template: Optional[str] = None
-    path: Optional[str] = None
-    port: Optional[int] = None
+    command: str = Field(..., description="CLI command: new, dev, up, build, or dockerfile")
+    template: Optional[str] = Field(None, description="Template name for 'new' command")
+    path: Optional[str] = Field(None, description="Project path for 'new' command")
+    port: Optional[int] = Field(None, description="Port for 'dev' or 'up' command")
 ```
 </details>
 
@@ -196,15 +196,18 @@ class CLIToolCall(BaseModel):
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure the template values the sampler draws from.
 
-Samplers control the distribution of generated outputs — they're what ensures your dataset covers the full output space rather than clustering around common cases. Add `"react-agent-python"` and `"memory-agent-python"` to the `values` list in `CategorySamplerParams`.
+Samplers control the distribution of generated outputs — they’re what ensures your dataset covers the full output space rather than clustering around common cases. Add the following to the `values` list in `CategorySamplerParams`: `"react-agent-python"`, `"memory-agent-python"`, `"retrieval-agent-python"`, `"data-enrichment-agent-python"`, `"new-langgraph-project-python"`.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
 params=CategorySamplerParams(values=[
-    "react-agent-python",
-    "memory-agent-python"
+    "react-agent-python", 
+    "memory-agent-python", 
+    "retrieval-agent-python", 
+    "data-enrichment-agent-python",
+    "new-langgraph-project-python"
 ])
 ```
 </details>
@@ -215,13 +218,13 @@ params=CategorySamplerParams(values=[
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button> — Split the dataset for training and validation.
 
-The validation set is held out during GRPO training and used to detect overfitting — if training reward climbs but validation reward plateaus, the model is memorizing rather than generalizing. Split `data` with `test_size` set to `0.1` (10% for validation).
+The validation set is held out during GRPO training and used to detect overfitting — if training reward climbs but validation reward plateaus, the model is memorizing rather than generalizing. Use `train_test_split` to split `dataset_df` with `test_size` set to `0.1` (10% for validation) and `random_state` seed set to `42` (or some other number).
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-train_data, val_data = train_test_split(data, test_size=0.1)
+train_df, val_df = train_test_split(dataset_df, test_size=0.1, random_state=42)
 ```
 </details>
 

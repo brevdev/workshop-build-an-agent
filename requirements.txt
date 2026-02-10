@@ -22,3 +22,5 @@ ragas~=0.2.0
 streamlit~=1.49.1
 tavily-python~=0.7.19
 voila
+unsloth
+vllm

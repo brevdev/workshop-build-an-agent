@@ -183,7 +183,7 @@ This schema is what Data Designer samples from to generate valid outputs — eve
 
 ```python
 class CLIToolCall(BaseModel):
-    command: str = Field(..., description="CLI command: new, dev, up, build, or dockerfile")
+    command: str = Field(None, description="CLI command: new, dev, up, build, or dockerfile")
     template: Optional[str] = Field(None, description="Template name for 'new' command")
     path: Optional[str] = Field(None, description="Project path for 'new' command")
     port: Optional[int] = Field(None, description="Port for 'dev' or 'up' command")

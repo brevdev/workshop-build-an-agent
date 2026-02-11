@@ -240,14 +240,15 @@ Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab(
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'def reward_fn');"><i class="fas fa-code"></i> reward_fn</button> — Call the NeMo Gym `/verify` endpoint to score model outputs.
 
-This is the bridge between GRPO and verifiable rewards: each model completion gets sent to the NeMo Gym server, which returns a composite reward score (JSON format + command correctness + flag accuracy). Implement `resp` by posting to `verify_endpoint` with `json` set to `verify_request`, then extract `reward` from the response JSON (defaulting to `0.0`).
+Implement the reward function by making a call to the `/verify` endpoint. 
+
+This is the bridge between GRPO and verifiable rewards: each model completion gets sent to the NeMo Gym server, which returns a composite reward score (JSON format + command correctness + flag accuracy). Implement `resp` by posting a request to `verify_endpoint` with `json` set to `verify_request` and the `timeout` set to 30s.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-resp = requests.post(verify_endpoint, json=verify_request)
-reward = resp.json().get("reward", 0.0)
+resp = requests.post(verify_endpoint, json=verify_request, timeout=30)
 ```
 </details>
 
@@ -257,6 +258,8 @@ reward = resp.json().get("reward", 0.0)
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button> — Configure the GRPO hyperparameters.
 
+Implement some key training configuration parameters. 
+
 These three settings control the core training dynamics: `num_generations` is how many candidate outputs GRPO generates per prompt (more = richer comparison signal), `learning_rate` controls the step size for weight updates, and `max_steps` caps the total training iterations. Implement `training_args` with `num_generations=4`, `learning_rate=1e-5`, and `max_steps=50`.
 
 <details>
@@ -264,9 +267,13 @@ These three settings control the core training dynamics: `num_generations` is ho
 
 ```python
 training_args = GRPOConfig(
+    ... # Keep other args as-is
     num_generations=4,
+    ...
     learning_rate=1e-5,
+    ...
     max_steps=50,
+    ...
 )
 ```
 </details>
@@ -277,7 +284,9 @@ training_args = GRPOConfig(
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button> — Wire up the model, reward function, and dataset into the trainer.
 
-The `GRPOTrainer` orchestrates the full training loop shown above: generate completions, score them via the reward function, and reinforce the best ones. Implement `trainer` with `model`, `reward_funcs` as a single-item list containing `reward_fn`, and `train_dataset`.
+Implement the `trainer` as a `GRPOTrainer` and wire up everything we've defined so far. 
+
+The `GRPOTrainer` orchestrates the full training loop shown above: generate completions, score them via the reward function, and reinforce the best ones. Implement `trainer` with `model`, `processing_class` set to `tokenizer`, `reward_funcs` as a single-item list containing `reward_fn`, `args` set to `training_args`, and the `train_dataset`.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -285,7 +294,9 @@ The `GRPOTrainer` orchestrates the full training loop shown above: generate comp
 ```python
 trainer = GRPOTrainer(
     model=model,
+    processing_class=tokenizer,
     reward_funcs=[reward_fn],
+    args=training_args,
     train_dataset=train_dataset,
 )
 ```
@@ -295,7 +306,7 @@ trainer = GRPOTrainer(
 
 ### Train the Agent
 
-Run `trainer.train()` notebook cell — should take around **~60-70 min** to complete on an A100/H100.
+Run `trainer.train()` notebook cell — depending on the number of iterations, this cell should take around **1 - 1.5 hours** to complete on an A100/H100.
 
 The customized model should appear in this location when completed: `outputs/grpo_langgraph_cli/merged_model/`. 
 

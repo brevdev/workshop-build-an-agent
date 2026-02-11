@@ -54,11 +54,11 @@ llm = HuggingFaceLLM(config)
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Initialize conversation with the JSON system prompt.
 
+Implement `messages` by creating a `Messages` instance with `config.json_system_prompt`.
+
 This is a subtle but critical detail: the model was trained with `config.json_system_prompt`, which instructs it to produce **structured JSON tool calls**. If you use the generic `config.system_prompt` instead, the model's output format won't match what it learned during GRPO training, and performance will degrade.
 
 > 💡 **Why this matters**: During training, the system prompt was part of every input. The model learned to produce correct outputs *conditioned on that specific prompt*. Changing the prompt at inference time is like studying for one exam and sitting for a different one.
-
-Implement `messages` by creating a `Messages` instance with `config.json_system_prompt`.
 
 <details>
 <summary>🆘 Need some help?</summary>

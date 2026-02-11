@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status
 
-sudo pip install torch unsloth==2026.2.1 trl transformers==4.56.2 accelerate peft datasets requests
-
 sudo npm install n -g
 sudo n stable
 

@@ -6,6 +6,8 @@ Building AI agents is exciting. Seeing them in action for the first time feels l
 
 How do you know if your agent is actually working? Is it hallucinating? Is it rude? Is it getting better or worse as you tweak the prompts? 
 
+<!-- fold:break -->
+
 Manual testing ("vibe checking") can only take you so far. As your agents become more complex and handle more use cases, you need systematic ways to measure their performance, identify weaknesses, and track improvements over time. You need to treat evaluation not as an afterthought, but as a core engineering discipline.
 
 In this module, we will transform your agent development process from an art into a science.
@@ -38,6 +40,10 @@ There isn't always one "right" answer. A response might be factually correct but
 
 You must evaluate the entire chain, not just isolated steps. A minor early error (like misinterpreting intent) can cascade into a completely wrong result, even if later steps were technically correct.
 
+<!-- fold:break -->
+
+<img src="_static/robots/controls.png" alt="How to Measure" style="float:right;max-width:300px;margin:25px;" />
+
 **Tool Usage**: Agents interact with external APIs, databases, and other systems.
 
 Evaluation must verify not just the final response, but also that the agent selected the right tool, used correct arguments, and properly incorporated the tool's output.
@@ -48,8 +54,6 @@ An agent's answer might differ based on what was said three turns ago. Testing s
 
 <!-- fold:break -->
 
-<img src="_static/robots/controls.png" alt="How to Measure" style="float:right;max-width:300px;margin:25px;" />
-
 ## What Should We Measure?
 
 To trust our agents, we need to measure their performance across two key dimensions: **Process** (how they got the answer) and **Outcome** (the quality of the answer itself).
@@ -59,6 +63,8 @@ When debugging a RAG agent, for example, a wrong answer could come from two plac
 2. **Bad Generation**: The agent found the documents but hallucinated the answer.
 
 We break these down into specific signals.
+
+<!-- fold:break -->
 
 ### Retrieval Metrics (Did we find the right data?)
 

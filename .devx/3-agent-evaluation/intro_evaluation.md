@@ -64,8 +64,6 @@ When debugging a RAG agent, for example, a wrong answer could come from two plac
 
 We break these down into specific signals.
 
-<!-- fold:break -->
-
 ### Retrieval Metrics (Did we find the right data?)
 
 * **Context Precision**: Is the stuff we found actually useful?

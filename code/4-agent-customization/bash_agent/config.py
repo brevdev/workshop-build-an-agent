@@ -65,7 +65,7 @@ class Config:
     #       you can add "langgraph" to enable LangGraph CLI commands.
     allowed_commands: List[str] = field(default_factory=lambda: [
         "cd", "cp", "ls", "cat", "find", "touch", "echo", "grep", "pwd",
-        "mkdir", "wget", "sort", "head", "tail", "du", "wc", "file",
+        "mkdir", "wget", "sort", "head", "tail", "du", "wc", "file", "langgraph",
     ])
 
     @property

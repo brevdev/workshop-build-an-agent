@@ -345,7 +345,7 @@ Consider:
 Finally, let's check the length of the generated reports. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Report Length Analysis');"><i class="fas fa-code"></i> Report Length Analysis</button>.
 
 Consider:
-- Reports under 2,000 characters may be too superficial.
+- Reports under 5,000 characters may be too superficial.
 - Does length vary across topics?
 - Does length correlate with quality scores?
 

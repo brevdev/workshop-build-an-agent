@@ -167,15 +167,46 @@ Expected sections: {expected_sections}
 {quality_criteria_text}
 Evaluate on these criteria (1-5 scale each):
 
-1. Structure: Are all expected sections present and well-organized?
-2. Content Quality: Is the information substantive and relevant?
-3. Accuracy: Are claims well-supported and factual?
-4. Writing Quality: Is it clear, professional, and well-written?
+Rate Structure on a scale of 1-5: Are all expected sections present and well-organized?
+- 5: All sections present and well-organized
+- 4: Most sections present and generally organized
+- 3: Some sections present and organization is lacking
+- 2: Few sections present and not well organized
+- 1: No sections present and not well organized
+
+Rate Content Quality on a scale of 1-5: Is the information substantive and relevant?
+- 5: All information is both relevant and substantive
+- 4: Most information is both relevant and substantive
+- 3: Some information is both relevant and substantive
+- 2: Most information irrelevant or of little substance
+- 1: None of the information is relevant or substantive
+
+Rate Content Coverage on a scale of 1-5: Are relevant topics covered and irrelevant ones avoided?
+- 5: All "should include" points are present and all "should avoid" are not present
+- 4: Most "should include" points are present and most "should avoid" are not present
+- 3: Some "should include" points are present or some "should avoid" are not present
+- 2: Few "should include" points are present or few "should avoid" are not present
+- 1: No "should include" points are present or all "should avoid" are present
+
+Rate Accuracy on a scale of 1-5: Are claims well-supported and factual?
+- 5: All sections factual and well-supported
+- 4: Most sections factual and well-supported
+- 3: Some sections factual and well-supported
+- 2: Few sections factual and well-supported
+- 1: No sections factual and well-supported
+
+Rate Writing Quality on a scale of 1-5: Is it clear, professional, and well-written?
+- 5: All sections clear, professional, and well-written
+- 4: Most sections clear, professional, and well-written
+- 3: Some sections clear, professional, and well-written
+- 2: Few sections clear, professional, and well-written
+- 1: No sections clear, professional, and well-written
 
 Provide your evaluation as JSON:
 {{
   "structure": {{"score": <1-5>, "explanation": "..."}},
   "content": {{"score": <1-5>, "explanation": "..."}},
+  "coverage": {{"score": <1-5>, "explanation": "..."}},
   "accuracy": {{"score": <1-5>, "explanation": "..."}},
   "writing": {{"score": <1-5>, "explanation": "..."}}
 }}

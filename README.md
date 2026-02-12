@@ -32,7 +32,7 @@ Learn the fundamentals of AI agents by building a Report Generation Agent from s
 **Key concepts**:
 - The four core components of any AI agent (Model, Tools, Memory, Routing)
 - ReAct architecture for tool-calling agents
-- Multi-agent orchestration with LangGraph
+- Building agents from scratch and with LangChain
 - Using NVIDIA Nemotron models
 
 ### Module 2: Agentic RAG (2-3 hours)

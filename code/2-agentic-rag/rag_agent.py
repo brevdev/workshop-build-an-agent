@@ -239,4 +239,5 @@ SYSTEM_PROMPT = """You are an IT help desk support agent with enhanced capabilit
 """
 
 # EXERCISE: Create the ReAct agent with tools. Define 'model', 'tools', and 'prompt'.
+# NOTE: Update this definition as you progress through the module — each section adds new tools.
 AGENT = ...

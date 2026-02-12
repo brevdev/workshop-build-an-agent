@@ -211,7 +211,7 @@ return list_skills()
 
 #### Exercise: Create the Agent with ALL Tools
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT = ');"><i class="fas fa-code"></i> AGENT</button> — Wire up all four tools!
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT = ');"><i class="fas fa-code"></i> AGENT</button> — Update the `AGENT` definition one last time to wire up all four tools. This is the final version!
 
 <details>
 <summary>🆘 Need some help?</summary>

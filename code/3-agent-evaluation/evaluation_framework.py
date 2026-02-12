@@ -159,7 +159,7 @@ Report:
 {report}
 
 Expected sections: {expected_sections}
-
+{quality_criteria_text}
 Evaluate on these criteria (1-5 scale each):
 
 1. Structure: Are all expected sections present and well-organized?
@@ -384,29 +384,43 @@ def evaluate_report_quality(
     topic: str,
     report: str,
     expected_sections: List[str],
+    quality_criteria: Optional[Dict[str, Any]] = None,
     judge_llm: Optional[ChatNVIDIA] = None
 ) -> Dict[str, EvaluationResult]:
     """
     Evaluate the quality of a generated report using LLM-as-a-judge.
-    
+
     Args:
         topic: The report topic
         report: The generated report content
         expected_sections: List of sections that should be present
+        quality_criteria: Optional dict with 'should_include' and 'should_avoid' lists
         judge_llm: Optional judge model (creates one if not provided)
-        
+
     Returns:
         Dictionary mapping criteria to EvaluationResults
     """
     if judge_llm is None:
         judge_llm = create_judge_llm()
-    
+
+    # Format quality criteria into text for the prompt
+    quality_criteria_text = ""
+    if quality_criteria:
+        parts = []
+        if quality_criteria.get("should_include"):
+            parts.append("The report SHOULD include: " + ", ".join(quality_criteria["should_include"]))
+        if quality_criteria.get("should_avoid"):
+            parts.append("The report SHOULD avoid: " + ", ".join(quality_criteria["should_avoid"]))
+        if parts:
+            quality_criteria_text = "\nQuality criteria:\n" + "\n".join(f"- {p}" for p in parts)
+
     chain = REPORT_QUALITY_PROMPT | judge_llm
-    
+
     result = chain.invoke({
         "topic": topic,
         "report": report,
-        "expected_sections": ", ".join(expected_sections)
+        "expected_sections": ", ".join(expected_sections),
+        "quality_criteria_text": quality_criteria_text
     })
     
     try:

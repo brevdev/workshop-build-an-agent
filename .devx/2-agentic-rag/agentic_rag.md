@@ -51,6 +51,8 @@ splitter = RecursiveCharacterTextSplitter(
 
 ### Embed chunks into vector representations
 
+Embeddings convert text into numerical vectors that capture semantic meaning. Texts with similar meaning produce vectors that are close together, which lets us find relevant documents by measuring vector distance — documents "close" to the query are likely relevant.
+
 These chunks need to be embedded into vectors for the database. This is done with the `RETRIEVER_EMBEDDING_MODEL` defined before.
 
 Use the [NVIDIAEmbeddings](https://build.nvidia.com/nvidia/llama-3_2-nv-embedqa-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'embeddings = ');"><i class="fas fa-code"></i> embeddings</button>. The API Key has already been configured, it does not need to be specified. Set truncate to `END`.
@@ -157,7 +159,9 @@ A system prompt has been defined in the code. Feel free to review it at <button 
 
 ### Create the Graph
 
-Becuase the ReAct architecture is so common, LangGraph provides a function that will create ReAct agent graphs. Plug `llm`, `RETRIEVER_TOOL`, and `SYSTEM_PROMPT` into LangGraph's [`create_react_agent`](https://langchain-ai.github.io/langgraph/agents/agents/#2-create-an-agent). Assign the resulting value to <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button>.
+Because the ReAct architecture is so common, LangGraph provides a function that will create ReAct agent graphs. Plug `llm`, `RETRIEVER_TOOL`, and `SYSTEM_PROMPT` into LangGraph's [`create_react_agent`](https://langchain-ai.github.io/langgraph/agents/agents/#2-create-an-agent). Assign the resulting value to <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button>.
+
+> **Note:** We'll update the `AGENT` definition as we add more capabilities in later sections. Each section builds on the last — by the end of this module, your agent will have multiple tools.
 
 <details>
 <summary>🆘 Need some help?</summary>

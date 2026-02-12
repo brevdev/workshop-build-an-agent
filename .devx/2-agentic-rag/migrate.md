@@ -12,9 +12,9 @@ In this exercise, we will run our LLM model locally and transition our code to o
 
 ## Find Deployment Instructions
 
-We've been using the [nvidia-nemotron-nano-9b-v2](https://build.nvidia.com/nvidia/nvidia-nemotron-nano-9b-v2) LLM from NVIDIA's API Catalog. For any model you want to run locally, look for the *Deploy* tab on its API Catalog page. Here you can find step-by-step instructions for running the model as a container.
+We've been using the [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b) LLM from NVIDIA's API Catalog. For any model you want to run locally, look for the *Deploy* tab on its API Catalog page. Here you can find step-by-step instructions for running the model as a container.
 
-For our model, you can find the relevant details on the [deployment page](https://build.nvidia.com/nvidia/nvidia-nemotron-nano-9b-v2/deploy), including Docker commands and environment setup.
+For our model, you can find the relevant details on the [deployment page](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b/deploy), including Docker commands and environment setup.
 
 Whenever you want to deploy a new model, check its *Deploy* tab for reference instructions. We'll be closely following these directions, with slight modifications, to run our LLM locally.
 
@@ -66,7 +66,7 @@ docker run -it --rm \
     -v nim-cache:/opt/nim/.cache \
     -u $(id -u) \
     -p 8000:8000 \
-    nvcr.io/nim/nvidia/nvidia-nemotron-nano-9b-v2:latest
+    nvcr.io/nim/nvidia/nemotron-3-nano:latest
 ```
 
 <!-- fold:break -->
@@ -96,7 +96,7 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "nvidia/nvidia-nemotron-nano-9b-v2",
+    "model": "nvidia/nemotron-3-nano",
     "messages": [
       {
         "role":"user",
@@ -125,7 +125,7 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "nvidia/nvidia-nemotron-nano-9b-v2",
+    "model": "nvidia/nemotron-3-nano",
     "input": "Hello, how are you?",
     "max_output_tokens": 128,
     "stream": false
@@ -160,7 +160,7 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-      "model": "nvidia/nvidia-nemotron-nano-9b-v2",
+      "model": "nvidia/nemotron-3-nano",
       "messages": [{"role":"user", "content":"Which number is larger, 9.11 or 9.8?"}],
       "max_tokens": 64
   }'

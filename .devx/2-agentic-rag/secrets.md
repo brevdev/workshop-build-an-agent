@@ -24,4 +24,40 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 </details>
 
+## Tavily API Key
+
+Tavily is a search API designed for AI agents. Later in this module, you'll use it to add web search capabilities via MCP. If you already set this up in Module 1, it should persist here.
+
+<details>
+<summary>⚠️ Don't have an account?</summary>
+
+You can get free access to Tavily with a [Tavily Developer Account](https://tavily.com/).
+</details>
+
+<details>
+<summary>⚠️ Don't have an API Key?</summary>
+
+Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
+
+</details>
+
+## LangSmith API Key (Optional)
+
+LangSmith provides tracing and monitoring for your agent. You'll use it in the [Running Your Agent](running.md) section to inspect your agent's behavior.
+
+<details>
+<summary>⚠️ Don't have an account?</summary>
+
+You can get free access to LangSmith with a [LangSmith Account](https://smith.langchain.com/).
+</details>
+
+<details>
+<summary>⚠️ Don't have an API Key?</summary>
+
+Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).
+
+</details>
+
+---
+
 Once you're ready, continue to the [Introduction to RAG](intro.md) section to get started with agentic RAG.

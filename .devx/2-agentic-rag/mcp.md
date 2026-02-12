@@ -168,9 +168,9 @@ The `session.call_tool()` method invokes the Tavily search tool on the remote MC
 
 #### Exercise: Give New Tool to Agent
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button> — Make this new tool available to the agent.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button> — Update the `AGENT` definition to include your new tool alongside the existing one.
 
-In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built.
+In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built. This replaces your earlier definition — we're expanding the agent's toolkit.
 
 <details>
 <summary>🆘  Need some help?</summary>

@@ -1,0 +1,226 @@
+.soul-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  padding: var(--space-6) var(--space-8);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Title */
+.soul-title {
+  text-align: center;
+  margin-bottom: var(--space-6);
+  z-index: 2;
+  width: 100%;
+}
+
+.soul-title h1 {
+  font-size: var(--text-xxl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+.soul-accent {
+  transition: color 0.4s ease;
+}
+
+.soul-title p {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  margin: var(--space-2) 0 0;
+  text-align: center;
+}
+
+/* Arena */
+.soul-arena {
+  position: relative;
+  width: min(1040px, 92vw);
+  height: min(780px, 72vh);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.soul-ambient {
+  position: absolute;
+  width: 455px;
+  height: 455px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Connection SVG */
+.soul-connections {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Robot */
+.soul-robot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.soul-robot-svg {
+  width: 182px;
+  height: 255px;
+}
+
+.soul-robot.selected .soul-robot-svg {
+  filter: drop-shadow(0 0 20px var(--card-glow, rgba(118,185,0,0.4)));
+}
+
+.soul-select-pulse {
+  position: absolute;
+  width: 182px;
+  height: 182px;
+  border: 3px solid;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Card anchors — positioned with CSS, centering via transform won't conflict with Framer */
+.soul-card-anchor {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.soul-card-anchor[data-position="top"] {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.soul-card-anchor[data-position="right"] {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.soul-card-anchor[data-position="bottom"] {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.soul-card-anchor[data-position="left"] {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Cards */
+.soul-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  min-width: 190px;
+  text-align: center;
+  position: relative;
+}
+
+.soul-card:hover,
+.soul-card.hovered {
+  border-color: var(--card-color);
+  box-shadow: 0 0 20px var(--card-glow), 0 0 40px var(--card-glow);
+}
+
+.soul-card.selected {
+  border-color: var(--card-color);
+  box-shadow: 0 0 30px var(--card-glow), 0 0 60px var(--card-glow);
+  background: var(--bg-surface);
+}
+
+.soul-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+}
+
+.soul-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.soul-card-name {
+  font-size: var(--text-ml);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.soul-card-provider {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--card-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.soul-card-tagline {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin: var(--space-1) 0 0;
+}
+
+.soul-card-check {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-color);
+  color: #fff;
+  border-radius: 50%;
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  box-shadow: 0 0 10px var(--card-glow);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .soul-arena {
+    width: 100%;
+    height: 500px;
+  }
+
+  .soul-title h1 {
+    font-size: var(--text-xl);
+  }
+
+  .soul-card {
+    min-width: 130px;
+    padding: var(--space-3) var(--space-4);
+  }
+}

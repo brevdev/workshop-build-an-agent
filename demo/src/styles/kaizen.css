@@ -1,0 +1,217 @@
+/* NVIDIA Kaizen Design System - Design Tokens */
+
+:root {
+  /* Brand Colors */
+  --nvidia-green: #76B900;
+  --nvidia-green-light: #8dc63f;
+  --nvidia-green-dark: #5a8f00;
+  --nvidia-green-glow: rgba(118, 185, 0, 0.4);
+  --nvidia-green-subtle: rgba(118, 185, 0, 0.1);
+
+  /* Dynamic accent (set by JS based on selected model) */
+  --accent-color: #76B900;
+  --accent-light: #8dc63f;
+  --accent-glow: rgba(118, 185, 0, 0.4);
+  --accent-subtle: rgba(118, 185, 0, 0.1);
+
+  /* Dark Theme Backgrounds - NVIDIA Dark */
+  --bg-primary: #111111;
+  --bg-secondary: #1a1a1a;
+  --bg-elevated: #242424;
+  --bg-surface: #2d2d2d;
+  --bg-hover: #363636;
+
+  /* Neutral Scale */
+  --n1000: #000000;
+  --n950: #0d0d0d;
+  --n900: #1a1a1a;
+  --n800: #242424;
+  --n700: #333333;
+  --n600: #444444;
+  --n500: #666666;
+  --n400: #888888;
+  --n300: #aaaaaa;
+  --n200: #cccccc;
+  --n100: #e6e6e6;
+  --n000: #ffffff;
+
+  /* Green Scale */
+  --g050: #f0f9e0;
+  --g100: #d4ed9e;
+  --g200: #b8e15c;
+  --g300: #9cd51a;
+  --g400: #8dc63f;
+  --g500: #76B900;
+  --g600: #5a8f00;
+  --g700: #3f6600;
+  --g800: #243d00;
+  --g900: #091400;
+
+  /* Blue Scale (info/links) */
+  --b400: #0078d4;
+  --b500: #0066b8;
+  --b600: #005499;
+
+  /* Red Scale (errors) */
+  --r400: #f44336;
+  --r500: #d32f2f;
+
+  /* Yellow Scale (warnings) */
+  --y400: #ffb300;
+  --y500: #ff8f00;
+
+  /* Teal Scale (success) */
+  --t400: #00bcd4;
+  --t500: #00acc1;
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-tertiary: #808080;
+  --text-disabled: #4d4d4d;
+  --text-inverse: #000000;
+  --text-brand: var(--accent-color);
+
+  /* Border Colors */
+  --border-default: #333333;
+  --border-hover: #444444;
+  --border-focus: var(--accent-color);
+  --border-subtle: #2a2a2a;
+
+  /* Typography - NVIDIA Sans with fallbacks */
+  --font-family-sans: 'NVIDIA Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+
+  /* Font Sizes */
+  --text-xxl: 3rem;      /* 48px */
+  --text-xl: 2.25rem;    /* 36px */
+  --text-lg: 1.5rem;     /* 24px */
+  --text-ml: 1.25rem;    /* 20px */
+  --text-md: 1rem;       /* 16px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-xs: 0.75rem;    /* 12px */
+
+  /* Font Weights */
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* Spacing Scale */
+  --space-1: 0.25rem;    /* 4px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px var(--accent-glow);
+  --shadow-glow-lg: 0 0 40px var(--accent-glow);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-popover: 400;
+  --z-tooltip: 500;
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  font-size: var(--text-md);
+  font-weight: var(--font-regular);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Utility Classes */
+.text-brand {
+  color: var(--nvidia-green);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.font-mono {
+  font-family: var(--font-family-mono);
+}
+
+.glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.glow-lg {
+  box-shadow: var(--shadow-glow-lg);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--n600);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--n500);
+}
+
+/* Selection */
+::selection {
+  background: var(--nvidia-green);
+  color: var(--text-inverse);
+}

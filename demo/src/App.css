@@ -1,0 +1,407 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--accent-color);
+  z-index: var(--z-sticky);
+  flex-shrink: 0;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nvidia-logo {
+  height: 20px;
+  width: auto;
+  color: var(--nvidia-green);
+}
+
+.header-divider {
+  color: var(--n600);
+  font-weight: var(--font-light);
+}
+
+.header-title {
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Mode toggle */
+.mode-toggle {
+  display: flex;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.mode-btn {
+  padding: var(--space-1) var(--space-3);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-md) - 2px);
+  font-family: var(--font-family-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.mode-btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+.mode-btn.active {
+  background: var(--accent-color);
+  color: var(--text-inverse);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.blocky-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(118, 185, 0, 0.1);
+  border: 1px solid rgba(118, 185, 0, 0.3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--nvidia-green);
+}
+
+.blocky-indicator.disconnected {
+  border-color: var(--y400);
+  background: rgba(255, 179, 0, 0.1);
+  color: var(--y400);
+}
+
+.blocky-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--nvidia-green);
+  border-radius: 50%;
+  animation: blocky-pulse 2s ease-in-out infinite;
+}
+
+.blocky-indicator.disconnected .blocky-dot {
+  background: var(--y400);
+  animation: none;
+}
+
+@keyframes blocky-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(118, 185, 0, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(118, 185, 0, 0); }
+}
+
+/* Sandbox mode badge (header, chat phase only) */
+.sandbox-mode-badge {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  white-space: nowrap;
+}
+
+.sandbox-mode-badge.off {
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid var(--r400);
+  color: var(--r400);
+}
+
+.sandbox-mode-badge.on {
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Sandbox info modal */
+.sandbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+}
+
+.sandbox-info-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 201;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  width: min(520px, 90vw);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+}
+
+.sandbox-info-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: var(--space-3);
+}
+
+.sandbox-info-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0 0 var(--space-2);
+}
+
+.sandbox-info-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0 0 var(--space-5);
+  line-height: 1.5;
+}
+
+.sandbox-info-desc a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.sandbox-info-desc a:hover {
+  text-decoration: underline;
+}
+
+.sandbox-info-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.sandbox-benefit {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.benefit-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sandbox-benefit strong {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.sandbox-benefit p {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.sandbox-info-note {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-align: center;
+  margin: 0 0 var(--space-5);
+  font-style: italic;
+}
+
+.sandbox-info-buttons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.sandbox-confirm {
+  flex: 1;
+  padding: var(--space-3);
+  background: var(--accent-color);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sandbox-confirm:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.sandbox-cancel {
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sandbox-cancel:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+/* Sandbox disable warning modal */
+.sandbox-warning-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 201;
+  background: var(--bg-secondary);
+  border: 2px solid var(--r400);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  width: min(440px, 90vw);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(244, 67, 54, 0.15);
+}
+
+.sandbox-warning-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: var(--space-3);
+}
+
+.sandbox-warning-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--r400);
+  text-align: center;
+  margin: 0 0 var(--space-3);
+}
+
+.sandbox-warning-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0 0 var(--space-6);
+  line-height: 1.5;
+}
+
+.sandbox-disable-btn {
+  flex: 1;
+  padding: var(--space-3);
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--r400);
+  border: 1px solid var(--r400);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sandbox-disable-btn:hover {
+  background: rgba(244, 67, 54, 0.25);
+  box-shadow: 0 0 15px rgba(244, 67, 54, 0.3);
+}
+
+.header-badge {
+  padding: var(--space-1) var(--space-3);
+  background: var(--nvidia-green-subtle);
+  border: 1px solid var(--nvidia-green);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--nvidia-green);
+}
+
+/* Main content */
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.soul-view {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.builder-view {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.chat-view {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Drag overlay */
+.drag-overlay-card {
+  transform: rotate(3deg);
+  opacity: 0.95;
+  pointer-events: none;
+  }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-content {
+    flex-direction: column;
+  }
+
+  .skill-palette {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-default);
+}
+
+  .skill-palette-content {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+  .skill-category {
+    flex: 1;
+    min-width: 200px;
+  }
+}

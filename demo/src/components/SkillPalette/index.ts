@@ -1,0 +1,1 @@
+export { SkillPalette } from './SkillPalette';

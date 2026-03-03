@@ -8,6 +8,21 @@ These agents are powerful, but they're **shallow**. In this module, we'll explor
 
 <!-- fold:break -->
 
+## The Story So Far
+
+Here's a quick recap of what you've accomplished across the workshop:
+
+| Module | What You Built | Key Pattern |
+|--------|---------------|-------------|
+| Module 1 | Report generation agent, IT help desk agent | ReAct loop with tool calling |
+| Module 2 | RAG-augmented agents with external knowledge | Retrieval + generation |
+| Module 3 | Evaluation pipelines for agent quality | LLM-as-judge, RAGAS metrics |
+| Module 4 | Customized agents via SDG + RLVR training | Domain specialization |
+
+But all of these agents share a common architecture: a **single model in a single loop**, with all state living inside the context window. We call these "shallow" agents — not because they're simple, but because their reasoning stays within a single layer of execution.
+
+<!-- fold:break -->
+
 ## The Shallow Agent Pattern
 
 Every agent we've built so far follows the same architecture:
@@ -16,7 +31,18 @@ Every agent we've built so far follows the same architecture:
 User → Model → Tool → Model → Tool → ... → Response
 ```
 
-One model. One context window. One tool at a time. The bash agent from Module 4 pushed this pattern to its limit — it could execute shell commands, but it still operated in a single flat loop. It couldn't:
+One model. One context window. One tool at a time. The bash agent from Module 4 pushed this pattern to its limit — it could execute shell commands, but it still operated in a single flat loop.
+
+Your ReAct agents are genuinely capable. They can:
+
+- **Dynamically select tools** — Choose the right tool for each step based on reasoning
+- **Execute multi-step tasks** — Chain together 5-15 tool calls to complete a task
+- **Ground responses** — Use retrieved information rather than hallucinating
+- **Produce structured output** — Generate formatted reports, JSON, or other structured results
+
+These capabilities cover a wide range of real-world tasks. For focused problems that fit within a single conversation — answering questions, generating short reports, triaging requests — shallow agents are often the right choice.
+
+But what happens when the task outgrows the architecture? The shallow agent pattern breaks down because it can't:
 
 - **Plan ahead** — Break a complex task into steps and track progress
 - **Delegate work** — Spawn a sub-agent to handle a sub-task in parallel
@@ -24,6 +50,31 @@ One model. One context window. One tool at a time. The bash agent from Module 4 
 - **Manage its own context** — Summarize long conversations to avoid running out of tokens
 
 For simple tasks, this is fine. But real-world production tasks — "research this topic, write code, test it, fix any bugs, and write documentation" — require something more.
+
+Think about how a human handles complex tasks. You don't try to hold everything in your head. You:
+- Write down a plan and check items off as you go
+- Delegate specialized work to colleagues
+- Take notes and refer back to them
+- Follow established procedures for common workflows
+
+These are exactly the capabilities that deep agents add to the LLM loop.
+
+<details>
+<summary><strong>A concrete example of shallow agent breakdown</strong></summary>
+
+Consider asking your Module 1 report generation agent: "Research the competitive landscape of AI agent frameworks, comparing at least 10 frameworks across architecture, pricing, ecosystem, and adoption. Produce a detailed report with citations."
+
+Here's what would likely happen:
+
+1. The agent searches for the first few frameworks and gets good results
+2. By framework 5-6, earlier search results are being pushed out of context
+3. The agent starts repeating searches it already did (it forgot the results)
+4. The comparison table becomes inconsistent (some frameworks have pricing info, others don't)
+5. The final report is patchy — strong on the last few frameworks researched, weak on the first ones
+
+A human researcher would take notes, organize by subtopic, and check their work against their outline. The shallow agent can't do any of this.
+
+</details>
 
 <!-- fold:break -->
 
@@ -81,18 +132,18 @@ One function call gives you an agent with planning, filesystem access, shell exe
 
 <!-- fold:break -->
 
-## What We'll Build
+## What You'll Learn
 
 <img src="_static/robots/plumber.png" alt="Builder Robot" style="float:right;max-width:300px;margin:25px;" />
 
-In this module, you'll:
+Here's what's ahead in this module, page by page:
 
-1. **Understand** the architecture of deep agents and how they differ from shallow ReAct agents
-2. **Explore** advanced capabilities — MCP tools, skills, sub-agent spawning, and middleware
-3. **Build** a deep agent step by step, filling in the core functions that power it
-4. **Test** your agent using an interactive Deep Agent Builder UI with drag-and-drop tools
-5. **Secure** your agent with Docker-based sandboxing and understand production deployment
+**[What Are Deep Agents?](deep_agents)** — The four pillars of deep agent architecture, real-world applications, and how the deepagents library implements it all.
 
-By the end, you'll have a production-grade agent that can plan, code, execute, delegate, and self-manage — running safely in an isolated environment.
+**[Set Up the Agent Builder](setup_agent_builder)** — Get the Deep Agent Builder UI running so you have an interactive environment for the hands-on exercises.
+
+**[Build a Deep Agent](build_deep_agents)** — Hands-on with the deepagents library. You'll build a deep agent step by step, filling in the core functions that power it, and test it using an interactive UI with drag-and-drop tools.
+
+**[Sandboxing and Security](sandboxing_security)** — How to run autonomous agents safely. You'll learn about sandboxing patterns, security architecture, and defense-in-depth strategies for production deployment.
 
 > Head over to [What Are Deep Agents](deep_agents) to dive into the architecture!

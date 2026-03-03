@@ -6,6 +6,30 @@ Your deep agent can read files, write code, and execute shell commands. That's i
 
 <!-- fold:break -->
 
+## Why Security Matters More for Deep Agents
+
+Three characteristics of deep agents amplify security concerns compared to the shallow agents you built in earlier modules:
+
+1. **Extended autonomy** — Deep agents run for minutes to hours without human oversight. A shallow agent completes in seconds, giving you time to catch mistakes. A deep agent might execute dozens of steps before you see any output.
+
+2. **Code execution** — Deep agents run shell commands, write files, install packages, and spawn sub-processes. A hallucinated `rm -rf /` or a fabricated `pip install malicious-package` isn't a hypothetical — it's a well-documented risk.
+
+3. **Cascading effects** — In a multi-agent system, a single sub-agent error can propagate through the entire hierarchy. A researcher sub-agent that follows a malicious link could compromise the orchestrator's entire workspace.
+
+The key insight: **once an agent passes control to a subprocess, only OS-level enforcement can ensure containment**. Application-level controls — prompt instructions like "don't delete files" — are insufficient because the model can hallucinate past them, and subprocess execution bypasses them entirely.
+
+<details>
+<summary><strong>Concrete risk examples</strong></summary>
+
+- **Hallucinated destructive commands** — The agent generates and executes `rm -rf /important/data` while trying to "clean up"
+- **Supply chain attacks** — The agent fabricates package names that happen to match malicious packages on public registries
+- **Data exfiltration** — A compromised sub-agent leaks sensitive data via DNS tunneling or encoded HTTP requests
+- **Resource exhaustion** — An agent in a retry loop spawns thousands of sub-processes, consuming all available compute
+
+</details>
+
+<!-- fold:break -->
+
 ## The Problem: Agents See Everything
 
 Without sandboxing, your agent operates directly on the host system. It has the same access as the process running it. Let's see what that means.
@@ -63,9 +87,40 @@ The workspace is empty.
 
 <!-- fold:break -->
 
+## The Security Spectrum
+
+Not all isolation is equal. Approaches range from trusting the model entirely to full hardware virtualization. Understanding this spectrum helps you choose the right level for your use case.
+
+| Tier | Approach | Isolation Level | Use Case |
+|------|----------|----------------|----------|
+| Weakest | Prompt-only controls | None (trust the model) | Development and testing only |
+| | Permission-gated runtimes (Deno) | Capability grants | Lightweight scripting tasks |
+| | OS-level sandboxing (Bubblewrap/Seatbelt) | Filesystem and network boundaries | Desktop agents (e.g., Claude Code) |
+| | Container hardening (Docker + seccomp) | Process-level, shared kernel | Most production workloads |
+| | User-space kernel (gVisor) | Syscall emulation | High-security workloads |
+| Strongest | Hardware virtualization (Firecracker) | Full VM, separate kernel | Maximum isolation |
+
+As you move down the table, isolation increases but so does complexity and overhead. The right choice depends on your **threat model**: who is running the agent, what data it can access, and what the consequences of a breach would be.
+
+> Our demo uses **Docker (tier 4)**, which covers most production workloads.
+
+<details>
+<summary><strong>How to choose your isolation level</strong></summary>
+
+Ask these questions:
+
+1. **Who controls the agent's inputs?** If only trusted developers, you can use lighter isolation. If end users can influence prompts, you need stronger boundaries.
+2. **What data can the agent access?** PII, credentials, or financial data demands stronger isolation than public information.
+3. **Does the agent execute code?** Any code execution — even "just" shell commands — requires at minimum container-level isolation.
+4. **What are the consequences of a breach?** A leaked API key is bad. A deleted production database is catastrophic. Match isolation to impact.
+
+</details>
+
+<!-- fold:break -->
+
 ## How Our Sandbox Works
 
-Our implementation uses **Docker containers** as the isolation boundary:
+Our implementation uses **Docker containers** as the isolation boundary — the agent runs locally and delegates code execution to an isolated container.
 
 ```python
 class DockerSandboxBackend(SandboxBackendProtocol):
@@ -91,6 +146,64 @@ When the agent calls `ls`, `read_file`, `write_file`, or `execute`, those operat
 
 <!-- fold:break -->
 
+## Two Patterns for Connecting Agents to Sandboxes
+
+Before choosing a sandbox **technology**, you need to choose a sandbox **pattern**. This architectural decision affects security, latency, and how quickly you can iterate.
+
+### Pattern 1 — Agent IN Sandbox
+
+The **agent itself** runs inside the sandbox. It communicates with external systems — the LLM API, databases, user interfaces — over HTTP or WebSocket connections.
+
+```
+┌─────────────────────────────┐
+│         Sandbox             │
+│  ┌─────────────────────┐   │
+│  │   Agent Process      │   │
+│  │   + Tools            │   │
+│  │   + File System      │   │
+│  │   + API Keys         │   │
+│  └─────────────────────┘   │
+└─────────────────────────────┘
+         ↕ HTTP/WS
+    External Services
+```
+
+**Pros:** Mirrors local development; simple architecture — everything runs in one place.
+
+**Cons:** API keys live inside the sandbox (security risk); container rebuilds needed for every agent update; all tools inherit the sandbox's full permissions.
+
+**Best for:** Prototyping and tight coupling between agent and execution environment.
+
+### Pattern 2 — Sandbox as Tool
+
+The **agent runs locally** (or on your server), and code execution is **delegated** to remote sandboxes via API calls. The sandbox is just another tool the agent can call.
+
+```
+┌──────────────────┐     ┌─────────────────┐
+│   Agent Process   │────→│   Sandbox API    │
+│   + API Keys     │     │   (Code exec)   │
+│   + Orchestration │←────│   (Isolated)    │
+└──────────────────┘     └─────────────────┘
+    Your server              Remote sandbox
+```
+
+**Pros:** API keys stay outside the sandbox; instant agent updates without container rebuilds; clean separation of agent state and execution; enables parallel sandbox execution; sandbox failures don't crash the agent.
+
+**Cons:** Network latency per execution call; more moving parts to manage.
+
+**Best for:** Most production deployments. This is the pattern used by the deepagents library.
+
+| Dimension | Agent IN Sandbox | Sandbox as Tool |
+|-----------|-----------------|-----------------|
+| **Credential security** | Keys inside sandbox | Keys stay external |
+| **Update speed** | Requires rebuild | Instant |
+| **Failure isolation** | Agent + sandbox coupled | Independent |
+| **Parallel execution** | Complex | Natural |
+
+> Our demo uses **Pattern 2** — the agent runs locally and delegates execution to a Docker container.
+
+<!-- fold:break -->
+
 ## Types of Sandboxes
 
 There are several approaches to sandboxing, each with different tradeoffs:
@@ -103,34 +216,86 @@ There are several approaches to sandboxing, each with different tradeoffs:
 | **Runloop** | Full VM | ~5-15 seconds | Pay-per-use | Maximum isolation |
 | **No sandbox** | None | 0 | Free | Trusted environments only |
 
-For production, the choice depends on your security requirements:
+<details>
+<summary><strong>Docker Containers — how they isolate</strong></summary>
 
-- **Development/demos**: Local Docker is fast and free
-- **Team environments**: Daytona provides orchestration and multi-user support
-- **Cloud production**: Modal or Runloop for serverless, managed isolation
-- **Air-gapped/regulated**: Self-hosted Daytona with custom network policies
+Docker is the most common approach for production agent sandboxing. It provides:
+
+- **Namespace isolation** — Each container has its own filesystem, process tree, and network stack
+- **Seccomp profiles** — Restrict which system calls the container can make
+- **Read-only filesystems** — Prevent the agent from modifying the container image
+- **Resource limits** — Cap CPU, memory, and network bandwidth
+
+**Strengths:** Fast startup (~1s), massive ecosystem, familiar to most developers.
+
+**Limitations:** Shared kernel — container escape vulnerabilities, while rare, do exist. Not suitable for truly untrusted code without additional hardening.
+
+</details>
+
+<details>
+<summary><strong>Firecracker MicroVMs (E2B)</strong></summary>
+
+Full hardware virtualization with ~150ms startup time. **E2B** is a leading agent sandboxing platform built on Firecracker.
+
+- Each agent gets its own **kernel** — the strongest isolation available
+- MicroVMs are lightweight (as little as 5MB memory overhead)
+- Startup time rivals containers, not traditional VMs
+- Full Linux environment with arbitrary package installation
+
+**When to use:** Untrusted code execution, maximum security requirements, or any scenario where you can't trust the code your agent generates.
+
+</details>
+
+<details>
+<summary><strong>OS-Level Sandboxing (Bubblewrap / Seatbelt)</strong></summary>
+
+Lightweight sandboxing built into the operating system:
+
+- **Bubblewrap** (Linux) — Creates unprivileged containers using Linux namespaces
+- **Seatbelt** (macOS) — Apple's sandbox framework restricting filesystem, network, and IPC access
+
+These are used by **Claude Code** for local execution — restricting which filesystem paths the agent can access, blocking network connections to unauthorized hosts, and limiting system call access.
+
+**When to use:** Local and desktop agent deployments where you need lightweight isolation without full containerization.
+
+</details>
 
 <!-- fold:break -->
 
-## Defense in Depth: HITL + Sandbox
+## Defense in Depth
 
 <img src="_static/robots/supervisor.png" alt="Defense in Depth" style="float:right;max-width:250px;margin:15px;" />
 
-The strongest security posture combines **Human-in-the-Loop (HITL)** from Module 4 with sandboxing:
+No single layer of security is sufficient. Effective security for deep agents requires **multiple overlapping controls**, so that a failure in any one layer is caught by another. This principle — **defense in depth** — is the foundation of secure agent deployment.
 
-| Layer | What It Does | Protects Against |
-|---|---|---|
-| **HITL** | Human reviews tool calls before execution | Hallucinated commands, unintended actions |
-| **Sandbox** | Agent runs in isolated container | Data exfiltration, system damage |
+Here are the layers, from closest to the user to closest to the hardware:
 
-Together, they provide **defense in depth**:
-1. The agent proposes an action (e.g., `execute: rm -rf /`)
-2. HITL pauses and asks the human to approve or reject
-3. Even if approved, the sandbox limits the blast radius to the container
+| Layer | Control | Example |
+|-------|---------|---------|
+| 1 | **Human-in-the-loop** | Approval gates for critical operations (Module 4 HITL) |
+| 2 | **Permission systems** | Allowlists for tools, commands, and file paths |
+| 3 | **Application sandboxing** | Restrict agent capabilities at the framework level |
+| 4 | **Container/VM isolation** | OS-level containment (Docker, Firecracker) |
+| 5 | **Network controls** | Default-deny egress, DNS monitoring |
+| 6 | **Audit logging** | Record all agent actions for post-hoc review |
 
-Neither alone is sufficient:
-- HITL without sandbox → human might approve something dangerous by accident
-- Sandbox without HITL → agent might do expensive operations (API calls, infinite loops) without oversight
+The key principle: assume any single layer can fail. HITL can be bypassed by batch operations. Permission systems can have gaps. Containers can have escape vulnerabilities. But all six failing simultaneously is extraordinarily unlikely.
+
+<details>
+<summary><strong>A real-world defense in depth example</strong></summary>
+
+Consider a deep research agent deployed in production:
+
+1. **HITL** — Users must approve the research plan before execution begins
+2. **Permissions** — The agent can only use `web_search` and `file_write` tools; no shell access
+3. **Application sandbox** — The LangChain framework restricts file writes to `/workspace/output/`
+4. **Container** — The agent runs in a Docker container with read-only root filesystem
+5. **Network** — Egress is limited to the LLM API and approved search domains; all other traffic is blocked
+6. **Audit** — Every tool call, API request, and file write is logged with timestamps
+
+If the agent is tricked by a prompt injection attack into trying to exfiltrate data, it would need to bypass the application file path restriction, escape the container's filesystem boundary, evade network egress controls, and avoid detection in the audit logs — all simultaneously.
+
+</details>
 
 <!-- fold:break -->
 
@@ -162,11 +327,20 @@ Every tool call, every file write, every command execution should be logged. Lan
 
 Prevent runaway agents from making thousands of API calls or running infinite loops. Set recursion limits on the graph and timeouts on tool execution.
 
+### 6. Adversarial Testing
+
+Before deploying, probe your agent with inputs designed to trigger unsafe behavior — prompt injection, harmful instructions, and edge cases. If you haven't tried to break it, you don't know it's safe.
+
+### 7. Environment Separation
+
+Use distinct configurations for development, staging, and production. Never test with production credentials or data.
+
 <!-- fold:break -->
 
 ## Enterprise Production Considerations
 
-Taking your deep agent to production requires more than just sandboxing:
+<details>
+<summary><strong>LangSmith Studio, deployment options, and state persistence</strong></summary>
 
 ### Monitoring with LangSmith Studio
 
@@ -198,13 +372,51 @@ For production, replace `MemorySaver()` (in-memory, lost on restart) with a pers
 - Multi-server deployments with shared state
 - Audit trails of agent decisions
 
+</details>
+
 <!-- fold:break -->
 
-## The "Now What?"
+<details>
+<summary><strong>How security evolved across all 5 modules</strong></summary>
+
+| Module | Agent Capability | Security Consideration |
+|--------|-----------------|----------------------|
+| Module 1 | Tool calling (search, APIs) | Tool selection validation |
+| Module 2 | RAG + document retrieval | Data access boundaries |
+| Module 3 | Evaluation and testing | Adversarial test cases |
+| Module 4 | Customized behavior + HITL | Human approval gates |
+| **Module 5** | **Autonomous execution** | **OS-level sandboxing + defense in depth** |
+
+Each level of capability demands a corresponding level of security. Deep agents sit at the far end of this spectrum — the most capable and the most in need of containment.
+
+</details>
+
+<!-- fold:break -->
+
+## Module Wrap-Up
 
 <img src="_static/robots/magician.png" alt="Next Steps" style="float:right;max-width:250px;margin:15px;" />
 
-You've built a deep agent that can plan, code, execute, delegate, and self-manage. You've secured it with sandboxing and HITL. Here's where to go next:
+### What You Learned
+
+| Topic | Key Takeaway |
+|-------|-------------|
+| **What Deep Agents Are** | Same LLM loop + planning, delegation, memory, skills |
+| **Shallow vs. Deep** | Shallow for focused tasks; deep for complex, long-horizon work |
+| **Real-World Applications** | Deep research, coding agents, analysis pipelines |
+| **Security and Sandboxing** | OS-level isolation is essential; defense in depth |
+
+### The Full Workshop Arc
+
+| Module | What You Learned | Key Capability |
+|--------|-----------------|----------------|
+| Module 1 | Build agents with ReAct | Agent fundamentals |
+| Module 2 | Extend with RAG and tools | Agent capabilities |
+| Module 3 | Measure and evaluate | Agent quality |
+| Module 4 | Customize through training | Agent expertise |
+| **Module 5** | **Deep agents + sandboxing** | **Agent autonomy** |
+
+### Where to Go Next
 
 1. **Deploy** — Use `langgraph deploy` or Docker Compose to run your agent in production
 2. **Evaluate** — Apply the Module 3 evaluation techniques to measure your deep agent's quality
@@ -212,6 +424,6 @@ You've built a deep agent that can plan, code, execute, delegate, and self-manag
 4. **Scale** — Add more tools, skills, and sub-agents as your use cases grow
 5. **Monitor** — Set up LangSmith tracing for production observability
 
-The deep agent pattern isn't just a toy — it's the architecture behind production AI coding assistants, research agents, and autonomous systems. You now have the knowledge to build, secure, and deploy them.
+You now have the complete toolkit — from building your first agent to deploying autonomous deep agents safely in production.
 
-> **Congratulations!** You've completed Module 5: Deep Agents. 🎉
+> **Congratulations!** You've completed Module 5: Deep Agents.

@@ -2,7 +2,7 @@
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right; max-width:300px;margin:25px;" />
 
-TODO
+Before diving into deep agents, let's set up the API keys you'll need for this module. Your deep agent will use NVIDIA models for reasoning, Tavily for web search, and optionally LangSmith for tracing and debugging.
 
 Use the <button onclick="openVoila('code/secrets_management/secrets_management_5.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set up your API Keys. You can also launch the Secrets Manager directly from the Jupyterlab launcher.
 
@@ -10,6 +10,8 @@ Use the <button onclick="openVoila('code/secrets_management/secrets_management_5
 <summary>⚠️ Still Need to Set These? Expand for details! </summary>
 
 ## NVIDIA API Key
+
+This key powers the LLM backbone — NVIDIA Nemotron and other models that drive your deep agent's reasoning.
 
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
@@ -45,6 +47,8 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 ## LangSmith API Key (Optional)
 
+You'll use LangSmith to trace and debug your agent's multi-step tool calls — essential for understanding what's happening inside a deep agent's autonomous workflow.
+
 LangSmith is LangChain's platform for testing, evaluating, and monitoring LLM applications. It provides tracing and debugging capabilities for your AI agents. Get your LangSmith API Key down below!
 
 <details>
@@ -62,4 +66,6 @@ Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/s
 
 </details>
 
-TODO
+## Ready to Go!
+
+With your API keys configured, you're all set to start exploring deep agents. Head over to [Introduction to Deep Agents](intro_deep_agents) to learn what makes deep agents different — and why they matter.

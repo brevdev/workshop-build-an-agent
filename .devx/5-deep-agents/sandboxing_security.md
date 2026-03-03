@@ -6,7 +6,7 @@ Your deep agent can read files, write code, and execute shell commands. That's i
 
 <!-- fold:break -->
 
-## Why Security Matters More for Deep Agents
+## Security Matters for Deep Agents
 
 Three characteristics of deep agents amplify security concerns compared to the shallow agents you built in earlier modules:
 
@@ -30,11 +30,11 @@ The key insight: **once an agent passes control to a subprocess, only OS-level e
 
 <!-- fold:break -->
 
-## The Problem: Agents See Everything
+### The Problem: Agents See Everything
 
 Without sandboxing, your agent operates directly on the host system. It has the same access as the process running it. Let's see what that means.
 
-### Demo: No Sandbox
+#### Demo: No Sandbox
 
 In the Deep Agent Builder UI, make sure **Sandbox Mode is OFF** (you'll see "⚠️ No Sandbox" in the header). Then ask:
 
@@ -65,13 +65,13 @@ db_user:mysql_prod_xK9#mN2
 
 <!-- fold:break -->
 
-## The Solution: Sandboxing
+### The Solution: Sandboxing
 
 <img src="_static/robots/operator.png" alt="Sandbox" style="float:right;max-width:250px;margin:15px;" />
 
 **Sandboxing** isolates the agent's execution environment from the host system. The agent operates inside a container or VM that has no access to the host's files, network, or credentials.
 
-### Demo: With Sandbox
+#### Demo: With Sandbox
 
 Now toggle **Sandbox Mode ON** in the Settings panel (you'll see "🔒 Sandboxed" in the header). Build a new agent and ask the same question:
 
@@ -146,7 +146,7 @@ When the agent calls `ls`, `read_file`, `write_file`, or `execute`, those operat
 
 <!-- fold:break -->
 
-## Two Patterns for Connecting Agents to Sandboxes
+## Patterns for Agent Sandboxing
 
 Before choosing a sandbox **technology**, you need to choose a sandbox **pattern**. This architectural decision affects security, latency, and how quickly you can iterate.
 

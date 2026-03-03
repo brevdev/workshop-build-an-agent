@@ -14,8 +14,8 @@ Here's a quick recap of what you've accomplished across the workshop:
 
 | Module | What You Built | Key Pattern |
 |--------|---------------|-------------|
-| Module 1 | Report generation agent, IT help desk agent | ReAct loop with tool calling |
-| Module 2 | RAG-augmented agents with external knowledge | Retrieval + generation |
+| Module 1 | Report generation agent | ReAct loop with tool calling |
+| Module 2 | RAG-augmented IT help desk agent | Retrieval + generation |
 | Module 3 | Evaluation pipelines for agent quality | LLM-as-judge, RAGAS metrics |
 | Module 4 | Customized agents via SDG + RLVR training | Domain specialization |
 
@@ -23,7 +23,7 @@ But all of these agents share a common architecture: a **single model in a singl
 
 <!-- fold:break -->
 
-## The Shallow Agent Pattern
+### The Shallow Agent Pattern
 
 Every agent we've built so far follows the same architecture:
 
@@ -33,6 +33,8 @@ User → Model → Tool → Model → Tool → ... → Response
 
 One model. One context window. One tool at a time. The bash agent from Module 4 pushed this pattern to its limit — it could execute shell commands, but it still operated in a single flat loop.
 
+#### Shallow Agent Capabilities
+
 Your ReAct agents are genuinely capable. They can:
 
 - **Dynamically select tools** — Choose the right tool for each step based on reasoning
@@ -41,6 +43,10 @@ Your ReAct agents are genuinely capable. They can:
 - **Produce structured output** — Generate formatted reports, JSON, or other structured results
 
 These capabilities cover a wide range of real-world tasks. For focused problems that fit within a single conversation — answering questions, generating short reports, triaging requests — shallow agents are often the right choice.
+
+<!-- fold:break -->
+
+#### Shallow Agent Limitations
 
 But what happens when the task outgrows the architecture? The shallow agent pattern breaks down because it can't:
 
@@ -97,7 +103,7 @@ Deep agents aren't just agents with more tools — they're agents with an **arch
 
 <!-- fold:break -->
 
-## From Bash Agent to Deep Agent
+### From Bash Agent to Deep Agent
 
 Remember the bash agent from Module 4? It could translate natural language into shell commands. That was a big step — an agent touching the real system.
 

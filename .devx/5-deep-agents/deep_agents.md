@@ -14,11 +14,15 @@ In this section, we'll first explore the conceptual framework — the "four pill
 
 Deep agents enhance the ReAct loop with four architectural pillars. Each one addresses a specific limitation of shallow agents.
 
+<!-- fold:break -->
+
 ### Pillar 1 — Explicit Planning
 
 Shallow agents plan **implicitly** — their "plan" exists only in the chain-of-thought reasoning within the context window. It's ephemeral, easily displaced by tool outputs, and invisible to the outside world.
 
 Deep agents plan **explicitly**. They maintain plan documents — essentially markdown to-do lists — that they review and update between steps. Each task is tracked with a status: **pending**, **in_progress**, or **completed**. Before taking action, the agent consults its plan. After each step, it updates the plan with results and adjusts strategy if needed.
+
+<!-- fold:break -->
 
 This seemingly simple change has profound effects:
 
@@ -66,6 +70,8 @@ Orchestrator (high-level planning)
 └── Sub-agent: Writer (synthesis, report generation)
 ```
 
+<!-- fold:break -->
+
 This pattern solves two problems at once:
 
 - **Context isolation** — No single sub-task can overflow the orchestrator's context window. Each sub-agent works in a clean environment and returns only what matters.
@@ -97,6 +103,8 @@ Deep agents shift from "remembering everything in context" to "knowing where to 
 
 - **File system access** — Read, write, edit, and search files as external memory. Intermediate results, research notes, and draft outputs all live on disk.
 - **Shared workspaces** — Sub-agents can read and write to common directories, enabling coordination without passing everything through the orchestrator's context.
+
+<!-- fold:break -->
 
 This is what enables deep agents to work on tasks that span hundreds of steps. The context window holds only what's immediately relevant — the plan, the current sub-task, and the most recent results. Everything else is a file read away.
 
@@ -167,9 +175,10 @@ A deep agent could **orchestrate** all of these as sub-agents: use the RAG agent
 
 <img src="_static/robots/supervisor.png" alt="Real World Applications" style="float:right;max-width:300px;margin:25px;" />
 
-Deep agent patterns have moved rapidly from research to production. Let's look at where they're making the biggest impact.
+Deep agent patterns have moved rapidly from research to production. Let's look at where they're making the biggest impact. Click on each use case to learn more. 
 
-### Deep Research
+<details>
+<summary><strong>1. Deep Research</strong></summary>
 
 Deep research is the flagship application of deep agents — and the category where all major AI providers have converged on remarkably similar architectures:
 
@@ -188,7 +197,10 @@ Despite different implementations, the common architecture follows a consistent 
 4. **Compression** — Results are synthesized, deduplicated, and cross-referenced
 5. **Report** — A final structured document is generated with citations
 
-### Coding Agents
+</details>
+
+<details>
+<summary><strong>2. Coding Assistants</strong></summary>
 
 Software development is the most battle-tested use case for deep agents. Tools like **Claude Code**, **Cursor**, and **GitHub Copilot** all leverage deep agent patterns:
 
@@ -198,28 +210,6 @@ Software development is the most battle-tested use case for deep agents. Tools l
 - **Persistent memory** to track progress across multi-file refactors
 
 These agents don't just autocomplete code — they reason about architecture, track progress, adapt when builds fail, and coordinate changes across dozens of files.
-
-<details>
-<summary><strong>Other applications across industries</strong></summary>
-
-Deep agent patterns are also emerging across many industries:
-
-- **Market analysis** — Researching competitors, analyzing trends, producing investment briefs across dozens of sources
-- **Compliance review** — Auditing documents against regulatory requirements, cross-referencing policies
-- **Data analysis pipelines** — Exploring datasets, generating hypotheses, running analyses, and producing reports
-- **Customer support automation** — Complex multi-step issue resolution requiring access to internal systems
-
-</details>
-
-<details>
-<summary><strong>Why are deep agents practical now?</strong></summary>
-
-Recent advances in LLM capabilities have made these patterns practical for production use:
-
-- **Longer context windows** make it feasible for orchestrators to manage complex plans
-- **Better instruction following** means agents reliably execute detailed skill protocols
-- **Improved tool use** enables reliable file system access, code execution, and API calls
-- **Faster inference** makes multi-agent architectures practical without prohibitive latency
 
 </details>
 
@@ -247,7 +237,19 @@ Like any architectural decision, deep agents come with both benefits and costs.
 | **Complexity** | Harder to test, predict, and debug across multiple agents |
 | **Coordination** | Multi-agent writing can produce disjointed output without careful orchestration |
 
+<details>
+<summary><strong>Why are deep agents practical now? Click me!</strong></summary>
+
+Recent advances in LLM capabilities have made these patterns practical for production use:
+
+- **Longer context windows** make it feasible for orchestrators to manage complex plans
+- **Better instruction following** means agents reliably execute detailed skill protocols
+- **Improved tool use** enables reliable file system access, code execution, and API calls
+- **Faster inference** makes multi-agent architectures practical without prohibitive latency
+
 Deep agents are not universally better than shallow agents — they're better for a specific class of problems. Using a deep agent for a simple question-answering task is like using a distributed system for a single-user application: architecturally sound but massively over-engineered.
+
+</details>
 
 <!-- fold:break -->
 
@@ -297,7 +299,7 @@ Now let's see how the **deepagents library** implements these pillars.
 
 <!-- fold:break -->
 
-## The `create_deep_agent()` Function
+### The `create_deep_agent()` Function
 
 At its core, a deep agent is created with a single function:
 
@@ -320,11 +322,32 @@ This returns a compiled **LangGraph** graph — the same framework we used in ea
 
 <!-- fold:break -->
 
-## Built-In Capabilities
+### The Middleware Pipeline
+
+Under the hood, `create_deep_agent()` builds a LangGraph graph with a **middleware stack** that processes every interaction:
+
+```
+User Message
+  → SummarizationMiddleware    (compress long conversations)
+  → PatchToolCallsMiddleware   (fix dangling tool calls)
+  → Model                      (LLM generates response)
+  → TodoListMiddleware         (manage planning state)
+  → FilesystemMiddleware       (handle file operations)
+  → SubAgentMiddleware         (delegate to sub-agents)
+  → HumanInTheLoopMiddleware   (pause for approval if configured)
+  → Tool Execution
+  → Back to Model...
+```
+
+Each middleware adds a capability without you writing any orchestration code. This is what makes deep agents "batteries-included" — the complexity is handled by the framework.
+
+<!-- fold:break -->
+
+### Built-In Capabilities
 
 Every deep agent comes with these tools out of the box — provided by the middleware stack.
 
-### Planning — `write_todos`
+#### Planning — `write_todos`
 
 The agent can create and manage a task list. When given a complex request, it breaks it into steps, tracks progress, and works through them systematically. This is **Pillar 1 (Explicit Planning)** in action.
 
@@ -343,7 +366,7 @@ This gives the agent a structured approach to multi-step problems instead of imp
 
 <!-- fold:break -->
 
-### Filesystem — `read_file`, `write_file`, `edit_file`, `ls`, `glob`, `grep`
+#### Filesystem — `read_file`, `write_file`, `edit_file`, `ls`, `glob`, `grep`
 
 <img src="_static/robots/operator.png" alt="File Operations" style="float:right;max-width:250px;margin:15px;" />
 
@@ -362,7 +385,7 @@ This is what separates deep agents from chatbots. They can navigate a codebase, 
 
 <!-- fold:break -->
 
-### Shell Execution — `execute`
+#### Shell Execution — `execute`
 
 The `execute` tool runs shell commands. Combined with filesystem tools, this lets the agent:
 
@@ -376,7 +399,7 @@ Shell access is what makes deep agents truly autonomous — but it's also what m
 
 <!-- fold:break -->
 
-### Sub-Agents — `task`
+#### Sub-Agents — `task`
 
 Perhaps the most powerful capability: deep agents can **spawn sub-agents** to handle sub-tasks in isolated context windows. This is **Pillar 2 (Hierarchical Delegation)** in action.
 
@@ -397,7 +420,7 @@ Each sub-agent gets its own context, tools, and prompt. This enables:
 
 <!-- fold:break -->
 
-### Context Management — Auto-Summarization
+#### Context Management — Auto-Summarization
 
 Long conversations accumulate tokens quickly. Deep agents handle this with **automatic summarization** — when the conversation gets too long, the middleware transparently compresses earlier messages so the agent keeps working without hitting token limits. This supports **Pillar 3 (Persistent Memory)** by ensuring the agent doesn't lose track of its work.
 
@@ -442,28 +465,7 @@ Skills don't add new tools — they add **expertise**. You can create skills for
 
 <!-- fold:break -->
 
-## The Middleware Pipeline
-
-Under the hood, `create_deep_agent()` builds a LangGraph graph with a **middleware stack** that processes every interaction:
-
-```
-User Message
-  → SummarizationMiddleware    (compress long conversations)
-  → PatchToolCallsMiddleware   (fix dangling tool calls)
-  → Model                      (LLM generates response)
-  → TodoListMiddleware         (manage planning state)
-  → FilesystemMiddleware       (handle file operations)
-  → SubAgentMiddleware         (delegate to sub-agents)
-  → HumanInTheLoopMiddleware   (pause for approval if configured)
-  → Tool Execution
-  → Back to Model...
-```
-
-Each middleware adds a capability without you writing any orchestration code. This is what makes deep agents "batteries-included" — the complexity is handled by the framework.
-
-<!-- fold:break -->
-
-## Deep Agent vs Shallow Agent — Architecture
+## Architecture Summary
 
 Here's the key architectural difference:
 

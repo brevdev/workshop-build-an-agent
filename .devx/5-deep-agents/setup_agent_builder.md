@@ -8,22 +8,6 @@ The demo lives in the `demo/` folder and has two parts: a **React frontend** and
 
 <!-- fold:break -->
 
-## Prerequisites
-
-Make sure you have these installed:
-
-| Tool | Version | Check |
-|---|---|---|
-| **Node.js** | 18+ | `node --version` |
-| **Python** | 3.11+ | `python3.11 --version` |
-| **Docker** | Any (optional, for sandbox mode) | `docker --version` |
-
-You should also have your API keys ready from the [Secrets](secrets) page:
-- **NVIDIA API Key** (`nvapi-...`)
-- **Tavily API Key** (`tvly-...`)
-
-<!-- fold:break -->
-
 ## Step 1: Backend Setup
 
 Open a terminal and set up the Python backend:
@@ -39,26 +23,9 @@ This installs `deepagents`, `fastapi`, `langchain`, and all other dependencies. 
 
 <!-- fold:break -->
 
-### Configure API Keys
-
-Create a `.env` file with your keys:
-
-```bash
-cp .env.example .env
-```
-
-Then edit `.env` and fill in your actual keys:
-
-```
-NVIDIA_API_KEY=nvapi-your-key-here
-TAVILY_API_KEY=tvly-your-key-here
-```
-
-> **Tip**: If you already set up secrets in the Secrets Manager, your keys may already be available as environment variables. You can check with `echo $NVIDIA_API_KEY`.
-
-<!-- fold:break -->
-
 ### Start the Backend
+
+> **Important:** If you already set up secrets in the Secrets Manager, your API keys may already be available as environment variables. You can check with `echo $NVIDIA_API_KEY`.
 
 ```bash
 uvicorn server:app --host 0.0.0.0 --port 8000
@@ -70,14 +37,12 @@ You should see:
 INFO:     Uvicorn running on http://0.0.0.0:8000
 ```
 
-Verify it's working:
+Leave this terminal running and verify it's working from another window:
 
 ```bash
 curl http://localhost:8000/api/health
 # → {"status":"ok","service":"deep-agent-backend","sessions":0}
 ```
-
-Leave this terminal running.
 
 <!-- fold:break -->
 
@@ -115,13 +80,17 @@ You'll see the **LLM Picker** — a robot in the center with model cards around 
 
 ## UI Walkthrough
 
-The demo has four phases:
+The demo has four phases. Click on each to learn more.
 
-### 1. Pick Your Model
+<details>
+<summary><strong>1. Pick Your Model</strong></summary>
 
 Click a model card to select it. **Nemotron** (NVIDIA's flagship) is recommended — it handles deepagents' middleware stack reliably. The model's brand color will theme the entire UI.
 
-### 2. Build Your Agent
+</details>
+
+<details>
+<summary><strong>2. Build Your Agent</strong></summary>
 
 After picking a model, you'll see three panels:
 
@@ -138,11 +107,15 @@ After picking a model, you'll see three panels:
 - ⚡ **Superpowers** — TDD and debugging methodology
 - And more...
 
-### 3. Click Build
+<details>
+<summary><strong>3. Click Build</strong></summary>
 
 When you've added at least one tool, the **Build** button lights up. Click it to see the build animation — the frontend sends your configuration to the backend, which assembles the deep agent.
 
-### 4. Chat
+</details>
+
+<details>
+<summary><strong>4. Chat with the Agent</strong></summary>
 
 Once built, you're in the **chat interface**:
 - Type messages and see real-time streaming responses
@@ -155,11 +128,14 @@ Try these to verify everything works:
 - *"Write a hello world Python script and run it"* — tests File I/O + Shell
 - *"What's in the news today?"* — tests Web Search
 
+</details>
+
 <!-- fold:break -->
 
-## Optional: Docker for Sandbox Mode
+<details>
+<summary><strong>5. (Optional) Docker for Sandbox Mode</strong></summary>
 
-If you have Docker installed, you can enable **Sandbox Mode** in the Settings panel. This runs the agent's tools inside an isolated Docker container — the agent can't see your host files.
+If you have Docker installed, you can enable **Sandbox Mode** in the Settings panel. This runs the agent's tools inside an isolated Docker container — the agent can't see your host files. 
 
 For Colima users, add your Docker socket to `.env`:
 
@@ -173,7 +149,9 @@ Pull the sandbox image (one-time):
 docker pull python:3.11-slim
 ```
 
-Then toggle Sandbox Mode ON in the Settings panel when building your agent.
+Then toggle Sandbox Mode ON in the Settings panel when building your agent. We'll talk about why this mode is important shortly. 
+
+</details>
 
 <!-- fold:break -->
 

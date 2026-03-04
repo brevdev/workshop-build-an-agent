@@ -320,7 +320,7 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
           case 'done':
             break;
         }
-      }, controller.signal);
+      }, undefined, controller.signal);
     } catch (err) {
       console.error('[Chat] Approval stream error:', err);
     } finally {

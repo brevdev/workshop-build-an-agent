@@ -85,3 +85,14 @@
     - $PORT
   icon: /project/.devx/_static/img/chatbot.svg
   catalog: NVIDIA DevX Learning Path
+
+- title: "Deep Agents Client"
+  source: http://localhost:$PORT/
+  cwd: /project/demo
+  type: local-server
+  args:
+    - bash
+    - -c
+    - npm run build && npm run preview -- --port $PORT
+  icon: /project/.devx/_static/img/chatbot.svg
+  catalog: NVIDIA DevX Learning Path

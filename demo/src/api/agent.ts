@@ -17,7 +17,6 @@ export interface UsageEvent { type: 'usage'; inputTokens: number; outputTokens: 
 
 export type AgentEvent = TokenEvent | ToolStartEvent | ToolEndEvent | ErrorEvent | DoneEvent | InterruptEvent | UsageEvent;
 
-interface ChatMessage { role: 'user' | 'agent'; content: string; }
 
 /**
  * Create a new agent session.
@@ -28,7 +27,7 @@ export async function createAgentSession(
   hitlEnabled: boolean = false,
   sandboxMap: Record<string, boolean> = {},
 ): Promise<string> {
-  const response = await fetch('/api/agent', {
+  const response = await fetch('api/agent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model_id: modelId, skill_ids: skillIds, hitl_enabled: hitlEnabled, sandbox_map: sandboxMap }),
@@ -42,7 +41,7 @@ export async function createAgentSession(
  * Delete an agent session.
  */
 export async function deleteAgentSession(sessionId: string): Promise<void> {
-  try { await fetch(`/api/agent/${sessionId}`, { method: 'DELETE' }); } catch { /* ignore */ }
+  try { await fetch(`api/agent/${sessionId}`, { method: 'DELETE' }); } catch { /* ignore */ }
 }
 
 /**
@@ -54,7 +53,7 @@ export async function sendMessage(
   onEvent: (event: AgentEvent) => void,
   signal?: AbortSignal,
 ): Promise<void> {
-  const response = await fetch(`/api/agent/${sessionId}/chat`, {
+  const response = await fetch(`api/agent/${sessionId}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message }),
@@ -84,7 +83,7 @@ export async function sendApproval(
     body.edited_args = editedArgs;
   }
 
-  const response = await fetch(`/api/agent/${sessionId}/approve`, {
+  const response = await fetch(`api/agent/${sessionId}/approve`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

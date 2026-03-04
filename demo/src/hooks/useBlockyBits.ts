@@ -51,7 +51,7 @@ export function useBlockyBits(enabled: boolean = true): UseBlockyBitsResult {
     if (!enabled) return;
 
     try {
-      const response = await fetch('/blocks/workspace', {
+      const response = await fetch('blocks/workspace', {
         signal: AbortSignal.timeout(2000),
       });
 

@@ -1,20 +1,25 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+const proxyConfig = {
+  '/api': {
+    target: 'http://localhost:8000',
+    changeOrigin: true,
+  },
+  '/blocks': {
+    target: 'http://localhost:1234',
+    changeOrigin: true,
+    rewrite: (path: string) => path.replace(/^\/blocks/, ''),
+  },
+};
+
 export default defineConfig({
   plugins: [react()],
+  base: './',
   server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-      },
-      '/blocks': {
-        target: 'http://localhost:1234',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/blocks/, ''),
-      },
-    },
+    proxy: proxyConfig,
+  },
+  preview: {
+    proxy: proxyConfig,
   },
 })

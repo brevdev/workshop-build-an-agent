@@ -17,7 +17,7 @@ interface NodePosition {
 export function ToolWebView({ skills, toolCalls, activeToolId }: ToolWebViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const animFrameRef = useRef<number>();
+  const animFrameRef = useRef<number | undefined>(undefined);
   const pulsePhaseRef = useRef(0);
   const shakeRef = useRef({ x: 0, y: 0, intensity: 0 });
   const [size, setSize] = useState({ w: 340, h: 400 });

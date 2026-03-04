@@ -66,7 +66,7 @@ VITE v7.x.x  ready in XXms
 
 <!-- fold:break -->
 
-## Step 3: Open the UI
+### Open the UI
 
 <img src="_static/robots/magician.png" alt="UI Robot" style="float:right;max-width:250px;margin:15px;" />
 

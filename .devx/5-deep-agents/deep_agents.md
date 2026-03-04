@@ -259,7 +259,7 @@ Deep agents are not universally better than shallow agents — they're better fo
 
 <!-- fold:break -->
 
-## When to Use Deep Agents
+### When to Use Deep Agents
 
 Not every task needs a deep agent. Here's a decision framework:
 
@@ -429,11 +429,11 @@ Long conversations accumulate tokens quickly. Deep agents handle this with **aut
 
 <!-- fold:break -->
 
-## Extending Deep Agents
+### Extending Deep Agents
 
 Beyond the built-in capabilities, deep agents can be extended with two mechanisms:
 
-### MCP Tools — Model Context Protocol
+#### MCP Tools — Model Context Protocol
 
 MCP lets you connect external tool servers to your agent. Any server exposing an SSE or Streamable HTTP endpoint can provide tools:
 
@@ -450,7 +450,7 @@ The agent calls these tools just like built-in ones. MCP is the standard protoco
 
 <!-- fold:break -->
 
-### Skills — Markdown Methodology Injection
+#### Skills — Markdown Methodology Injection
 
 Skills are `.md` files that get injected into the agent's system prompt. They teach the agent *how* to approach specific types of problems:
 

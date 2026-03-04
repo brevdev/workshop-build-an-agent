@@ -22,7 +22,9 @@ Let's build each one.
 
 <!-- fold:break -->
 
-## Exercise 1: Configure the Model
+## Exercises
+
+### Exercise 1: Configure the Model
 
 The first step is connecting to an NVIDIA NIM model. Deep agents need a model that supports **tool calling** — the ability to generate structured function calls.
 
@@ -48,7 +50,7 @@ def _get_model(model_id: str = "nemotron"):
 
 <!-- fold:break -->
 
-## Exercise 2: Build the Tool Pipeline
+### Exercise 2: Build the Tool Pipeline
 
 Deep agents come with built-in tools (filesystem, planning, etc.), but we can add more. The most common addition is **web search** via Tavily.
 
@@ -74,7 +76,7 @@ def _build_extra_tools(skill_ids: list[str]) -> list:
 
 <!-- fold:break -->
 
-## Exercise 3: Write the System Prompt
+### Exercise 3: Write the System Prompt
 
 <img src="_static/robots/spyglass.png" alt="System Prompt" style="float:right;max-width:250px;margin:15px;" />
 
@@ -115,7 +117,7 @@ CRITICAL RULES:
 
 <!-- fold:break -->
 
-## Exercise 4: Configure the Backend
+### Exercise 4: Configure the Backend
 
 The **backend** determines where file operations and shell commands execute. Deep agents support different backends:
 
@@ -153,7 +155,7 @@ def _build_backend(skill_ids: list[str]):
 
 <!-- fold:break -->
 
-## Exercise 5: Wire It All Together
+### Exercise 5: Wire It All Together
 
 Now bring all the pieces together. The `create_agent()` function calls your other functions and passes everything to `create_deep_agent()`.
 
@@ -198,7 +200,7 @@ def create_agent(skill_ids=None, model_id="nemotron", hitl_enabled=False):
 
 <!-- fold:break -->
 
-## Exercise 6: Add a Custom Skill
+### Exercise 6: Add a Custom Skill
 
 <img src="_static/robots/magician.png" alt="Skills" style="float:right;max-width:250px;margin:15px;" />
 

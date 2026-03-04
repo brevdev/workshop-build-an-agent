@@ -125,34 +125,6 @@ Ask these questions:
 
 <!-- fold:break -->
 
-## How Our Sandbox Works
-
-Our implementation uses **Docker containers** as the isolation boundary — the agent runs locally and delegates code execution to an isolated container.
-
-```python
-class DockerSandboxBackend(SandboxBackendProtocol):
-    def __init__(self):
-        self._container = docker_client.containers.run(
-            "python:3.11-slim",
-            command="sleep infinity",
-            detach=True,
-            working_dir="/workspace",
-            mem_limit="512m",
-            nano_cpus=1_000_000_000,  # 1 CPU
-            # No host mounts — fully isolated
-        )
-```
-
-Key properties:
-- **No host mounts** — The container has its own filesystem
-- **Resource limits** — 512MB RAM, 1 CPU
-- **Auto-cleanup** — Container is destroyed when the session ends
-- **Full protocol compliance** — Implements `SandboxBackendProtocol` so all deepagents tools work transparently
-
-When the agent calls `ls`, `read_file`, `write_file`, or `execute`, those operations happen *inside the container*, not on your machine.
-
-<!-- fold:break -->
-
 ## Patterns for Agent Sandboxing
 
 Before choosing a sandbox **technology**, you need to choose a sandbox **pattern**. This architectural decision affects security, latency, and how quickly you can iterate.
@@ -210,6 +182,34 @@ The **agent runs locally** (or on your server), and code execution is **delegate
 | **Parallel execution** | Complex | Natural |
 
 > Our demo uses **Pattern 2** — the agent runs locally and delegates execution to a Docker container.
+
+<!-- fold:break -->
+
+### How Our Sandbox Works
+
+Our implementation uses **Docker containers** as the isolation boundary — the agent runs locally and delegates code execution to an isolated container.
+
+```python
+class DockerSandboxBackend(SandboxBackendProtocol):
+    def __init__(self):
+        self._container = docker_client.containers.run(
+            "python:3.11-slim",
+            command="sleep infinity",
+            detach=True,
+            working_dir="/workspace",
+            mem_limit="512m",
+            nano_cpus=1_000_000_000,  # 1 CPU
+            # No host mounts — fully isolated
+        )
+```
+
+Key properties:
+- **No host mounts** — The container has its own filesystem
+- **Resource limits** — 512MB RAM, 1 CPU
+- **Auto-cleanup** — Container is destroyed when the session ends
+- **Full protocol compliance** — Implements `SandboxBackendProtocol` so all deepagents tools work transparently
+
+When the agent calls `ls`, `read_file`, `write_file`, or `execute`, those operations happen *inside the container*, not on your machine.
 
 <!-- fold:break -->
 

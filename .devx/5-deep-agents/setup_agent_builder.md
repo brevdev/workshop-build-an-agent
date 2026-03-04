@@ -48,31 +48,20 @@ curl http://localhost:8000/api/health
 
 ## Step 2: Frontend Setup
 
-In a different <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>, set up the React frontend:
+In a different <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>, set up the React frontend dependencies:
 
 ```bash
 cd demo
 npm install
-npm run dev
-```
-
-You should see:
-
-```
-VITE v7.x.x  ready in XXms
-
-➜  Local:   http://localhost:5173/
 ```
 
 <!-- fold:break -->
 
-### Open the UI
+### Open the Frontend UI
 
 <img src="_static/robots/magician.png" alt="UI Robot" style="float:right;max-width:250px;margin:15px;" />
 
-Open your browser to:
-
-**http://localhost:5173**
+Open the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button>. You can also launch this directly from the Jupyterlab Launcher screen.
 
 You'll see the **LLM Picker** — a robot in the center with model cards around it.
 
@@ -164,13 +153,5 @@ Then toggle Sandbox Mode ON in the Settings panel when building your agent. We'l
 | "DEGRADED function" error | NVIDIA NIM API may be temporarily down. Wait a few minutes and retry. |
 | Agent times out | The NIM endpoint might be slow. Try again — first calls can take longer. |
 | Sandbox mode hangs | Make sure Docker/Colima is running: `docker ps` should work. |
-
-<!-- fold:break -->
-
-## Ready?
-
-With both terminals running, you should have:
-- ✅ Backend at `http://localhost:8000`
-- ✅ Frontend at `http://localhost:5173`
 
 > Head to [Build a Deep Agent](build_deep_agents) to start the exercises!

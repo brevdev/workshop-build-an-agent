@@ -14,10 +14,10 @@ Here's a quick recap of what you've accomplished across the workshop:
 
 | Module | What You Built | Key Pattern |
 |--------|---------------|-------------|
-| Module 1 | Report generation agent | ReAct loop with tool calling |
-| Module 2 | RAG-augmented IT help desk agent | Retrieval + generation |
-| Module 3 | Evaluation pipelines for agent quality | LLM-as-judge, RAGAS metrics |
-| Module 4 | Customized agents via SDG + RLVR training | Domain specialization |
+| 1 | Report generation agent | ReAct loop with tool calling |
+| 2 | RAG-augmented IT help desk agent | Retrieval + generation |
+| 3 | Evaluation pipelines for agent quality | LLM-as-judge, RAGAS metrics |
+| 4 | Customized CLI agent via SDG + RLVR  | Domain specialization |
 
 But all of these agents share a common architecture: a **single model in a single loop**, with all state living inside the context window. We call these "shallow" agents — not because they're simple, but because their reasoning stays within a single layer of execution.
 
@@ -32,6 +32,8 @@ User → Model → Tool → Model → Tool → ... → Response
 ```
 
 One model. One context window. One tool at a time. The bash agent from Module 4 pushed this pattern to its limit — it could execute shell commands, but it still operated in a single flat loop.
+
+<!-- fold:break -->
 
 #### Shallow Agent Capabilities
 
@@ -57,14 +59,6 @@ But what happens when the task outgrows the architecture? The shallow agent patt
 
 For simple tasks, this is fine. But real-world production tasks — "research this topic, write code, test it, fix any bugs, and write documentation" — require something more.
 
-Think about how a human handles complex tasks. You don't try to hold everything in your head. You:
-- Write down a plan and check items off as you go
-- Delegate specialized work to colleagues
-- Take notes and refer back to them
-- Follow established procedures for common workflows
-
-These are exactly the capabilities that deep agents add to the LLM loop.
-
 <details>
 <summary><strong>A concrete example of shallow agent breakdown</strong></summary>
 
@@ -82,11 +76,17 @@ A human researcher would take notes, organize by subtopic, and check their work 
 
 </details>
 
+> Think about how a human handles complex tasks. You don't try to hold everything in your head. You:
+> - Write down a plan and check items off as you go
+> - Delegate specialized work to colleagues
+> - Take notes and refer back to them
+> - Follow established procedures for common workflows
+> 
+> These are exactly the capabilities that deep agents add to the LLM loop.
+
 <!-- fold:break -->
 
 ## What Makes an Agent "Deep"?
-
-<img src="_static/robots/supervisor.png" alt="Supervisor Robot" style="float:right;max-width:300px;margin:25px;" />
 
 A **deep agent** goes beyond the flat ReAct loop. It has built-in capabilities that make it autonomous enough to handle complex, multi-step tasks without constant human guidance:
 

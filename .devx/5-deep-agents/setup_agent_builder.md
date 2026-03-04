@@ -10,7 +10,7 @@ The demo lives in the `demo/` folder and has two parts: a **React frontend** and
 
 ## Step 1: Backend Setup
 
-Open a terminal and set up the Python backend:
+Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> and set up the Python backend:
 
 ```bash
 cd demo/backend
@@ -37,7 +37,7 @@ You should see:
 INFO:     Uvicorn running on http://0.0.0.0:8000
 ```
 
-Leave this terminal running and verify it's working from another window:
+Leave this server running and verify it's working from another <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>:
 
 ```bash
 curl http://localhost:8000/api/health
@@ -48,7 +48,7 @@ curl http://localhost:8000/api/health
 
 ## Step 2: Frontend Setup
 
-Open a **second terminal** and set up the React frontend:
+In a different <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>, set up the React frontend:
 
 ```bash
 cd demo
@@ -106,6 +106,8 @@ After picking a model, you'll see three panels:
 - 💻 **Shell Execution** — Run commands and scripts
 - ⚡ **Superpowers** — TDD and debugging methodology
 - And more...
+
+</details>
 
 <details>
 <summary><strong>3. Click Build</strong></summary>

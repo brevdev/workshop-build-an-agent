@@ -2,9 +2,9 @@
 
 <img src="_static/robots/datacenter.png" alt="Deep Agent Architecture" style="float:right;max-width:300px;margin:25px;" />
 
-**Deep agents** are AI agents equipped with planning tools, file system access, shell execution, and sub-agent spawning, operating through an autonomous reasoning loop to handle complex, multi-step tasks. They use the same LLM-in-a-loop foundation as the ReAct agents you built in earlier modules, but with a **middleware pipeline** that adds planning, file management, sub-agent orchestration, and context management around every interaction.
+**Deep agents** are AI agents equipped with planning tools, file system access, shell execution, and sub-agent spawning, operating through an autonomous reasoning loop to handle complex, multi-step tasks. They use the same LLM-in-a-loop foundation as the ReAct agents you built in earlier modules, but with a **middleware pipeline** around every interaction.
 
-The result: agents that can reliably operate across hundreds of steps and extended time horizons — from minutes to hours — where shallow agents would lose focus, overflow their context, or fail to recover from mistakes.
+**The result?** Agents that can reliably operate across hundreds of steps and extended time horizons — from minutes to hours — where shallow agents would lose focus, overflow their context, or fail to recover from mistakes.
 
 In this section, we'll first explore the conceptual framework — the "four pillars" that make deep agents work — and then look at how the deepagents library implements them.
 
@@ -173,7 +173,7 @@ A deep agent could **orchestrate** all of these as sub-agents: use the RAG agent
 
 ## Deep Agents in the Real World
 
-<img src="_static/robots/supervisor.png" alt="Real World Applications" style="float:right;max-width:300px;margin:25px;" />
+<img src="_static/robots/supervisor.png" alt="Real World Applications" style="float:right;max-width:250px;margin:25px;" />
 
 Deep agent patterns have moved rapidly from research to production. Let's look at where they're making the biggest impact. Click on each use case to learn more. 
 
@@ -217,9 +217,10 @@ These agents don't just autocomplete code — they reason about architecture, tr
 
 ## Benefits and Tradeoffs
 
-Like any architectural decision, deep agents come with both benefits and costs.
+Like any architectural decision, deep agents come with both benefits and costs. Click on each of the following to learn more: 
 
-**Benefits:**
+<details>
+<summary><strong>1. Benefits of Deep Agent Architecture</strong></summary>
 
 | Benefit | Description |
 |---------|-------------|
@@ -228,7 +229,10 @@ Like any architectural decision, deep agents come with both benefits and costs.
 | **Resilient planning** | Adapts strategy when steps fail instead of entering infinite loops |
 | **Safe execution** | Sandboxing enables autonomous code execution in production |
 
-**Tradeoffs:**
+</details>
+
+<details>
+<summary><strong>2. Tradeoffs of Deep Agent Architecture</strong></summary>
 
 | Tradeoff | Detail |
 |----------|--------|
@@ -237,8 +241,10 @@ Like any architectural decision, deep agents come with both benefits and costs.
 | **Complexity** | Harder to test, predict, and debug across multiple agents |
 | **Coordination** | Multi-agent writing can produce disjointed output without careful orchestration |
 
+</details>
+
 <details>
-<summary><strong>Why are deep agents practical now? Click me!</strong></summary>
+<summary><strong>3. So Why are Deep Agents Practical Now?</strong></summary>
 
 Recent advances in LLM capabilities have made these patterns practical for production use:
 
@@ -265,18 +271,15 @@ Not every task needs a deep agent. Here's a decision framework:
 | Autonomous operation is acceptable | Real-time response is required |
 | The task benefits from planning and delegation | The path is straightforward |
 
-<details>
-<summary><strong>A practical rule of thumb</strong></summary>
+> **A practical rule of thumb** - Ask yourself: "Could a single person complete this in one sitting without taking notes?" If yes, a shallow agent is probably fine. If the answer is "no — you'd need to break it into subtasks, keep a to-do list, and coordinate with specialists," that's a deep agent problem.
 
-Ask yourself: "Could a single person complete this in one sitting without taking notes?" If yes, a shallow agent is probably fine. If the answer is "no — you'd need to break it into subtasks, keep a to-do list, and coordinate with specialists," that's a deep agent problem.
-
-</details>
+<!-- fold:break -->
 
 Here are some concrete examples:
 
 | Task | Agent Type | Why |
 |------|-----------|-----|
-| "Summarize this article" | Shallow | Single step, fits in context |
+| "Summarize these articles" | Shallow | Single step, fits in context |
 | "Answer this question using our docs" | Shallow | RAG + generation, 3-5 steps |
 | "Research 10 competitors and write a market report" | Deep | Multi-source, requires planning and synthesis |
 | "Refactor this codebase to use a new API" | Deep | Multi-file, needs progress tracking |

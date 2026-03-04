@@ -2,9 +2,9 @@
 
 <img src="_static/robots/plumber.png" alt="Build Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Time to get hands-on. In this section, you'll build a deep agent step by step by filling in the core functions that power it. We'll work through the backend code and then test everything using the interactive Deep Agent Builder UI.
+Time to get hands-on. In this section, you'll build a deep agent step by step by filling in the core functions that power it. We'll work through the backend code and then test everything using the interactive Deep Agent Client from the previous section.
 
-<button onclick="openOrCreateFileInJupyterLab('code/5-deep-agents/deep_agent.py');"><i class="fa-brands fa-python"></i> code/5-deep-agents/deep_agent.py</button> is the skeleton file you'll complete. It mirrors the production code in `demo/backend/agent.py` but with key sections left as exercises.
+<button onclick="openOrCreateFileInJupyterLab('code/5-deep-agents/deep_agent.py');"><i class="fa-brands fa-python"></i> code/5-deep-agents/deep_agent.py</button> is the skeleton file you'll complete. This is a mirror of the Client code in `demo/backend/agent.py` but with key sections left as exercises.
 
 <!-- fold:break -->
 
@@ -24,7 +24,7 @@ Let's build each one.
 
 ## Exercises
 
-### Exercise 1: Configure the Model
+### Exercise: Configure the Model
 
 The first step is connecting to an NVIDIA NIM model. Deep agents need a model that supports **tool calling** — the ability to generate structured function calls.
 
@@ -50,9 +50,9 @@ def _get_model(model_id: str = "nemotron"):
 
 <!-- fold:break -->
 
-### Exercise 2: Build the Tool Pipeline
+### Exercise: Build the Tool Pipeline
 
-Deep agents come with built-in tools (filesystem, planning, etc.), but we can add more. The most common addition is **web search** via Tavily.
+Deep agents come with built-in tools (filesystem, planning, etc.), but we can add more. One easy and familiar addition we can make is **web search** via Tavily.
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> # TODO: Exercise 2</button>
 
@@ -76,7 +76,7 @@ def _build_extra_tools(skill_ids: list[str]) -> list:
 
 <!-- fold:break -->
 
-### Exercise 3: Write the System Prompt
+### Exercise: Write the System Prompt
 
 <img src="_static/robots/spyglass.png" alt="System Prompt" style="float:right;max-width:250px;margin:15px;" />
 
@@ -85,9 +85,9 @@ The system prompt is critical — it tells the agent what it can do, what rules 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 3');"><i class="fas fa-code"></i> # TODO: Exercise 3</button>
 
 Fill in `_build_system_prompt()` to:
-1. List the agent's enabled capabilities
+1. List the agent's enabled capabilities (`{caps_text}`) in the workspace (`{workspace}`)
 2. Set critical rules (use absolute paths, don't repeat tool calls, etc.)
-3. Optionally include HITL notes and skill content
+3. Optionally include HITL notes (`{hitl_note}`) and skill content (`{skill_section}`)
 
 Key rules your prompt should include:
 - File tools require **absolute paths** under the workspace directory
@@ -117,7 +117,7 @@ CRITICAL RULES:
 
 <!-- fold:break -->
 
-### Exercise 4: Configure the Backend
+### Exercise: Configure the Backend
 
 The **backend** determines where file operations and shell commands execute. Deep agents support different backends:
 
@@ -155,7 +155,7 @@ def _build_backend(skill_ids: list[str]):
 
 <!-- fold:break -->
 
-### Exercise 5: Wire It All Together
+### Exercise: Wire It All Together
 
 Now bring all the pieces together. The `create_agent()` function calls your other functions and passes everything to `create_deep_agent()`.
 
@@ -200,7 +200,7 @@ def create_agent(skill_ids=None, model_id="nemotron", hitl_enabled=False):
 
 <!-- fold:break -->
 
-### Exercise 6: Add a Custom Skill
+### Exercise: Add a Custom Skill
 
 <img src="_static/robots/magician.png" alt="Skills" style="float:right;max-width:250px;margin:15px;" />
 
@@ -224,20 +224,16 @@ Then wire it into the agent by adding it to the `skill_files` mapping in <button
 
 ## Test Your Agent
 
-With all exercises complete, it's time to test! Launch the **Deep Agent Builder UI**:
+With all exercises complete, it's time to test! 
 
 ```bash
-# Terminal 1: Backend
+# Terminal 1: Ensure Backend is Running
 cd demo/backend
 source .venv/bin/activate
 uvicorn server:app --host 0.0.0.0 --port 8000
-
-# Terminal 2: Frontend
-cd demo
-npm run dev
 ```
 
-Open `http://localhost:5173` and:
+Then, launch the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button> and try the following: 
 
 1. **Pick Nemotron** as your model
 2. **Drag tools** onto the agent — Web Search, File I/O, Shell Execution
@@ -253,7 +249,7 @@ Watch the tool traces in real-time — you'll see each tool call, its input, out
 
 ## What Just Happened?
 
-When you clicked Build, the frontend sent your configuration to the backend:
+When you clicked Build, the frontend sent your deep agent configuration to the backend:
 
 ```
 POST /api/agent

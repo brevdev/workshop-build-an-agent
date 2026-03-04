@@ -1,4 +1,4 @@
-# Set Up the Agent Builder
+# Experience a Deep Agent
 
 <img src="_static/robots/plumber.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -61,7 +61,7 @@ npm install
 
 <img src="_static/robots/magician.png" alt="UI Robot" style="float:right;max-width:250px;margin:15px;" />
 
-Open the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button>. You can also launch this directly from the Jupyterlab Launcher screen.
+Open the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button>. You can also launch this directly from the Jupyterlab Launcher screen. This may take a few moments to initialize. 
 
 You'll see the **LLM Picker** — a robot in the center with model cards around it.
 

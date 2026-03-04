@@ -482,4 +482,4 @@ Here's the key architectural difference:
 
 The deep agent has a **pipeline** of middleware that wraps every model call and tool execution, adding intelligence at each step.
 
-> Ready to build one? Head to [Set Up the Agent Builder](setup_agent_builder) to get your environment ready!
+> Ready to see a deep agent in action? Head to [Experience a Deep Agent](experience_deep_agent) to get started!

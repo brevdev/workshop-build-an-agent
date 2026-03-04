@@ -52,9 +52,9 @@ These capabilities cover a wide range of real-world tasks. For focused problems 
 
 But what happens when the task outgrows the architecture? The shallow agent pattern breaks down because it can't:
 
-- **Plan ahead** — Break a complex task into steps and track progress
+- **Plan ahead** — Break down a complex task, track progress over long time horizons
 - **Delegate work** — Spawn a sub-agent to handle a sub-task in parallel
-- **Manage files** — Read, write, edit, search, and organize code across a project
+- **Manage files** — Read, write, edit, search, and organize files across a project
 - **Manage its own context** — Summarize long conversations to avoid running out of tokens
 
 For simple tasks, this is fine. But real-world production tasks — "research this topic, write code, test it, fix any bugs, and write documentation" — require something more.
@@ -92,12 +92,12 @@ A **deep agent** goes beyond the flat ReAct loop. It has built-in capabilities t
 
 | Capability | Shallow Agent | Deep Agent |
 |---|---|---|
-| **Planning** | None — improvises each step | `write_todos` for task breakdown and tracking |
-| **File System** | Maybe one tool (e.g., read) | Full suite: `read`, `write`, `edit`, `ls`, `glob`, `grep` |
-| **Shell Access** | Maybe (with HITL) | Built-in `execute` with sandboxing |
+| **Planning** | Limited to CoT reasoning | `write_todos` for task breakdown and tracking |
+| **File System** | Limited tooling (e.g., read) | Full suite: `read`, `write`, `edit`, `ls`, `glob`, `grep` |
+| **Shell Access** | Possible (with HITL) | Built-in `execute` with sandboxing |
 | **Sub-Agents** | None | `task` tool to delegate work to specialized agents |
 | **Context Management** | Fixed window, truncation | Auto-summarization when conversations get long |
-| **Skills** | Hardcoded prompts | Loadable markdown methodology files |
+| **Skills** | Primarily relies on system prompts | Loadable markdown methodology files |
 
 Deep agents aren't just agents with more tools — they're agents with an **architecture** designed for complex, autonomous work.
 
@@ -107,7 +107,7 @@ Deep agents aren't just agents with more tools — they're agents with an **arch
 
 Remember the bash agent from Module 4? It could translate natural language into shell commands. That was a big step — an agent touching the real system.
 
-Now imagine an agent that can:
+Now imagine that agent with the following capabilities:
 
 1. **Plan** — "I need to research GPU optimization, write a benchmark script, run it, analyze results, and write a report."
 2. **Execute** — Write files, run commands, read outputs, fix errors

@@ -14,8 +14,6 @@ In this section, we'll first explore the conceptual framework — the "four pill
 
 Deep agents enhance the ReAct loop with four architectural pillars. Each one addresses a specific limitation of shallow agents.
 
-<!-- fold:break -->
-
 ### Pillar 1 — Explicit Planning
 
 Shallow agents plan **implicitly** — their "plan" exists only in the chain-of-thought reasoning within the context window. It's ephemeral, easily displaced by tool outputs, and invisible to the outside world.
@@ -51,7 +49,7 @@ A deep agent's plan might look like this:
 - [ ] Add citations and verify claims
 ```
 
-The agent updates this plan after every step. If "Research AutoGen" fails because the search returns irrelevant results, the agent can note the failure and try a different search strategy — rather than blindly retrying the same query.
+The agent updates this plan after every step. If "Research AutoGen" fails because the search returns irrelevant results, the agent can note the failure and try a different search strategy — rather than blindly retrying the same query in a loop.
 
 </details>
 
@@ -180,14 +178,7 @@ Deep agent patterns have moved rapidly from research to production. Let's look a
 <details>
 <summary><strong>1. Deep Research</strong></summary>
 
-Deep research is the flagship application of deep agents — and the category where all major AI providers have converged on remarkably similar architectures:
-
-| Provider | Product | Distinguishing Feature |
-|----------|---------|----------------------|
-| **OpenAI** | Deep Research | Uses o3 for extended autonomous browsing and synthesis |
-| **Google** | Gemini Deep Research | Produces 100+ page reports via multi-agent workflows |
-| **Perplexity** | Deep Research | Speed-optimized, prioritizing faster turnaround |
-| **Anthropic** | Claude Research | Extended thinking for multi-step research synthesis |
+Deep research is a flagship application of deep agents — and the category where all major AI providers (OpenAI, Google, Perplexity, Anthropic) have converged on remarkably similar architectures. 
 
 Despite different implementations, the common architecture follows a consistent pattern:
 
@@ -246,12 +237,12 @@ Like any architectural decision, deep agents come with both benefits and costs. 
 <details>
 <summary><strong>3. So Why are Deep Agents Practical Now?</strong></summary>
 
-Recent advances in LLM capabilities have made these patterns practical for production use:
+Recent advances in LLM and agent capabilities have made these patterns practical for production use:
 
 - **Longer context windows** make it feasible for orchestrators to manage complex plans
 - **Better instruction following** means agents reliably execute detailed skill protocols
 - **Improved tool use** enables reliable file system access, code execution, and API calls
-- **Faster inference** makes multi-agent architectures practical without prohibitive latency
+- **Modularity** of MCP tools and agent skills makes for easier access to key agent components
 
 Deep agents are not universally better than shallow agents — they're better for a specific class of problems. Using a deep agent for a simple question-answering task is like using a distributed system for a single-user application: architecturally sound but massively over-engineered.
 
@@ -271,11 +262,8 @@ Not every task needs a deep agent. Here's a decision framework:
 | Autonomous operation is acceptable | Real-time response is required |
 | The task benefits from planning and delegation | The path is straightforward |
 
-> **A practical rule of thumb** - Ask yourself: "Could a single person complete this in one sitting without taking notes?" If yes, a shallow agent is probably fine. If the answer is "no — you'd need to break it into subtasks, keep a to-do list, and coordinate with specialists," that's a deep agent problem.
-
-<!-- fold:break -->
-
-Here are some concrete examples:
+<details>
+<summary><strong>Show me some examples!</strong></summary>
 
 | Task | Agent Type | Why |
 |------|-----------|-----|
@@ -284,6 +272,10 @@ Here are some concrete examples:
 | "Research 10 competitors and write a market report" | Deep | Multi-source, requires planning and synthesis |
 | "Refactor this codebase to use a new API" | Deep | Multi-file, needs progress tracking |
 | "Generate a quarterly compliance report from 50 documents" | Deep | Long-running, delegation needed |
+
+</details>
+
+> **A practical rule of thumb** - Ask yourself: "Could a single person complete this in one sitting without taking notes?" If yes, a shallow agent is probably fine. If the answer is "no — you'd need to break it into subtasks, keep a to-do list, and coordinate with specialists," that's a deep agent problem.
 
 <!-- fold:break -->
 
@@ -294,7 +286,7 @@ To see how the four pillars work in concert, consider a deep research task: "Ana
 1. **Explicit Planning** — The agent creates a plan: research each country's regulations, then synthesize a comparison
 2. **Hierarchical Delegation** — The orchestrator spawns 7 researcher sub-agents, one per country
 3. **Persistent Memory** — Each researcher writes findings to files; the orchestrator reads them for synthesis
-4. **Agent Skills** — Detailed instructions tell each researcher how many sources to gather, what format to use, and how to handle conflicting information
+4. **Agent Skills** — Detailed instructions load dynamically to tell each researcher how many sources to gather, what format to use, and how to handle conflicting information
 
 No single pillar is sufficient on its own — together, they enable reliable autonomous operation at a scale shallow agents can't reach.
 
@@ -350,7 +342,7 @@ Each middleware adds a capability without you writing any orchestration code. Th
 
 Every deep agent comes with these tools out of the box — provided by the middleware stack.
 
-#### Planning — `write_todos`
+#### Planning 
 
 The agent can create and manage a task list. When given a complex request, it breaks it into steps, tracks progress, and works through them systematically. This is **Pillar 1 (Explicit Planning)** in action.
 
@@ -369,7 +361,7 @@ This gives the agent a structured approach to multi-step problems instead of imp
 
 <!-- fold:break -->
 
-#### Filesystem — `read_file`, `write_file`, `edit_file`, `ls`, `glob`, `grep`
+#### Filesystem 
 
 <img src="_static/robots/operator.png" alt="File Operations" style="float:right;max-width:250px;margin:15px;" />
 
@@ -388,11 +380,11 @@ This is what separates deep agents from chatbots. They can navigate a codebase, 
 
 <!-- fold:break -->
 
-#### Shell Execution — `execute`
+#### Shell Execution
 
 The `execute` tool runs shell commands. Combined with filesystem tools, this lets the agent:
 
-- Run Python scripts it wrote
+- Run scripts it wrote
 - Install packages
 - Run tests
 - Check system status
@@ -402,7 +394,7 @@ Shell access is what makes deep agents truly autonomous — but it's also what m
 
 <!-- fold:break -->
 
-#### Sub-Agents — `task`
+#### Sub-Agents
 
 Perhaps the most powerful capability: deep agents can **spawn sub-agents** to handle sub-tasks in isolated context windows. This is **Pillar 2 (Hierarchical Delegation)** in action.
 
@@ -423,7 +415,7 @@ Each sub-agent gets its own context, tools, and prompt. This enables:
 
 <!-- fold:break -->
 
-#### Context Management — Auto-Summarization
+#### Context Management 
 
 Long conversations accumulate tokens quickly. Deep agents handle this with **automatic summarization** — when the conversation gets too long, the middleware transparently compresses earlier messages so the agent keeps working without hitting token limits. This supports **Pillar 3 (Persistent Memory)** by ensuring the agent doesn't lose track of its work.
 
@@ -431,11 +423,11 @@ Long conversations accumulate tokens quickly. Deep agents handle this with **aut
 
 ### Extending Deep Agents
 
-Beyond the built-in capabilities, deep agents can be extended with two mechanisms:
+Beyond the built-in capabilities, deep agents can be extended with two mechanisms you've seen before:
 
-#### MCP Tools — Model Context Protocol
+#### MCP Tools
 
-MCP lets you connect external tool servers to your agent. Any server exposing an SSE or Streamable HTTP endpoint can provide tools:
+Model Context Protocol (MCP) lets you connect external tool servers to your agent. Any server exposing an SSE or Streamable HTTP endpoint can provide tools:
 
 ```python
 # Connect to a remote MCP server
@@ -450,7 +442,7 @@ The agent calls these tools just like built-in ones. MCP is the standard protoco
 
 <!-- fold:break -->
 
-#### Skills — Markdown Methodology Injection
+#### Agent Skills 
 
 Skills are `.md` files that get injected into the agent's system prompt. They teach the agent *how* to approach specific types of problems:
 

@@ -14,7 +14,7 @@ Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> term
 
 ```bash
 cd demo/backend
-python3.11 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -131,8 +131,6 @@ Try these to verify everything works:
 - *"What's in the news today?"* — tests Web Search
 
 </details>
-
-<!-- fold:break -->
 
 <details>
 <summary><strong>5. (Optional) Docker for Sandbox Mode</strong></summary>

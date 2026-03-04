@@ -371,6 +371,8 @@ Use distinct configurations for development, staging, and production. Never test
 
 ## Module Wrap-Up
 
+You now have the complete toolkit — from building your first agent to deploying autonomous deep agents safely and securely.
+
 ### What You Learned
 
 | Topic | Key Takeaway |
@@ -396,14 +398,10 @@ Each level of capability demands a corresponding level of security. Deep agents 
 
 <!-- fold:break -->
 
-### Where to Go Next
+### What to Explore Next
 
-1. **Deploy** — Use `langgraph deploy` or Docker Compose to run your agent in production
-2. **Evaluate** — Apply the Module 3 evaluation techniques to measure your deep agent's quality
-3. **Customize** — Use Module 4's training techniques to fine-tune the model for your specific domain
-4. **Scale** — Add more tools, skills, and sub-agents as your use cases grow
-5. **Monitor** — Set up LangSmith tracing for production observability
+- **[NVIDIA NeMo Agent Toolkit](https://github.com/NVIDIA/NeMo-Agent-Toolkit)**: Open-source, framework-agnostic library for connecting, evaluating, and profiling AI agents. Includes built-in RAG evaluators, agent trajectory evaluation, and custom evaluator support. Works with LangChain, LlamaIndex, CrewAI, and other frameworks.
 
-You now have the complete toolkit — from building your first agent to deploying autonomous deep agents safely in production.
+- **[AI-Q NVIDIA Research Assistant Blueprint](https://github.com/NVIDIA-AI-Blueprints/aiq)**: An open reference example for building intelligent AI agents that connect to your enterprise data, reason using state-of-the-art models, and deliver trusted business insights. This is an example of an enterprise-ready deep agent you can deploy in your own enterprise.
 
 > **Congratulations!** You've completed Module 5: Deep Agents.

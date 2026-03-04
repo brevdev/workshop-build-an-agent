@@ -136,6 +136,8 @@ agent = create_deep_agent(
 
 One function call gives you an agent with planning, filesystem access, shell execution, sub-agents, and context management — all wired up and ready to go.
 
+> To learn more about NVIDIA's integrations with LangChain, check out [these docs](https://docs.langchain.com/oss/python/integrations/providers/nvidia). 
+
 <!-- fold:break -->
 
 ## What You'll Learn

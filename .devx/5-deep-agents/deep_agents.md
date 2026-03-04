@@ -188,6 +188,8 @@ Despite different implementations, the common architecture follows a consistent 
 4. **Compression** — Results are synthesized, deduplicated, and cross-referenced
 5. **Report** — A final structured document is generated with citations
 
+> NVIDIA offers a blueprint to host your own Deep Research Agent. Check out the AI-Q Blueprint for Enterprise Research [here](https://build.nvidia.com/nvidia/aiq).
+
 </details>
 
 <details>

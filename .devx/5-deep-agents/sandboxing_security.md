@@ -131,19 +131,7 @@ Before choosing a sandbox **technology**, you need to choose a sandbox **pattern
 
 The **agent itself** runs inside the sandbox. It communicates with external systems — the LLM API, databases, user interfaces — over HTTP or WebSocket connections.
 
-```
-┌─────────────────────────────┐
-│         Sandbox             │
-│  ┌─────────────────────┐   │
-│  │   Agent Process      │   │
-│  │   + Tools            │   │
-│  │   + File System      │   │
-│  │   + API Keys         │   │
-│  └─────────────────────┘   │
-└─────────────────────────────┘
-         ↕ HTTP/WS
-    External Services
-```
+![Agent IN Sandbox](img/agent_in_sandbox.png)
 
 **Pros:** Mirrors local development; simple architecture — everything runs in one place.
 
@@ -157,14 +145,7 @@ The **agent itself** runs inside the sandbox. It communicates with external syst
 
 The **agent runs locally** (or on your server), and code execution is **delegated** to remote sandboxes via API calls. The sandbox is just another tool the agent can call.
 
-```
-┌──────────────────┐     ┌─────────────────┐
-│   Agent Process   │────→│   Sandbox API    │
-│   + API Keys     │     │   (Code exec)   │
-│   + Orchestration │←────│   (Isolated)    │
-└──────────────────┘     └─────────────────┘
-    Your server              Remote sandbox
-```
+![Sandbox as Tool](img/sandbox_as_tool.png)
 
 **Pros:** API keys stay outside the sandbox; instant agent updates without container rebuilds; clean separation of agent state and execution; enables parallel sandbox execution; sandbox failures don't crash the agent.
 

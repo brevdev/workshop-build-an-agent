@@ -1,0 +1,27 @@
+---
+config:
+  theme: 'base'
+  themeVariables:
+    primaryColor: '#eaf6e0'
+    secondaryColor: '#eaf6e0'
+    background: white
+---
+
+flowchart LR
+
+    subgraph server["Your Server"]
+        Agent["Agent Process"]
+        Keys["API Keys"]
+        Orch["Orchestration"]
+    end
+
+    subgraph remote["Remote Sandbox"]
+        API["Sandbox API"]
+        Exec["Code Execution"]
+        Isolated["Isolated Environment"]
+    end
+
+    server <--> remote
+
+    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
+    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

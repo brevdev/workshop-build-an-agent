@@ -61,12 +61,7 @@ Instead of a single agent trying to do everything, deep agents use an **orchestr
 
 Only the synthesized results return to the orchestrator. This creates a hierarchy:
 
-```
-Orchestrator (high-level planning)
-├── Sub-agent: Researcher (web search, source analysis)
-├── Sub-agent: Analyst (data processing, comparison)
-└── Sub-agent: Writer (synthesis, report generation)
-```
+![Hierarchical Delegation](img/hierarchical_delegation.png)
 
 <!-- fold:break -->
 
@@ -323,18 +318,7 @@ This returns a compiled **LangGraph** graph — the same framework we used in ea
 
 Under the hood, `create_deep_agent()` builds a LangGraph graph with a **middleware stack** that processes every interaction:
 
-```
-User Message
-  → SummarizationMiddleware    (compress long conversations)
-  → PatchToolCallsMiddleware   (fix dangling tool calls)
-  → Model                      (LLM generates response)
-  → TodoListMiddleware         (manage planning state)
-  → FilesystemMiddleware       (handle file operations)
-  → SubAgentMiddleware         (delegate to sub-agents)
-  → HumanInTheLoopMiddleware   (pause for approval if configured)
-  → Tool Execution
-  → Back to Model...
-```
+![Middleware Pipeline](img/middleware_pipeline.png)
 
 Each middleware adds a capability without you writing any orchestration code. This is what makes deep agents "batteries-included" — the complexity is handled by the framework.
 
@@ -467,18 +451,12 @@ Skills don't add new tools — they add **expertise**. You can create skills for
 Here's the key architectural difference:
 
 **Shallow Agent (ReAct):**
-```
-[Model] ←→ [Tool Node]
-```
+
+![Shallow Agent Architecture](img/shallow_agent_pattern.png)
 
 **Deep Agent:**
-```
-[Summarization] → [PatchToolCalls] → [Model] → [TodoList] → [Filesystem]
-                                                     ↓
-                                              [SubAgentMiddleware]
-                                                     ↓
-                                              [HITL Gate] → [Tools]
-```
+
+![Deep Agent Architecture](img/middleware_pipeline.png)
 
 The deep agent has a **pipeline** of middleware that wraps every model call and tool execution, adding intelligence at each step.
 

@@ -1,0 +1,23 @@
+---
+config:
+  theme: 'base'
+  themeVariables:
+    primaryColor: '#eaf6e0'
+    secondaryColor: '#eaf6e0'
+    background: white
+---
+
+flowchart LR
+
+    A["User<br/>Message"] --> B["Summarization"] --> C["PatchToolCalls"] --> D["Model"] --> E["TodoList"] --> F["Filesystem"]
+
+    subgraph delegation["Parallel Delegation"]
+        direction LR
+        G["SubAgent"] --> H["HITL"] --> I["Tool<br/>Execution"]
+    end
+
+    F --> G
+    I --> |"loop"| D
+
+    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
+    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

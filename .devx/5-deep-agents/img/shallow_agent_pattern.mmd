@@ -7,12 +7,12 @@ config:
     background: white
 ---
 
-%%{init: {'themeVariables': {'fontSize': '12px'}}}%%
+%%{init: {'themeVariables': {'fontSize': '16px'}}}%%
 flowchart LR
 
     User --> Model
 
-    subgraph loop["ReAct Loop (serial, many iterations)"]
+    subgraph loop["ReAct Loop"]
         direction LR
         Model --> Tool --> Model
     end

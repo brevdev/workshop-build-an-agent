@@ -69,7 +69,9 @@ You'll see the **LLM Picker** — a robot in the center with model cards around 
 
 ## UI Walkthrough
 
-The demo has four phases. Click on each to learn more.
+![Sample Output from UI](img/sample_response.png)
+
+The full demo has four phases. Click on each to learn more.
 
 <details>
 <summary><strong>1. Pick Your Model</strong></summary>
@@ -113,8 +115,6 @@ Once built, you're in the **chat interface**:
 - **Tool traces** appear inline — see which tools the agent calls, their inputs, outputs, and timing
 - The **Tool Calls panel** on the right shows the full execution log
 - **Suggested questions** appear based on your enabled tools
-
-![Sample Output from UI](img/sample_response.png)
 
 Try these to verify everything works:
 - *"List all files in the workspace"* — tests File I/O

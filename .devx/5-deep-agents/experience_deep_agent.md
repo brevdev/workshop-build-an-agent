@@ -114,6 +114,8 @@ Once built, you're in the **chat interface**:
 - The **Tool Calls panel** on the right shows the full execution log
 - **Suggested questions** appear based on your enabled tools
 
+![Sample Output from UI](img/sample_response.png)
+
 Try these to verify everything works:
 - *"List all files in the workspace"* — tests File I/O
 - *"Write a hello world Python script and run it"* — tests File I/O + Shell

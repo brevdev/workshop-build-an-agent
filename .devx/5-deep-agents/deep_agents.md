@@ -104,7 +104,7 @@ Deep agents shift from "remembering everything in context" to "knowing where to 
 
 <!-- fold:break -->
 
-This is what enables deep agents to work on tasks that span hundreds of steps. The context window holds only what's immediately relevant — the plan, the current sub-task, and the most recent results. Everything else is a file read away.
+This is what enables deep agents to work on tasks that span hundreds of steps. The context window holds only what's immediately relevant — the plan, the current sub-task, and the most recent results. Everything else is a file read tool call away.
 
 | | Shallow Agent | Deep Agent |
 |---|---|---|
@@ -148,7 +148,7 @@ Here's a comprehensive comparison of the two architectures:
 | **Delegation** | Single agent does everything | Orchestrator + specialized sub-agents |
 | **Memory** | Context window only | File system + external stores |
 | **System Prompt** | Brief instructions | Detailed skills with protocols |
-| **Task Horizon** | 5-15 steps | 50-500+ steps |
+| **Task Horizon** | 5-15 steps | 10-100+ steps |
 | **Error Recovery** | Retry or fail | Adapt strategy, try alternatives |
 | **Best For** | Focused, short tasks | Complex, multi-step workflows |
 
@@ -195,7 +195,7 @@ Despite different implementations, the common architecture follows a consistent 
 <details>
 <summary><strong>2. Coding Assistants</strong></summary>
 
-Software development is the most battle-tested use case for deep agents. Tools like **Claude Code**, **Cursor**, and **GitHub Copilot** all leverage deep agent patterns:
+Software development is the most battle-tested use case for deep agents. Tools like **Claude Code** and **Cursor** all leverage deep agent patterns:
 
 - **Planning tools** to decompose engineering tasks into subtasks
 - **File system access** to navigate and modify large codebases
@@ -230,7 +230,7 @@ Like any architectural decision, deep agents come with both benefits and costs. 
 | Tradeoff | Detail |
 |----------|--------|
 | **Latency** | Minutes to hours vs. seconds for shallow agents |
-| **Cost** | ~15x more tokens than standard chat interactions |
+| **Cost** | Significantly more token usage than standard agent interactions |
 | **Complexity** | Harder to test, predict, and debug across multiple agents |
 | **Coordination** | Multi-agent writing can produce disjointed output without careful orchestration |
 
@@ -259,7 +259,7 @@ Not every task needs a deep agent. Here's a decision framework:
 | Use a Deep Agent When... | Use a Shallow Agent When... |
 |--------------------------|----------------------------|
 | Tasks span dozens to hundreds of steps | Tasks complete in 5-15 steps |
-| Multiple specialized skills are needed | A single tool-calling loop suffices |
+| Multiple specialized skills are needed together | A single tool-calling loop suffices |
 | The problem would overflow a context window | Everything fits in one conversation |
 | Autonomous operation is acceptable | Real-time response is required |
 | The task benefits from planning and delegation | The path is straightforward |

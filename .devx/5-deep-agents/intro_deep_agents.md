@@ -94,7 +94,7 @@ A **deep agent** goes beyond the flat ReAct loop. It has built-in capabilities t
 |---|---|---|
 | **Planning** | Limited to CoT reasoning | `write_todos` for task breakdown and tracking |
 | **File System** | Limited tooling (e.g., read) | Full suite: `read`, `write`, `edit`, `ls`, `glob`, `grep` |
-| **Shell Access** | Possible (with HITL) | Built-in `execute` with sandboxing |
+| **Shell Access** | Possible with custom implementation | Built-in `execute` with sandboxing |
 | **Sub-Agents** | None | `task` tool to delegate work to specialized agents |
 | **Context Management** | Fixed window, truncation | Auto-summarization when conversations get long |
 | **Skills** | Primarily relies on system prompts | Loadable markdown methodology files |
@@ -110,10 +110,10 @@ Remember the bash agent from Module 4? It could translate natural language into 
 Now imagine that agent with the following capabilities:
 
 1. **Plan** — "I need to research GPU optimization, write a benchmark script, run it, analyze results, and write a report."
-2. **Execute** — Write files, run commands, read outputs, fix errors
+2. **Execute** — Write files, run commands, read outputs, debug errors
 3. **Delegate** — "Let me send the research task to a sub-agent while I start writing the code."
 4. **Adapt** — If the context gets too long, summarize and continue
-5. **Learn** — Load skills (markdown files) that teach it specific methodologies
+5. **Learn** — Load skills (markdown files) that teach it specific domains and methodologies
 
 That's a deep agent. And that's what we'll build in this module.
 

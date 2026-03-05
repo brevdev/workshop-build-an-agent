@@ -14,9 +14,9 @@ flowchart TB
     Analyst["Analyst<br/><i>data processing, comparison</i>"]
     Writer["Writer<br/><i>synthesis, report generation</i>"]
 
-    Orchestrator --> Researcher
-    Orchestrator --> Analyst
-    Orchestrator --> Writer
+    Orchestrator <--> Researcher
+    Orchestrator <--> Analyst
+    Orchestrator <--> Writer
 
     classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
     classDef orchestrator fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#222;

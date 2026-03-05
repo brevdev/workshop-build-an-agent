@@ -46,8 +46,6 @@ The agent will respond with something like:
 
 ```
 /tmp/deepagent_workspace/passwords.txt
-/tmp/deepagent_workspace/api_keys.env
-/tmp/deepagent_workspace/bank_accounts.csv
 /tmp/deepagent_workspace/ssn_records.txt
 ```
 
@@ -86,7 +84,7 @@ Now toggle **Sandbox Mode ON** in the Settings panel (you'll see "🔒 Sandboxed
 The agent responds:
 
 ```
-The workspace is empty.
+The workspace at /workspace is currently empty. There are no files present. Would you like to create or upload any files to your workspace?
 ```
 
 **The sensitive files don't exist inside the sandbox.** The agent runs in a fresh Docker container with no host mounts. It literally cannot see your files.

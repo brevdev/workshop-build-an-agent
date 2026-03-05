@@ -30,20 +30,25 @@ The first step is connecting to an NVIDIA NIM model. Deep agents need a model th
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 1');"><i class="fas fa-code"></i> # TODO: Exercise 1</button>
 
-Fill in `_get_model()` to create a `ChatNVIDIA` instance using the model name from `MODEL_MAP` and the API key from the environment.
+Fill in `_get_model()` to create a ChatNVIDIA instance.
+
+Use `MODEL_MAP` to look up the `model_id`, and `os.getenv("NVIDIA_API_KEY")` for the `api_key`.
+Set temperature to 0.3.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-def _get_model(model_id: str = "nemotron"):
-    api_key = os.getenv("NVIDIA_API_KEY")
-    model_name = MODEL_MAP.get(model_id, MODEL_MAP["nemotron"])
-    return ChatNVIDIA(
-        model=model_name,
-        api_key=api_key,
-        temperature=0.3,
-    )
+...
+api_key = os.getenv("NVIDIA_API_KEY")
+model_name = MODEL_MAP.get(model_id, MODEL_MAP["llama"])
+print(f"[Agent] Using model: {model_name} (id={model_id})")
+return ChatNVIDIA(
+    model=model_name,
+    api_key=api_key,
+    temperature=0.3,
+)
+...
 ```
 
 </details>
@@ -56,20 +61,18 @@ Deep agents come with built-in tools (filesystem, planning, etc.), but we can ad
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> # TODO: Exercise 2</button>
 
-Fill in `_build_extra_tools()` to add a `TavilySearchResults` tool when `"websearch"` is in the skill list.
+Fill in `_build_extra_tools()` to add a `TavilySearchResults` tool when `"websearch"` is in the skill list. Use ``os.getenv("TAVILY_API_KEY")`` for the ``api_key``, and ``max_results=3``.
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-def _build_extra_tools(skill_ids: list[str]) -> list:
-    tools = []
-    if "websearch" in skill_ids:
-        from langchain_community.tools.tavily_search import TavilySearchResults
-        tavily_key = os.getenv("TAVILY_API_KEY")
-        if tavily_key:
-            tools.append(TavilySearchResults(max_results=3, api_key=tavily_key))
-    return tools
+...
+from langchain_community.tools.tavily_search import TavilySearchResults
+tavily_key = os.getenv("TAVILY_API_KEY")
+if tavily_key:
+    tools.append(TavilySearchResults(max_results=3, api_key=tavily_key))
+...
 ```
 
 </details>
@@ -84,21 +87,24 @@ The system prompt is critical — it tells the agent what it can do, what rules 
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 3');"><i class="fas fa-code"></i> # TODO: Exercise 3</button>
 
-Fill in `_build_system_prompt()` to:
-1. List the agent's enabled capabilities (`{caps_text}`) in the workspace (`{workspace}`)
-2. Set critical rules (use absolute paths, don't repeat tool calls, etc.)
-3. Optionally include HITL notes (`{hitl_note}`) and skill content (`{skill_section}`)
+Fill in ``_build_system_prompt()`` to create the agent's instructions.
 
-Key rules your prompt should include:
-- File tools require **absolute paths** under the workspace directory
-- **Never** call the same tool with the same arguments twice
-- Be concise and technically accurate
+The prompt should tell the agent:
+- `model_name`: the name of the model
+- `caps_text`: all capabilities of the agent
+- `workspace`: filesystem working directory of the agent
+- `rag_rule`: instructions for rag if added
+- `hitl_note`: instructions for HITL if added
+- `skill_section`: instructions for skills if added
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-return f"""You are an NVIDIA Deep Agent — a powerful AI assistant.
+...
+
+return f"""You are an NVIDIA Deep Agent — a powerful AI assistant built for GTC 2026.
+Your soul (foundation model) is: {model_name}
 
 Your enabled capabilities:
 {caps_text}
@@ -109,7 +115,7 @@ CRITICAL RULES:
    Always use paths like: {workspace}/hello.py
 3. Use web search when the user asks for current information.
 4. Be concise and technically accurate.
-5. NEVER call the same tool with the same arguments twice.
+5. You are running on NVIDIA infrastructure.{rag_rule}
 {hitl_note}{skill_section}"""
 ```
 
@@ -127,28 +133,26 @@ The **backend** determines where file operations and shell commands execute. Dee
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 4');"><i class="fas fa-code"></i> # TODO: Exercise 4</button>
 
-Fill in `_build_backend()` to:
-1. Use `LocalShellBackend` when shell execution is enabled
-2. Fall back to `FilesystemBackend` otherwise
-3. Set a `root_dir` so the agent operates in a specific workspace
+Fill in ``_build_backend()`` to return the right backend:
+
+* If "execute" is in ``skill_ids`` → ``LocalShellBackend`` (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to True)
+* Otherwise → ``FilesystemBackend`` (with root_dir as workspace)
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-def _build_backend(skill_ids: list[str]):
-    workspace = "/tmp/deepagent_workspace"
-    os.makedirs(workspace, exist_ok=True)
-    
-    if "execute" in skill_ids:
-        return LocalShellBackend(
-            root_dir=workspace,
-            timeout=60.0,
-            max_output_bytes=50000,
-            inherit_env=True,
-        )
-    else:
-        return FilesystemBackend(root_dir=workspace)
+...
+if "execute" in skill_ids:
+    backend = LocalShellBackend(
+        root_dir=workspace,
+        timeout=60.0,
+        max_output_bytes=50000,
+        inherit_env=True,
+    )
+else:
+    backend = FilesystemBackend(root_dir=workspace)
+...
 ```
 
 </details>
@@ -161,39 +165,42 @@ Now bring all the pieces together. The `create_agent()` function calls your othe
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 5');"><i class="fas fa-code"></i> # TODO: Exercise 5</button>
 
-Fill in `create_agent()` to:
-1. Get the model, tools, prompt, and backend
-2. Build the `agent_kwargs` dict
-3. Optionally add `interrupt_on` for HITL approval
-4. Call `create_deep_agent(**agent_kwargs)`
+Fill in ``create_agent()`` to:
+
+1. Call ``_get_model()`` with model_id, ``_build_extra_tools()`` with skill_ids
+2. Build the ``agent_kwargs`` dict with model, extra_tools (if it exists), system_prompt, backend, checkpointer
+3. If ``hitl_enabled``, add interrupt_on=INTERRUPT_TOOLS
+4. Call ``create_deep_agent`` on **agent_kwargs and return the result
 
 <details>
 <summary>🆘 Need some help?</summary>
 
 ```python
-def create_agent(skill_ids=None, model_id="nemotron", hitl_enabled=False):
-    if skill_ids is None:
-        skill_ids = []
+...
+model = _get_model(model_id)
+extra_tools = _build_extra_tools(skill_ids)
+any_sandboxed = any(sandbox_map.get(sid, False) for sid in skill_ids)
+system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, any_sandboxed)
+skill_sources = _get_skill_sources()
 
-    model = _get_model(model_id)
-    extra_tools = _build_extra_tools(skill_ids)
-    system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled)
-    backend = _build_backend(skill_ids)
+backend, sandbox = _build_backend(skill_ids, sandbox_map)
 
-    agent_kwargs = {
-        "model": model,
-        "tools": extra_tools if extra_tools else None,
-        "system_prompt": system_prompt,
-        "backend": backend,
-        "checkpointer": MemorySaver(),
-    }
+agent_kwargs: dict = {
+    "model": model,
+    "tools": extra_tools if extra_tools else None,
+    "system_prompt": system_prompt,
+    "backend": backend,
+    "checkpointer": checkpointer,
+}
 
-    if hitl_enabled:
-        agent_kwargs["interrupt_on"] = {
-            "write_file": True, "edit_file": True, "execute": True,
-        }
+if hitl_enabled:
+    agent_kwargs["interrupt_on"] = INTERRUPT_TOOLS
 
-    return create_deep_agent(**agent_kwargs)
+if skill_sources:
+    agent_kwargs["skills"] = skill_sources
+
+agent = create_deep_agent(**agent_kwargs)
+...
 ```
 
 </details>
@@ -206,17 +213,49 @@ def create_agent(skill_ids=None, model_id="nemotron", hitl_enabled=False):
 
 Skills are markdown files that get injected into the agent's system prompt. They teach the agent domain-specific methodology without adding new tools.
 
-**Create a new skill file** at `skills/my_skill.md` with instructions for the agent. For example, a "Code Review" skill:
+**Create a new skill file** at `demo/backend/skills/my_skill.md` with instructions for the agent. 
+
+<details>
+<summary><strong>Show Me an Example - Click Me!</strong></summary>
+
+Let's create a `demo/backend/skills/technical_writing.md` skill:
 
 ```markdown
-# Code Review Skill
+# Technical Writing Skill
 
-When reviewing code:
-1. Check for correctness and edge cases
-2. Look for security vulnerabilities
-3. Evaluate readability and naming
-4. Suggest concrete improvements with examples
+You are now operating as a technical writer. Follow these guidelines for all documentation tasks.
+
+## Structure
+
+1. **Executive Summary** - Start with a brief overview (2-3 sentences)
+2. **Key Points** - Use bullet points for scannable content  
+3. **Details** - Expand on each point with specifics
+4. **Conclusion** - Summarize actionable takeaways
+
+## Style Guidelines
+
+- Use active voice ("The system processes..." not "Data is processed by...")
+- Keep sentences under 25 words
+- Define acronyms on first use
+- Use concrete examples over abstract explanations
+
+## Formatting
+
+- Use headers (##, ###) to organize sections
+- Code blocks for any technical content
+- Tables for comparisons
+- Bold for key terms, *italics* for emphasis
+
+## Quality Checklist
+
+Before finishing, verify:
+- [ ] Executive summary captures the main point
+- [ ] All claims are supported by evidence or sources
+- [ ] No jargon without explanation
+- [ ] Clear next steps or call to action
 ```
+
+</details>
 
 Then wire it into the agent by adding it to the `skill_files` mapping in <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', 'skill_files = ');"><i class="fas fa-code"></i> skill_files</button>.
 
@@ -224,7 +263,23 @@ Then wire it into the agent by adding it to the `skill_files` mapping in <button
 
 ## Test Your Agent
 
-With all exercises complete, it's time to test! 
+With all exercises complete, it's time to test. Let's see if your agent is working!
+
+```bash
+cd demo/backend
+source .venv/bin/activate
+python ../../code/5-deep-agents/deep_agent.py
+```
+
+If successful, you should see a "Your deep agent is working!" message at the end of the test. 
+
+<!-- fold:break -->
+
+## Run Your Agent
+
+If you would like to use this agent you just created in the main Deep Agent Client, feel free to bring in the contents you just wrote from ``code/5-deep-agents/deep_agent.py`` into ``demo/backend/agent.py``. 
+
+Re-launch the backend with this agent implementation: 
 
 ```bash
 # Terminal 1: Ensure Backend is Running
@@ -233,7 +288,9 @@ source .venv/bin/activate
 uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
-Then, launch the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button> and try the following: 
+<!-- fold:break -->
+
+With the backend running, launch the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button> and try the following: 
 
 1. **Pick Nemotron** as your model
 2. **Drag tools** onto the agent — Web Search, File I/O, Shell Execution

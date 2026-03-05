@@ -34,8 +34,6 @@ The key insight: **once an agent passes control to a subprocess, only OS-level e
 
 Without sandboxing, your agent operates directly on the host system. It has the same access as the process running it. Let's see what that means.
 
-<!-- fold:break -->
-
 #### Demo: No Sandbox
 
 In the Deep Agent Builder UI, make sure **Sandbox Mode is OFF** (you'll see "⚠️ No Sandbox" in the header). Then ask:
@@ -73,8 +71,6 @@ db_user:mysql_prod_xK9#mN2
 
 **Sandboxing** isolates the agent's execution environment from the host system. The agent operates inside a container or VM that has no access to the host's files, network, or credentials.
 
-<!-- fold:break -->
-
 #### Demo: With Sandbox
 
 Now toggle **Sandbox Mode ON** in the Settings panel (you'll see "🔒 Sandboxed" in the header). Build a new agent and ask the same question:
@@ -104,7 +100,7 @@ Not all isolation is equal. Approaches range from trusting the model entirely to
 | | User-space kernel (gVisor) | Syscall emulation | High-security workloads |
 | Strongest | Hardware virtualization (Firecracker) | Full VM, separate kernel | Maximum isolation |
 
-> Our demo uses **Docker (tier 4)**, which covers most production workloads.
+> Our demo uses **Docker containers** for agent execution sandboxing and isolation.
 
 <!-- fold:break -->
 
@@ -160,13 +156,13 @@ The **agent runs locally** (or on your server), and code execution is **delegate
 | **Failure isolation** | Agent + sandbox coupled | Independent |
 | **Parallel execution** | Complex | Natural |
 
-> Our demo uses **Pattern 2** — the agent runs locally and delegates execution to a Docker container.
+> Our demo uses **Pattern 2** — the agent runs on the system and delegates execution to a Docker container.
 
 <!-- fold:break -->
 
 ### How Our Sandbox Works
 
-Our implementation uses **Docker containers** as the isolation boundary — the agent runs locally and delegates code execution to an isolated container.
+Our implementation uses **Docker containers** as the isolation boundary — the agent runs on the system and delegates code execution to an isolated container.
 
 ```python
 class DockerSandboxBackend(SandboxBackendProtocol):
@@ -209,7 +205,7 @@ Learn more about a few options by clicking each of the examples below.
 <details>
 <summary><strong>1. Docker Containers</strong></summary>
 
-Docker is the most common approach for production agent sandboxing. It provides:
+Docker is a common approach for agent sandboxing in development. It provides:
 
 - **Namespace isolation** — Each container has its own filesystem, process tree, and network stack
 - **Seccomp profiles** — Restrict which system calls the container can make

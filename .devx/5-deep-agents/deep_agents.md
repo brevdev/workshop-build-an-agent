@@ -343,7 +343,7 @@ Agent thinks: Let me break this into tasks...
   ])
 ```
 
-This gives the agent a structured approach to multi-step problems instead of improvising each action.
+This gives the agent a structured approach to multi-step problems instead of improvising each action from chain-of-thought reasoning.
 
 <!-- fold:break -->
 

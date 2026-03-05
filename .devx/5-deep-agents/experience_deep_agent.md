@@ -14,7 +14,7 @@ Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> term
 
 ```bash
 cd demo/backend
-python3 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```

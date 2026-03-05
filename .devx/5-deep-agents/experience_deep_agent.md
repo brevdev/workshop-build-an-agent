@@ -124,18 +124,12 @@ Try these to verify everything works:
 <details>
 <summary><strong>5. (Optional) Docker for Sandbox Mode</strong></summary>
 
-If you have Docker installed, you can enable **Sandbox Mode** in the Settings panel. This runs the agent's tools inside an isolated Docker container — the agent can't see your host files. 
+In the Deep Agent Client, you can enable **Sandbox Mode** in the Settings panel. This runs the agent's tools inside an isolated Docker container — the agent can't see your host files. 
 
-For Colima users, add your Docker socket to `.env`:
-
-```bash
-echo "DOCKER_HOST=unix://$HOME/.colima/default/docker.sock" >> demo/backend/.env
-```
-
-Pull the sandbox image (one-time):
+You may consider pulling the sandbox image ahead of time (one-time process) to have it cached for later:
 
 ```bash
-docker pull python:3.11-slim
+docker pull python:3.12-slim
 ```
 
 Then toggle Sandbox Mode ON in the Settings panel when building your agent. We'll talk about why this mode is important shortly. 

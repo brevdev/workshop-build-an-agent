@@ -27,9 +27,7 @@ But all of these agents share a common architecture: a **single model in a singl
 
 Every agent we've built so far follows the same architecture:
 
-```
-User → Model → Tool → Model → Tool → ... → Response
-```
+![Shallow Agent Pattern](img/shallow_agent_pattern.png)
 
 One model. One context window. One tool at a time. The bash agent from Module 4 pushed this pattern to its limit — it could execute shell commands, but it still operated in a single flat loop.
 

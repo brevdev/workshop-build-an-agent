@@ -66,12 +66,12 @@ INTERRUPT_TOOLS = {
 
 def _get_model(model_id: str = "llama"):
     """Return an NVIDIA NIM chat model for the given model ID."""
-    api_key = ...
-    model_name = ...
+    api_key = os.getenv("NVIDIA_API_KEY")
+    model_name = MODEL_MAP.get(model_id, MODEL_MAP["llama"])
     print(f"[Agent] Using model: {model_name} (id={model_id})")
     return ChatNVIDIA(
-        model=...,
-        api_key=...,
+        model=model_name,
+        api_key=api_key,
         temperature=0.3,
     )
 
@@ -90,9 +90,9 @@ def _build_extra_tools(skill_ids: list[str]) -> list:
     if "websearch" in skill_ids:
         try:
             from langchain_community.tools.tavily_search import TavilySearchResults
-            tavily_key = ...
+            tavily_key = os.getenv("TAVILY_API_KEY")
             if tavily_key:
-                tools.append(...)
+                tools.append(TavilySearchResults(max_results=3, api_key=tavily_key))
                 print("[Agent] Added Tavily web search tool")
         except ImportError:
             print("[Agent] Tavily not available")
@@ -116,9 +116,8 @@ skill_files = {
     "superpowers": "superpowers.md",
     "cudf": "cudf.md",
     "code_review": "code_review.md",
-    # TODO: Exercise 6 — Add your custom skill here. 
-    # Make sure the skills file exists in demo/backend/skills folder
-    # "my_skill": "my_skill.md",
+    # TODO: Exercise 6 — Add your custom skill here
+    "my_skill": "technical_writing.md",
 }
 
 def _load_skill_content(skill_ids: list[str]) -> str:
@@ -189,19 +188,19 @@ Continue normally after approval — do not ask the user to approve manually."""
     skill_section = f"\n\n---\n\n{skill_content}" if skill_content else ""
 
     return f"""You are an NVIDIA Deep Agent — a powerful AI assistant built for GTC 2026.
-Your soul (foundation model) is: {...}
+Your soul (foundation model) is: {model_name}
 
 Your enabled capabilities:
-{...}
+{caps_text}
 
 CRITICAL RULES:
 1. Answer the user's question DIRECTLY. Do NOT use the 'task' tool — respond yourself.
-2. File tools require ABSOLUTE paths. Your workspace is: {...}
-   Always use paths like: {...}/hello.py
+2. File tools require ABSOLUTE paths. Your workspace is: {workspace}
+   Always use paths like: {workspace}/hello.py
 3. Use web search when the user asks for current information.
 4. Be concise and technically accurate.
-5. You are running on NVIDIA infrastructure.{...}
-{...}{...}"""
+5. You are running on NVIDIA infrastructure.{rag_rule}
+{hitl_note}{skill_section}"""
 
 
 # ── Exercise 4: Configure the Backend ────────────────────────────────────────
@@ -238,10 +237,15 @@ def _build_backend(skill_ids: list[str], sandbox_map: dict[str, bool]):
     print(f"[Agent] Sandbox mode OFF — using local workspace: {workspace}")
 
     if "execute" in skill_ids:
-        backend = ...
+        backend = LocalShellBackend(
+            root_dir=workspace,
+            timeout=60.0,
+            max_output_bytes=50000,
+            inherit_env=True,
+        )
         print("[Agent] Shell execution enabled via LocalShellBackend")
     else:
-        backend = ...
+        backend = FilesystemBackend(root_dir=workspace)
         print("[Agent] Using FilesystemBackend")
 
     return backend, None
@@ -271,8 +275,8 @@ def create_agent(
     if sandbox_map is None:
         sandbox_map = {}
 
-    model = ...
-    extra_tools = ...
+    model = _get_model(model_id)
+    extra_tools = _build_extra_tools(skill_ids)
     any_sandboxed = any(sandbox_map.get(sid, False) for sid in skill_ids)
     system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, any_sandboxed)
     skill_sources = _get_skill_sources()
@@ -280,20 +284,20 @@ def create_agent(
     backend, sandbox = _build_backend(skill_ids, sandbox_map)
 
     agent_kwargs: dict = {
-        "model": ... ,
-        "tools": ... if ... else None,
-        "system_prompt": ... ,
-        "backend": ... ,
-        "checkpointer": ... ,
+        "model": model,
+        "tools": extra_tools if extra_tools else None,
+        "system_prompt": system_prompt,
+        "backend": backend,
+        "checkpointer": checkpointer,
     }
 
     if hitl_enabled:
-        agent_kwargs["interrupt_on"] = ...
+        agent_kwargs["interrupt_on"] = INTERRUPT_TOOLS
 
     if skill_sources:
         agent_kwargs["skills"] = skill_sources
 
-    agent = ...
+    agent = create_deep_agent(**agent_kwargs)
     sandboxed = [k for k, v in sandbox_map.items() if v]
     print(f"[Agent] Created deep agent: skills={skill_ids}, hitl={hitl_enabled}, sandboxed={sandboxed}")
     return agent, sandbox

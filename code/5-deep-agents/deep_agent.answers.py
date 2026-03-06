@@ -116,8 +116,7 @@ skill_files = {
     "superpowers": "superpowers.md",
     "cudf": "cudf.md",
     "code_review": "code_review.md",
-    # TODO: Exercise 6 — Add your custom skill here
-    "my_skill": "technical_writing.md",
+    "cuopt": "cuopt.md",
 }
 
 def _load_skill_content(skill_ids: list[str]) -> str:

@@ -116,9 +116,7 @@ skill_files = {
     "superpowers": "superpowers.md",
     "cudf": "cudf.md",
     "code_review": "code_review.md",
-    # TODO: Exercise 6 — Add your custom skill here. 
-    # Make sure the skills file exists in demo/backend/skills folder
-    # "my_skill": "my_skill.md",
+    "cuopt": "cuopt.md",
 }
 
 def _load_skill_content(skill_ids: list[str]) -> str:

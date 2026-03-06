@@ -36,7 +36,7 @@ Without sandboxing, your agent operates directly on the host system. It has the 
 
 #### Demo: No Sandbox
 
-In the Deep Agent Builder UI, make sure **Sandbox Mode is OFF** (you'll see "⚠️ No Sandbox" in the header). Then ask:
+In the Deep Agent Builder UI, make sure **Sandbox Mode is OFF** (you'll see "⚠️ No Sandbox" in the header). Build an agent with Shell Execution and File I/O and ask:
 
 > *"What files are in my workspace?"*
 
@@ -73,7 +73,9 @@ db_user:mysql_prod_xK9#mN2
 
 #### Demo: With Sandbox
 
-Now toggle **Sandbox Mode ON** in the Settings panel (you'll see "🔒 Sandboxed" in the header). Build a new agent and ask the same question:
+Click "Build a New Agent". Now recreate your deep agent and toggle **Sandbox Mode ON** in the Settings panel (you'll see "🔒 Sandboxed" in the header). 
+
+Build a new agent and ask the same question:
 
 > *"What files are in my workspace?"*
 

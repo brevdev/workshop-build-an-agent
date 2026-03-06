@@ -150,8 +150,10 @@ if "execute" in skill_ids:
         max_output_bytes=50000,
         inherit_env=True,
     )
+    print("[Agent] Shell execution enabled via LocalShellBackend")
 else:
     backend = FilesystemBackend(root_dir=workspace)
+    print("[Agent] Using FilesystemBackend")
 ...
 ```
 
@@ -207,63 +209,11 @@ agent = create_deep_agent(**agent_kwargs)
 
 <!-- fold:break -->
 
-### Exercise: Add a Custom Skill
-
-<img src="_static/robots/magician.png" alt="Skills" style="float:right;max-width:250px;margin:15px;" />
-
-Skills are markdown files that get injected into the agent's system prompt. They teach the agent domain-specific methodology without adding new tools.
-
-**Create a new skill file** at `demo/backend/skills/my_skill.md` with instructions for the agent. 
-
-<details>
-<summary><strong>Show Me an Example - Click Me!</strong></summary>
-
-Let's create a `demo/backend/skills/technical_writing.md` skill:
-
-```markdown
-# Technical Writing Skill
-
-You are now operating as a technical writer. Follow these guidelines for all documentation tasks.
-
-## Structure
-
-1. **Executive Summary** - Start with a brief overview (2-3 sentences)
-2. **Key Points** - Use bullet points for scannable content  
-3. **Details** - Expand on each point with specifics
-4. **Conclusion** - Summarize actionable takeaways
-
-## Style Guidelines
-
-- Use active voice ("The system processes..." not "Data is processed by...")
-- Keep sentences under 25 words
-- Define acronyms on first use
-- Use concrete examples over abstract explanations
-
-## Formatting
-
-- Use headers (##, ###) to organize sections
-- Code blocks for any technical content
-- Tables for comparisons
-- Bold for key terms, *italics* for emphasis
-
-## Quality Checklist
-
-Before finishing, verify:
-- [ ] Executive summary captures the main point
-- [ ] All claims are supported by evidence or sources
-- [ ] No jargon without explanation
-- [ ] Clear next steps or call to action
-```
-
-</details>
-
-Then wire it into the agent by adding it to the `skill_files` mapping in <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', 'skill_files = ');"><i class="fas fa-code"></i> skill_files</button>.
-
-<!-- fold:break -->
-
 ## Test Your Agent
 
 With all exercises complete, it's time to test. Let's see if your agent is working!
+
+Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> and execute the built-in dry run. 
 
 ```bash
 cd demo/backend
@@ -277,7 +227,7 @@ If successful, you should see a "Your deep agent is working!" message at the end
 
 ## Run Your Agent
 
-If you would like to use this agent you just created in the main Deep Agent Client, feel free to bring in the contents you just wrote from ``code/5-deep-agents/deep_agent.py`` into ``demo/backend/agent.py``. 
+> If you would like to use this agent you just created in the main Deep Agent Client, copy the entire file contents you just wrote from ``code/5-deep-agents/deep_agent.py`` into ``demo/backend/agent.py``. 
 
 Re-launch the backend with this agent implementation: 
 

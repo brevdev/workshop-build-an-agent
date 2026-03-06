@@ -271,7 +271,7 @@ function App() {
               </span>
             )}
             <div className="header-badge" style={selectedModel ? { borderColor: selectedModel.primaryColor, color: selectedModel.primaryColor, background: selectedModel.subtleColor } : undefined}>
-              {selectedModel ? `${selectedModel.name} · GTC 2026` : 'GTC 2026 Demo'}
+              {selectedModel ? `${selectedModel.name} · Build an Agent Workshop` : 'Build an Agent Workshop'}
             </div>
           </div>
         </motion.header>

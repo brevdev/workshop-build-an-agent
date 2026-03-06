@@ -8,3 +8,4 @@ jq
 vim
 nodejs
 npm
+python3.12-venv

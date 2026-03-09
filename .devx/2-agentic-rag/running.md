@@ -138,6 +138,8 @@ The sidebar menu contains a link called `Monitoring`. Clicking on that results i
 
 <!-- fold:break -->
 
-## Operations Ready
+## Next Steps
 
-Our agent is now ready for day 2 operations. To control costs, we would like to run our own models before going to production. [Migrate to Local NIM](migrate.md).
+Before we wrap up, let's augment our baseline RAG agent with some additional capabilities and learn more about MCP Tools and agent skills along the way. 
+
+Let's head over to [Implementing MCP](mcp.md) to learn more. 

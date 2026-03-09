@@ -90,7 +90,7 @@ execution:
           icon_url: ""
     resources:
         gpu:
-            requested: 1
+            requested: 0
         sharedMemoryMB: 0
     secrets: []
     mounts:

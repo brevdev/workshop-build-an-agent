@@ -1,0 +1,176 @@
+.skill-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  user-select: none;
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Recommended glow */
+.skill-card.recommended {
+  border-color: var(--rec-color, var(--accent-color));
+  box-shadow: 0 0 12px var(--rec-glow, var(--accent-glow));
+  animation: rec-glow-pulse 2.5s ease-in-out infinite;
+}
+
+.skill-card-rec-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    var(--rec-glow, var(--accent-glow)) 0%,
+    transparent 70%
+  );
+  opacity: 0.3;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes rec-glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px var(--rec-glow, var(--accent-glow)); }
+  50% { box-shadow: 0 0 22px var(--rec-glow, var(--accent-glow)); }
+}
+
+.skill-card.recommended .skill-card-category {
+  background: var(--rec-glow, var(--accent-glow));
+  color: #fff;
+}
+
+.skill-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-glow);
+}
+
+.skill-card.dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+  box-shadow: var(--shadow-lg), var(--shadow-glow-lg);
+  border-color: var(--accent-color);
+  z-index: var(--z-modal);
+}
+
+.skill-card.in-agent {
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface);
+}
+
+.skill-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.skill-card.in-agent .skill-card-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 1.25rem;
+}
+
+.skill-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.skill-card-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-card-description {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin: var(--space-1) 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-card-category {
+  font-size: 9px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--n700);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.skill-card-category[data-category="cuda"] {
+  background: rgba(118, 185, 0, 0.2);
+  color: var(--accent-color);
+}
+
+.skill-card-category[data-category="ai"] {
+  background: rgba(0, 120, 212, 0.2);
+  color: var(--b400);
+}
+
+.skill-card-category[data-category="tools"] {
+  background: rgba(255, 179, 0, 0.2);
+  color: var(--y400);
+}
+
+.skill-card-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--accent-subtle) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.skill-card:hover .skill-card-glow {
+  opacity: 1;
+}
+
+.skill-card.dragging .skill-card-glow {
+  opacity: 1;
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--accent-glow) 0%,
+    transparent 70%
+  );
+}
+
+/* Tooltip — appears to the right so it escapes the palette overflow */
+.skill-card-tooltip {
+  position: fixed;
+  display: none;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: var(--z-tooltip);
+  box-shadow: var(--shadow-glow);
+}
+
+.skill-card:hover .skill-card-tooltip {
+  display: block;
+}

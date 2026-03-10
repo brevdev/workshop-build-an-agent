@@ -1,0 +1,13 @@
+graph TB
+    A[Question] --> D[Judge LLM]
+    B[Agent Response] --> D
+    C[Context/Criteria] --> D
+    D --> E[Evaluation Prompt]
+    E --> F[Score + Explanation]
+    
+    style A fill:#4CAF50
+    style B fill:#2196F3
+    style C fill:#FFC107
+    style D fill:#9C27B0
+    style F fill:#FF5722
+

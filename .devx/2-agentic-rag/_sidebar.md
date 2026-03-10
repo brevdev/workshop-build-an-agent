@@ -1,5 +1,7 @@
-* [Introduction to RAG](intro.md)
 * [Setting up Secrets](secrets.md)
+* [Introduction to RAG](intro.md)
 * [Building Agentic RAG](agentic_rag.md)
 * [Running Your Agent](running.md)
+* [Implementing MCP](mcp.md)
+* [Agent Skills](skills.md)
 * [Migrate to Local NIM](migrate.md)

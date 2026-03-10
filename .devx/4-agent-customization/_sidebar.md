@@ -1,0 +1,6 @@
+* [Setting up Secrets](secrets.md)
+* [Introduction to Customization](intro_customization.md)
+* [The Bash Agent](bash_agent.md)
+* [Synthetic Data Generation](sdg.md)
+* [GRPO Training](grpo_training.md)
+* [Running the Customized Agent](run_customized.md)

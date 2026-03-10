@@ -18,10 +18,10 @@ While other frameworks may provide different ways to deploy agents, the core ide
 
 To get started, start a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> here in Jupyter.
 
-Change to the `code` directory:
+Change to the `code/2-agentic-rag` directory:
 
 ```bash
-cd code
+cd code/2-agentic-rag
 ```
 
 And start your Agent API with the LangGraph CLI.
@@ -74,7 +74,7 @@ If you see any errors while running your agent, they will appear in this termina
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     File "<frozen importlib._bootstrap_external>", line 999, in exec_module
     File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-    File "/project/code/rag_agent.py", line 37, in <module>
+    File "/project/code/2-agentic-rag/rag_agent.py", line 37, in <module>
       chunks = splitter.split_documents(docs)
               ^^^^^^^^^^^^^^^^^^^^^^^^
   AttributeError: 'ellipsis' object has no attribute 'split_documents'
@@ -138,6 +138,8 @@ The sidebar menu contains a link called `Monitoring`. Clicking on that results i
 
 <!-- fold:break -->
 
-## Operations Ready
+## Next Steps
 
-Our agent is now ready for day 2 operations. To control costs, we would like to run our own models before going to production. [Migrate to Local NIM](migrate.md).
+Before we wrap up, let's augment our baseline RAG agent with some additional capabilities and learn more about MCP Tools and agent skills along the way. 
+
+Let's head over to [Implementing MCP](mcp.md) to learn more. 

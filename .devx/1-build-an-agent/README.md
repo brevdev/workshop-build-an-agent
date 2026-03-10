@@ -12,15 +12,18 @@ This workshop will help you get started building AI agents from scratch. At the 
 * A turn-key, portable development environment
 * Your own customized agent ready to share as a launchable
 
-The entire workshop can take anywhere from 2 to 4 hours to complete.
+This learning module can take around 1 to 2 hours to complete.
 
 ## Learning Objectives
 
-By the end of this workshop, you'll know how to create an agent that can:
-- Use tools to perform actions
-- Maintain conversation context
-- Make decisions about next steps
-- Handle complex multi-step workflows
+By the end of this module, you'll understand:
+- Why agents exist and what problems they solve
+- The four core components of any AI agent (model, tools, memory, routing)
+- How agents differ from simple LLM calls and workflows
+- The ReAct pattern for reasoning and acting
+- How system prompts shape agent behavior
+- When to use agents vs simpler approaches
+- How to build agents both from scratch and with LangChain
 
 > Head over to [Setting up Secrets](secrets) to get started!
 

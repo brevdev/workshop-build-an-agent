@@ -3,13 +3,9 @@
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right; max-width:300px;margin:25px;" />
 
 
-For this agent to work, we will need to configure a few secrets. Use the <button onclick="openVoila('code/secrets_management.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set these up.
+For this agent to work, we will need to configure a few secrets. Use the <button onclick="openVoila('code/secrets_management/secrets_management_2.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set these up. Note that the secrets you already set for Module 1 should persist here as well. 
 
 You can also launch the Secrets Manager from the launcher.
-
-## OpenRouter API Key
-
-OpenRouter is a unified API that provides access to multiple AI models from different providers, including NVIDIA's models. You do **not** need to set this API Key for the Agentic RAG workshop. 
 
 ## NGC API Key
 
@@ -30,11 +26,24 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 ## Tavily API Key
 
-Tavily is a search API designed for AI agents. It provides real-time web search capabilities that help agents gather up-to-date information from the internet. You do **not** need to set this API Key for the Agentic RAG workshop. 
+Tavily is a search API designed for AI agents. Later in this module, you'll use it to add web search capabilities via MCP. If you already set this up in Module 1, it should persist here.
 
-## LangSmith API Key
+<details>
+<summary>⚠️ Don't have an account?</summary>
 
-LangSmith is LangChain's platform for testing, evaluating, and monitoring LLM applications. It provides tracing and debugging capabilities for your AI agents. Get your LangSmith API Key down below!
+You can get free access to Tavily with a [Tavily Developer Account](https://tavily.com/).
+</details>
+
+<details>
+<summary>⚠️ Don't have an API Key?</summary>
+
+Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
+
+</details>
+
+## LangSmith API Key (Optional)
+
+LangSmith provides tracing and monitoring for your agent. You'll use it in the [Running Your Agent](running.md) section to inspect your agent's behavior.
 
 <details>
 <summary>⚠️ Don't have an account?</summary>
@@ -49,3 +58,6 @@ Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/s
 
 </details>
 
+---
+
+Once you're ready, continue to the [Introduction to RAG](intro.md) section to get started with agentic RAG.

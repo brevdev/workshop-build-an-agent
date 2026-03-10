@@ -26,8 +26,47 @@
   icon: /project/.devx/_static/img/nvidia-icon.svg
   catalog: NVIDIA DevX Learning Path
 
+- title: "3. Agent Evaluation"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/project/.devx/3-agent-evaluation"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /project/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "4. Agent Customization"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/project/.devx/4-agent-customization"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /project/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "5. Deep Agents"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/project/.devx/5-deep-agents"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /project/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
 - title: "Secrets Manager"
-  source: /project/code/secrets_management.ipynb
+  source: /project/code/secrets_management/secrets_management_master.ipynb
   cwd: /projects
   args: {}
   type: notebook-voila
@@ -36,7 +75,7 @@
 
 - title: "Simple Agents Client"
   source: http://localhost:$PORT/
-  cwd: /project/code/
+  cwd: /project/code/2-agentic-rag
   type: local-server
   args:
     - streamlit
@@ -44,5 +83,16 @@
     - simple_client.py
     - --server.port
     - $PORT
+  icon: /project/.devx/_static/img/chatbot.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "Deep Agents Client"
+  source: http://localhost:$PORT/
+  cwd: /project/demo
+  type: local-server
+  args:
+    - bash
+    - -c
+    - npm run build && npm run preview -- --port $PORT
   icon: /project/.devx/_static/img/chatbot.svg
   catalog: NVIDIA DevX Learning Path

@@ -13,7 +13,7 @@ This workshop will help you understand the evolution from basic LLMs to traditio
 * A vector database implementation using FAISS
 * Your own customized agentic RAG system
 
-The entire workshop can take anywhere from 1 to 2 hours to complete.
+This learning module can take around 2 to 3 hours to complete.
 
 ## Learning Objectives
 

@@ -1,4 +1,5 @@
 data-designer~=0.3.7
+duckdb~=1.4.4
 dotenv~=0.9.9
 faiss-cpu~=1.12.0
 fastapi~=0.116.1

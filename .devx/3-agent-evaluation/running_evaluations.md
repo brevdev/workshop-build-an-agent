@@ -15,7 +15,8 @@ Before starting, ensure you have:
 - The pre-made datasets: `rag_agent_test_cases.json` and `report_agent_test_cases.json`
 
 **Agents built** - Your RAG agent from Module 2 and Report Generation agent from Module 1 should be built and functional. 
-- If you have not yet completed those modules, paste the contents of the ``code/2-agentic-rag/rag_agent.answers.py`` answer key into ``code/2-agentic-rag/rag_agent.py``. 
+- If you have not yet completed those modules, paste the contents of the ``code/2-agentic-rag/rag_agent.answers.py`` answer key into ``code/2-agentic-rag/rag_agent.py``.
+- **Note:** Remove `web_search`, `get_skill`, and `list_available_skills` from the tool list in `create_react_agent` for best RAG evaluation results.
 
 **Metrics selected** - You've learned about evaluation metrics and LLM-as-a-Judge techniques in the previous sections of this module. 
 
@@ -145,7 +146,7 @@ Rate faithfulness on a scale of 1-5:
 
 Now that we have made our evaluation prompts robust, we can leverage these in addition to the evaluation datasets we created in the last section to evaluate agents! 
 
-> Before proceeding, ensure ``code/2-agentic-rag/rag_agent.py`` has been completed. Need help? Check out the <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.answers.py');"><i class="fa-solid fa-flask"></i> RAG Agent Answer Key</button>. 
+> Before proceeding, ensure ``code/2-agentic-rag/rag_agent.py`` has been completed. Need help? Check out the <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.answers.py');"><i class="fa-solid fa-flask"></i> RAG Agent Answer Key</button>. Remove `web_search`, `get_skill`, and `list_available_skills` from the tool list in `create_react_agent` for best RAG evaluation results.
 
 ## Evaluating the RAG Agent
 

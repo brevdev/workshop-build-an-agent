@@ -192,7 +192,7 @@ cd code/4-agent-customization
 And start the agent you just built: 
 
 ```bash
-python3 -m bash_agent.main_langgraph
+python3.12 -m bash_agent.main_langgraph
 ```
 
 Try a sample query: `"List all files"` → `ls`

@@ -102,7 +102,7 @@ cd code/4-agent-customization
 And start your customized bash agent:
 
 ```bash
-python3 -m bash_agent.main_hf
+python3.12 -m bash_agent.main_hf
 ```
 
 <!-- fold:break -->

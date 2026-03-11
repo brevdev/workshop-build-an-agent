@@ -132,7 +132,7 @@ With our vector database and retriever chain in place, we're ready to construct 
 
 ### Define the Model
 
-Every agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Nano model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
+Every agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Super model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
 
 <details>
 <summary>🆘 Need some help?</summary>

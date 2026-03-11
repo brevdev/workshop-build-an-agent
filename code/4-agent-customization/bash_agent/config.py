@@ -18,7 +18,7 @@ class Config:
     # -------------------------------------
 
     llm_base_url: str = "https://integrate.api.nvidia.com/v1"
-    llm_model_name: str = "nvidia/nvidia-nemotron-nano-9b-v2"
+    llm_model_name: str = "nvidia/nemotron-3-super-120b-a12b"
     llm_api_key: str = field(default_factory=lambda: os.environ.get("NVIDIA_API_KEY", ""))
     
     # Sampling parameters (reduced temperature for deterministic outputs)

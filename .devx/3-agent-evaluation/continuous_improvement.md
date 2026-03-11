@@ -129,8 +129,8 @@ Different models have different strengths. Choose the right model for each task.
 ```python
 # Try different models
 llm_options = [
-    "nvidia/nvidia-nemotron-nano-9b-v2",  # Fast, efficient
-    "nvidia/llama-3.3-nemotron-super-49b-v1.5",  # More capable
+    "nvidia/nemotron-3-nano-30b-a3b",  # Fast, efficient
+    "nvidia/nemotron-3-super-120b-a12b",  # More capable
 ]
 
 for model_name in llm_options:

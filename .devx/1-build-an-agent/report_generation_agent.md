@@ -12,7 +12,7 @@ The report generation agent will automatically research any topic and write a pr
 Remember, there are four primary components to an agent: the model, tools, memory/state, and routing.
 
 In this exercise, we wire up all four:
-- **Model**: NVIDIA Nemotron 3 Nano (30B), accessed via NVIDIA's API
+- **Model**: NVIDIA Nemotron 3 Super (120B), accessed via NVIDIA's API
 - **Tools**: A web search function using the Tavily Search Engine API
 - **Memory**: Managed automatically by LangChain as conversation history
 - **Routing**: Handled by LangChain's agent framework (no manual loop needed) 

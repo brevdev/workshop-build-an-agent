@@ -125,6 +125,8 @@ class DockerSandboxBackend(SandboxBackendProtocol):
             else:
                 # Fallback: just return file names
                 results.append(FileInfo(path=line.strip()))
+        if not results:
+            return [FileInfo(path=f"{resolved}/ (empty directory)")]
         return results
 
     async def als_info(self, path: str) -> list[FileInfo]:

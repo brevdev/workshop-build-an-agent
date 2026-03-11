@@ -272,6 +272,7 @@ def _process_event(event: dict, tool_timers: dict[str, float]) -> dict | None:
         run_id = event.get("run_id", "")
         tool_input = event.get("data", {}).get("input", "")
         tool_timers[run_id] = time.time()
+        print(f"[Tool] START {tool_name}: {str(tool_input)[:150]}")
 
         input_str = str(tool_input)
         if len(input_str) > 200:
@@ -295,6 +296,7 @@ def _process_event(event: dict, tool_timers: dict[str, float]) -> dict | None:
         output = event.get("data", {}).get("output", "")
         start_time = tool_timers.pop(run_id, time.time())
         duration_ms = int((time.time() - start_time) * 1000)
+        print(f"[Tool] END   {tool_name} ({duration_ms}ms): {str(output)[:150]}")
 
         output_str = str(output)
         if len(output_str) > 300:

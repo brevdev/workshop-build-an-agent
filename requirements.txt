@@ -1,4 +1,5 @@
 data-designer~=0.3.7
+deepagents>=0.3.11
 duckdb~=1.4.4
 dotenv~=0.9.9
 faiss-cpu~=1.12.0
@@ -20,6 +21,7 @@ OpenAI
 pandas~=2.3.0
 pydantic
 ragas~=0.2.0
+scikit-learn~=1.6.0
 streamlit~=1.49.1
 tavily-python~=0.7.19
 voila

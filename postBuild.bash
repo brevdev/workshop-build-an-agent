@@ -25,6 +25,20 @@ else
     echo "File already exists. No action taken."
 fi
 
+# Install Mamba/Nemotron CUDA extensions (must be built with CUDA present)
+pip install --no-build-isolation "causal-conv1d @ git+https://github.com/Dao-AILab/causal-conv1d.git@v1.5.2"
+pip install --no-build-isolation "mamba-ssm @ git+https://github.com/state-spaces/mamba.git@v2.2.5"
+
+# Patch mamba-ssm for transformers 5.x compatibility
+# (mamba-ssm 2.2.5 imports GreedySearchDecoderOnlyOutput which was removed in transformers 5.x)
+MAMBA_GEN=$(python3 -c "import importlib.util; spec = importlib.util.find_spec('mamba_ssm'); print(spec.submodule_search_locations[0])" 2>/dev/null)/utils/generation.py
+if [ -f "$MAMBA_GEN" ]; then
+    sed -i 's/from transformers.generation import GreedySearchDecoderOnlyOutput, SampleDecoderOnlyOutput, TextStreamer/try:\n    from transformers.generation import GreedySearchDecoderOnlyOutput, SampleDecoderOnlyOutput, TextStreamer\nexcept ImportError:\n    from transformers.generation import GenerateDecoderOnlyOutput as GreedySearchDecoderOnlyOutput, GenerateDecoderOnlyOutput as SampleDecoderOnlyOutput, TextStreamer/' "$MAMBA_GEN"
+    echo "Patched mamba-ssm for transformers 5.x compatibility"
+else
+    echo "WARNING: Could not find mamba-ssm generation.py to patch"
+fi
+
 # Install CUDA Toolkit
 # 1. Detect Architecture
 ARCH=$(uname -m)

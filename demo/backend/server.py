@@ -50,7 +50,7 @@ class AgentSession:
 
     @property
     def config(self):
-        return {"configurable": {"thread_id": self.thread_id}, "recursion_limit": 30}
+        return {"configurable": {"thread_id": self.thread_id}, "recursion_limit": 120}
 
 sessions: dict[str, AgentSession] = {}
 

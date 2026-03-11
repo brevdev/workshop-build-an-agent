@@ -13,10 +13,7 @@ The demo lives in the `demo/` folder and has two parts: a **React frontend** and
 Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> and set up the Python backend:
 
 ```bash
-cd demo/backend
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+cd demo/backend && python3.12 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 ```
 
 This installs `deepagents`, `fastapi`, `langchain`, and all other dependencies. It should take about a minute.
@@ -51,8 +48,7 @@ curl http://localhost:8000/api/health
 In a different <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>, set up the React frontend dependencies:
 
 ```bash
-cd demo
-npm install
+cd demo && npm install
 ```
 
 <!-- fold:break -->

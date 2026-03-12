@@ -469,6 +469,7 @@ def evaluate_report_quality(
         return {
             "structure": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="structure"),
             "content": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="content"),
+            "coverage": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="coverage"),
             "accuracy": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="accuracy"),
             "writing": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="writing"),
         }

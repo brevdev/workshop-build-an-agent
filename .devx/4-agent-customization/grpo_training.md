@@ -228,8 +228,7 @@ GRPO computes that Response #1 scored above the group average and reinforces its
 Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> window — Start reward server:
 
 ```bash
-cd code/4-agent-customization/nemo_gym_resources/langgraph_cli
-uvicorn app:app --host 0.0.0.0 --port 8000
+cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
 Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/02_grpo_training.ipynb');"><i class="fa-solid fa-flask"></i> 02_grpo_training.ipynb</button>

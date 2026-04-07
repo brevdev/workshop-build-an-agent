@@ -1,9 +1,10 @@
 """
 OpenClaw Agent Wrapper — Module 6
 
-Bridges a live OpenClaw agent to the exercise `agent_fn(prompt) -> str` interface.
-If OpenClaw is not installed or the agent is not running, gracefully falls back
-to a mock agent so exercises still work.
+Bridges a live OpenClaw agent to the exercise `agent_fn(prompt) -> str`
+interface. Uses the `openclaw agent -m` CLI command to communicate with
+the gateway. If the gateway is not reachable, gracefully falls back to
+a mock agent so exercises still work.
 
 Usage:
     from openclaw_wrapper import create_openclaw_agent_fn
@@ -12,15 +13,154 @@ Usage:
     response = agent_fn("What can you help me with?")
 """
 
-from typing import Callable
+import os
+import shutil
+import subprocess
+from typing import Callable, Optional
+
+
+def _find_openclaw_binary() -> Optional[str]:
+    """Find the openclaw binary, checking PATH then common npm install locations.
+
+    JupyterLab may launch Streamlit without ~/.npm-global/bin on PATH,
+    so we also check the default npm global bin directory directly.
+    """
+    # Check PATH first (works when user has exported ~/.npm-global/bin)
+    found = shutil.which("openclaw")
+    if found:
+        return found
+    # Check the default npm global bin directory (handles JupyterLab launcher)
+    npm_global = os.path.expanduser("~/.npm-global/bin/openclaw")
+    if os.path.isfile(npm_global) and os.access(npm_global, os.X_OK):
+        return npm_global
+    return None
+
+
+# Resolve the binary once at import time
+_OPENCLAW_BIN = _find_openclaw_binary()
+
+
+def _read_gateway_token() -> Optional[str]:
+    """Read the gateway auth token from the OpenClaw config file."""
+    config_path = os.path.expanduser("~/.openclaw/openclaw.json")
+    if not os.path.isfile(config_path):
+        return None
+    try:
+        import json
+        with open(config_path) as f:
+            config = json.load(f)
+        return config.get("gateway", {}).get("auth", {}).get("token")
+    except Exception:
+        return None
+
+
+# Resolve the gateway token once at import time
+_GATEWAY_TOKEN = _read_gateway_token()
+
+
+def _check_openclaw_cli() -> bool:
+    """Check if the openclaw CLI is installed."""
+    return _OPENCLAW_BIN is not None
+
+
+def _build_env() -> dict:
+    """Build subprocess environment with the gateway auth token."""
+    env = os.environ.copy()
+    if _GATEWAY_TOKEN:
+        env["OPENCLAW_GATEWAY_TOKEN"] = _GATEWAY_TOKEN
+    return env
+
+
+def _auto_approve_device() -> None:
+    """Auto-approve the latest pending device pairing request."""
+    if not _OPENCLAW_BIN:
+        return
+    try:
+        subprocess.run(
+            [_OPENCLAW_BIN, "devices", "approve", "--latest"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            env=_build_env(),
+        )
+    except Exception:
+        pass
+
+
+def _check_gateway_via_cli(timeout: int = 10) -> bool:
+    """Check if the OpenClaw gateway is running using `openclaw gateway status`."""
+    if not _OPENCLAW_BIN:
+        return False
+    try:
+        cmd = [_OPENCLAW_BIN, "gateway", "status"]
+        if _GATEWAY_TOKEN:
+            cmd += ["--token", _GATEWAY_TOKEN]
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=_build_env(),
+        )
+        if result.returncode != 0 and "pairing required" in result.stderr.lower():
+            _auto_approve_device()
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=_build_env())
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
+def _send_via_cli(prompt: str, timeout: int = 600) -> dict:
+    """Send a message to the OpenClaw agent via the CLI and return structured result.
+
+    Uses --json to avoid interactive TTY output (banners, spinners, ANSI codes)
+    that causes the subprocess to hang in pipe mode.
+
+    Returns a dict with keys:
+        "text": str — the agent's response text
+        "meta": dict | None — token usage, model, duration, etc.
+        "error": str | None — error message if the call failed
+    """
+    import json as _json
+
+    cmd = [
+        _OPENCLAW_BIN, "agent", "--agent", "main",
+        "--json",
+        "-m", prompt,
+    ]
+    env = _build_env()
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
+
+    # Auto-approve device pairing on first use, then retry
+    if result.returncode != 0 and "pairing required" in (result.stderr or "").lower():
+        _auto_approve_device()
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
+
+    if result.returncode != 0:
+        error = result.stderr.strip() or "Unknown error"
+        return {"text": f"[Agent error: {error}]", "meta": None, "error": error}
+
+    # Parse JSON output
+    # Structure: { "result": { "payloads": [{ "text": "..." }], "meta": { ... } } }
+    stdout = result.stdout.strip()
+    try:
+        data = _json.loads(stdout)
+        result_data = data.get("result", {})
+        payloads = result_data.get("payloads", [])
+        text = payloads[0].get("text", "") if payloads else str(data)
+        meta = result_data.get("meta")
+        return {"text": text, "meta": meta, "error": None}
+    except (ValueError, TypeError):
+        return {"text": stdout, "meta": None, "error": None}
 
 
 def create_openclaw_agent_fn(agent_name: str = "research-assistant") -> Callable[[str], str]:
     """
     Create an agent_fn that sends prompts to a running OpenClaw agent.
 
-    Attempts to connect to a live OpenClaw agent. If OpenClaw is not installed
-    or the agent is not running, returns a mock agent function instead.
+    Checks whether the OpenClaw CLI is available and the gateway is reachable.
+    If both are true, returns a function that sends prompts via `openclaw agent -m`.
+    Otherwise, returns a mock agent function for testing.
 
     Args:
         agent_name: Name of the OpenClaw agent to connect to
@@ -28,28 +168,17 @@ def create_openclaw_agent_fn(agent_name: str = "research-assistant") -> Callable
     Returns:
         A callable: (prompt: str) -> str
     """
-    try:
-        from openclaw import Client
-        client = Client()
+    if _check_openclaw_cli() and _check_gateway_via_cli():
+        print(f"Connected to live OpenClaw agent via CLI ({_OPENCLAW_BIN})")
+        return _send_via_cli
 
-        def agent_fn(prompt: str) -> str:
-            response = client.send(agent_name, prompt, timeout=30)
-            return response.text
-
-        # Verify the agent is running with a quick health check
-        agent_fn("Hello, are you there?")
-        print(f"Connected to live OpenClaw agent '{agent_name}'")
-        return agent_fn
-
-    except ImportError:
-        print("OpenClaw is not installed. Using mock agent.")
-        print("  To install: pip install openclaw")
-        return _create_mock_agent()
-
-    except Exception as e:
-        print(f"Could not connect to OpenClaw agent ({e}). Using mock agent.")
-        print("  To start your agent: openclaw start")
-        return _create_mock_agent()
+    if not _check_openclaw_cli():
+        print("OpenClaw CLI not found. Using mock agent.")
+        print("  To install: curl -fsSL https://openclaw.ai/install.sh | bash")
+    else:
+        print("OpenClaw gateway not running. Using mock agent.")
+        print("  To start: openclaw gateway run")
+    return _create_mock_agent()
 
 
 def _create_mock_agent() -> Callable[[str], str]:

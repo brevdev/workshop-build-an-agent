@@ -2,7 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Before you can secure an agent, you need an agent to secure. In this section, you'll set up **OpenClaw** — a config-first autonomous agent framework — and get a research assistant running that you'll spend the rest of the module hardening.
+Before you can secure an agent, you need an agent to secure. In this section, you'll set up **OpenClaw** — a config-first autonomous agent framework — and get a personal assistant running that you'll spend the rest of the module hardening.
 
 <!-- fold:break -->
 
@@ -11,7 +11,7 @@ Before you can secure an agent, you need an agent to secure. In this section, yo
 OpenClaw is a framework for building always-on autonomous agents. Unlike LangChain graphs or CrewAI crews, OpenClaw takes a **config-first** approach:
 
 1. Write a `SOUL.md` file that defines the agent's identity, goals, and behavior
-2. Run `openclaw start`
+2. Run the gateway
 3. The agent is live
 
 No Python chains. No graph definitions. No orchestration code. The agent's behavior emerges from its SOUL configuration, and it runs continuously — processing messages, monitoring feeds, and writing to its own memory files.
@@ -63,17 +63,51 @@ The SOUL file is the single source of truth for agent behavior. It defines:
 
 Follow these steps to install OpenClaw and launch a research assistant agent.
 
-### Step 1: Install OpenClaw
+### Step 1: Install OpenClaw and Run the Setup Wizard
+
+OpenClaw is a Node.js application. Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and install it with the official install script — this will also launch the interactive setup wizard:
 
 ```bash
-pip install openclaw
+curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
-This installs the OpenClaw CLI and Python SDK.
+> **Requires Node.js 22.14+** (Node 24 recommended). The script installs the `openclaw` CLI via npm. See the [official install docs](https://docs.openclaw.ai/install) for alternative methods.
 
-### Step 2: Create Your SOUL.md
+<!-- fold:break -->
 
-Create a file called `SOUL.md` in your workspace with the following content:
+### Step 2: Complete the Setup Wizard
+
+The install script automatically starts the setup wizard. If you need to re-run it later: `openclaw onboard`. Walk through the prompts as follows:
+
+1. **Security warning** — Read the notice and confirm: **Yes**
+2. **Setup mode** — Select **QuickStart** (uses default gateway settings: port 18789, loopback bind, token auth)
+3. **Model/auth provider** — Select **Custom Provider**, then enter:
+   - **API Base URL**: `https://integrate.api.nvidia.com/v1`
+   - **API Key**: Paste your NVIDIA API key (the same one from the Secrets Manager)
+   - **Endpoint compatibility**: **OpenAI-compatible**
+   - **Model ID**: `nvidia/nemotron-3-super-120b-a12b`
+   - **Endpoint ID**: Accept the default (`custom-integrate-api-nvidia-com`)
+   - **Model alias**: Leave blank
+4. **Channel** — Select **Skip for now** (we'll use the CLI and NemoClaw Client for this module)
+5. **Web search** — Select **Tavily Search** (uses your `TAVILY_API_KEY` environment variable if set, otherwise skip)
+6. **Skills** — Select **No** (not needed for this module)
+7. **Hooks** — Select **Skip for now**
+
+The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates the agent workspace at `~/.openclaw/workspace/`.
+
+After the wizard completes, **approve the CLI device pairing** so the agent can receive messages. OpenClaw requires each CLI "device" to be explicitly approved before it can talk to the gateway:
+
+```bash
+openclaw devices approve --latest
+```
+
+> If you see "pairing required" errors later (e.g., after restarting the gateway), re-run `openclaw devices approve --latest` to approve the latest pending device.
+
+<!-- fold:break -->
+
+### Step 3: Create Your SOUL.md
+
+The wizard created a default workspace. Now give your agent its identity by editing `~/.openclaw/workspace/SOUL.md`:
 
 ```markdown
 # Research Assistant
@@ -102,65 +136,59 @@ You are a research assistant that monitors technical feeds, summarizes papers, a
 
 <!-- fold:break -->
 
-### Step 3: Configure the Heartbeat
+### Step 4: Configure the Heartbeat
 
-Create a `HEARTBEAT.md` file to set the agent's cycle frequency:
+Create a `HEARTBEAT.md` file at `~/.openclaw/workspace/HEARTBEAT.md`. The heartbeat file uses **plain English** — the gateway reads it as natural language instructions for what to do on each cycle:
 
 ```markdown
-# Heartbeat Configuration
+# Heartbeat
 
-interval: 5m
-max_tokens_per_cycle: 4096
-model: nvidia/nemotron-3-super-120b-a12b
+Every 5 minutes, check RSS feeds for new papers on AI safety and agent architectures.
+Summarize any new findings and append them to MEMORY.md.
+Create a daily briefing document in /workspace/ at the end of each day.
 ```
 
-This tells OpenClaw to wake the agent every 5 minutes, cap each cycle at 4096 tokens, and use Nemotron for reasoning.
+By default, the heartbeat runs every 30 minutes. You can adjust the interval in `~/.openclaw/openclaw.json`.
 
-### Step 4: Start the Agent
+### Step 5: Start the Gateway
+
+In this workshop environment, systemd user services aren't available, so the gateway won't auto-start as a daemon. Start it manually in a terminal:
 
 ```bash
-openclaw start
+export PATH="$HOME/.npm-global/bin:$PATH" && openclaw gateway run
 ```
 
-You should see output similar to:
-
-```
-[OpenClaw] Agent "research-assistant" starting...
-[OpenClaw] SOUL loaded: Research Assistant
-[OpenClaw] Heartbeat interval: 5m
-[OpenClaw] Listening for messages...
-[OpenClaw] Agent is live.
-```
-
-### Step 5: Verify the Agent is Running
+Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and verify it's running:
 
 ```bash
-openclaw status
+openclaw gateway status
 ```
 
-Expected output:
-
-```
-Agent: research-assistant
-Status: running
-Uptime: 0m 12s
-Heartbeats: 1
-Memory size: 0.2 KB
-```
+> Check for any configuration issues with ``openclaw doctor``. OpenClaw also provides a built-in UI with ``openclaw dashboard``, but we will use the NemoClaw Client app built for this workshop. 
 
 <!-- fold:break -->
 
 ### Step 6: Test With a Message
 
-Send a test message through the CLI:
+With the gateway running in a separate terminal, open an interactive chat session:
 
 ```bash
-openclaw send "What topics are you currently monitoring?"
+openclaw tui
 ```
 
-The agent should respond based on its SOUL configuration, mentioning AI safety and agent architectures. It should also begin writing to MEMORY.md.
+This opens a terminal UI where you can chat with your agent directly. Try asking:
 
-You can also use the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button> for a chat interface instead of the CLI. The client connects to your running agent automatically, or falls back to a mock agent for testing.
+> Hi, how are you?
+
+The agent should respond based on its SOUL configuration, mentioning it's role as an assistant and it's ability to learn and self-evolve. It should also begin writing to MEMORY.md.
+
+For a single non-interactive message (useful for scripting, testing, etc.), you may also use:
+
+```bash
+openclaw agent --agent main -m "Hi, how are you?"
+```
+
+You can also use the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button> for a browser-based chat interface. The client connects to your running gateway automatically, or falls back to a mock agent for testing.
 
 <!-- fold:break -->
 
@@ -185,18 +213,18 @@ With the agent running, open the <button onclick="launch('NemoClaw Client');"><i
 
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
-| `openclaw: command not found` | Not installed or not in PATH | Run `pip install openclaw` and restart your terminal |
-| `Agent failed to start` | Missing SOUL.md | Ensure SOUL.md is in the current directory |
-| `Model error: 401` | NVIDIA API key not set | Check your API key in the Secrets Manager |
-| `Heartbeat timeout` | Model latency too high | Increase `max_tokens_per_cycle` or switch to a faster model |
-| `No messages received` | No integrations configured | Use `openclaw send` for local testing |
+| `openclaw: command not found` | Not installed or not in PATH | Re-run the install script: `curl -fsSL https://openclaw.ai/install.sh \| bash` |
+| `Node.js version error` | Node.js too old | Install Node.js 22.14+ (Node 24 recommended) |
+| `Gateway not starting` | Port conflict or config issue | Run `openclaw doctor` for diagnostics |
+| `Model error: 401` | API key not set or invalid | Re-run `openclaw onboard` to reconfigure your API key |
+| `No messages received` | No integrations configured | Use `openclaw tui` or `openclaw agent --agent main -m "message"` for local testing |
 
 </details>
 
 <details>
 <summary><strong>Can't install OpenClaw? Use the mock agent instead.</strong></summary>
 
-If you're unable to install OpenClaw in your environment, the exercise code includes a **mock agent** that simulates the same interface. The mock agent is deliberately leaky — it responds to some adversarial prompts in unsafe ways so that the safety evaluation exercises can detect and report violations.
+If you're unable to install OpenClaw in your environment (e.g., Node.js not available, network restrictions), the exercise code includes a **mock agent** that simulates the same interface. The mock agent is deliberately leaky — it responds to some adversarial prompts in unsafe ways so that the safety evaluation exercises can detect and report violations.
 
 The mock agent is loaded automatically when OpenClaw is not available:
 

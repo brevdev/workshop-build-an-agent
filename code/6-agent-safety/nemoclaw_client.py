@@ -40,14 +40,9 @@ if "agent_mode" not in st.session_state:
 
 @st.cache_resource
 def _detect_openclaw_available():
-    """Check if a live OpenClaw agent is reachable (cached once at startup)."""
-    try:
-        from openclaw import Client
-        client = Client()
-        client.send("research-assistant", "ping", timeout=5)
-        return True
-    except Exception:
-        return False
+    """Check if the OpenClaw CLI is installed and the gateway is reachable."""
+    from openclaw_wrapper import _check_openclaw_cli, _check_gateway_via_cli
+    return _check_openclaw_cli() and _check_gateway_via_cli(timeout=10)
 
 
 LIVE_AVAILABLE = _detect_openclaw_available()
@@ -89,8 +84,8 @@ with st.sidebar:
     selected_is_live = selected_mode == MODE_LIVE
     if st.session_state.agent_fn is None or current_is_live != selected_is_live:
         if selected_mode == MODE_LIVE and not LIVE_AVAILABLE:
-            st.error("OpenClaw is not installed or the agent is not running.", icon="🔴")
-            st.caption("Install with `pip install openclaw` and run `openclaw start`.")
+            st.error("OpenClaw gateway not reachable at localhost:18789.", icon="🔴")
+            st.caption("Install: `curl -fsSL https://openclaw.ai/install.sh | bash` then `openclaw gateway run`")
             _set_agent(MODE_MOCK)
         else:
             _set_agent(selected_mode)
@@ -122,12 +117,6 @@ with st.sidebar:
     for label, probe in probe_categories.items():
         if st.button(label, use_container_width=True):
             st.session_state.messages.append({"role": "user", "content": probe})
-            with st.spinner("Agent responding..."):
-                try:
-                    response = st.session_state.agent_fn(probe)
-                except Exception as e:
-                    response = f"[Error: {e}]"
-            st.session_state.messages.append({"role": "assistant", "content": response})
             st.rerun()
 
     st.divider()
@@ -135,6 +124,57 @@ with st.sidebar:
     if st.button("🗑️ Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
+
+# ── Helper: call agent and store result ──────────────────────────────
+
+def _call_agent(prompt: str) -> dict:
+    """Call the agent and return structured result with text + meta."""
+    try:
+        result = st.session_state.agent_fn(prompt)
+        # Live agent returns dict with text/meta/error; mock returns plain str
+        if isinstance(result, str):
+            return {"text": result, "meta": None, "error": None}
+        return result
+    except Exception as e:
+        return {"text": f"[Error: {e}]", "meta": None, "error": str(e)}
+
+
+def _render_metrics(meta: dict):
+    """Render agent response metrics in a compact layout."""
+    if not meta:
+        return
+    agent_meta = meta.get("agentMeta", {})
+    usage = agent_meta.get("usage", {})
+    last_call = agent_meta.get("lastCallUsage", {})
+    duration_ms = meta.get("durationMs", 0)
+    model = agent_meta.get("model", "")
+    stop_reason = meta.get("stopReason", "")
+
+    input_tokens = usage.get("input", 0)
+    output_tokens = usage.get("output", 0)
+    cache_read = last_call.get("cacheRead", 0) or usage.get("cacheRead", 0)
+    cache_write = last_call.get("cacheWrite", 0) or usage.get("cacheWrite", 0)
+
+    cols = st.columns(4)
+    with cols[0]:
+        st.metric("Duration", f"{duration_ms / 1000:.1f}s")
+    with cols[1]:
+        st.metric("Input Tokens", f"{input_tokens:,}")
+    with cols[2]:
+        st.metric("Output Tokens", f"{output_tokens:,}")
+    with cols[3]:
+        st.metric("Input + Output", f"{input_tokens + output_tokens:,}")
+
+    details = []
+    if model:
+        details.append(f"Model: `{model}`")
+    if stop_reason:
+        details.append(f"Stop: `{stop_reason}`")
+    if cache_read or cache_write:
+        details.append(f"Cache read: `{cache_read:,}` | Cache write: `{cache_write:,}`")
+    if details:
+        st.caption(" | ".join(details))
+
 
 # ── Chat Interface ───────────────────────────────────────────────────
 
@@ -152,21 +192,34 @@ if st.session_state.agent_mode == "mock":
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"], avatar="🐾" if msg["role"] == "assistant" else "user"):
         st.markdown(msg["content"])
+        if msg["role"] == "assistant" and msg.get("meta"):
+            with st.expander("Metrics", expanded=False):
+                _render_metrics(msg["meta"])
 
 # Chat input
 if prompt := st.chat_input("Send a message to your agent..."):
-    # Display user message
+    # Append user message and rerun so it renders before the agent call
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    st.rerun()
 
-    # Get agent response
+# Process pending agent response (user message was just added, no assistant reply yet)
+if (
+    st.session_state.messages
+    and st.session_state.messages[-1]["role"] == "user"
+):
+    pending_prompt = st.session_state.messages[-1]["content"]
+
     with st.chat_message("assistant", avatar="🐾"):
         with st.spinner("Thinking..."):
-            try:
-                response = st.session_state.agent_fn(prompt)
-            except Exception as e:
-                response = f"[Agent error: {e}]"
-        st.markdown(response)
+            result = _call_agent(pending_prompt)
+        st.markdown(result["text"])
+        if result.get("meta"):
+            with st.expander("Metrics", expanded=True):
+                _render_metrics(result["meta"])
 
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": result["text"],
+        "meta": result.get("meta"),
+    })
+    st.rerun()

@@ -1,0 +1,33 @@
+graph TB
+    Agent["OpenClaw Agent Process"]
+
+    subgraph "OpenShell Runtime"
+        direction TB
+        subgraph "Layer 1: Filesystem"
+            LL["Landlock LSM<br/>Kernel 5.13+"]
+            LL_R["read_only: /usr/lib, /usr/bin"]
+            LL_W["read_write: /workspace, /tmp/agent"]
+        end
+
+        subgraph "Layer 2: Process"
+            SC["seccomp BPF"]
+            SC_U["run_as_user: agent<br/>(never root)"]
+            SC_S["Syscall filtering"]
+        end
+
+        subgraph "Layer 3: Network"
+            OP["HTTP CONNECT Proxy<br/>+ Policy Engine"]
+            OP_A["ALLOW: integrate.api.nvidia.com:443 POST"]
+            OP_B["ALLOW: *.rss.com:443 GET"]
+            OP_D["DENY: everything else"]
+        end
+    end
+
+    Agent -->|"All operations<br/>pass through"| LL
+    LL --> SC
+    SC --> OP
+
+    style Agent fill:#9c27b0,color:#fff
+    style LL fill:#4caf50,color:#fff
+    style SC fill:#2196f3,color:#fff
+    style OP fill:#ff9800,color:#000

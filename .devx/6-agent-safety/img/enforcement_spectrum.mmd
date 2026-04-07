@@ -1,0 +1,36 @@
+graph LR
+    subgraph "Module 4: Application Level"
+        A1["Regex Check<br/>re.search(r'[`$]', cmd)"]
+        A2["Command Allowlist<br/>shlex.split + allowlist"]
+        A3["HITL Gate<br/>Human approval"]
+    end
+
+    subgraph "Module 5: Container Level"
+        B1["Docker Namespace<br/>Isolated filesystem"]
+        B2["Resource Limits<br/>512MB RAM, 1 CPU"]
+        B3["No Host Mounts<br/>Credential isolation"]
+    end
+
+    subgraph "Module 6: Kernel Level"
+        C1["Landlock LSM<br/>Per-path file access"]
+        C2["seccomp BPF<br/>Syscall filtering"]
+        C3["Network Proxy<br/>Per-endpoint control"]
+        C4["Privacy Router<br/>Data classification"]
+    end
+
+    A1 --> A2 --> A3
+    A3 -->|"Gap: Agent can bypass<br/>app-level controls"| B1
+    B1 --> B2 --> B3
+    B3 -->|"Gap: No per-file or<br/>per-endpoint granularity"| C1
+    C1 --> C2 --> C3 --> C4
+
+    style A1 fill:#ff9800,color:#000
+    style A2 fill:#ff9800,color:#000
+    style A3 fill:#ff9800,color:#000
+    style B1 fill:#2196f3,color:#fff
+    style B2 fill:#2196f3,color:#fff
+    style B3 fill:#2196f3,color:#fff
+    style C1 fill:#4caf50,color:#fff
+    style C2 fill:#4caf50,color:#fff
+    style C3 fill:#4caf50,color:#fff
+    style C4 fill:#4caf50,color:#fff

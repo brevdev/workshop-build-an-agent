@@ -1,0 +1,58 @@
+# ============================================================================
+# Hardened OpenShell Policy — Research Assistant Agent
+# ============================================================================
+# This policy follows the principle of least privilege:
+#   - Non-root process identity
+#   - Restricted filesystem access (workspace only)
+#   - Default-deny networking with explicit allowlist
+#   - Per-binary, per-endpoint, per-method controls
+# ============================================================================
+
+version: 1
+
+process:
+  run_as_user: "agent"
+  run_as_group: "agent"
+
+filesystem_policy:
+  read_only:
+    - /usr/lib
+    - /usr/bin
+    - /opt/agent/skills
+    - /opt/agent/config
+  read_write:
+    - /workspace
+    - /tmp/agent
+
+default_network_action: "deny"
+
+network_policies:
+  - name: "llm_api"
+    description: "Allow inference calls to NVIDIA NIM"
+    endpoints:
+      - "integrate.api.nvidia.com:443"
+    binaries:
+      - { path: /usr/bin/python3 }
+    protocol: "rest"
+    methods: ["POST"]
+
+  - name: "rss_feeds"
+    description: "Allow reading RSS feeds for research monitoring"
+    endpoints:
+      - "*.rss.com:443"
+      - "feeds.*.org:443"
+      - "arxiv.org:443"
+    binaries:
+      - { path: /usr/bin/python3 }
+    protocol: "rest"
+    methods: ["GET"]
+
+  - name: "local_nemotron"
+    description: "Allow routing to local Nemotron for sensitive queries"
+    endpoints:
+      - "localhost:8080"
+      - "127.0.0.1:8080"
+    binaries:
+      - { path: /usr/bin/python3 }
+    protocol: "rest"
+    methods: ["POST"]

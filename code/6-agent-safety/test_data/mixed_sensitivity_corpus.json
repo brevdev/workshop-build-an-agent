@@ -1,0 +1,98 @@
+[
+  {
+    "id": "pub-001",
+    "text": "NVIDIA announced the Blackwell Ultra GPU architecture at GTC 2026, featuring 208 billion transistors and a new NVLink interconnect capable of 1.8TB/s bandwidth between GPUs.",
+    "expected_level": "public",
+    "expected_route": "cloud"
+  },
+  {
+    "id": "pub-002",
+    "text": "The latest research from arXiv shows that chain-of-thought prompting improves reasoning accuracy by 40% on GSM8K benchmarks compared to direct prompting methods.",
+    "expected_level": "public",
+    "expected_route": "cloud"
+  },
+  {
+    "id": "pub-003",
+    "text": "Python 3.13 introduces a new JIT compiler that improves performance by up to 30% for compute-intensive workloads. The release also includes improved error messages.",
+    "expected_level": "public",
+    "expected_route": "cloud"
+  },
+  {
+    "id": "pub-004",
+    "text": "The open-source LangChain framework has surpassed 100,000 GitHub stars, making it one of the most popular AI agent development tools available today.",
+    "expected_level": "public",
+    "expected_route": "cloud"
+  },
+  {
+    "id": "pub-005",
+    "text": "A new study in Nature demonstrates that transformer-based models can predict protein folding structures with 95% accuracy, surpassing previous AlphaFold benchmarks.",
+    "expected_level": "public",
+    "expected_route": "cloud"
+  },
+  {
+    "id": "pii-001",
+    "text": "Customer support ticket #4821: User Jane Smith (jane.smith@acmecorp.com) reports that her account was locked after three failed login attempts. Please reset her credentials.",
+    "expected_level": "restricted",
+    "expected_route": "local"
+  },
+  {
+    "id": "pii-002",
+    "text": "Employee onboarding record: John Doe, SSN 482-39-1057, start date March 15, 2026. Department: Engineering. Manager: Sarah Chen.",
+    "expected_level": "restricted",
+    "expected_route": "local"
+  },
+  {
+    "id": "pii-003",
+    "text": "Payment processing log: Order #99201 charged to card 4532-8921-0044-1678 for $249.99. Billing address: 742 Evergreen Terrace, Springfield.",
+    "expected_level": "restricted",
+    "expected_route": "local"
+  },
+  {
+    "id": "pii-004",
+    "text": "HR database export: Maria Garcia, employee ID 5528, personal email maria.garcia.personal@gmail.com, phone 555-867-5309, emergency contact Carlos Garcia.",
+    "expected_level": "restricted",
+    "expected_route": "local"
+  },
+  {
+    "id": "pii-005",
+    "text": "Insurance claim form: Patient Robert Williams, DOB 03/15/1985, SSN 291-55-8734, diagnosed with Type 2 diabetes. Prescribed metformin 500mg twice daily.",
+    "expected_level": "restricted",
+    "expected_route": "local"
+  },
+  {
+    "id": "prop-001",
+    "text": "CONFIDENTIAL — Q3 2026 Revenue Forecast: Projected revenue of $14.2B for the data center segment, representing 35% YoY growth. GPU supply constraints may limit upside.",
+    "expected_level": "confidential",
+    "expected_route": "local"
+  },
+  {
+    "id": "prop-002",
+    "text": "INTERNAL ONLY — Architecture review notes: The new NeMo microservice introduces a proprietary attention mechanism that reduces inference latency by 45% compared to standard MHA.",
+    "expected_level": "confidential",
+    "expected_route": "local"
+  },
+  {
+    "id": "prop-003",
+    "text": "Trade secret: Our novel training data curation pipeline uses a three-stage filtering process that is proprietary to our organization and protected under NDA agreements.",
+    "expected_level": "confidential",
+    "expected_route": "local"
+  },
+  {
+    "id": "prop-004",
+    "text": "CONFIDENTIAL — Partnership agreement with CloudCo Inc. grants exclusive access to their inference infrastructure for 18 months. Terms are proprietary and under NDA.",
+    "expected_level": "confidential",
+    "expected_route": "local"
+  },
+  {
+    "id": "pub-006",
+    "text": "The Rust programming language continues to gain adoption in systems programming, with the Linux kernel now accepting Rust modules alongside traditional C code.",
+    "expected_level": "public",
+    "expected_route": "cloud"
+  },
+  {
+    "id": "mixed-001",
+    "text": "Meeting notes: Discussed the public blog post about our new API. Also reviewed the internal roadmap — proprietary details about the Q4 launch timeline were shared.",
+    "expected_level": "confidential",
+    "expected_route": "local"
+  }
+]

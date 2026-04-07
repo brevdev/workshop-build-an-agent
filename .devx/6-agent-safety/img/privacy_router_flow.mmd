@@ -1,0 +1,28 @@
+graph TD
+    Input["Incoming Text"]
+
+    PII{"PII Scan<br/>(SSN, email, CC)"}
+    PROP{"Proprietary Scan<br/>(confidential, NDA)"}
+
+    RESTRICTED["RESTRICTED<br/>PII detected"]
+    CONFIDENTIAL["CONFIDENTIAL<br/>Proprietary content"]
+    PUBLIC["PUBLIC<br/>No sensitive patterns"]
+
+    LOCAL["Route to Local<br/>Nemotron 3 Nano 4B"]
+    CLOUD["Route to Cloud<br/>Frontier Model"]
+
+    Input --> PII
+    PII -->|"Match"| RESTRICTED
+    PII -->|"No match"| PROP
+    PROP -->|"Match"| CONFIDENTIAL
+    PROP -->|"No match"| PUBLIC
+
+    RESTRICTED --> LOCAL
+    CONFIDENTIAL --> LOCAL
+    PUBLIC --> CLOUD
+
+    style RESTRICTED fill:#f44336,color:#fff
+    style CONFIDENTIAL fill:#ff9800,color:#000
+    style PUBLIC fill:#4caf50,color:#fff
+    style LOCAL fill:#2196f3,color:#fff
+    style CLOUD fill:#9c27b0,color:#fff

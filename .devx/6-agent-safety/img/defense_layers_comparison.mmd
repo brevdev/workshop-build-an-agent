@@ -1,0 +1,38 @@
+graph LR
+    subgraph "Defense Layers Across Modules"
+        direction TB
+
+        subgraph "Closest to User"
+            L1["Layer 1: HITL<br/>(Module 4)<br/>Human approval gates"]
+        end
+
+        subgraph "Application"
+            L2["Layer 2: Allowlists<br/>(Module 4)<br/>Regex + command check"]
+            L3["Layer 3: App Sandbox<br/>(Module 5)<br/>Framework-level restrictions"]
+        end
+
+        subgraph "Container"
+            L4["Layer 4: Docker<br/>(Module 5)<br/>Namespace + resource limits"]
+        end
+
+        subgraph "Kernel (NEW in M6)"
+            L5["Layer 5: Landlock<br/>(Module 6)<br/>Per-file, per-binary"]
+            L6["Layer 6: seccomp<br/>(Module 6)<br/>Syscall filtering"]
+            L7["Layer 7: Network Proxy<br/>(Module 6)<br/>Per-endpoint control"]
+        end
+
+        subgraph "Data (NEW in M6)"
+            L8["Layer 8: Privacy Router<br/>(Module 6)<br/>Sensitivity classification"]
+        end
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7 --> L8
+
+    style L1 fill:#ff9800,color:#000
+    style L2 fill:#ff9800,color:#000
+    style L3 fill:#2196f3,color:#fff
+    style L4 fill:#2196f3,color:#fff
+    style L5 fill:#4caf50,color:#fff
+    style L6 fill:#4caf50,color:#fff
+    style L7 fill:#4caf50,color:#fff
+    style L8 fill:#4caf50,color:#fff

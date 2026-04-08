@@ -20,48 +20,9 @@ This simplicity is exactly what makes safety critical. There's no explicit code 
 
 <!-- fold:break -->
 
-## OpenClaw Architecture
-
-Under the hood, OpenClaw has four core components:
-
-### Heartbeat Daemon
-
-The agent runs on a configurable heartbeat cycle. Every N minutes (default: 5), the daemon wakes the agent, feeds it new messages and context, and lets it act. Between heartbeats, the agent sleeps. This is how OpenClaw agents run 24/7 without burning compute continuously.
-
-### Markdown Memory
-
-OpenClaw agents maintain state in plain markdown files:
-
-- **MEMORY.md** — Long-term facts, preferences, and context the agent accumulates
-- **diary/** — Timestamped entries the agent writes after each heartbeat cycle
-- **SOUL.md** — The agent's identity, goals, and behavioral rules (you write this; the agent reads it)
-
-This memory persists across restarts. Over days and weeks, the agent builds a rich context from its own experience — which is why drift is a real concern.
-
-### Messaging Integrations
-
-OpenClaw connects to external channels for input and output:
-
-- Slack, Telegram, Discord, email
-- RSS feeds and webhooks
-- Local CLI for testing
-
-Messages arrive asynchronously and queue until the next heartbeat.
-
-### SOUL.md Configuration
-
-The SOUL file is the single source of truth for agent behavior. It defines:
-
-- **Identity** — Who the agent is and how it communicates
-- **Goals** — What the agent should accomplish
-- **Rules** — Hard constraints on behavior (e.g., "never share user data")
-- **Tools** — Which integrations and capabilities are enabled
-
-<!-- fold:break -->
-
 ## Quickstart: Get Your Agent Running
 
-Follow these steps to install OpenClaw and launch a research assistant agent.
+Follow these steps to install OpenClaw and launch a personal assistant agent.
 
 ### Step 1: Install OpenClaw and Run the Setup Wizard
 
@@ -95,67 +56,55 @@ The install script automatically starts the setup wizard. If you need to re-run 
 
 The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates the agent workspace at `~/.openclaw/workspace/`.
 
-After the wizard completes, **approve the CLI device pairing** so the agent can receive messages. OpenClaw requires each CLI "device" to be explicitly approved before it can talk to the gateway:
+<!-- fold:break -->
+
+## Step 3: Review OpenClaw Workspace
+
+Under the hood, OpenClaw operates in the workspace using the following components. Feel free to click on each and explore the contents. 
+
+> Refer back to them as your agent runs and self-evolves. 
+
+### Core Agent Identity
+
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/SOUL.md');"><i class="fa-brands fa-python"></i> SOUL.md</button> — Defines the agent's personality, values, tone, limits, tools, and behavior. 
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/IDENTITY.md');"><i class="fa-brands fa-python"></i> IDENTITY.md</button> — A lightweight, public-facing metadata card used for routing messages, tasks, and requests. 
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/USER.md');"><i class="fa-brands fa-python"></i> USER.md</button> — This is what the agent knows about you, the human operator.
+
+<!-- fold:break -->
+
+### Operational Logic
+
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/AGENTS.md');"><i class="fa-brands fa-python"></i> AGENTS.md</button> — Operating manual that dictates procedures: what to do on wake-up, how to handle specific workflows, and how to manage its memory.
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/TOOLS.md');"><i class="fa-brands fa-python"></i> TOOLS.md</button> — A guide for the agent on how to use its capabilities, including tools and usage notes
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/HEARTBEAT.md');"><i class="fa-brands fa-python"></i> HEARTBEAT.md</button> — Controls the agent's proactive behavior for recurring tasks without human prompting. 
+
+<!-- fold:break -->
+
+### Memory and State
+
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/MEMORY.md');"><i class="fa-brands fa-python"></i> MEMORY.md</button> — Long-term facts, preferences, and context the agent accumulates dynamically over time
+- <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/BOOTSTRAP.md');"><i class="fa-brands fa-python"></i> BOOTSTRAP.md</button> — A one-time setup script for initial creation of the identity and directory structure.
+- ``state`` directory — Stores persistent data that isn't plain text - authentication profiles, session history, etc
+
+<!-- fold:break -->
+
+### Step 5: Cleanup Tasks
+
+There are a few changes we should first make for this agent to run with best results. 
+
+Let's add our new installation to the PATH variable and expand the model context window for best results. 
 
 ```bash
-openclaw devices approve --latest
+export PATH="$HOME/.npm-global/bin:$PATH" && \
+sed -i 's/"contextWindow": 16000/"contextWindow": 131072/' ~/.openclaw/openclaw.json
 ```
 
-> If you see "pairing required" errors later (e.g., after restarting the gateway), re-run `openclaw devices approve --latest` to approve the latest pending device.
-
-<!-- fold:break -->
-
-### Step 3: Create Your SOUL.md
-
-The wizard created a default workspace. Now give your agent its identity by editing `~/.openclaw/workspace/SOUL.md`:
-
-```markdown
-# Research Assistant
-
-## Identity
-You are a research assistant that monitors technical feeds, summarizes papers, and creates daily briefings.
-
-## Goals
-- Monitor RSS feeds for new papers and articles on AI safety and agent architectures
-- Summarize key findings in clear, concise language
-- Maintain a running log of research themes in MEMORY.md
-- Create daily briefing documents in /workspace/
-
-## Rules
-- Never share user data or credentials
-- Never execute commands outside your workspace directory
-- Never modify your own SOUL.md
-- Always cite sources when summarizing research
-- When uncertain, say so rather than fabricating information
-
-## Tools
-- rss: Monitor RSS feeds
-- file: Read and write files in /workspace/
-- search: Web search for follow-up research
-```
-
-<!-- fold:break -->
-
-### Step 4: Configure the Heartbeat
-
-Create a `HEARTBEAT.md` file at `~/.openclaw/workspace/HEARTBEAT.md`. The heartbeat file uses **plain English** — the gateway reads it as natural language instructions for what to do on each cycle:
-
-```markdown
-# Heartbeat
-
-Every 5 minutes, check RSS feeds for new papers on AI safety and agent architectures.
-Summarize any new findings and append them to MEMORY.md.
-Create a daily briefing document in /workspace/ at the end of each day.
-```
-
-By default, the heartbeat runs every 30 minutes. You can adjust the interval in `~/.openclaw/openclaw.json`.
-
-### Step 5: Start the Gateway
+### Step 4: Start the Gateway
 
 In this workshop environment, systemd user services aren't available, so the gateway won't auto-start as a daemon. Start it manually in a terminal:
 
 ```bash
-export PATH="$HOME/.npm-global/bin:$PATH" && openclaw gateway run
+openclaw gateway run
 ```
 
 Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and verify it's running:
@@ -168,7 +117,13 @@ openclaw gateway status
 
 <!-- fold:break -->
 
-### Step 6: Test With a Message
+### Step 5: Test With a Message
+
+OpenClaw requires each CLI "device" to be explicitly approved before it can talk to the gateway:
+
+```bash
+openclaw devices approve --latest
+```
 
 With the gateway running in a separate terminal, open an interactive chat session:
 
@@ -196,51 +151,15 @@ You can also use the <button onclick="launch('NemoClaw Client');"><i class="fa-s
 
 With the agent running, open the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button> or continue using the CLI. Take a moment to observe how the agent operates:
 
-1. **Check memory** — Look at the `MEMORY.md` file in your workspace. After the first heartbeat, the agent will have written its initial context.
+1. **Send a few messages** — Chat with your agent and learn more about each other. Ask the agent to summarize a topic or check its feeds. Watch how it incorporates information into memory over successive heartbeats.
 
-2. **Check the diary** — Look in the `diary/` directory. Each heartbeat cycle produces a timestamped entry describing what the agent did.
+2. **Check self-evolution** — After learning more about each other, take a look at the <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/IDENTITY.md');"><i class="fa-brands fa-python"></i> IDENTITY.md</button> and <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/USER.md');"><i class="fa-brands fa-python"></i> USER.md</button> files in your workspace. How have they changed? 
 
-3. **Send a few messages** — Ask the agent to summarize a topic or check its feeds. Watch how it incorporates information into memory over successive heartbeats.
+3. **Check memory** — Look at the <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/MEMORY.md');"><i class="fa-brands fa-python"></i> MEMORY.md</button> file in your workspace. After the first heartbeat (30m by default), the agent will have written its initial context.
 
 4. **Watch for drift** — After 3-4 heartbeat cycles, compare the current MEMORY.md to the initial version. The agent's context is already evolving.
 
 > The agent works. It responds to messages, writes to memory, and operates autonomously on its heartbeat cycle. But it has no guardrails beyond the soft rules in SOUL.md. A prompt injection in an RSS feed, a PII-laden email, or a malicious message could all compromise it.
-
-<!-- fold:break -->
-
-<details>
-<summary><strong>Troubleshooting</strong></summary>
-
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| `openclaw: command not found` | Not installed or not in PATH | Re-run the install script: `curl -fsSL https://openclaw.ai/install.sh \| bash` |
-| `Node.js version error` | Node.js too old | Install Node.js 22.14+ (Node 24 recommended) |
-| `Gateway not starting` | Port conflict or config issue | Run `openclaw doctor` for diagnostics |
-| `Model error: 401` | API key not set or invalid | Re-run `openclaw onboard` to reconfigure your API key |
-| `No messages received` | No integrations configured | Use `openclaw tui` or `openclaw agent --agent main -m "message"` for local testing |
-
-</details>
-
-<details>
-<summary><strong>Can't install OpenClaw? Use the mock agent instead.</strong></summary>
-
-If you're unable to install OpenClaw in your environment (e.g., Node.js not available, network restrictions), the exercise code includes a **mock agent** that simulates the same interface. The mock agent is deliberately leaky — it responds to some adversarial prompts in unsafe ways so that the safety evaluation exercises can detect and report violations.
-
-The mock agent is loaded automatically when OpenClaw is not available:
-
-```python
-from openclaw_wrapper import create_openclaw_agent_fn
-
-agent_fn = create_openclaw_agent_fn()
-# If OpenClaw is installed and running, connects to the live agent
-# Otherwise, falls back to the mock agent
-
-response = agent_fn("What can you help me with?")
-```
-
-All exercises work identically with both the live agent and the mock. The mock simply makes the safety gaps more visible.
-
-</details>
 
 <!-- fold:break -->
 

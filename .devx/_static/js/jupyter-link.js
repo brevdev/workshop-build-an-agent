@@ -19,6 +19,12 @@ async function openOrCreateFileInJupyterLab(path, factory = null, initialContent
         return;
     }
 
+    // Resolve tilde paths by creating a symlink in the corresponding code/<module>/ directory
+    if (path.startsWith('~/')) {
+        path = await resolveTildePath(app, path);
+        if (!path) return;
+    }
+
     const contentsManager = app.serviceManager.contents;
 
     const fileExists = await checkFileExists(contentsManager, path);
@@ -304,4 +310,98 @@ function launch(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learni
     }
 
     app.commands.execute(command);
+}
+
+
+// --- Tilde path resolution for files outside the JupyterLab server root ---
+
+/**
+ * Identifies the current module by fetching the .devx-module marker file.
+ * Each module directory contains a .devx-module file with the module name
+ * (e.g., "6-agent-safety"). Since the local HTTP server's root is the module
+ * directory, this file is directly fetchable.
+ * Returns "code/<module>" or empty string if not found.
+ */
+async function getModuleDir() {
+    try {
+        const resp = await fetch('.devx-module');
+        if (resp.ok) {
+            const module = (await resp.text()).trim();
+            if (module) return 'code/' + module;
+        }
+    } catch {}
+    return '';
+}
+
+/**
+ * Resolves a tilde path (e.g., "~/.openclaw/workspace/SOUL.md") to a project-relative
+ * path by creating a symlink in the corresponding code/<module>/ directory.
+ * The symlink is created via a hidden terminal session if it doesn't already exist.
+ */
+async function resolveTildePath(app, tildePath) {
+    const withoutTilde = tildePath.slice(2); // ".openclaw/workspace/SOUL.md"
+    const parts = withoutTilde.split('/');
+    const fileName = parts.pop(); // "SOUL.md"
+    const dirPath = parts.join('/'); // ".openclaw/workspace"
+    const symlinkName = parts[parts.length - 1] || dirPath.replace(/[\/\.]/g, '-'); // "workspace"
+
+    const moduleDir = await getModuleDir(); // "code/6-agent-safety"
+    const symlinkBase = moduleDir ? moduleDir + '/' + symlinkName : symlinkName;
+    const resolvedPath = symlinkBase + '/' + fileName; // "code/6-agent-safety/workspace/SOUL.md"
+
+    // Check if the file is already accessible through an existing symlink
+    const contentsManager = app.serviceManager.contents;
+    try {
+        await contentsManager.get(resolvedPath);
+        console.log(`Tilde path resolved via existing symlink: ${resolvedPath}`);
+        return resolvedPath;
+    } catch {
+        // Symlink doesn't exist yet — create it
+    }
+
+    console.log(`Creating symlink: /project/${symlinkBase} → ~/${dirPath}`);
+    try {
+        await runShellCommand(app, `ln -sfn ~/${dirPath} /project/${symlinkBase}`);
+    } catch (err) {
+        console.error('Failed to create symlink for tilde path:', err);
+        return null;
+    }
+
+    return resolvedPath;
+}
+
+/**
+ * Executes a shell command via a hidden JupyterLab terminal session.
+ * Uses app.serviceManager.terminals (from the parent JupyterLab frame)
+ * which handles authentication automatically — avoids 403 errors from
+ * cross-frame fetch calls.
+ */
+async function runShellCommand(app, command) {
+    const session = await app.serviceManager.terminals.startNew();
+
+    return new Promise((resolve, reject) => {
+        let done = false;
+
+        const onMessage = (_, msg) => {
+            if (msg.type === 'stdout' && msg.content.some(s => s.includes('__SYMLINK_DONE__'))) {
+                done = true;
+                session.messageReceived.disconnect(onMessage);
+                session.shutdown();
+                resolve();
+            }
+        };
+
+        session.messageReceived.connect(onMessage);
+        session.send({ type: 'stdin', content: [`${command} && echo __SYMLINK_DONE__\r`] });
+
+        // Timeout safety net
+        setTimeout(() => {
+            if (!done) {
+                done = true;
+                session.messageReceived.disconnect(onMessage);
+                session.shutdown();
+                resolve(); // Resolve anyway — symlink may still have been created
+            }
+        }, 10000);
+    });
 }

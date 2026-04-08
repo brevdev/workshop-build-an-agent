@@ -2,7 +2,7 @@
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Before diving into agent safety, let's make sure you have the API key you need for this module. The safety evaluation exercises use NVIDIA models as LLM-as-judge evaluators, so you'll need your NVIDIA API Key ready.
+Before diving into agent safety, let's make sure you have the API key you need for this module. The agents we work with in this module run on NVIDIA's models, so you'll need your NVIDIA API Key ready.
 
 If you've already set this up in an earlier module, you're good to go — skip straight to the next page.
 
@@ -31,19 +31,5 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 </details>
 
 </details>
-
-<!-- fold:break -->
-
-## What You Won't Need
-
-Unlike Module 5, this module does **not** require Tavily or LangSmith keys. All exercises run against local policy files, local test data, and the NVIDIA API for LLM-as-judge evaluation.
-
-| Key | Required? | Used For |
-|-----|-----------|----------|
-| NVIDIA API Key | Yes | LLM-as-judge safety evaluation (Exercises 4 and 5) |
-| Tavily API Key | No | Not used in this module |
-| LangSmith API Key | No | Not used in this module |
-
-## Ready to Go!
 
 With your NVIDIA API key configured, you're all set to start exploring agent safety. Head over to [The Autonomous Agent Problem](intro_agent_safety) to understand why the guardrails from previous modules aren't enough.

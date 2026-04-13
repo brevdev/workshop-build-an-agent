@@ -172,9 +172,8 @@ In the rest of this module, you'll build the NemoClaw stack layer by layer:
 | Page | What You'll Do | Exercise |
 |------|---------------|----------|
 | [Set Up Your OpenClaw Agent](setup_openclaw) | Get an autonomous agent running | Setup |
-| [Enforced Constraints](enforced_constraints) | Write and validate OpenShell policies | Exercise 1 |
-| [Data Routing](data_routing) | Build a PII classifier and sensitivity router | Exercise 2 |
-| [NemoClaw: The Complete Stack](nemoclaw_stack) | Red-team the agent and run LLM-as-judge evals | Exercises 3 and 4 |
-| [Safety Evaluation](safety_evaluation) | Wire everything into an end-to-end safety suite | Exercise 5 |
+| [From OpenClaw to NemoClaw](why_nemoclaw) | Understand NemoClaw's security layers and policy format | Concepts |
+| [Set Up NemoClaw](setup_nemoclaw) | Install and configure the NemoClaw stack | Setup |
+| [Working with NemoClaw](using_nemoclaw) | Policy exercises + safety evaluation suite | Exercises 1-5 |
 
 > Let's set up your agent. Head to [Set Up Your OpenClaw Agent](setup_openclaw) to get started.

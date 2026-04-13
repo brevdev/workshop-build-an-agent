@@ -2,57 +2,69 @@
 # Hardened OpenShell Policy — Research Assistant Agent
 # ============================================================================
 # This policy follows the principle of least privilege:
-#   - Non-root process identity
-#   - Restricted filesystem access (workspace only)
+#   - Non-root process identity (run_as_user: sandbox)
+#   - Restricted filesystem (read-write only /sandbox and /tmp)
 #   - Default-deny networking with explicit allowlist
 #   - Per-binary, per-endpoint, per-method controls
+#
+# Format follows the OpenShell Policy Schema Reference:
+#   https://docs.nvidia.com/openshell/latest/reference/policy-schema.html
 # ============================================================================
 
 version: 1
 
-process:
-  run_as_user: "agent"
-  run_as_group: "agent"
-
 filesystem_policy:
+  include_workdir: true
   read_only:
-    - /usr/lib
-    - /usr/bin
-    - /opt/agent/skills
-    - /opt/agent/config
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /app
+    - /etc
   read_write:
-    - /workspace
-    - /tmp/agent
+    - /sandbox
+    - /tmp
+    - /dev/null
 
-default_network_action: "deny"
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox
 
 network_policies:
-  - name: "llm_api"
-    description: "Allow inference calls to NVIDIA NIM"
+  llm_api:
+    name: llm-api-inference
     endpoints:
-      - "integrate.api.nvidia.com:443"
+      - host: integrate.api.nvidia.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        access: full
     binaries:
       - { path: /usr/bin/python3 }
-    protocol: "rest"
-    methods: ["POST"]
 
-  - name: "rss_feeds"
-    description: "Allow reading RSS feeds for research monitoring"
+  rss_feeds:
+    name: rss-feeds-readonly
     endpoints:
-      - "*.rss.com:443"
-      - "feeds.*.org:443"
-      - "arxiv.org:443"
+      - host: arxiv.org
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        access: read-only
     binaries:
+      - { path: /usr/bin/curl }
       - { path: /usr/bin/python3 }
-    protocol: "rest"
-    methods: ["GET"]
 
-  - name: "local_nemotron"
-    description: "Allow routing to local Nemotron for sensitive queries"
+  local_nemotron:
+    name: local-nemotron-inference
     endpoints:
-      - "localhost:8080"
-      - "127.0.0.1:8080"
+      - host: localhost
+        port: 8080
+        protocol: rest
+        enforcement: enforce
+        access: full
     binaries:
       - { path: /usr/bin/python3 }
-    protocol: "rest"
-    methods: ["POST"]

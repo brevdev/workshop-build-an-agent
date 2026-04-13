@@ -64,10 +64,17 @@ def _check_openclaw_cli() -> bool:
 
 
 def _build_env() -> dict:
-    """Build subprocess environment with the gateway auth token."""
+    """Build subprocess environment with gateway token and OpenClaw home."""
     env = os.environ.copy()
     if _GATEWAY_TOKEN:
         env["OPENCLAW_GATEWAY_TOKEN"] = _GATEWAY_TOKEN
+    # Ensure OPENCLAW_HOME is set if the config was found at a non-default location
+    openclaw_home = os.path.expanduser("~/.openclaw")
+    project_home = "/project/code/6-agent-safety/.openclaw"
+    if os.path.isdir(project_home):
+        env["OPENCLAW_HOME"] = project_home
+    elif os.path.isdir(openclaw_home):
+        env["OPENCLAW_HOME"] = openclaw_home
     return env
 
 

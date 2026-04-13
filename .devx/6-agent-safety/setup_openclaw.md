@@ -165,8 +165,8 @@ With the agent running, open the <button onclick="launch('NemoClaw Client');"><i
 
 ## What's Next
 
-Your agent works. But right now, the only thing standing between it and unsafe behavior is a markdown file with soft rules.
+Your agent works. But right now, the only thing standing between it and unsafe behavior is a markdown file with soft rules. It has full system access, open network, and credentials in the environment.
 
-In the next section, you'll learn how to enforce constraints at the **kernel level** — restrictions the agent cannot override, even with arbitrary code execution.
+In the next section, you'll see exactly how NemoClaw solves each of these gaps with kernel-level enforcement, deny-by-default networking, credential isolation, and privacy routing.
 
-> Head to [Enforced Constraints with OpenShell](enforced_constraints) to lock it down.
+> Head to [From OpenClaw to NemoClaw](why_nemoclaw) to examine the technical layers that make autonomous agents production-safe.

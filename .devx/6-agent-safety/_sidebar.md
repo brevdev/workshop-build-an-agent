@@ -1,6 +1,6 @@
 * [Setting up Secrets](secrets.md)
 * [The Autonomous Agent Problem](intro_agent_safety.md)
 * [Set Up Your OpenClaw Agent](setup_openclaw.md)
-* [From OpenClaw to NemoClaw](why_nemoclaw.md)
+* [Why NemoClaw: Principles and Layers](why_nemoclaw.md)
 * [Set Up NemoClaw](setup_nemoclaw.md)
 * [Working with NemoClaw](using_nemoclaw.md)

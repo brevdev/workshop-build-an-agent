@@ -2,7 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Before you can harden an agent, you need an agent to harden. In this section, you'll set up **OpenClaw** — a config-first autonomous agent framework — and get a personal assistant running that you'll spend the rest of the module hardening.
+Before you can harden an agent, you need an agent to harden. In this section, you'll set up **OpenClaw** — a popular, config-first autonomous agent framework — and get a personal assistant running that you'll spend the rest of the module hardening.
 
 <!-- fold:break -->
 
@@ -22,23 +22,21 @@ This simplicity is exactly what makes safety critical. There's no explicit code 
 
 ## Quickstart: Get Your Agent Running
 
-Follow these steps to install OpenClaw and launch a personal assistant agent.
+Follow these steps to install OpenClaw and launch a personal assistant agent. Full docs are available [here](https://docs.openclaw.ai/install).
 
-### Step 1: Install OpenClaw and Run the Setup Wizard
+### Step 1: Install OpenClaw
 
-OpenClaw is a Node.js application. Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and install it with the official install script — this will also launch the interactive setup wizard:
+Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and install it with the official install script — this will also launch the interactive setup wizard:
 
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
-> **Requires Node.js 22.14+** (Node 24 recommended). The script installs the `openclaw` CLI via npm. See the [official install docs](https://docs.openclaw.ai/install) for alternative methods.
-
 <!-- fold:break -->
 
 ### Step 2: Complete the Setup Wizard
 
-The install script automatically starts the setup wizard. If you need to re-run it later: `openclaw onboard`. Walk through the prompts as follows:
+The install script automatically starts the setup wizard. Walk through the prompts as follows:
 
 1. **Security warning** — Read the notice and confirm: **Yes**
 2. **Setup mode** — Select **QuickStart** (uses default gateway settings: port 18789, loopback bind, token auth)
@@ -55,6 +53,8 @@ The install script automatically starts the setup wizard. If you need to re-run 
 7. **Hooks** — Select **Skip for now**
 
 The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates the agent workspace at `~/.openclaw/workspace/`.
+
+> If you need to re-run the setup later, use `openclaw onboard`. 
 
 <!-- fold:break -->
 
@@ -90,9 +90,7 @@ Under the hood, OpenClaw operates in the workspace using the following component
 
 ### Step 5: Cleanup Tasks
 
-There are a few changes we should first make for this agent to run with best results. 
-
-Let's add our new installation to the PATH variable and expand the model context window for best results. 
+There are a few changes we should first make for this agent to run with best results. Let's add our new installation to the PATH variable and expand the model context window for best results. 
 
 ```bash
 export PATH="$HOME/.npm-global/bin:$PATH" && \
@@ -137,6 +135,8 @@ This opens a terminal UI where you can chat with your agent directly. Try asking
 
 The agent should respond based on its SOUL configuration, mentioning it's role as an assistant and it's ability to learn and self-evolve. It should also begin writing to MEMORY.md.
 
+<!-- fold:break -->
+
 For a single non-interactive message (useful for scripting, testing, etc.), you may also use:
 
 ```bash
@@ -167,6 +167,6 @@ With the agent running, open the <button onclick="launch('NemoClaw Client');"><i
 
 Your agent works. But right now, the only thing standing between it and unsafe behavior is a markdown file with soft rules. It has full system access, open network, and credentials in the environment.
 
-In the next section, you'll see exactly how NemoClaw solves each of these gaps with kernel-level enforcement, deny-by-default networking, credential isolation, and privacy routing.
+In the next section, you'll see exactly how the NemoClaw reference stack attempts to bridge these gaps with kernel-level enforcement, deny-by-default networking, credential isolation, and privacy routing.
 
-> Head to [From OpenClaw to NemoClaw](why_nemoclaw) to examine the technical layers that help make autonomous agents safer for production.
+> Head to [Why NemoClaw: Principles and Layers](why_nemoclaw) to examine the security principles and technical layers that help make autonomous agents safer for production.

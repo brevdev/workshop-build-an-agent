@@ -2,9 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="NemoClaw Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Now for the hands-on part -- let's get NemoClaw running and see those security layers in action. You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router classifies and routes data, and how Nemotron handles sensitive queries locally. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
-
-NemoClaw wraps your existing OpenClaw installation inside an OpenShell sandbox with default-deny networking, filesystem restrictions, and inference routing -- all configured through a single onboarding wizard.
+You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router classifies and routes data, and how Nemotron handles sensitive queries locally. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
 
 Here's what your NemoClaw deployment will look like when we're done. The agent lives inside the sandbox; all its traffic passes through the proxy; and credentials are designed to stay outside the sandbox.
 
@@ -51,25 +49,29 @@ curl -fsSL https://www.nvidia.com/nemoclaw.sh | bash
 
 This takes a minute or two depending on your connection.
 
+<!-- fold:break -->
+
 The installer will:
 - Install the `nemoclaw` CLI via npm
 - Deploy OpenShell if it is not already installed
 - Deploy Node.js if absent (you already have it from the OpenClaw setup)
 - Launch the onboarding wizard automatically
 
-The onboarding wizard will start, but it will hang at **"Still waiting for gateway health..."** inside AI Workbench. This is expected -- press `Ctrl+C` to cancel, then continue with the steps below.
+The onboarding wizard will start, but it will hang at **"Still waiting for gateway health..."** inside this workshop environment. This is expected -- press `Ctrl+C` to cancel, then continue with the steps below.
 
 <!-- fold:break -->
 
 ## Step 2: Fix the Gateway Endpoint
 
-The onboarding wizard hangs because AI Workbench runs your terminal inside a container. By default, the OpenShell gateway advertises itself at `127.0.0.1:8080`, but inside the container `127.0.0.1` is the container's own loopback -- not the Docker host where the gateway port is actually mapped. We need to recreate the gateway with the correct host address.
+The onboarding wizard hangs because the workshop runs your terminal inside a containerized environment. By default, the OpenShell gateway advertises itself at `127.0.0.1:8080`, but inside the container `127.0.0.1` is the container's own loopback -- not the Docker host where the gateway port is actually mapped. We need to recreate the gateway with the correct host address.
 
 First, destroy the gateway that the installer created:
 
 ```bash
 openshell gateway destroy -g nemoclaw
 ```
+
+<!-- fold:break -->
 
 Then start a new gateway with `--gateway-host` set to the Docker host IP (the container's default route):
 
@@ -107,8 +109,6 @@ Walk through each prompt as follows:
 
 The wizard will build the sandbox image (~2.4 GB compressed), upload it to the gateway, configure DNS, and launch OpenClaw inside the sandbox. This takes a few minutes on first run.
 
-<!-- fold:break -->
-
 <details>
 <summary><strong>What does the onboarding wizard do behind the scenes?</strong></summary>
 
@@ -138,6 +138,8 @@ nemoclaw my-assistant connect
 
 Your shell prompt will change to indicate you are now inside the sandboxed environment. All security layers -- Landlock filesystem restrictions, seccomp syscall filtering, and the network proxy -- are active.
 
+<!-- fold:break -->
+
 From inside the sandbox, verify the OpenClaw gateway is running:
 
 ```bash
@@ -158,6 +160,24 @@ To return to the host shell, type `exit` or press `Ctrl+D`.
 
 Let's make sure everything came up correctly. You will check status from both the host and the monitoring TUI.
 
+<details>
+<summary><strong>Still facing issues? Click me for troubleshooting!</strong></summary>
+
+If something didn't work, don't worry -- here are the most common issues and their fixes:
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `nemoclaw: command not found` | Shell PATH not updated after install | Run `source ~/.bashrc` or `export PATH="$HOME/.npm-global/bin:$PATH"` |
+| Docker permission denied | User not in the docker group | `sudo usermod -aG docker $USER` then log out and back in |
+| Sandbox creation fails (exit 137 / OOM) | Insufficient RAM for image push (~2.4 GB compressed) | Close other containers and add swap: `sudo dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
+| Cannot connect to sandbox | Sandbox not running or gateway stopped | Check `nemoclaw my-assistant status`, then `openshell sandbox list`. Restart gateway: `openshell gateway start --name nemoclaw` |
+| `openshell: command not found` inside sandbox | OpenShell not in PATH inside the sandbox environment | Check sandbox logs: `nemoclaw my-assistant logs --follow` |
+| Port 18789 already in use | Another process holds the default gateway port | Find and stop it: `sudo lsof -i :18789` then `kill <PID>` |
+| Inference requests time out | Endpoint unreachable or blocked by network policy | Verify provider with `nemoclaw my-assistant status`; check policy rules in `openshell term` |
+| Node.js version too old | NemoClaw requires Node.js 22.16+ | Check with `node --version`; upgrade with `nvm install 22 && nvm use 22` |
+
+</details>
+
 ### From the Host Terminal
 
 Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> Open Terminal</button> and run:
@@ -174,6 +194,8 @@ nemoclaw my-assistant status
 
 You should see the sandbox state as **running**, along with the active inference provider and endpoint.
 
+<!-- fold:break -->
+
 Your sandbox is running! The agent is now contained behind all four enforcement layers.
 
 To list the underlying OpenShell sandbox details:
@@ -181,6 +203,8 @@ To list the underlying OpenShell sandbox details:
 ```bash
 openshell sandbox list
 ```
+
+<!-- fold:break -->
 
 ### Monitoring TUI
 
@@ -194,6 +218,8 @@ The TUI displays:
 - Active network connections from the sandbox
 - Blocked egress requests awaiting operator approval
 - Inference routing status
+
+<!-- fold:break -->
 
 ### Quick Network Policy Test
 
@@ -248,42 +274,6 @@ You can also continue using the CLI for direct interaction:
 nemoclaw my-assistant connect
 openclaw tui
 ```
-
-<!-- fold:break -->
-
-## Troubleshooting
-
-If something didn't work, don't worry -- here are the most common issues and their fixes:
-
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| `nemoclaw: command not found` | Shell PATH not updated after install | Run `source ~/.bashrc` or `export PATH="$HOME/.npm-global/bin:$PATH"` |
-| Docker permission denied | User not in the docker group | `sudo usermod -aG docker $USER` then log out and back in |
-| Sandbox creation fails (exit 137 / OOM) | Insufficient RAM for image push (~2.4 GB compressed) | Close other containers and add swap: `sudo dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
-| Cannot connect to sandbox | Sandbox not running or gateway stopped | Check `nemoclaw my-assistant status`, then `openshell sandbox list`. Restart gateway: `openshell gateway start --name nemoclaw` |
-| `openshell: command not found` inside sandbox | OpenShell not in PATH inside the sandbox environment | Check sandbox logs: `nemoclaw my-assistant logs --follow` |
-| Port 18789 already in use | Another process holds the default gateway port | Find and stop it: `sudo lsof -i :18789` then `kill <PID>` |
-| Inference requests time out | Endpoint unreachable or blocked by network policy | Verify provider with `nemoclaw my-assistant status`; check policy rules in `openshell term` |
-| Node.js version too old | NemoClaw requires Node.js 22.16+ | Check with `node --version`; upgrade with `nvm install 22 && nvm use 22` |
-
-<details>
-<summary><strong>Collecting diagnostics for bug reports</strong></summary>
-
-If you encounter an issue not listed above, collect a diagnostic bundle:
-
-```bash
-nemoclaw debug --sandbox my-assistant --output /tmp/nemoclaw-debug.tar.gz
-```
-
-Use the `--quick` flag to skip large log files:
-
-```bash
-nemoclaw debug --quick --sandbox my-assistant
-```
-
-Include the output when filing an issue.
-
-</details>
 
 <!-- fold:break -->
 

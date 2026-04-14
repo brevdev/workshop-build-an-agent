@@ -42,7 +42,7 @@ These exercises use two CLI tools:
 
 Open a terminal and connect to your sandbox. All Part A commands run from inside the sandbox unless noted otherwise.
 
-> Refer back to [From OpenClaw to NemoClaw](why_nemoclaw) for the YAML format and layer descriptions referenced throughout these exercises.
+> Refer back to [Why NemoClaw: Principles and Layers](why_nemoclaw) for the YAML format and layer descriptions referenced throughout these exercises.
 
 <!-- fold:break -->
 

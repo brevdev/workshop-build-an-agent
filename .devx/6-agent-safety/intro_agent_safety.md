@@ -4,15 +4,58 @@
 
 In Modules 1 through 5, you built increasingly powerful agents — from a report generator to a sandboxed deep agent that plans, codes, and executes autonomously. Each module added capability. This module adds a safety architecture that helps make autonomous operation more trustworthy.
 
-This module centers on **NVIDIA NemoClaw** — a reference stack for running autonomous agents more securely. You'll build each layer of the NemoClaw architecture hands-on: kernel-level enforcement with OpenShell, data sensitivity routing with the Privacy Router, and continuous safety evaluation with LLM-as-judge.
+This module centers on **NVIDIA NemoClaw** — a reference stack for running autonomous agents more securely. You'll build each layer of the NemoClaw architecture hands-on: network egress control, filesystem restrictions via Landlock LSM, process-level hardening with seccomp and dropped capabilities, and inference routing with the Privacy Router — four layers of deny-by-default security enforced by OpenShell.
 
 The question isn't whether your agent can do the work. It's whether your agent can do the work **safely when no one is watching**.
 
 <!-- fold:break -->
 
+## Why Agent Security Is Different
+
+Traditional application security assumes a clear trust boundary: the server trusts its own code, and external inputs are validated at the edge. Agents break this model in fundamental ways. Five properties make agent security a distinct discipline. Click on each to learn more. 
+
+<details>
+<summary><strong>1. Blurred trust boundaries</strong></summary>
+
+A web server has a clear inside and outside. An agent doesn't. It consumes untrusted content (user messages, tool outputs, RAG retrieval results, RSS feeds) and produces outputs that may themselves become inputs to other agents or tools. The agent is simultaneously client, server, and user -- and every boundary is a potential injection point.
+
+</details>
+
+<details>
+<summary><strong>2. The confused deputy</strong></summary>
+
+An agent acts on your behalf, wielding your credentials and authority. But it can be deceived. Think of a diplomat who carries your seal of office -- if an adversary slips a forged instruction into the diplomat's briefing materials, the diplomat may unknowingly execute the adversary's will using your authority. A prompt injection exploits exactly this dynamic.
+
+</details>
+
+<details>
+<summary><strong>3. Tool use as attack surface</strong></summary>
+
+Every tool an agent can invoke is a potential privilege escalation vector. A file-writing tool can overwrite configuration. A web-browsing tool can exfiltrate data. A code-execution tool can install malware. More tools means a larger attack surface -- and agents are designed to use many tools.
+
+</details>
+
+<details>
+<summary><strong>4. Persistent memory</strong></summary>
+
+Unlike a stateless API call, agents carry context across sessions. MEMORY.md, diary entries, and learned preferences accumulate over time. A subtle poisoning of memory in week one can influence the agent's behavior in week ten. Compromises can be long-lived and difficult to detect.
+
+</details>
+
+<details>
+<summary><strong>5. Amplification through reasoning</strong></summary>
+
+Agents don't just execute single commands -- they plan, reason, and chain multiple steps together. A small manipulation in an early reasoning step can compound through the chain into a large, unintended action. What starts as a benign-looking data fetch can escalate into an unauthorized deployment.
+
+</details>
+
+These five properties define the threat landscape that any agent security architecture must address. 
+
+<!-- fold:break -->
+
 ## The Story So Far
 
-Here's a quick recap of the capabilities and safety patterns you've built across the workshop:
+To see where we stand so far, here's a quick recap of the capabilities and safety patterns you've built across the workshop:
 
 | Module | What You Built | Key Safety Pattern |
 |--------|---------------|-------------------|
@@ -63,7 +106,7 @@ Application allowlists and container isolation are necessary but not sufficient 
 
 HITL works during business hours. But autonomous agents run overnight, over weekends, and across time zones.
 
-- **Approval fatigue** — Even during business hours, humans rubber-stamp after the 50th approval
+- **Approval fatigue** — Even during business hours, humans tend to rubber-stamp after the 50th approval
 - **Batch operations** — An agent processing 500 tickets can't wait for 500 approvals
 - **Latency** — Real-time agents (chat, monitoring) can't block on human response times
 
@@ -77,7 +120,7 @@ Always-on agents are not static. They are self-evolving.
 
 - **Memory accumulation** — OpenClaw agents write to MEMORY.md and diary entries. Over weeks, the agent's context shifts.
 - **SOUL.md modification** — Some agent frameworks allow the agent to update its own system prompt. Small edits compound.
-- **Stale allowlists** — The command allowlist you wrote in month one doesn't cover the tools the agent discovered in month three.
+- **Stale allowlists** — The command allowlist you wrote in month one doesn't cover the new tools the agent discovered in month three.
 
 Static rules applied to a dynamic agent create a widening gap between what the policy permits and what the agent actually does.
 
@@ -91,7 +134,7 @@ Docker isolates the *process* but doesn't distinguish the *data*. Inside the con
 - A proprietary internal memo gets sent to the same cloud API as a Wikipedia excerpt
 - There's no mechanism to route sensitive data to local inference and public data to cloud
 
-Container isolation answers "where can the agent run?" but not "what data should the agent see?"
+Container isolation answers "where can the agent run?" but not "what data should the agent actually see?"
 
 <!-- fold:break -->
 
@@ -189,7 +232,7 @@ In the rest of this module, you'll build the NemoClaw stack layer by layer:
 | Page | What You'll Do | Exercise |
 |------|---------------|----------|
 | [Set Up Your OpenClaw Agent](setup_openclaw) | Get an autonomous agent running | Setup |
-| [From OpenClaw to NemoClaw](why_nemoclaw) | Understand NemoClaw's security layers and policy format | Concepts |
+| [Why NemoClaw: Principles and Layers](why_nemoclaw) | Understand agent security principles and NemoClaw's enforcement layers | Concepts |
 | [Set Up NemoClaw](setup_nemoclaw) | Install and configure the NemoClaw stack | Setup |
 | [Working with NemoClaw](using_nemoclaw) | Policy exercises + safety evaluation suite | Exercises 1-5 |
 

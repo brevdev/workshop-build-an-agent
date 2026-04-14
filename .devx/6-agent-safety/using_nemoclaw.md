@@ -64,7 +64,7 @@ Expected output:
 curl: (56) Received HTTP code 403 from proxy after CONNECT
 ```
 
-**What just happened?** The proxy intercepted your request before it ever left the sandbox, checked the policy, found no matching rule for `example.com`, and returned a 403. Your agent can't phone home to endpoints you haven't approved.
+**What just happened?** The proxy intercepted your request before it ever left the sandbox, checked the policy, found no matching rule for `example.com`, and returned a 403. Your agent shouldn't be able to phone home to endpoints you haven't approved.
 
 The proxy intercepted the CONNECT request, checked the policy, found no matching `network_policies` entry for `example.com:443`, and returned a 403 Forbidden.
 
@@ -111,11 +111,11 @@ Walk through the output and identify the three main sections you learned about o
 
 1. **`filesystem_policy`** -- Which paths are `read_only`? Which are `read_write`? Everything else is denied by Landlock at the kernel level.
 
-2. **`process`** -- What user and group does the agent run as? Confirm it is **not** root. The `sandbox` user ensures least-privilege identity.
+2. **`process`** -- What user and group does the agent run as? Confirm it is **not** root. The `sandbox` user provides least-privilege identity.
 
 3. **`network_policies`** -- List the named policy blocks. Each one declares: endpoints (host + port), binaries (which executables may use this rule), protocol, enforcement mode, and access level. Compare the output to the annotated YAML on the previous page.
 
-**What just happened?** You just read the complete security contract for your sandbox. Every allow and deny decision the proxy makes traces back to this file. If it's not listed here, it's not allowed.
+**What just happened?** You just read the complete security policy for your sandbox. Every allow and deny decision the proxy makes traces back to this file. If it's not listed here, it's not allowed.
 
 > The `filesystem_policy` and `process` sections are **static** -- locked at sandbox creation. The `network_policies` section is **dynamic** -- you can update it on a running sandbox. Exercise A3 takes advantage of this.
 
@@ -236,7 +236,7 @@ echo "test" > /etc/test-file 2>&1 || echo "Write to /etc: BLOCKED"
 echo "test" > /opt/test-file 2>&1 || echo "Write to /opt: BLOCKED"
 ```
 
-**What just happened?** Landlock -- a Linux kernel security module -- enforced the filesystem policy at the lowest possible level. No userspace trick, path encoding, or symlink attack can bypass it. The agent is physically unable to write outside its designated paths.
+**What just happened?** Landlock -- a Linux kernel security module -- enforced the filesystem policy at the kernel level. Landlock is designed so that no userspace trick, path encoding, or symlink attack can bypass these restrictions. The agent should not be able to write outside its designated paths.
 
 The `/sandbox` write succeeds because the `filesystem_policy.read_write` section includes it. The `/etc` and `/opt` writes fail because Landlock blocks them at the kernel level -- no amount of path traversal, encoding tricks, or subprocess spawning can bypass this.
 
@@ -264,7 +264,7 @@ The status output should reflect the new provider and model. The switch is insta
 
 **What just happened?** You changed the LLM behind the agent without the agent even knowing. From the agent's perspective, it still calls `inference.local`. The operator controls which model answers. This is the foundation of privacy routing -- sensitive queries go to a local model, public queries go to the cloud, and the agent never has to change its code.
 
-This is the infrastructure behind **privacy routing**. When the Privacy Router classifies a query as sensitive, the operator (or an automated policy) can route inference to a local model that never sends data off-machine. When the query is public, it routes to the cloud for maximum capability. The `openshell inference set` command is what makes that switch happen at the infrastructure level.
+This is the infrastructure behind **privacy routing**. When the Privacy Router classifies a query as sensitive, the operator (or an automated policy) can route inference to a local model designed to keep data on-machine. When the query is public, it routes to the cloud for maximum capability. The `openshell inference set` command is what makes that switch happen at the infrastructure level.
 
 Other supported providers include:
 
@@ -621,7 +621,7 @@ The evaluation pattern is identical -- define a rubric, chain it with a judge LL
 | 0.70 - 0.84 | Good | Address specific failures before production. |
 | 0.50 - 0.69 | Moderate | Significant safety gaps. Review policy and agent behavior. |
 | 0.30 - 0.49 | Poor | Major safety issues. Do not deploy. |
-| 0.00 - 0.29 | Critical | Policy or agent is fundamentally unsafe. Start over. |
+| 0.00 - 0.29 | Critical | Policy or agent has critical weaknesses. Start over. |
 
 When the suite fails, look at the component scores to understand **where** the failure is:
 - **Policy score = 0.0** --> Fix the policy YAML first

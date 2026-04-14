@@ -2,7 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Before you can secure an agent, you need an agent to secure. In this section, you'll set up **OpenClaw** — a config-first autonomous agent framework — and get a personal assistant running that you'll spend the rest of the module hardening.
+Before you can harden an agent, you need an agent to harden. In this section, you'll set up **OpenClaw** — a config-first autonomous agent framework — and get a personal assistant running that you'll spend the rest of the module hardening.
 
 <!-- fold:break -->
 
@@ -169,4 +169,4 @@ Your agent works. But right now, the only thing standing between it and unsafe b
 
 In the next section, you'll see exactly how NemoClaw solves each of these gaps with kernel-level enforcement, deny-by-default networking, credential isolation, and privacy routing.
 
-> Head to [From OpenClaw to NemoClaw](why_nemoclaw) to examine the technical layers that make autonomous agents production-safe.
+> Head to [From OpenClaw to NemoClaw](why_nemoclaw) to examine the technical layers that help make autonomous agents safer for production.

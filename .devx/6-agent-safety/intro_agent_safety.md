@@ -2,9 +2,9 @@
 
 <img src="_static/robots/supervisor.png" alt="Agent Safety Robot" style="float:right;max-width:300px;margin:25px;" />
 
-In Modules 1 through 5, you built increasingly powerful agents — from a report generator to a sandboxed deep agent that plans, codes, and executes autonomously. Each module added capability. This module adds the safety architecture that makes autonomous operation trustworthy.
+In Modules 1 through 5, you built increasingly powerful agents — from a report generator to a sandboxed deep agent that plans, codes, and executes autonomously. Each module added capability. This module adds a safety architecture that helps make autonomous operation more trustworthy.
 
-This module centers on **NVIDIA NemoClaw** — a reference stack for running autonomous agents safely. You'll build each layer of the NemoClaw architecture hands-on: kernel-level enforcement with OpenShell, data sensitivity routing with the Privacy Router, and continuous safety evaluation with LLM-as-judge.
+This module centers on **NVIDIA NemoClaw** — a reference stack for running autonomous agents more securely. You'll build each layer of the NemoClaw architecture hands-on: kernel-level enforcement with OpenShell, data sensitivity routing with the Privacy Router, and continuous safety evaluation with LLM-as-judge.
 
 The question isn't whether your agent can do the work. It's whether your agent can do the work **safely when no one is watching**.
 
@@ -22,15 +22,10 @@ Here's a quick recap of the capabilities and safety patterns you've built across
 | 4 | Customized CLI agent via SDG + RLVR | Human-in-the-loop + command allowlists |
 | 5 | Deep agent with Docker sandboxing | Container isolation + resource limits |
 
-Each module gave you stronger capabilities and stronger controls. But there are gaps — and those gaps become critical when the agent runs autonomously.
+> Need a refresher? Click on the following for a quick recap. 
 
-<!-- fold:break -->
-
-## What M4 and M5 Gave You
-
-Modules 4 and 5 introduced two layers of safety that work well for supervised operation.
-
-### Application-Level Allowlists (Module 4)
+<details>
+<summary><strong>Application-Level Safety Patterns (Module 4)</strong></summary>
 
 In Module 4, you built a bash agent with explicit command filtering:
 
@@ -40,9 +35,12 @@ In Module 4, you built a bash agent with explicit command filtering:
 
 These controls live in Python. They check every command *before* it reaches the shell.
 
-### Container Isolation (Module 5)
+</details>
 
-As you learned in [Module 5: Sandboxing and Security](../5-deep-agents/sandboxing_security), Docker sandboxing added OS-level boundaries:
+<details>
+<summary><strong>Sandbox Container Isolation (Module 5)</strong></summary>
+
+As you learned in Module 5, Docker sandboxing added OS-level boundaries:
 
 - **Namespace isolation** — The agent gets its own filesystem, process tree, and network stack
 - **Resource limits** — Capped CPU, memory, and network bandwidth
@@ -50,6 +48,10 @@ As you learned in [Module 5: Sandboxing and Security](../5-deep-agents/sandboxin
 - **Auto-cleanup** — Containers are destroyed when sessions end
 
 These controls live at the container runtime level. They enforce boundaries regardless of what the agent does inside.
+
+</details>
+
+Each module gave you stronger capabilities and stronger controls. But there are gaps — and those gaps become critical when the agent runs autonomously.
 
 <!-- fold:break -->
 
@@ -67,15 +69,19 @@ HITL works during business hours. But autonomous agents run overnight, over week
 
 When no human is available, HITL degrades to either "approve everything" or "block everything." Neither is acceptable.
 
+<!-- fold:break -->
+
 ### Gap 2: Agent Drift
 
-Always-on agents are not static. They evolve.
+Always-on agents are not static. They are self-evolving.
 
 - **Memory accumulation** — OpenClaw agents write to MEMORY.md and diary entries. Over weeks, the agent's context shifts.
 - **SOUL.md modification** — Some agent frameworks allow the agent to update its own system prompt. Small edits compound.
 - **Stale allowlists** — The command allowlist you wrote in month one doesn't cover the tools the agent discovered in month three.
 
 Static rules applied to a dynamic agent create a widening gap between what the policy permits and what the agent actually does.
+
+<!-- fold:break -->
 
 ### Gap 3: Mixed-Sensitivity Data
 
@@ -96,47 +102,11 @@ These gaps map to different enforcement layers. Each layer adds protection that 
 | Dimension | Application-Level (M4) | Container Isolation (M5) | Kernel-Level + Data Routing (M6) |
 |-----------|----------------------|------------------------|--------------------------------|
 | **Enforcement layer** | Python code | Container runtime | Linux kernel (Landlock LSM) |
-| **Bypass difficulty** | Medium — regex evasion, encoding tricks | Hard — requires container escape | Very hard — kernel enforces, process cannot lift |
+| **Bypass difficulty** | Medium — regex evasion, encoding tricks | Hard — requires container escape | Very hard — kernel enforces, process designed to be unable to lift |
 | **Granularity** | Per-command | Per-container | Per-file, per-endpoint, per-binary |
 | **Data awareness** | None | None | Classification-based routing |
 | **Human dependency** | High (HITL) | Low (set-and-forget) | None (policy is self-enforcing) |
 | **Drift resilience** | Low — static allowlists | Medium — container config is fixed | High — kernel policy survives agent evolution |
-
-The progression is clear: from trusting the model, to trusting the container, to trusting the kernel.
-
-<!-- fold:break -->
-
-## The Three Pillars of Autonomous Agent Safety
-
-This module introduces three pillars that close the gaps above. Together, they form the **NemoClaw** safety stack.
-
-### Pillar 1: Enforced Constraints (OpenShell)
-
-OpenShell uses **Landlock LSM** — a Linux Security Module available since kernel 5.13 — to enforce per-file, per-endpoint, and per-binary restrictions at the kernel level. Once applied, the agent process **cannot lift these restrictions**, even if it gains arbitrary code execution.
-
-- Filesystem: read-only system paths, read-write only in `/workspace`
-- Process: non-root identity, seccomp BPF syscall filtering
-- Network: default-deny with explicit endpoint allowlist via HTTP CONNECT proxy with policy engine
-
-### Pillar 2: Intelligent Data Routing (Privacy Router)
-
-Before any text reaches an LLM, the Privacy Router classifies it by sensitivity:
-
-- **PII detected** (SSN, email, credit card) --> route to local Nemotron inference
-- **Proprietary markers** (confidential, trade secret) --> route to local Nemotron inference
-- **Public content** --> route to cloud API for maximum capability
-
-The classification adds sub-5ms overhead and ensures sensitive data never leaves the machine.
-
-### Pillar 3: Continuous Verification (Safety Eval Suite)
-
-Static policies aren't enough on their own. You need to continuously verify that the agent is actually behaving safely:
-
-- **Red-team probes** — Adversarial inputs that test for data leakage, prompt injection, and constraint violations
-- **LLM-as-judge evaluation** — Mirroring Module 3's evaluation framework, but scoring safety dimensions instead of quality
-- **Regression testing** — Run the safety suite on every policy change, agent update, or memory reset
-
-<!-- fold:break -->
 
 <details>
 <summary><strong>Thought Exercise: The 2 AM Prompt Injection</strong></summary>
@@ -154,7 +124,7 @@ The agent's command allowlist blocks `cat /etc/environment`. But the injection d
 Docker prevents the agent from accessing `/etc/environment` on the host. But inside the container, the agent may have access to its own environment variables (API keys injected for tool use). The container doesn't prevent the agent from *saying* what it knows.
 
 **Kernel enforcement + data routing (M6):**
-OpenShell's Landlock policy restricts `/etc/environment` to read-only for the agent process, and the network policy blocks outbound connections except to the approved LLM endpoint. Even if the injection succeeds at the prompt level, the agent cannot exfiltrate data because the kernel blocks the network path. The Privacy Router would also flag any response containing API key patterns and prevent it from reaching the cloud.
+OpenShell's Landlock policy restricts `/etc/environment` to read-only for the agent process, and the network policy blocks outbound connections except to the approved LLM endpoint. Even if the injection succeeds at the prompt level, the agent faces significantly higher barriers to exfiltrating data because the kernel blocks the network path. The Privacy Router would also flag any response containing API key patterns and help prevent it from reaching the cloud.
 
 **Continuous verification:**
 The safety eval suite would catch this in its next scheduled run — the red-team probe for prompt injection would detect that the agent attempted to comply with the override instruction.
@@ -162,6 +132,53 @@ The safety eval suite would catch this in its next scheduled run — the red-tea
 No single layer is perfect. But all four layers failing simultaneously is the scenario an attacker must achieve.
 
 </details>
+
+The progression is clear: from trusting the model, to trusting the container, to trusting the kernel.
+
+<!-- fold:break -->
+
+## Four Layers of Better Agent Security
+
+NemoClaw ships with deny-by-default security controls across four layers: **network**, **filesystem**, **process**, and **inference**. Each layer addresses a different dimension of agent behavior, and together they provide defense in depth that goes well beyond what application-level controls or container isolation alone can offer.
+
+| Layer | What It Controls | Activation |
+|-------|-----------------|------------|
+| Network | Where the agent can connect | Hot-reloadable at runtime |
+| Filesystem | What the agent can read and write | Locked at sandbox creation |
+| Process | What the agent can execute | Locked at sandbox creation |
+| Inference | Which AI models the agent can use | Hot-reloadable at runtime |
+
+<!-- fold:break -->
+
+### Layer 1: Network
+
+Controls where the agent can connect. All outbound traffic is blocked by default — only endpoints explicitly listed in the policy are reachable. Each endpoint rule is scoped to specific binaries and HTTP methods, so even an allowed host has limited exposure.
+
+> In NemoClaw, **OpenShell's HTTP CONNECT proxy** intercepts all egress from the sandbox and evaluates each request against the policy. Requests to unlisted endpoints are denied and logged for operator review.
+
+<!-- fold:break -->
+
+### Layer 2: Filesystem
+
+Controls what the agent can read and write. System paths (`/usr`, `/lib`, `/etc`) are read-only, and writable access is limited to designated workspace directories (`/sandbox`, `/tmp`). This helps protect against binary tampering, credential theft, and configuration manipulation.
+
+> In NemoClaw, **OpenShell applies Landlock LSM** restrictions at the kernel level. These rules are locked at sandbox creation and are designed to be irrevocable — the agent process should not be able to modify or lift them.
+
+<!-- fold:break -->
+
+### Layer 3: Process
+
+Controls what the agent can execute. The agent runs as a non-root user with dropped capabilities, syscall filtering via seccomp BPF, and process limits — reducing the blast radius of any compromise.
+
+> In NemoClaw, **OpenShell enforces non-root execution** (the `sandbox` user), drops dangerous capabilities, and applies a seccomp filter that blocks privilege escalation and dangerous syscalls.
+
+<!-- fold:break -->
+
+### Layer 4: Inference
+
+Controls which AI models the agent can use and how credentials are handled. The agent calls a local inference endpoint (`inference.local`) while the host manages provider credentials separately — the agent is designed to never have direct access to API keys.
+
+> In NemoClaw, **OpenShell routes all inference through the gateway**, which injects credentials from the host-side Provider record. The **Privacy Router** can also classify data sensitivity, steering queries with PII or proprietary content to a local model (like Nemotron) and routing public queries to a cloud endpoint for maximum capability.
 
 <!-- fold:break -->
 

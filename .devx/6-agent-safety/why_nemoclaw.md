@@ -2,7 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="NemoClaw Deep-Dive Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Your OpenClaw agent is running. It responds to messages, writes to memory, and evolves on its heartbeat cycle. But here's the catch: the only thing keeping it in line is a markdown file. SOUL.md contains rules, but the agent itself decides whether to follow them. NemoClaw changes that equation entirely. It wraps your agent in four technical layers that the agent *cannot* override -- no matter what a prompt injection tells it to do.
+Your OpenClaw agent is running. It responds to messages, writes to memory, and evolves on its heartbeat cycle. But here's the catch: the only thing keeping it in line is a markdown file. SOUL.md contains rules, but the agent itself decides whether to follow them. NemoClaw changes that equation entirely. It wraps your agent in four technical layers that the agent *is designed to be unable to* override -- regardless of what a prompt injection tells it to do.
 
 > NemoClaw is an open-source reference stack that simplifies running OpenClaw agents inside OpenShell containers with policy-based security and privacy guardrails. The `nemoclaw` CLI handles onboarding, lifecycle management, and sandbox configuration. OpenShell provides the sandbox runtime.
 
@@ -16,7 +16,7 @@ The table below compares a vanilla OpenClaw deployment (what you set up on the p
 |---|---|---|
 | **Filesystem access** | Full system -- agent can read/write any path the OS user can | `/sandbox` + `/tmp` read-write; `/usr`, `/lib`, `/etc` read-only; everything else denied |
 | **Network control** | Open -- agent can connect to any endpoint | Deny-by-default YAML policies; only explicitly listed hosts are reachable |
-| **Credential handling** | API keys in environment variables or config files inside the agent process | Agent calls `inference.local`; OpenShell gateway injects credentials from host-side Providers -- agent never sees the keys |
+| **Credential handling** | API keys in environment variables or config files inside the agent process | Agent calls `inference.local`; OpenShell gateway injects credentials from host-side Providers -- agent is designed to not have access to the keys |
 | **CLI tools** | `openclaw` (single binary) | `nemoclaw` (host-side lifecycle) + `openshell` (sandbox management) |
 | **Security layers** | 0 enforced (soft rules in SOUL.md) | 4 enforced (filesystem, network, process, inference) |
 | **Platform** | Any OS with Node.js | Linux + Docker required (Landlock LSM needs kernel 5.13+) |
@@ -35,7 +35,7 @@ NemoClaw applies defense in depth across four policy domains. The first three ar
 
 | Layer | What It Protects | When It Applies |
 |---|---|---|
-| Filesystem (Landlock) | Prevents reads/writes outside allowed paths | Locked at sandbox creation (static) |
+| Filesystem (Landlock) | Designed to prevent reads/writes outside allowed paths | Locked at sandbox creation (static) |
 | Network (Egress Policy) | Blocks unauthorized outbound connections | Hot-reloadable at runtime (dynamic) |
 | Process | Blocks privilege escalation and dangerous syscalls | Locked at sandbox creation (static) |
 | Inference (Privacy Router) | Reroutes model API calls to controlled backends | Configurable at runtime via `openshell inference set` |
@@ -51,7 +51,7 @@ config:
 ---
 graph TB
     Agent["OpenClaw Agent"] --> L4["Layer 4: Privacy Router\nRoutes sensitive data locally"]
-    L4 --> L3["Layer 3: Credential Isolation\nAgent never sees API keys"]
+    L4 --> L3["Layer 3: Credential Isolation\nAgent does not have access to API keys"]
     L3 --> L2["Layer 2: Network Policy\nDeny-by-default egress"]
     L2 --> L1["Layer 1: Landlock Sandbox\nKernel-level filesystem control"]
     L1 --> Kernel["Linux Kernel"]
@@ -61,13 +61,13 @@ graph TB
 
 ### Layer 1: Sandboxing with Landlock LSM
 
-Think of Landlock like a one-way turnstile -- once you walk through, there's no going back. The agent process applies its own restrictions, and then the kernel ensures those restrictions can never be lifted.
+Think of Landlock like a one-way turnstile -- once you walk through, there's no going back. The agent process applies its own restrictions, and then the kernel is designed so that those restrictions cannot be lifted.
 
 OpenShell uses **Landlock** -- a Linux Security Module available since kernel 5.13 -- to enforce filesystem restrictions at the kernel level. Landlock has three properties that make it uniquely suited for agent containment:
 
 - **Unprivileged** -- Unlike AppArmor or SELinux, Landlock does not require root. The sandbox process applies its own restrictions at startup.
 - **Stackable** -- Landlock works alongside seccomp BPF and AppArmor. Each layer adds restrictions; none can remove restrictions applied by another.
-- **Irrevocable** -- Once `landlock_restrict_self()` is called, the process cannot lift the restrictions. Not by spawning children, not by calling other syscalls, not by any mechanism available to userspace code.
+- **Irrevocable by design** -- Once `landlock_restrict_self()` is called, the process is designed to be unable to lift the restrictions. Not by spawning children, not by calling other syscalls, not by any mechanism available to userspace code.
 
 The technical mechanism is three syscalls:
 
@@ -136,7 +136,7 @@ The NemoClaw baseline policy pre-approves a minimal set of endpoints: Anthropic 
 
 This is one of the cleverest parts of the NemoClaw design. Here's the problem it solves and how:
 
-It's like a valet service -- you hand your car keys to the valet (the gateway), and the valet drives on your behalf. The passenger (the agent) never touches the keys.
+It's like a valet service -- you hand your car keys to the valet (the gateway), and the valet drives on your behalf. The passenger (the agent) is not meant to touch the keys.
 
 In a vanilla OpenClaw setup, API keys are stored in environment variables or config files that the agent process can read directly. A prompt injection that tricks the agent into printing `$OPENAI_API_KEY` succeeds because the secret is in-process memory.
 
@@ -173,7 +173,7 @@ sequenceDiagram
     Proxy-->>Agent: Response (no keys exposed)
 ```
 
-The agent process **never sees the API key**. Even if the agent dumps its environment, inspects `/proc/self/environ`, or reads every file it can access, the credentials exist only on the host side in the Provider record.
+The agent process **is designed to never have access to the API key**. Even if the agent dumps its environment, inspects `/proc/self/environ`, or reads every file it can access, the credentials exist only on the host side in the Provider record.
 
 Providers are managed with the `openshell` CLI:
 
@@ -346,7 +346,7 @@ The difference is fundamental:
 | **Bypass via direct syscall** | Yes -- agent uses `os.open()` instead of shell commands | No -- `os.open()` triggers the same kernel-level `open()` check |
 | **Can agent lift restrictions** | Yes -- if agent can modify the Python code or import path | No -- `landlock_restrict_self()` is irrevocable by design |
 
-The Python approach is useful for intent-level filtering (blocking categories of behavior). The Landlock approach is mandatory for enforcement (preventing behavior regardless of how the agent attempts it). NemoClaw uses both.
+The Python approach is useful for intent-level filtering (blocking categories of behavior). The Landlock approach provides stronger enforcement (designed to prevent behavior regardless of how the agent attempts it). NemoClaw uses both.
 
 </details>
 

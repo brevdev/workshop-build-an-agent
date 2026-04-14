@@ -2,9 +2,9 @@
 
 <img src="_static/robots/supervisor.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 
-Your agent runs 24/7, evolves its own behavior, and processes sensitive data. How do you make it safe when you're not watching?
+Your agent runs 24/7, evolves its own behavior, and processes sensitive data. How do you make it safer when you're not watching?
 
-In this module, you'll use **NVIDIA NemoClaw** — a reference stack for securing autonomous agents — to build a defense system that enforces safety at the kernel level, classifies data before it leaves the machine, and continuously verifies the agent hasn't drifted. NemoClaw combines OpenClaw (agent), OpenShell (enforcement), Nemotron (local inference), and Privacy Router (data routing) into one deployable system.
+In this module, you'll use **NVIDIA NemoClaw** — a reference stack for strengthening the security of autonomous agents — to build a defense system that adds safety enforcement at the kernel level, classifies data before it leaves the machine, and continuously verifies the agent hasn't drifted. NemoClaw combines OpenClaw (agent), OpenShell (enforcement), Nemotron (local inference), and Privacy Router (data routing) into one deployable system.
 
 This learning module can take around 2 to 2.5 hours to complete.
 

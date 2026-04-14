@@ -2,11 +2,11 @@
 
 <img src="_static/robots/supervisor.png" alt="NemoClaw Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Now for the hands-on part -- let's get NemoClaw running and see those security layers in action. You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router classifies and routes data, and how Nemotron handles sensitive queries locally. Now let's install it and get a secured sandbox running around your OpenClaw agent.
+Now for the hands-on part -- let's get NemoClaw running and see those security layers in action. You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router classifies and routes data, and how Nemotron handles sensitive queries locally. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
 
 NemoClaw wraps your existing OpenClaw installation inside an OpenShell sandbox with default-deny networking, filesystem restrictions, and inference routing -- all configured through a single onboarding wizard.
 
-Here's what your NemoClaw deployment will look like when we're done. The agent lives inside the sandbox; all its traffic passes through the proxy; and credentials never enter the sandbox.
+Here's what your NemoClaw deployment will look like when we're done. The agent lives inside the sandbox; all its traffic passes through the proxy; and credentials are designed to stay outside the sandbox.
 
 ```mermaid
 ---
@@ -58,24 +58,6 @@ The installer will:
 - Launch the onboarding wizard automatically
 
 The onboarding wizard will start, but it will hang at **"Still waiting for gateway health..."** inside AI Workbench. This is expected -- press `Ctrl+C` to cancel, then continue with the steps below.
-
-After installation, verify the CLI is available:
-
-```bash
-nemoclaw --version
-```
-
-If the command is not found, your shell PATH may need updating:
-
-```bash
-source ~/.bashrc
-```
-
-Or add the npm global bin directory manually:
-
-```bash
-export PATH="$HOME/.npm-global/bin:$PATH"
-```
 
 <!-- fold:break -->
 
@@ -221,7 +203,7 @@ From inside the sandbox (`nemoclaw my-assistant connect`), test the default-deny
 curl https://example.com
 ```
 
-This request should be **blocked** -- the sandbox cannot reach arbitrary external hosts. Now try an endpoint that the policy explicitly allows (your configured inference endpoint). The connection should succeed.
+This request should be **blocked** with a 403 Unauthorized error -- the sandbox cannot reach arbitrary external hosts. Now try an endpoint that the policy explicitly allows (your configured inference endpoint). The connection should succeed.
 
 This confirms the kernel-level network enforcement is active.
 

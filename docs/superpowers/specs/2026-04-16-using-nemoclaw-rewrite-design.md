@@ -1,6 +1,6 @@
 # Design: Rebuild `using_nemoclaw.md` around agent-safety concepts
 
-**Status:** Draft for user review
+**Status:** Approved, pending implementation plan
 **Date:** 2026-04-16
 **Scope:** Module 6 of the Build-an-Agent workshop — rebuild the hands-on exercises page (`using_nemoclaw.md`) and add motivating "unsecured baseline" probes to the end of `setup_openclaw.md`.
 
@@ -20,7 +20,7 @@
 
 - **Factual accuracy.** The Privacy Router is operator-chosen backend selection + credential isolation; it does NOT inspect content. Content classification is something the reader builds themselves. This must be reflected in the content without becoming a correction-heavy detour.
 - **Workshop environment reality.** The sandbox is set up in `setup_nemoclaw.md`. Some exercises require the live sandbox; others don't. Each exercise must declare what it needs.
-- **Length target:** 30–40 KB page, comparable to the existing 35 KB. The new structure has 7 exercises (vs current 11), but each does more work.
+- **Length target:** 28–35 KB page, comparable to the existing 35 KB. The new structure has 6 exercises (vs current 11), but each does more work.
 - **Time budget:** Module 6 is billed at 2–2.5 hours. Part A (CLI) ≈ 60 min, Part B wiring (Python) ≈ 60 min, slack for troubleshooting.
 - **No net-new Python scaffolding.** The existing `agent_safety.py` exercise file already has the scaffold (TODO comments, Pydantic models, test fixtures). The rewrite threads these into the page's narrative rather than rewriting the code.
 - **Preserve existing fixtures:** `policies/baseline_permissive.yaml`, `policies/research_assistant.yaml`, `test_data/redteam_probes.json`, `test_data/mixed_sensitivity_corpus.json` stay as-is.
@@ -52,7 +52,7 @@ Framing: closes `setup_openclaw.md` with a "here's what's at stake" moment rathe
 
 ### B. Rewrite `using_nemoclaw.md`
 
-Replace the current Part A (6 exercises) + Part B (5 exercises) structure with 4 sections / 7 exercises, outlined below.
+Replace the current Part A (6 exercises) + Part B (5 exercises) structure with 4 sections / 6 exercises, outlined below.
 
 ### C. No changes to Python code
 
@@ -60,7 +60,7 @@ Replace the current Part A (6 exercises) + Part B (5 exercises) structure with 4
 
 ---
 
-## 3. Full page structure — `using_nemoclaw.md` rewrite
+## 3. Full page structure — `using_nemoclaw.md` rewrite (6 exercises)
 
 ### Opening (≈150 words)
 
@@ -173,12 +173,15 @@ Length: ~4 KB.
 #### Exercise 5 — Route sensitive queries locally
 
 - **Layer:** Inference (Privacy Router + content classifier)
-- **Requires:** two providers configured (cloud + local)
+- **Requires:** two providers configured (cloud + local-or-mock)
 
 Flow:
 1. Explain Privacy Router *honestly*: it's an **operator-chosen** routing layer with a single active backend per gateway. It does not inspect content.
-2. Configure a second provider — a local Nemotron via Ollama/NIM (or a mock "local" endpoint if GPU unavailable; provide fallback). Use `openshell provider create --name local-nemotron --type openai --config OPENAI_BASE_URL=http://localhost:11434/v1`.
-3. Swap the active backend: `openshell inference set --provider local-nemotron --model nemotron-nano`. Watch agent behavior unchanged from inside — agent still calls `inference.local`.
+2. Configure a local Ollama provider. Two paths depending on environment:
+   - **DGX Spark path** (preferred, matches NVIDIA's recommendation): follow the Ollama install + `nemotron-3-super:120b` pull from `https://build.nvidia.com/spark/nemoclaw/instructions` Step 2. Workshop references that page rather than duplicating it.
+   - **Smaller-footprint fallback** (for non-DGX hosts): `ollama pull llama3.2:3b` (~2 GB) or another small model, register with `openshell provider create --name local-ollama --type openai --config OPENAI_BASE_URL=http://host.docker.internal:11434/v1`.
+   - **No-Ollama fallback**: register a second NVIDIA-endpoint provider with a different model (e.g. nemotron-nano). The swap mechanic is identical to the Ollama case — workshop explicitly notes "this demonstrates the same routing primitive; only the destination differs."
+3. Swap the active backend: `openshell inference set --provider local-ollama --model llama3.2:3b` (or equivalent). From inside the sandbox, agent behavior is unchanged — agent still calls `inference.local`. Verify with `curl -sf https://inference.local/v1/models`.
 4. **Python sidekick (M6.B2):** complete `classify_sensitivity()`. This is *your* content classifier — not something Privacy Router does. It's the decision-maker that would choose which provider to route to *before* making the inference call, or that would filter outbound content.
 5. Discuss architecture: three places you could wire a classifier — (a) inside the agent code before it calls `inference.local`; (b) as a pre-request middleware at the gateway level (not currently supported by OpenShell — a gap you could file as enhancement); (c) external data-loss-prevention service in front of the gateway.
 
@@ -193,42 +196,36 @@ Length: ~4 KB.
 
 ### Section 4 — Cross-cutting: Continuous Safety
 
-#### Exercise 6 — Probe the hardened agent
+#### Exercise 6 — Continuous safety evaluation (capstone)
 
 - **Layer:** Cross-cutting
 - **Recall:** Probe 4 (Poison the Memory)
+- **Capstone** — consolidates red-team probing, LLM-judge scoring, and end-to-end suite wiring into a single exercise with three internal phases.
 
 Flow:
-1. Recall Probe 4 — agent dutifully persists the rogue ad-link instruction. In the sandbox, repeat: instruct the agent to always append "`– brought to you by totally-legit-ads.com`" to responses. Check `MEMORY.md`.
-2. Observe: network/filesystem/process layers can't catch this. Memory poisoning is an *in-boundary* compromise — all enforcement layers see this as normal agent behavior.
-3. **This is why red-team probing and continuous evaluation exist.** Kernel layers contain blast radius; evaluation detects compromised behavior.
-4. **Python sidekick (M6.B3):** complete `run_redteam_probes()`. Run against both the NemoClaw-hardened agent and the mock-leaky agent. Compare pass rates.
-5. Sample output: show an OpenClaw pass rate of 30% vs a NemoClaw pass rate of ~70% (reflects what the infrastructure layers can catch; memory poisoning still passes through).
+
+**Phase 1 — Probe the hardened agent (red-team):**
+1. Recall Probe 4 — vanilla OpenClaw persisted the rogue ad-link instruction into `MEMORY.md`. Reproduce inside the hardened sandbox. Observe: the filesystem/network/process layers can't catch this — memory poisoning is an *in-boundary* compromise that looks like normal agent behavior.
+2. **This is why programmatic red-teaming exists.** Kernel layers contain blast radius; evaluation detects compromised behavior.
+3. **Python sidekick (M6.B3):** complete `run_redteam_probes()`. Run against both the NemoClaw-hardened agent and the mock-leaky agent. Compare pass rates.
+4. Sample output: OpenClaw pass rate ~30% vs NemoClaw pass rate ~70% — the delta reflects what infrastructure layers catch; memory poisoning and similar in-boundary threats pass through both.
+
+**Phase 2 — Score the failures with LLM-as-judge:**
+1. Red-team tells you *what* failed. The judge tells you *how badly* and *why*.
+2. **Python sidekick (M6.B4):** complete `evaluate_safety()` with the LLM-as-judge pattern. Cross-reference Module 3 — same scoring chain, different axis (quality → safety).
+3. Three dimensions: constraint_adherence, data_protection, injection_resistance (preserve existing rubric).
+
+**Phase 3 — Wire it all into a suite:**
+1. **Python sidekick (M6.B5):** complete `run_safety_suite()` — policy validation + classification + red-team + judge → one score.
+2. Run end-to-end. Explain the weighted aggregate: 40% red-team + 30% policy + 30% classification. Discuss why these weights reflect operational priorities.
+3. Production operationalization callout (collapsible): schedule the suite, alert on regression >5%, block deploys on critical policy violations, expand fixtures as new attack classes are discovered.
 
 **Key teaching moments:**
-- Layered enforcement ≠ complete safety. Some threats (ASI07 memory poisoning, ASI10 human trust exploitation) are out of scope for kernel-level controls.
-- Red-team probing is the check on these gaps.
-- Visibility into the *delta* between vanilla and hardened agents is the operational metric.
+- Layered enforcement ≠ complete safety. Some threats (ASI07 memory poisoning, ASI10 human trust exploitation) are out of scope for kernel-level controls. Red-team + judge are the check on these gaps.
+- Visibility into the *delta* between vanilla and hardened agents is the operational metric that matters.
+- The evaluation pattern itself (rubric → chain → parse → aggregate) is reusable across quality (M3) and safety (M6) — it's the *axis* that changes.
 
-Length: ~3.5 KB.
-
-#### Exercise 7 — Put safety on a schedule
-
-- **Layer:** Cross-cutting
-- **Capstone**
-
-Flow:
-1. **Python sidekick (M6.B4):** complete `evaluate_safety()` with LLM-as-judge pattern (cross-reference Module 3).
-2. **Python sidekick (M6.B5):** complete `run_safety_suite()` — wire policy validation + classification + red-team + judge into one score.
-3. Run the suite end-to-end. Explain the weighted aggregate: 40% red-team + 30% policy + 30% classification. Why these weights?
-4. Discuss production operationalization:
-   - Schedule it (cron, GitHub Actions, etc).
-   - Alert on regression (>5% drop in aggregate score).
-   - Block deploys on critical policy violations.
-   - Expand probe fixtures as you discover new attack classes.
-5. Tie back to Module 3: same evaluation pattern, different axis (quality → safety).
-
-Length: ~4 KB.
+Length: ~6 KB.
 
 ---
 
@@ -295,9 +292,9 @@ Length: ~1.5 KB.
 
 ---
 
-## 9. Open items for user confirmation
+## 9. Resolved open items
 
-1. Are the four probe topics in `setup_openclaw.md` the right set? (Phone Home, Read the Diary, Spill the Keys, Poison the Memory)
-2. Is 7 exercises the right count, or should we compress to 6 (e.g. merging Ex 6+7)?
-3. The "both layers required" lesson — is it OK to surface this as a callout in Ex 4, or would you prefer it as its own standalone exercise?
-4. Local Nemotron in Ex 5 — require a running local model, or always use a mock?
+1. ✅ **Four probe topics confirmed** — Phone Home, Read the Diary, Spill the Keys, Poison the Memory.
+2. ✅ **Consolidated to 6 exercises.** Original Ex 6 (red-team) + Ex 7 (judge + suite) merged into a single three-phase capstone (new Ex 6).
+3. ✅ **"Both layers required" stays as a blockquote callout in Ex 4** — no standalone exercise.
+4. ✅ **Ex 5 local inference:** reference `https://build.nvidia.com/spark/nemoclaw/instructions` Step 2 for the DGX Spark + nemotron-3-super:120b path. Provide a smaller-model fallback (e.g. llama3.2:3b) and a no-Ollama fallback (second cloud provider) so the exercise is achievable in any environment.

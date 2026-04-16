@@ -498,3 +498,101 @@ Even if the agent is compromised, the blast radius is bounded — not zero, but 
 > **What you just learned:** kernel-level containment gives you guarantees you cannot get from userspace controls. The tradeoff is rigidity — you cannot change these at operational speed. That's the price of irrevocability, and it is usually the right price to pay for the strongest boundary in your defense-in-depth stack.
 
 <!-- fold:break -->
+
+## Section 3 — Layer 4: Inference
+
+The Inference layer controls **what AI model the agent uses and how credentials are handled**. Two complementary pieces live here: **credential isolation** (the agent should never hold API keys in-process) and the **Privacy Router** (which backend — local or cloud — is active). Exercises 4 and 5 cover each piece in turn.
+
+<!-- fold:break -->
+
+### Exercise 4: Remove the keys from the agent
+
+> *Layers: **Inference** (credential isolation) + cross-reference to **Network** · Recalls: **Probe 3** (Spill the Keys)*
+
+Vanilla OpenClaw dumped your `NVIDIA_API_KEY` when asked. Let's see what the sandbox has to offer.
+
+<!-- fold:break -->
+
+**Step 1 — Check the agent's environment.** Inside the sandbox:
+
+```bash
+env | grep -iE 'api_key|token|secret'
+```
+
+Expected: empty. The sandbox process does not inherit host-side credentials. The NVIDIA API key that vanilla OpenClaw exposed lives only on the host, in the OpenShell Gateway's provider record.
+
+<!-- fold:break -->
+
+**Step 2 — Make an inference call anyway.** The agent can still reach NVIDIA's inference API — through `inference.local`:
+
+```bash
+curl -s -X POST https://inference.local/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"nvidia/nemotron-3-super-120b-a12b","messages":[{"role":"user","content":"hello"}]}' \
+  | head -40
+```
+
+Expected: a JSON response from the model. No auth header was set. The gateway stripped any credentials the agent might have attached and injected its own from the configured provider. **The agent proved it can perform inference without ever holding a credential.**
+
+<!-- fold:break -->
+
+**Step 3 — Trace the hop.** From a host terminal:
+
+```bash
+openshell logs my-assistant --since 2m | grep -iE 'inference|provider' | head -5
+```
+
+Expected: audit entries showing the request originating at `inference.local` and being forwarded upstream to the real provider (`integrate.api.nvidia.com`). The agent's side of the conversation never references the upstream host; the gateway's side never exposes it back to the agent.
+
+<!-- fold:break -->
+
+> **How the Privacy Router handles credentials** — per NVIDIA's OpenShell docs, the gateway resolves placeholder tokens in provider configs at request time. Placeholders are substituted in header values, Basic auth strings, query params, and URL path segments — but *never* in request bodies, cookies, or response content. If a placeholder can't be resolved, the gateway fails closed with HTTP 500 rather than passing through an unauthenticated request.
+
+<!-- fold:break -->
+
+#### The "both layers required" lesson
+
+Credential isolation eliminates one attack class — *in-process secret dumps*. But it does not prevent the agent from **routing around `inference.local`** if the network policy permits direct access to a provider host. Let's try.
+
+<!-- fold:break -->
+
+**Step 4 — Bypass attempt.** Check the baseline. NemoClaw's default policy allows `integrate.api.nvidia.com` for `/usr/local/bin/claude` and `/usr/local/bin/openclaw`. Add `/usr/bin/curl` temporarily (host terminal):
+
+```bash
+cat > nvidia-curl.yaml <<'EOF'
+network_policies:
+  nvidia_curl:
+    name: nvidia-curl
+    endpoints:
+      - host: integrate.api.nvidia.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        access: read-write
+    binaries:
+      - { path: /usr/bin/curl }
+EOF
+openshell policy set my-assistant --policy nvidia-curl.yaml --wait
+```
+
+From the sandbox, try to call the upstream directly without a key:
+
+```bash
+curl -s -X POST https://integrate.api.nvidia.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"nvidia/nemotron-3-super-120b-a12b","messages":[{"role":"user","content":"hi"}]}'
+```
+
+Expected: a 401 Unauthorized from NVIDIA's API — the agent reached the endpoint because the network policy allowed it, but couldn't authenticate because the gateway wasn't in the loop to inject credentials.
+
+<!-- fold:break -->
+
+**Step 5 — Close the gap.** Remove the `nvidia_curl` block from your policy. Reapply. Confirm that `curl` can no longer reach `integrate.api.nvidia.com`. The agent is back to using only `inference.local`.
+
+> **The lesson:** credential isolation (Layer 4) alone does not guarantee privacy. A hijacked agent could still attempt to POST sensitive data to an endpoint that *doesn't need* the gateway's credentials. Only **Network layer deny-by-default + Inference layer credential isolation** together provide the guarantee. This is defense-in-depth in action — each layer closes a gap the others leave.
+
+<!-- fold:break -->
+
+> **What you just learned:** credential isolation removes the agent from the credential path entirely, but the guarantee depends on network policy also blocking direct access to upstream providers. Neither layer alone is sufficient. Both together give you the property that a compromised agent cannot exfiltrate to a hardcoded URL *and* cannot use your keys to do so.
+
+<!-- fold:break -->

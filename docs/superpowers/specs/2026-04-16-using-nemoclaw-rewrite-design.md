@@ -1,6 +1,6 @@
 # Design: Rebuild `using_nemoclaw.md` around agent-safety concepts
 
-**Status:** Approved, pending implementation plan
+**Status:** Approved and implemented (v1). v2 refactor in progress — split into two pages with fold-count reduction (see Section 10).
 **Date:** 2026-04-16
 **Scope:** Module 6 of the Build-an-Agent workshop — rebuild the hands-on exercises page (`using_nemoclaw.md`) and add motivating "unsecured baseline" probes to the end of `setup_openclaw.md`.
 
@@ -298,3 +298,47 @@ Length: ~1.5 KB.
 2. ✅ **Consolidated to 6 exercises.** Original Ex 6 (red-team) + Ex 7 (judge + suite) merged into a single three-phase capstone (new Ex 6).
 3. ✅ **"Both layers required" stays as a blockquote callout in Ex 4** — no standalone exercise.
 4. ✅ **Ex 5 local inference:** reference `https://build.nvidia.com/spark/nemoclaw/instructions` Step 2 for the DGX Spark + nemotron-3-super:120b path. Provide a smaller-model fallback (e.g. llama3.2:3b) and a no-Ollama fallback (second cloud provider) so the exercise is achievable in any environment.
+
+---
+
+## 10. V2 Refactor — Split + Compress (2026-04-16)
+
+After v1 implementation, fold count on `using_nemoclaw.md` came in at 66 — 3× the next-largest page in any module (M5's `deep_agents.md` at 22). Workshop pages typically run 8–22 folds. User feedback: split the single page into two, compress folds, trim ~20-25% of content to keep "the soul of the exercise" while fitting the workshop's per-page norm.
+
+### V2 structure
+
+**Page A — `using_nemoclaw.md` "Working with NemoClaw"** (Exercises 1–5; target ~19 folds)
+- Each exercise collapses its 5–7 numbered steps into collapsible `<details><summary><strong>Step N — ...</strong></summary>` blocks.
+- One `<!-- fold:break -->` per exercise-level pivot (intro, "what you just learned"), not per step.
+- Section header folds retained (Layer 1, Layer 2+3, Layer 4).
+
+**Page B — `evaluating_safety.md` "Evaluating Agent Safety"** (Exercise 6 three phases; target ~12 folds)
+- New filename, new page in the module navigation.
+- Holds the capstone Python-heavy work (red-team + judge + safety suite).
+- Module wrap-up and "What to Explore Next" moved here (natural closing for the module).
+
+### Content trims (20-25% reduction)
+
+| Location | Trim |
+|---|---|
+| Ex 3 Part A Step 3 (bypass attempts) | Four attempts → two most illustrative (symlink + subprocess spawn). Drop path-traversal and Python-open duplicates. |
+| Ex 3 Part B Step 3 (dangerous syscalls) | Three examples (mount + unshare + ptrace-via-ctypes) → two (mount + unshare). Drop the ctypes snippet. |
+| Ex 5 Step 2 (Ollama paths) | Three paths (Spark / Small / No-Ollama) → one canonical path (small Ollama model) + brief pointer to Spark for large-model users. Drop the "No-Ollama" fallback (operator can figure it out if they need it). |
+| Ex 5 Step 5 (classifier architectures) | Three architectures enumerated → one-line mention + external link. |
+| Ex 6 Phase framing | Reduce per-phase intro prose to 1-2 sentences; collapsed-steps carry the procedure weight. |
+| "What you just learned" callouts | Keep per exercise (they cement the lesson) but tighten to 1 sentence each. |
+
+### Navigation changes
+
+- `_sidebar.md`: append `* [Evaluating Agent Safety](evaluating_safety.md)` after the current last line.
+- `intro_agent_safety.md` nav table: add a row for the new page.
+
+### Fold count targets
+
+| Page | Before | After |
+|---|---|---|
+| `using_nemoclaw.md` | 66 | ~19 |
+| `evaluating_safety.md` | — (new) | ~12 |
+| Module total | 129 | ~95 |
+
+Both pages fit the workshop's 20–22 fold ceiling. Total module fold count drops below M2, M3, M5 totals.

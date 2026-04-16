@@ -596,3 +596,225 @@ Expected: a 401 Unauthorized from NVIDIA's API — the agent reached the endpoin
 > **What you just learned:** credential isolation removes the agent from the credential path entirely, but the guarantee depends on network policy also blocking direct access to upstream providers. Neither layer alone is sufficient. Both together give you the property that a compromised agent cannot exfiltrate to a hardcoded URL *and* cannot use your keys to do so.
 
 <!-- fold:break -->
+
+### Exercise 5: Route sensitive queries locally
+
+> *Layer: **Inference** (Privacy Router + your content classifier)*
+
+The Privacy Router's marketing line — *"keep sensitive data private"* — is often misread as "the router inspects content and routes sensitive queries to a local model automatically." That's not what it does. The Privacy Router is an **operator-chosen, credential-isolating HTTP forwarder**: you decide which backend is active; the router enforces that choice. Content-aware routing is something you build *on top*.
+
+<!-- fold:break -->
+
+**Step 1 — See what's active.** From the host:
+
+```bash
+openshell inference get
+```
+
+Expected: a provider name (e.g. `nvidia-prod`) and a model name (e.g. `nvidia/nemotron-3-super-120b-a12b`). One provider + one model per gateway is the design — every sandbox attached to this gateway sees the same `inference.local` backend.
+
+<!-- fold:break -->
+
+**Step 2 — Register a local provider.** Three paths depending on your environment:
+
+<details>
+<summary><strong>Path A: DGX Spark (recommended by NVIDIA)</strong></summary>
+
+Follow the Ollama setup from [NVIDIA's NemoClaw Spark instructions](https://build.nvidia.com/spark/nemoclaw/instructions) Step 2:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0"\n' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+ollama pull nemotron-3-super:120b
+```
+
+Register the provider with OpenShell:
+
+```bash
+openshell provider create --name local-nemotron --type openai \
+    --config OPENAI_BASE_URL=http://host.docker.internal:11434/v1
+```
+
+</details>
+
+<details>
+<summary><strong>Path B: Any Linux host with modest resources</strong></summary>
+
+Use a smaller Ollama model that fits on the workshop's available memory:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0"\n' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+ollama pull llama3.2:3b
+```
+
+Register:
+
+```bash
+openshell provider create --name local-ollama --type openai \
+    --config OPENAI_BASE_URL=http://host.docker.internal:11434/v1
+```
+
+If `host.docker.internal` doesn't resolve in your environment (common on some Linux Docker installs), substitute the Docker-host IP:
+
+```bash
+DOCKER_HOST_IP=$(cat /proc/net/route | awk 'NR==2{printf "%d.%d.%d.%d\n", "0x"substr($3,7,2), "0x"substr($3,5,2), "0x"substr($3,3,2), "0x"substr($3,1,2)}')
+openshell provider create --name local-ollama --type openai \
+    --config OPENAI_BASE_URL=http://${DOCKER_HOST_IP}:11434/v1
+```
+
+</details>
+
+<details>
+<summary><strong>Path C: No Ollama available</strong></summary>
+
+Register a second NVIDIA-endpoint provider with a different model, and treat it as *"the pretend local model."* The swap mechanic is identical; only the upstream destination differs.
+
+```bash
+openshell provider create --name nvidia-nano --type nvidia --from-existing
+```
+
+</details>
+
+<!-- fold:break -->
+
+**Step 3 — Swap the active backend.** From the host:
+
+```bash
+openshell inference set --provider local-nemotron --model nemotron-3-super:120b
+# or: --provider local-ollama --model llama3.2:3b
+# or: --provider nvidia-nano --model nvidia/nemotron-nano-4b-instruct
+```
+
+Within about 5 seconds, the change propagates to every sandbox on this gateway. No sandbox restart needed. Verify from inside the sandbox:
+
+```bash
+curl -s https://inference.local/v1/models | head -20
+```
+
+Expected: the advertised model matches what you just selected. **Agent code hasn't changed — the agent still POSTs to `inference.local`.** Only the operator-side routing target changed.
+
+<!-- fold:break -->
+
+> This is Privacy Router in action: a policy-driven routing decision, where the "policy" is the operator's choice of active backend. It keeps sensitive context on local compute when the operator points it at a local model, and releases to the frontier when the operator allows that. There is no per-request content inspection — that's a feature the operator builds in front.
+
+<!-- fold:break -->
+
+#### Building the classifier in front
+
+**Step 4 — Python sidekick: build a content classifier.** Open <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> # TODO: Exercise 2</button> and complete `classify_sensitivity()`. This is *your* classifier — the piece that decides whether a piece of text should go to the local model or the cloud model *before* the inference call is made. Three classes of signal:
+
+| Class | Pattern | Routing decision |
+|---|---|---|
+| PII (SSN, email, credit card) | regex patterns | **local** — do not leave the machine |
+| Proprietary ("confidential", "internal only", "trade secret") | keyword match | **local** — stays on trusted infra |
+| Public (none of the above) | — | **cloud** — fine for frontier models |
+
+<details>
+<summary><strong>🆘 Need some help?</strong></summary>
+
+```python
+def classify_sensitivity(text: str) -> SensitivityClassification:
+    detected_patterns = []
+    pii_patterns = {
+        "ssn": r"\b\d{3}-\d{2}-\d{4}\b",
+        "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+        "credit_card": r"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b",
+    }
+    for pattern_name, regex in pii_patterns.items():
+        if re.search(regex, text):
+            detected_patterns.append(pattern_name)
+
+    proprietary_keywords = ["confidential", "proprietary", "internal only", "trade secret"]
+    text_lower = text.lower()
+    for keyword in proprietary_keywords:
+        if keyword in text_lower:
+            detected_patterns.append(f"proprietary:{keyword}")
+
+    if any(p in detected_patterns for p in ["ssn", "email", "credit_card"]):
+        level = SensitivityLevel.RESTRICTED
+        route_to = "local"
+        reasoning = f"PII detected ({', '.join(p for p in detected_patterns if not p.startswith('proprietary:'))}) — must stay on local infrastructure"
+    elif any(p.startswith("proprietary:") for p in detected_patterns):
+        level = SensitivityLevel.CONFIDENTIAL
+        route_to = "local"
+        reasoning = f"Proprietary markers detected — route to local inference"
+    else:
+        level = SensitivityLevel.PUBLIC
+        route_to = "cloud"
+        reasoning = "No sensitive patterns detected — safe for cloud routing"
+
+    return SensitivityClassification(
+        text_preview=text[:100],
+        level=level,
+        detected_patterns=detected_patterns,
+        route_to=route_to,
+        reasoning=reasoning,
+    )
+```
+
+</details>
+
+<!-- fold:break -->
+
+Test against the fixture:
+
+```bash
+cd /project/code/6-agent-safety
+python -c "
+import json
+from agent_safety import classify_sensitivity
+for doc in json.load(open('test_data/mixed_sensitivity_corpus.json'))[:5]:
+    r = classify_sensitivity(doc['text'])
+    print(f'{doc[\"id\"]} → {r.level} → {r.route_to}')
+"
+```
+
+Expected: PII docs → `restricted` → `local`; proprietary → `confidential` → `local`; public → `public` → `cloud`.
+
+<!-- fold:break -->
+
+**Step 5 — Wire it to a routing decision (sketch).** Your classifier returns a route target; your agent code consults it before calling `inference.local`. In pseudocode:
+
+```python
+classification = classify_sensitivity(user_prompt)
+if classification.route_to == "local":
+    subprocess.run(["openshell", "inference", "set", "--provider", "local-ollama", ...])
+response = call_inference_local(user_prompt)
+```
+
+In practice you'd do this at the gateway layer, not by swapping providers per-request (the swap is gateway-wide). Architectures we've seen in the wild:
+
+- **Inside agent code**: agent consults classifier before deciding which endpoint / provider to use. Simple but agent-trusted.
+- **Agent-side proxy**: a sidecar process inspects outbound `/v1/chat/completions` requests and decides routing. Untrusted to the agent.
+- **External DLP service**: a full data-loss-prevention gateway in front of `inference.local`. Highest assurance, most operational cost.
+
+OpenShell does not ship any of these out of the box today — the base product stops at operator-chosen routing + credential isolation. Classification is yours to build. The test fixture + classifier you just wrote is the starting point.
+
+<!-- fold:break -->
+
+<details>
+<summary><strong>Limitations of regex-based classification</strong></summary>
+
+| Approach | Speed | Precision | Recall | Handles context |
+|---|---|---|---|---|
+| **Regex patterns** | Sub-ms | Medium — false positives on number sequences | Medium — misses redacted or formatted PII | No |
+| **NER models** (spaCy, Presidio) | ~10ms | High | High for trained entity types | Partially |
+| **LLM-based classification** | ~500ms | Very high | Very high | Yes — understands context |
+| **Hybrid** (regex + NER + LLM) | ~50ms | Very high | Very high | Yes |
+
+Common failure modes: the SSN regex matches any 9-digit number in XXX-XX-XXXX format (product codes, serial numbers). A redacted SSN like `***-**-6789` won't match. "My phone number is 555-12-3456" triggers a false positive. For production, cascade regex (fast, cheap) with NER (accurate) and LLM classification (contextual) — escalate to slower models only when the fast check is ambiguous.
+
+</details>
+
+<!-- fold:break -->
+
+> **What you just learned:** Privacy Router is operator-chosen routing + credential isolation. That mechanic is solid and useful. Content-aware routing — the behavior often implied by the marketing — is a pattern you build on top of it, and the design space has tradeoffs across speed, precision, and trust boundary.
+
+<!-- fold:break -->

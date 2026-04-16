@@ -4,3 +4,4 @@
 * [Why NemoClaw: Principles and Layers](why_nemoclaw.md)
 * [Set Up NemoClaw](setup_nemoclaw.md)
 * [Working with NemoClaw](using_nemoclaw.md)
+* [Evaluating Agent Safety](evaluating_safety.md)

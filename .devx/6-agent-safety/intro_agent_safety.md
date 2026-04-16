@@ -234,6 +234,7 @@ In the rest of this module, you'll build the NemoClaw stack layer by layer:
 | [Set Up Your OpenClaw Agent](setup_openclaw) | Get an autonomous agent running | Setup |
 | [Why NemoClaw: Principles and Layers](why_nemoclaw) | Understand agent security principles and NemoClaw's enforcement layers | Concepts |
 | [Set Up NemoClaw](setup_nemoclaw) | Install and configure the NemoClaw stack | Setup |
-| [Working with NemoClaw](using_nemoclaw) | Hands-on hardening + continuous safety evaluation | Exercises 1-6 |
+| [Working with NemoClaw](using_nemoclaw) | Write and apply OpenShell policies to harden the agent | Exercises 1-5 |
+| [Evaluating Agent Safety](evaluating_safety) | Red-team probes + LLM-as-judge + continuous safety suite | Exercise 6 |
 
 > Let's set up your agent. Head to [Set Up Your OpenClaw Agent](setup_openclaw) to get started.

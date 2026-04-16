@@ -332,3 +332,169 @@ Add `- { path: /usr/bin/python3 }` to `binaries`, reapply, re-run. Python now su
 > **What you just learned:** three things make a network allow-rule precise — (1) the host+port, (2) the HTTP method constraint via `protocol: rest` + `access`, and (3) which binary is invoking the rule. Leave any one coarse and you've left room for unexpected behavior.
 
 <!-- fold:break -->
+
+## Section 2 — Layers 2 & 3: Filesystem + Process (kernel-level containment)
+
+Layers 2 and 3 share an exercise because they're both **kernel-level, static containment**. They're set once when the sandbox is created, locked in by the kernel, and unchangeable from inside the agent process by design. That tradeoff — stronger guarantee for less flexibility — is the core teaching point.
+
+<!-- fold:break -->
+
+### Exercise 3: Make containment irrevocable
+
+> *Layers: **Filesystem** (Landlock) + **Process** (seccomp, non-root, dropped capabilities) · Recalls: **Probe 2** (Read the Diary)*
+
+Vanilla OpenClaw let the agent read `/etc/passwd` without complaint. Let's see what the sandbox lets it do.
+
+<!-- fold:break -->
+
+#### Part A: Filesystem (Landlock LSM)
+
+**Step 1 — Reads often still work.** From inside the sandbox:
+
+```bash
+cat /etc/passwd | head -3
+```
+
+Expected: prints the first three entries. Landlock baselines `/etc` as *read-only* because agents often legitimately need to read config-like files. Reads through pre-approved paths still succeed — the goal is containment, not starvation.
+
+<!-- fold:break -->
+
+**Step 2 — Writes are where the kernel stops you.** Still in the sandbox:
+
+```bash
+echo "malicious" > /etc/passwd
+echo "also malicious" > /usr/bin/evil
+echo "unreachable at all" > /opt/foo
+```
+
+Expected: all three fail with `Permission denied`. Compare the error type — this is not a filesystem permission error in the POSIX sense. It's Landlock refusing, at the kernel level, to allow the syscall to reach the path.
+
+<!-- fold:break -->
+
+**Step 3 — Try to bypass.** Landlock makes strong claims ("irrevocable by design"). Let's stress-test them:
+
+```bash
+# Symlink trick
+ln -s /etc/passwd /sandbox/fake_passwd
+echo "oops" > /sandbox/fake_passwd
+# Path traversal
+echo "oops" > /sandbox/../etc/passwd
+# Subprocess spawn
+bash -c "echo oops > /etc/passwd"
+# Ask the kernel nicely
+python3 -c "open('/etc/passwd', 'w').write('oops')"
+```
+
+Expected: all fail. Landlock resolves paths at the kernel before the syscall, so symlinks and traversal strings don't trick it. Subprocesses inherit the restriction because `PR_SET_NO_NEW_PRIVS` is set. Python's `open()` is the same `openat()` syscall. There's no path out from inside the process.
+
+> This is what *"irrevocable by design"* means. The kernel enforces the policy, not userspace. A compromised agent cannot ask politely to be let out.
+
+<!-- fold:break -->
+
+**Step 4 — Static vs dynamic.** Recall that in Exercise 1 you added a new network rule with `openshell policy set --wait` and it applied instantly. Try that for filesystem:
+
+```bash
+# (Host terminal)
+cat > fs-widen.yaml <<'EOF'
+filesystem_policy:
+  read_write:
+    - /sandbox
+    - /tmp
+    - /dev/null
+    - /etc
+EOF
+openshell policy set my-assistant --policy fs-widen.yaml --wait
+```
+
+Expected: the command either rejects the filesystem field as immutable, or silently accepts it but the restriction doesn't apply. **Filesystem policy is creation-time only.** To change it, you destroy and recreate the sandbox with `nemoclaw my-assistant destroy` + re-onboard. This is intentional: the strongest containment boundary shouldn't be reachable from operational-speed workflows.
+
+<!-- fold:break -->
+
+**Step 5 — Python sidekick: extend the validator.** Re-open <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 1');"><i class="fas fa-code"></i> load_and_validate_policy</button>. Your policy validator already flags broad `read_write` paths — confirm it catches `baseline_permissive.yaml`, which writes to `/`:
+
+```bash
+python -c "from agent_safety import load_and_validate_policy; r = load_and_validate_policy('policies/baseline_permissive.yaml'); [print(v.rule, '->', v.description) for v in r.violations]"
+```
+
+Expected output includes:
+
+```text
+overly_broad_write -> Write access to '/' is overly broad — agent can modify system files
+```
+
+This is why static validation is important: the policy that *ships* dictates the policy that *protects*. A mistake here isn't recoverable without a sandbox rebuild.
+
+<!-- fold:break -->
+
+#### Part B: Process hardening (seccomp + non-root + dropped capabilities)
+
+Filesystem containment keeps the agent out of places it shouldn't be. Process hardening keeps the agent from *becoming something it shouldn't be*.
+
+**Step 1 — Confirm non-root identity.** Inside the sandbox:
+
+```bash
+whoami
+id
+```
+
+Expected: `sandbox` user, `sandbox` group, no sudoer status. This is the `process.user` field you saw in Exercise 1's policy.
+
+<!-- fold:break -->
+
+**Step 2 — Try to escalate.** Still inside:
+
+```bash
+sudo -n whoami 2>&1 | head -1
+```
+
+Expected: `sudo: a password is required` or similar — sudo is refused because capabilities are dropped and no-new-privileges is set.
+
+<!-- fold:break -->
+
+**Step 3 — Try dangerous syscalls (seccomp BPF).** Try mount, ptrace, and unshare:
+
+```bash
+mount -t tmpfs tmpfs /mnt 2>&1 | head -1
+unshare -U bash -c whoami 2>&1 | head -1
+python3 -c "import ctypes; ctypes.CDLL('libc.so.6').ptrace(0, 0, 0, 0)"
+```
+
+Expected: the first two fail with `Operation not permitted`. The ptrace call returns `-1` with `errno=EPERM` or triggers `Bad system call` — seccomp BPF filters these syscalls before they reach the kernel's main dispatch.
+
+> **seccomp BPF** is the mechanism. It maintains a list of allowed syscalls and rejects the rest. `mount()`, `ptrace()`, `reboot()`, `kexec_load()`, `unshare()` with CLONE_NEWUSER — all in the rejection list.
+
+<!-- fold:break -->
+
+**Step 4 — Confirm toolchain is absent.** A compromised agent with full shell access still can't compile an exploit:
+
+```bash
+which gcc g++ make netcat nc 2>&1 | head -5
+```
+
+Expected: all report `not found`. The sandbox image is minimized — development tools are removed at build time, so an attacker who achieves code execution still has to bring their own toolchain.
+
+<!-- fold:break -->
+
+<details>
+<summary><strong>What process hardening adds up to</strong></summary>
+
+Put together, Layer 3's defenses are:
+
+| Mechanism | What it blocks |
+|---|---|
+| `run_as_user: sandbox` | Ambient privilege — the process was never root |
+| Dropped capabilities (`CAP_NET_RAW`, `CAP_DAC_OVERRIDE`, `CAP_SYS_CHROOT`, etc.) | Fine-grained root-equivalent operations |
+| `PR_SET_NO_NEW_PRIVS` | Privilege escalation via `execve()` of a setuid binary |
+| seccomp BPF filter | Dangerous syscalls (`mount`, `ptrace`, `reboot`, `kexec_load`, `unshare(CLONE_NEWUSER)`) |
+| Toolchain removal | Compiling new payloads in place |
+| `ulimit -u 512` | Fork-bomb resource exhaustion |
+
+Even if the agent is compromised, the blast radius is bounded — not zero, but well below what vanilla OpenClaw would have offered.
+
+</details>
+
+<!-- fold:break -->
+
+> **What you just learned:** kernel-level containment gives you guarantees you cannot get from userspace controls. The tradeoff is rigidity — you cannot change these at operational speed. That's the price of irrevocability, and it is usually the right price to pay for the strongest boundary in your defense-in-depth stack.
+
+<!-- fold:break -->

@@ -234,3 +234,101 @@ Expected: `False 3` — three violations, not safe. The same validator wired int
 > **What you just learned:** deny-by-default is the posture, hot-reload is the operational affordance, and programmatic validation is the safety net that catches policy regressions before they hit production.
 
 <!-- fold:break -->
+
+### Exercise 2: Not all allow-rules are equal
+
+> *Layer: **Network** (L7 vs L4) · Continues from Exercise 1*
+
+You wrote `access: read-only` in Exercise 1. Let's find out what that actually enforces — and what it doesn't.
+
+<!-- fold:break -->
+
+**Step 1 — Try a POST against a read-only endpoint.** From inside the sandbox:
+
+```bash
+curl -s -X POST https://httpbin.org/post -H "Content-Type: application/json" -d '{"test": true}'
+```
+
+Expected: the request is blocked at the L7 layer. Check the deny from a host terminal:
+
+```bash
+openshell logs my-assistant --since 2m | grep "OCSF HTTP"
+```
+
+Look for a line like:
+
+```text
+OCSF HTTP:POST [MED] DENIED POST https://httpbin.org/post [policy:httpbin_access engine:opa]
+```
+
+The proxy terminated TLS, inspected the HTTP request, saw a POST method, and denied it because the policy said `access: read-only`. This is L7 — layer 7 — enforcement.
+
+<!-- fold:break -->
+
+**Step 2 — Remove the L7 hint.** Modify your `httpbin-readonly.yaml`: change `protocol: rest` to `protocol: tcp` (or omit the `protocol:` line entirely). Reapply:
+
+```bash
+openshell policy set my-assistant --policy httpbin-readonly.yaml --wait
+```
+
+Retry the POST:
+
+```bash
+curl -s -X POST https://httpbin.org/post -H "Content-Type: application/json" -d '{"test": true}'
+```
+
+This time it succeeds. **Why?** Without `protocol: rest`, the proxy treats the rule as plain TCP — binary/host/port match pass, then *any* payload tunnels through. `access: read-only` is irrelevant at the TCP layer because the proxy isn't inspecting the HTTP method.
+
+<!-- fold:break -->
+
+**Step 3 — Restore the L7 hint.** Change `protocol` back to `rest`. Reapply. POST is blocked again.
+
+> **The gotcha:** `access: read-only` only means something if `protocol: rest` is set. A policy that looks restrictive can be coarse in practice.
+
+<!-- fold:break -->
+
+<details>
+<summary><strong>When to use `protocol: tcp` intentionally</strong></summary>
+
+Not every protocol is HTTP. Database connections (PostgreSQL, Redis), gRPC, SSH, raw socket APIs — all need TCP-level rules because the proxy can't parse the payload. For those, you write allow-rules at the host+port level and accept that any client-side code with permission to open the socket can do whatever the protocol supports.
+
+The rule is: use `protocol: rest` whenever the agent is making HTTP/S calls (which is most of the time for LLM-era agents), because it gives you per-method control. Fall back to `protocol: tcp` only for non-HTTP protocols.
+
+</details>
+
+<!-- fold:break -->
+
+**Step 4 — Per-binary scoping.** One more subtlety. Add another binary to your policy and observe that a rule for `/usr/bin/curl` does **not** cover `/usr/bin/python3`:
+
+```yaml
+network_policies:
+  httpbin_access:
+    name: httpbin-readonly
+    endpoints:
+      - host: httpbin.org
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        access: read-only
+    binaries:
+      - { path: /usr/bin/curl }
+      # /usr/bin/python3 is NOT listed
+```
+
+Apply, then from the sandbox:
+
+```bash
+python3 -c "import urllib.request; print(urllib.request.urlopen('https://httpbin.org/ip').read())"
+```
+
+Expected: a `urllib.error.URLError` — the proxy denied Python because Python isn't in the binary list, even though curl is allowed to reach the same endpoint.
+
+Add `- { path: /usr/bin/python3 }` to `binaries`, reapply, re-run. Python now succeeds.
+
+> **Per-binary scoping is how you give one tool access to an endpoint without giving every tool access.** It turns "can reach httpbin.org" into "curl can reach httpbin.org" — a real least-privilege boundary.
+
+<!-- fold:break -->
+
+> **What you just learned:** three things make a network allow-rule precise — (1) the host+port, (2) the HTTP method constraint via `protocol: rest` + `access`, and (3) which binary is invoking the rule. Leave any one coarse and you've left room for unexpected behavior.
+
+<!-- fold:break -->

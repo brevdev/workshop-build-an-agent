@@ -1130,3 +1130,35 @@ When the suite fails, the component scores tell you *where*:
 > **What you just learned:** the evaluation pattern itself is reusable — rubric → LLM chain → parse → aggregate, with Module 3's quality framework the direct analogue. What changes is the axis: M3 asks *is the agent helpful?*, M6 asks *is the agent controlled?* Running both on every deployment is how you know your agent is both capable and safe.
 
 <!-- fold:break -->
+
+## Module Wrap-Up
+
+Step back and look at what you've built across all six modules:
+
+| Module | What You Built | Key Safety Pattern |
+|--------|----------------|-------------------|
+| 1 | Report generation agent | Tool selection and scoping |
+| 2 | RAG-augmented IT help desk | Data access boundaries |
+| 3 | Evaluation pipelines | Adversarial test cases |
+| 4 | Customized CLI agent via SDG + RLVR | Human-in-the-loop + command allowlists |
+| 5 | Deep agent with Docker sandboxing | Container isolation + resource limits |
+| **6** | **Hardened autonomous agent with continuous safety evaluation** | **Kernel-level enforcement (OpenShell) + Data routing (Privacy Router) + Continuous evaluation** |
+
+Each level of capability demanded a matching level of discipline. Module 6 closes the loop: your autonomous agent is not just contained — it is **evaluated, tested, and continuously verified**.
+
+<!-- fold:break -->
+
+## What to Explore Next
+
+Agent safety is the discipline — NemoClaw is one implementation. The tools and references below let you go deeper:
+
+- **[NVIDIA NemoClaw](https://github.com/NVIDIA/NemoClaw)** — The full reference stack in one deployable package
+- **[NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell)** — Kernel-level agent runtime with Landlock, seccomp, and the inference gateway
+- **[OpenShell Policy Schema](https://docs.nvidia.com/openshell/latest/reference/policy-schema.html)** — Complete YAML reference
+- **[OpenClaw Documentation](https://docs.openclaw.ai/)** — Config-first autonomous agent framework
+- **[NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails)** — Complementary input/output filtering for LLM interactions
+- **[OWASP Top 10 for Agentic Applications](https://genai.owasp.org/)** — Industry-standard taxonomy of agent threats
+
+<!-- fold:break -->
+
+> **Congratulations!** You've completed Module 6: Agent Safety with NemoClaw. You now have an end-to-end toolkit — from building your first agent to deploying autonomous agents with kernel-level enforcement, data-aware routing, and continuous safety verification. Go ship something safely.

@@ -4,6 +4,8 @@
 
 The Agent Customization Workshop teaches you how to **customize AI agents for specific domains** using NVIDIA technology. You'll transform a generic bash agent into a **LangGraph CLI expert** using Synthetic Data Generation (SDG) and Reinforcement Learning with Verifiable Rewards (RLVR).
 
+> While a DGX Spark (GB10) is supported, running this module on an A100-80GB or larger instance is highly recommended for faster training due to memory bandwidth constraints.
+
 This workshop demonstrates a **generalizable pattern** that applies to customizing any AI agent. At the end of the workshop, you will take home:
 
 - A **customized bash agent** that expertly handles LangGraph CLI commands

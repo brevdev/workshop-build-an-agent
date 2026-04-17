@@ -307,6 +307,8 @@ trainer = GRPOTrainer(
 
 Run `trainer.train()` notebook cell — depending on the number of iterations, this cell should take around **1 - 1.5 hours** to complete on an A100/H100.
 
+> While the notebook should run on a DGX Spark (GB10), we highly recommend an A100/H100 GPU instance for faster training due to memory bandwidth constraints. 
+
 The customized model should appear in this location when completed: `outputs/grpo_langgraph_cli/merged_model/`. 
 
 <!-- fold:break -->

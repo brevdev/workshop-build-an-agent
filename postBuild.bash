@@ -99,9 +99,17 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
 fi
 
 # Install Mamba/Nemotron CUDA extensions (must be built with CUDA + torch present)
-# TORCH_CUDA_ARCH_LIST covers A100 (8.0), H100 (9.0), and DGX Spark GB10 (12.1)
-# CUDA_HOME/PATH/LD_LIBRARY_PATH were exported above so nvcc is reachable
-export TORCH_CUDA_ARCH_LIST="8.0;9.0;12.1"
+# TORCH_CUDA_ARCH_LIST is arch-specific to avoid wasted compile time:
+#   - x86_64: sm_80 (A100) + sm_90 (H100); sm_121 (Grace-Blackwell) is aarch64-exclusive
+#   - aarch64: sm_80 + sm_90 + sm_121, covering A100/H100 (if present) + GB10 Spark
+# Narrowing x86_64 to 2 SM targets cuts mamba-ssm+causal-conv1d compile time by ~1/3
+# (single-kernel compile cost multiplies linearly with number of targets).
+# CUDA_HOME/PATH/LD_LIBRARY_PATH were exported above so nvcc is reachable.
+if [ "$ARCH" = "x86_64" ]; then
+    export TORCH_CUDA_ARCH_LIST="8.0;9.0"
+else
+    export TORCH_CUDA_ARCH_LIST="8.0;9.0;12.1"
+fi
 echo "Building causal-conv1d and mamba-ssm for TORCH_CUDA_ARCH_LIST=$TORCH_CUDA_ARCH_LIST..."
 
 pip install --no-build-isolation "causal-conv1d @ git+https://github.com/Dao-AILab/causal-conv1d.git@v1.5.2"

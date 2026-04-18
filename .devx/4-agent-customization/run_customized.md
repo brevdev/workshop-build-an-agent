@@ -30,28 +30,7 @@ The key difference from the base agent in `bash_agent.ipynb`: instead of calling
 
 ## Run the Agent: Hands-on Implementation
 
-### Exercise: Adjust the Allow List
-
-We have customized the reasoning process and domain knowledge of our agent's model. Now, it's time to update the customized agent to be able to actually use the new information it's learned.
-
-Open the agent's <button onclick="goToLineAndSelect('code/4-agent-customization/bash_agent/config.py', 'allowed_commands: List[str] = field(default_factory=lambda:');"><i class="fas fa-code"></i> allow list</button> — Add to the agent's allowed list of commands.
-
-Let's add ``langgraph`` as a viable command to the agent's  `allowed_commands` list.
-
-<details>
-<summary>🆘  Need some help?</summary>
-
-```python
-allowed_commands: List[str] = field(default_factory=lambda: [
-    "cd", "cp", "ls", "cat", "find", "touch", "echo", "grep", "pwd",
-    "mkdir", "wget", "sort", "head", "tail", "du", "wc", "file", "langgraph"
-])
-```
-</details>
-
-<!-- fold:break -->
-
-Now, let's run our customized agent. Open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/03_run_agent.ipynb');"><i class="fa-solid fa-flask"></i> 03_run_agent.ipynb</button>
+Open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/03_run_agent.ipynb');"><i class="fa-solid fa-flask"></i> 03_run_agent.ipynb</button>
 
 ### Exercise: Load Model
 

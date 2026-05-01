@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status
 
+# Some workbench base images don't ship npm. Install it before using `n`.
+command -v npm >/dev/null 2>&1 || { sudo apt-get update && sudo apt-get install -y npm; }
+
 sudo npm install n -g
 sudo n stable
 

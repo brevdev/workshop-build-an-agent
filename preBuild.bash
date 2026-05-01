@@ -27,6 +27,7 @@ sudo python3.12 -m ensurepip --upgrade
 sudo ln -s $(which python3.12) /usr/local/bin/python
 sudo ln -s $(which pip3.12) /usr/local/bin/pip
 sudo pip install --upgrade setuptools pip
+sudo apt install python3.12-venv
 
 # configure custom docker apt repo
 sudo mkdir -p /etc/apt/keyrings

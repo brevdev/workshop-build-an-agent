@@ -18,15 +18,30 @@ export NGC_API_KEY=\$NVIDIA_API_KEY
 export NGC_CLI_API_KEY=\$NVIDIA_API_KEY
 EOM
 
-# upgrade to python 3.12
-sudo add-apt-repository -y ppa:deadsnakes/ppa
-sudo apt-get update -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3.12 python3.12-dev python3.12-venv
-sudo rm -rf /usr/bin/pip*
-sudo python3.12 -m ensurepip --upgrade
-sudo ln -s $(which python3.12) /usr/local/bin/python
-sudo ln -s $(which pip3.12) /usr/local/bin/pip
-sudo pip install --upgrade setuptools pip
+# Install Python 3.12 from python-build-standalone (pre-built CPython tarball).
+# NOTE: This block previously used deadsnakes PPA via add-apt-repository, but
+# launchpadlib times out reaching api.launchpad.net from some Brev networks
+# (e.g. Crusoe). python-build-standalone is a single tarball served from
+# github.com, which is reliably reachable. deepagents (and other deps in
+# requirements.txt) require Python >= 3.11, so 3.10 fallback is not viable.
+ARCH=$(uname -m)
+PBS_DATE="20260414"
+PY_VERSION="3.12.13"
+if [ "$ARCH" = "x86_64" ]; then
+    PBS_TRIPLE="x86_64-unknown-linux-gnu"
+elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+    PBS_TRIPLE="aarch64-unknown-linux-gnu"
+else
+    echo "Unsupported architecture: $ARCH"; exit 1
+fi
+PBS_URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_DATE}/cpython-${PY_VERSION}%2B${PBS_DATE}-${PBS_TRIPLE}-install_only.tar.gz"
+echo "Downloading Python ${PY_VERSION} from python-build-standalone..."
+curl -fsSL "$PBS_URL" | sudo tar -xz -C /opt/
+sudo ln -sf /opt/python/bin/python3.12 /usr/local/bin/python3.12
+sudo ln -sf /opt/python/bin/pip3.12 /usr/local/bin/pip3.12
+sudo ln -sf /opt/python/bin/python3.12 /usr/local/bin/python
+sudo ln -sf /opt/python/bin/pip3.12 /usr/local/bin/pip
+sudo /opt/python/bin/pip3.12 install --upgrade setuptools pip
 
 # configure custom docker apt repo
 sudo mkdir -p /etc/apt/keyrings

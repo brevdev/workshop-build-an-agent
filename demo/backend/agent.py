@@ -28,7 +28,7 @@ checkpointer = MemorySaver()
 
 # Map UI model IDs to NVIDIA NIM model strings (verified available)
 MODEL_MAP = {
-    "nemotron": "nvidia/llama-3.3-nemotron-super-49b-v1.5",
+    "nemotron": "nvidia/nemotron-3-super-120b-a12b",
     "llama": "meta/llama-3.3-70b-instruct",
     "deepseek": "deepseek-ai/deepseek-r1-0528",
     "claude": "meta/llama-3.3-70b-instruct",

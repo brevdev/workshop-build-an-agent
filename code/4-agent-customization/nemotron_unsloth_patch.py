@@ -1,14 +1,28 @@
 """
-Monkey-patch for Nemotron models to work with Unsloth's efficient GRPO implementation.
+Monkey-patches for the Nemotron-H remote modeling code, applied to the loaded
+model class at runtime.
 
-Nemotron uses custom modeling code (modeling_nemotron_h.py) that doesn't respect
-Unsloth's UNSLOTH_RETURN_HIDDEN_STATES environment variable. This patch fixes that.
+Two distinct bugs are fixed:
+
+1. Forward pass doesn't respect UNSLOTH_RETURN_HIDDEN_STATES. Unsloth's efficient
+   GRPO implementation expects the model to return hidden states in the `logits`
+   field when that env var is set; Nemotron's custom modeling code ignores it.
+   We wrap `forward` to honor the flag.
+
+2. `prepare_inputs_for_generation` crashes on transformers 5.x. The remote code
+   was written against transformers 4.x's contract where `cache_position` was
+   always non-None at call time. transformers 5.x's new `_prefill()` path can
+   pass `cache_position=None`, which causes `TypeError: 'NoneType' object is
+   not subscriptable` on `cache_position[-1]`. We wrap the method to
+   reconstruct `cache_position` from `past_key_values` when it's missing —
+   exactly what transformers 5.x's native NemotronH implementation does via
+   its GenerationMixin parent.
 
 Usage:
     from nemotron_unsloth_patch import patch_nemotron_for_unsloth_grpo
-    
+
     model, tokenizer = FastLanguageModel.from_pretrained(...)
-    patch_nemotron_for_unsloth_grpo(model)
+    patch_nemotron_for_unsloth_grpo(model)  # applies both patches above
     model = FastLanguageModel.get_peft_model(model, ...)
 """
 
@@ -124,6 +138,65 @@ def patch_nemotron_for_unsloth_grpo(model):
     causal_lm.__class__.forward = patched_forward
     causal_lm.__class__._unsloth_patched = True
     print(f"✓ Patched {model_class_name}.forward for Unsloth GRPO compatibility")
+
+    # Also patch prepare_inputs_for_generation for transformers 5.x compat.
+    _patch_prepare_inputs_for_generation(causal_lm, model_class_name)
+
+
+def _patch_prepare_inputs_for_generation(causal_lm, model_class_name):
+    """
+    Null-handle cache_position in NemotronH.prepare_inputs_for_generation.
+
+    The HF Hub remote modeling code for nvidia/NVIDIA-Nemotron-Nano-9B-v2 was
+    written against transformers 4.x, where cache_position was guaranteed
+    non-None when past_key_values was present. transformers 5.x's _prefill()
+    can pass cache_position=None, causing the remote code to crash at
+    `cache_position[-1]` with TypeError.
+
+    Mirrors transformers 5.x's native NemotronH implementation, which inherits
+    GenerationMixin.prepare_inputs_for_generation — that parent method
+    reconstructs cache_position from past_key_values' seq length when missing.
+    """
+    import torch
+
+    if getattr(causal_lm.__class__, '_cache_position_patched', False):
+        print(f"✓ {model_class_name}.prepare_inputs_for_generation already patched")
+        return
+
+    original_prep = causal_lm.__class__.prepare_inputs_for_generation
+
+    def patched_prep(self, input_ids, past_key_values=None, attention_mask=None,
+                     inputs_embeds=None, cache_position=None, position_ids=None,
+                     use_cache=True, **kwargs):
+        if cache_position is None and past_key_values is not None:
+            past_length = 0
+            if hasattr(past_key_values, 'get_seq_length'):
+                try:
+                    past_length = past_key_values.get_seq_length()
+                except Exception:
+                    past_length = 0
+            elif hasattr(past_key_values, 'seqlen_offset'):
+                past_length = past_key_values.seqlen_offset
+            cache_position = torch.arange(
+                past_length,
+                past_length + input_ids.shape[1],
+                device=input_ids.device,
+            )
+        return original_prep(
+            self,
+            input_ids=input_ids,
+            past_key_values=past_key_values,
+            attention_mask=attention_mask,
+            inputs_embeds=inputs_embeds,
+            cache_position=cache_position,
+            position_ids=position_ids,
+            use_cache=use_cache,
+            **kwargs,
+        )
+
+    causal_lm.__class__.prepare_inputs_for_generation = patched_prep
+    causal_lm.__class__._cache_position_patched = True
+    print(f"✓ Patched {model_class_name}.prepare_inputs_for_generation for cache_position=None handling (transformers 5.x compat)")
 
 
 def verify_patch(model, tokenizer):

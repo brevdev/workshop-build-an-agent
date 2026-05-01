@@ -6,7 +6,7 @@ Here are the current mappings — **these will need updating once you finalize y
 
 ```typescript
 // Model blocks → which LLM to use
-'NVIDIA'  → 'nemotron'   // nvidia/llama-3.3-nemotron-super-49b-v1.5
+'NVIDIA'  → 'nemotron'   // nvidia/nemotron-3-super-120b-a12b
 'Meta'    → 'llama'      // meta/llama-3.3-70b-instruct
 'Claude'  → 'claude'     // fallback to llama for now
 'Google'  → 'deepseek'   // deepseek-ai/deepseek-r1-0528

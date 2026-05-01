@@ -109,7 +109,7 @@ If Docker isn't available, the backend falls back to local execution with a warn
 
 ### LLM Picker
 Choose your foundation model — each has a brand color that themes the entire UI:
-- **Nemotron** (NVIDIA) — `nvidia/llama-3.3-nemotron-super-49b-v1.5` with variant picker (General, Finance, Code, Legal)
+- **Nemotron** (NVIDIA) — `nvidia/nemotron-3-super-120b-a12b` with variant picker (General, Finance, Code, Legal)
 - **Llama** (Meta) — `meta/llama-3.3-70b-instruct`
 - **DeepSeek** — `deepseek-ai/deepseek-r1-0528`
 - **Claude** (Anthropic) — fallback to Llama

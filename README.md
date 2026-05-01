@@ -1,6 +1,6 @@
-# Build An Agent Workshop [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-32kC34ErT9wsqTcJyaKMxBEuhr2)
+# Build An Agent Workshop  [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-32kC34ErT9wsqTcJyaKMxBEuhr2)
 
-The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through five progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating and improving agent performance.
+The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through six progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating, improving, and securing agent performance.
 
 This workshop provides everything you need to become proficient in agentic AI development:
 
@@ -8,18 +8,19 @@ This workshop provides everything you need to become proficient in agentic AI de
 * **Module 2 - Agentic RAG**: Build an IT Help Desk agent using RAG with NVIDIA NeMo Retriever
 * **Module 3 - Agent Evaluation**: Learn to measure and improve agent quality using RAGAS metrics and LLM-as-a-judge techniques
 * **Module 4 - Agent Customization**: Customize your agent beyond prompt engineering and tools with agent skills and reinforcement learning (RL).
-* **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation. 
+* **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation.
+* **Module 6 - Agent Safety**: Secure autonomous agents with kernel-level enforcement (OpenShell), data sensitivity routing (Privacy Router), red-team testing, and continuous safety evaluation using NVIDIA's NemoClaw stack.
 
 At the end of this workshop, you will take home:
 
 * Deep understanding of agent architecture and design patterns
-* Five working agents demonstrating different capabilities
+* Six working agents demonstrating different capabilities
 * Knowledge of NVIDIA NIM, NeMo models, and evaluation tools
 * Comprehensive evaluation framework for production agents
 * A turn-key, portable development environment
 * Best practices for continuous agent improvement
 
-The entire workshop can take anywhere from 10 to 15 hours to complete, depending on depth of exploration.
+The entire workshop can take anywhere from 12 to 18 hours to complete, depending on depth of exploration.
 
 ## Workshop Modules
 
@@ -86,6 +87,21 @@ Build autonomous agents that handle complex, multi-step tasks with planning and 
 - Using NVIDIA NIM models with the deepagents library
 - Production isolation patterns (Docker, resource limits)
 
+### Module 6: Agent Safety (2-2.5 hours)
+
+Secure autonomous agents with kernel-level enforcement, data routing, and continuous safety evaluation.
+
+**What you'll build**: A safety evaluation suite that validates OpenShell policies, classifies sensitive data for local/cloud routing, runs red-team probes against a live OpenClaw agent, and scores agent behavior using LLM-as-judge — the same patterns used in NVIDIA's NemoClaw stack.
+
+**Key concepts**:
+- Why application-level controls (M4) and container isolation (M5) are insufficient for always-on agents
+- Setting up and running an OpenClaw autonomous agent
+- Kernel-level enforcement with OpenShell (Landlock LSM, seccomp BPF, OPA proxy)
+- Data sensitivity classification and local/cloud routing (Privacy Router)
+- Red-team testing with adversarial probes
+- Safety evaluation using LLM-as-judge (extending M3's evaluation framework)
+- The NemoClaw reference architecture (OpenClaw + OpenShell + Nemotron + Privacy Router)
+
 ## Learning Objectives
 
 By the end of this workshop, you'll know how to:
@@ -95,6 +111,7 @@ By the end of this workshop, you'll know how to:
 - **Use NVIDIA technology** including NIM, Nemotron models, and NeMo Retriever
 - **Customize agents** through synthetic data generation and reinforcement learning
 - **Build deep agents** with planning, delegation, and sandboxed execution
+- **Secure agents** with kernel-level enforcement, data classification, and red-team evaluation
 - **Deploy and monitor** agents in production environments
 - **Continuously improve** agent performance through systematic evaluation
 

@@ -228,8 +228,7 @@ GRPO computes that Response #1 scored above the group average and reinforces its
 Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> window — Start reward server:
 
 ```bash
-cd code/4-agent-customization/nemo_gym_resources/langgraph_cli
-uvicorn app:app --host 0.0.0.0 --port 8000
+cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
 Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/02_grpo_training.ipynb');"><i class="fa-solid fa-flask"></i> 02_grpo_training.ipynb</button>
@@ -307,6 +306,8 @@ trainer = GRPOTrainer(
 ### Train the Agent
 
 Run `trainer.train()` notebook cell — depending on the number of iterations, this cell should take around **1 - 1.5 hours** to complete on an A100/H100.
+
+> While the notebook should run on a DGX Spark (GB10), we highly recommend an A100/H100 GPU instance for faster training due to memory bandwidth constraints. 
 
 The customized model should appear in this location when completed: `outputs/grpo_langgraph_cli/merged_model/`. 
 

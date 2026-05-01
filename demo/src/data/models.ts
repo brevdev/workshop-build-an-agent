@@ -34,7 +34,7 @@ export const nemotronVariants: NemotronVariant[] = [
     color: '#76B900',
     glowColor: 'rgba(118, 185, 0, 0.4)',
     available: true,
-    backendModel: 'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+    backendModel: 'nvidia/nemotron-3-super-120b-a12b',
   },
   {
     id: 'nemotron-finance',
@@ -45,7 +45,7 @@ export const nemotronVariants: NemotronVariant[] = [
     color: '#0088FF',
     glowColor: 'rgba(0, 136, 255, 0.4)',
     available: true,
-    backendModel: 'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+    backendModel: 'nvidia/nemotron-3-super-120b-a12b',
   },
   {
     id: 'nemotron-code',
@@ -56,7 +56,7 @@ export const nemotronVariants: NemotronVariant[] = [
     color: '#A855F7',
     glowColor: 'rgba(168, 85, 247, 0.4)',
     available: true,
-    backendModel: 'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+    backendModel: 'nvidia/nemotron-3-super-120b-a12b',
   },
   {
     id: 'nemotron-legal',
@@ -67,7 +67,7 @@ export const nemotronVariants: NemotronVariant[] = [
     color: '#F59E0B',
     glowColor: 'rgba(245, 158, 11, 0.4)',
     available: true,
-    backendModel: 'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+    backendModel: 'nvidia/nemotron-3-super-120b-a12b',
   },
 ];
 
@@ -82,7 +82,7 @@ export const models: ModelDef[] = [
     accentColor: '#8dc63f',
     glowColor: 'rgba(118, 185, 0, 0.4)',
     subtleColor: 'rgba(118, 185, 0, 0.1)',
-    backendModel: 'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+    backendModel: 'nvidia/nemotron-3-super-120b-a12b',
     recommendedSkills: ['websearch', 'superpowers', 'rag'],
   },
   {

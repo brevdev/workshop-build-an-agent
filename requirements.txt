@@ -25,5 +25,8 @@ scikit-learn~=1.6.0
 streamlit~=1.49.1
 tavily-python~=0.7.19
 voila
-unsloth
-vllm
+torch==2.10.0
+unsloth==2026.4.4
+unsloth-zoo==2026.4.6
+trl==0.24.0
+transformers==5.5.0

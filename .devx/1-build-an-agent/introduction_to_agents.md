@@ -45,7 +45,7 @@ The model is your agent's brain - it reads the conversation, decides what to do 
 - **Follows instructions reliably**: Agents depend on the model respecting system prompts and constraints
 - **Reasons well**: Multi-step tasks require the model to plan and adapt
 
-In this workshop, we use **NVIDIA Nemotron 3 Nano (30B)** - a model tuned for a good balance of speed, cost, and reasoning ability. It's hosted on NVIDIA's API catalog, so you can get started without local GPU setup.
+In this workshop, we use **NVIDIA Nemotron 3 Super (120B)** - a powerful model with strong reasoning ability. It's hosted on NVIDIA's API catalog, so you can get started without local GPU setup.
 
 ### System Prompts
 

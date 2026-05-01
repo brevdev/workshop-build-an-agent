@@ -11,7 +11,7 @@ from tools import search_tavily
 # Load configuration
 API_KEY = os.environ["NVIDIA_API_KEY"]
 MODEL_URL = "https://integrate.api.nvidia.com/v1"
-MODEL_NAME = "nvidia/nemotron-3-nano-30b-a3b"
+MODEL_NAME = "nvidia/nemotron-3-super-120b-a12b"
 
 # Initialize the LLM
 llm = ChatOpenAI(

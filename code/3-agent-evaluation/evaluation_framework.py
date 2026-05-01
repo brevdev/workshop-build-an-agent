@@ -16,7 +16,7 @@ from pydantic import BaseModel
 _LOGGER = logging.getLogger(__name__)
 
 # Model Configuration
-JUDGE_MODEL = "nvidia/nemotron-3-nano-30b-a3b"
+JUDGE_MODEL = "nvidia/nemotron-3-super-120b-a12b"
 EMBEDDING_MODEL = "nvidia/llama-3.2-nv-embedqa-1b-v2"
 
 
@@ -469,6 +469,7 @@ def evaluate_report_quality(
         return {
             "structure": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="structure"),
             "content": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="content"),
+            "coverage": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="coverage"),
             "accuracy": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="accuracy"),
             "writing": EvaluationResult(score=0.0, explanation="Parse failed", metric_name="writing"),
         }

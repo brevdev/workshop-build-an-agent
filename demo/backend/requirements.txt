@@ -3,7 +3,7 @@ fastapi
 uvicorn[standard]
 sse-starlette
 tavily-python
-langchain-nvidia-ai-endpoints==1.0.3
+langchain-nvidia-ai-endpoints==1.2.1
 langchain-community
 langchain
 langchain-classic

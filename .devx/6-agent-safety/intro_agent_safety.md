@@ -142,12 +142,14 @@ Container isolation answers "where can the agent run?" but not "what data should
 
 These gaps map to different enforcement layers. Each layer adds protection that the previous layers cannot provide.
 
+> **A note on roles.** Throughout this module, the **operator** is the human (or automation acting on their behalf) with host-level access to the OpenShell gateway — the role that configures providers, sets the active inference backend, and applies policies. The **agent** runs inside the sandbox and cannot perform these actions; the **end user** sends prompts to the agent and is one step further removed. The distinction matters because much of M6's security story is *"the operator's configuration is enforced even when the agent is compromised."*
+
 | Dimension | Application-Level (M4) | Container Isolation (M5) | Kernel-Level + Data Routing (M6) |
 |-----------|----------------------|------------------------|--------------------------------|
 | **Enforcement layer** | Python code | Container runtime | Linux kernel (Landlock LSM) |
 | **Bypass difficulty** | Medium — regex evasion, encoding tricks | Hard — requires container escape | Very hard — kernel enforces, process designed to be unable to lift |
 | **Granularity** | Per-command | Per-container | Per-file, per-endpoint, per-binary |
-| **Data awareness** | None | None | Classification-based routing |
+| **Data awareness** | None | None | Operator-controlled routing + classifier hook |
 | **Human dependency** | High (HITL) | Low (set-and-forget) | None (policy is self-enforcing) |
 | **Drift resilience** | Low — static allowlists | Medium — container config is fixed | High — kernel policy survives agent evolution |
 
@@ -167,7 +169,7 @@ The agent's command allowlist blocks `cat /etc/environment`. But the injection d
 Docker prevents the agent from accessing `/etc/environment` on the host. But inside the container, the agent may have access to its own environment variables (API keys injected for tool use). The container doesn't prevent the agent from *saying* what it knows.
 
 **Kernel enforcement + data routing (M6):**
-OpenShell's Landlock policy restricts `/etc/environment` to read-only for the agent process, and the network policy blocks outbound connections except to the approved LLM endpoint. Even if the injection succeeds at the prompt level, the agent faces significantly higher barriers to exfiltrating data because the kernel blocks the network path. The Privacy Router would also flag any response containing API key patterns and help prevent it from reaching the cloud.
+OpenShell's Landlock policy restricts `/etc/environment` to read-only for the agent process, and the network policy blocks outbound connections except to the approved LLM endpoint. Even if the injection succeeds at the prompt level, the agent faces significantly higher barriers to exfiltrating data because the kernel blocks the network path. And because the Privacy Router routes inference through `inference.local` with credentials injected at the gateway, the API key is never in the agent's environment in the first place — there is nothing for the injection to print.
 
 **Continuous verification:**
 The safety eval suite would catch this in its next scheduled run — the red-team probe for prompt injection would detect that the agent attempted to comply with the override instruction.
@@ -221,7 +223,7 @@ Controls what the agent can execute. The agent runs as a non-root user with drop
 
 Controls which AI models the agent can use and how credentials are handled. The agent calls a local inference endpoint (`inference.local`) while the host manages provider credentials separately — the agent is designed to never have direct access to API keys.
 
-> In NemoClaw, **OpenShell routes all inference through the gateway**, which injects credentials from the host-side Provider record. The **Privacy Router** can also classify data sensitivity, steering queries with PII or proprietary content to a local model (like Nemotron) and routing public queries to a cloud endpoint for maximum capability.
+> In NemoClaw, **OpenShell routes all inference through the gateway**, which strips sandbox-supplied credentials and injects host-side ones from the configured Provider record. The **Privacy Router** enforces the operator's choice of one backend per gateway — a local model (like Nemotron) or a cloud endpoint — and supports hot-swapping the active backend without recreating sandboxes. Per-request, content-aware routing is a pattern you build on top of this primitive (covered in Exercise 5).
 
 <!-- fold:break -->
 

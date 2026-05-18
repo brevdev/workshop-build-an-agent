@@ -2,7 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="NemoClaw Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
-You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router classifies and routes data, and how Nemotron handles sensitive queries locally. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
+You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router isolates credentials and enforces the operator's choice of inference backend, and how Nemotron can serve as that backend when sensitive queries need to stay local. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
 
 Here's what your NemoClaw deployment will look like when we're done. The agent lives inside the sandbox; all its traffic passes through the proxy; and credentials are designed to stay outside the sandbox.
 

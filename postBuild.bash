@@ -115,7 +115,20 @@ if [ "$ARCH" = "x86_64" ]; then
 else
     export TORCH_CUDA_ARCH_LIST="12.1"
 fi
-echo "Building causal-conv1d and mamba-ssm for TORCH_CUDA_ARCH_LIST=$TORCH_CUDA_ARCH_LIST..."
+# Force gcc/g++ as the C/C++ compiler for from-source extension builds.
+# Our Python comes from python-build-standalone (see preBuild.bash), whose
+# upstream artifacts are compiled with clang — so sysconfig.get_config_var('CXX')
+# returns 'clang++'. setuptools then tries to invoke clang++, which isn't in
+# the image, and the build dies with "clang++: No such file or directory".
+# Torch's CUDA extensions are validated against g++ on Linux anyway (the
+# WRONG_COMPILER_WARNING explicitly names g++), and g++ is installed via apt.txt.
+# Note: the precompiled-wheel fallback masks this on x86_64 because causal-conv1d's
+# setup.py hardcodes a 'linux_x86_64' URL, so the wheel download succeeds there
+# and no source build happens. On aarch64 the URL 404s and we hit source build.
+export CC=gcc
+export CXX=g++
+
+echo "Building causal-conv1d and mamba-ssm for TORCH_CUDA_ARCH_LIST=$TORCH_CUDA_ARCH_LIST (CC=$CC CXX=$CXX)..."
 
 pip install --no-build-isolation "causal-conv1d @ git+https://github.com/Dao-AILab/causal-conv1d.git@v1.5.2"
 pip install --no-build-isolation "mamba-ssm @ git+https://github.com/state-spaces/mamba.git@v2.2.5"

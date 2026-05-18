@@ -1,6 +1,7 @@
 curl
 docker-ce-cli
 docker-compose-plugin
+g++
 gh
 git
 git-lfs

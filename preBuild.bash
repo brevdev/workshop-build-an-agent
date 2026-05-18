@@ -1,4 +1,15 @@
+#!/bin/bash
+set -e  # Fail fast so silent install failures don't cascade into corrupted apt sources / missing python3.12
+
 # install basic deps
+# NOTE: `apt-get update` is required first — the base image
+# (nvcr.io/nvidia/ai-workbench/python-basic) ships with a pruned
+# /var/lib/apt/lists/, so a bare `apt-get install` would fail to resolve
+# packages. If lsb-release silently fails to install here, the docker.list
+# write below evaluates `$(lsb_release -cs)` to empty and produces a
+# malformed apt source (missing Component field), which then breaks every
+# subsequent `apt-get update` in the build.
+sudo apt-get update
 sudo apt-get install -y software-properties-common lsb-release ca-certificates gnupg
 
 # configure user default profile

@@ -6,28 +6,35 @@ graph TB
             OC["OpenClaw Agent<br/>SOUL.md + HEARTBEAT.md<br/>Markdown memory"]
         end
 
+        subgraph "Application Layer (your code, Exercise 5)"
+            CL["Content Classifier<br/>PII / proprietary / public"]
+        end
+
         subgraph "Routing Layer"
-            PR["Privacy Router<br/>Data classification<br/>Local vs. Cloud routing"]
+            PR["Privacy Router (inference.local)<br/>Credential injection<br/>+ operator-chosen backend"]
         end
 
         subgraph "Inference Layer"
-            NEM["Nemotron 3 Nano 4B<br/>Local inference<br/>(sensitive data)"]
-            CLOUD["Cloud Frontier Model<br/>Remote inference<br/>(public data)"]
+            NEM["Nemotron 3 Nano 4B<br/>Local inference"]
+            CLOUD["Cloud Frontier Model<br/>Remote inference"]
         end
 
         subgraph "Enforcement Layer"
             OS["OpenShell Runtime<br/>Landlock + seccomp + network proxy"]
-            POL["Policy YAML<br/>filesystem + process + network"]
+            POL["Policy YAML + openshell inference set<br/>filesystem + process + network + backend"]
         end
     end
 
-    OC -->|"All queries"| PR
-    PR -->|"Restricted /<br/>Confidential"| NEM
-    PR -->|"Public"| CLOUD
+    OC -->|"All queries"| CL
+    CL -->|"Routes per sensitivity"| PR
+    PR -->|"When operator backend = local"| NEM
+    PR -->|"When operator backend = cloud"| CLOUD
     OS -->|"Enforces"| OC
     POL -->|"Configures"| OS
+    POL -.->|"Sets active backend"| PR
 
     style OC fill:#9c27b0,color:#fff
+    style CL fill:#ffeb3b,color:#000
     style PR fill:#ff9800,color:#000
     style NEM fill:#2196f3,color:#fff
     style CLOUD fill:#673ab7,color:#fff

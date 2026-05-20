@@ -9,7 +9,7 @@ This workshop provides everything you need to become proficient in agentic AI de
 * **Module 3 - Agent Evaluation**: Learn to measure and improve agent quality using RAGAS metrics and LLM-as-a-judge techniques
 * **Module 4 - Agent Customization**: Customize your agent beyond prompt engineering and tools with agent skills and reinforcement learning (RL).
 * **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation.
-* **Module 6 - Agent Safety**: Secure autonomous agents with kernel-level enforcement (OpenShell), data sensitivity routing (Privacy Router), red-team testing, and continuous safety evaluation using NVIDIA's NemoClaw stack.
+* **Module 6 - Agent Safety**: Secure autonomous agents with kernel-level enforcement (via OpenShell) and privacy routing using NVIDIA's NemoClaw stack.
 
 At the end of this workshop, you will take home:
 
@@ -91,13 +91,13 @@ Build autonomous agents that handle complex, multi-step tasks with planning and 
 
 Secure autonomous agents with kernel-level enforcement, data routing, and continuous safety evaluation.
 
-**What you'll build**: A safety evaluation suite that validates OpenShell policies, classifies sensitive data for local/cloud routing, runs red-team probes against a live OpenClaw agent, and scores agent behavior using LLM-as-judge — the same patterns used in NVIDIA's NemoClaw stack.
+**What you'll build**: An OpenClaw personal assistant agent that executes inside and outside of an Openshell sandbox, complete with network and filesystem policies that demonstrate how the NVIDIA NemoClaw reference stack improves agent security.
 
 **Key concepts**:
 - Why application-level controls (M4) and container isolation (M5) are insufficient for always-on agents
 - Setting up and running an OpenClaw autonomous agent
 - Kernel-level enforcement with OpenShell (Landlock LSM, seccomp BPF, OPA proxy)
-- Data sensitivity classification and local/cloud routing (Privacy Router)
+- Improved security for routing inference via a privacy router
 - Red-team testing with adversarial probes
 - Safety evaluation using LLM-as-judge (extending M3's evaluation framework)
 - The NemoClaw reference architecture (OpenClaw + OpenShell + Nemotron + Privacy Router)

@@ -29,7 +29,7 @@ Follow these steps to install OpenClaw and launch a personal assistant agent. Fu
 Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and install it with the official install script — this will also launch the interactive setup wizard:
 
 ```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
+curl -fsSL https://openclaw.ai/install.sh | OPENCLAW_VERSION=2026.5.20 bash
 ```
 
 <!-- fold:break -->
@@ -52,7 +52,7 @@ The install script automatically starts the setup wizard. Walk through the promp
 5. **Web search** — Select **Skip for now**
 6. **Skills** — Select **No** (not needed for this module)
 7. **Hooks** — Select **Skip for now**
-8. Select **Hatch in Terminal** to test the connection
+8. Select **Hatch in Terminal** to test the connection. Exit when you receive a successful response. 
 
 The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates the agent workspace at `~/.openclaw/workspace/`.
 
@@ -109,7 +109,7 @@ In this workshop environment, systemd user services aren't available, so the gat
 openclaw gateway run
 ```
 
-The gateway enables filesystem access, shell execution, and tool usage for your agent. Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and verify it's running:
+The gateway enables filesystem access, shell execution, and tool usage for your agent. Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and verify it's running (``Connectivity probe: ok``):
 
 ```bash
 openclaw gateway status
@@ -121,7 +121,19 @@ openclaw gateway status
 
 ### Step 5: Test With a Message
 
-With the gateway running in a separate terminal, open an interactive chat session:
+There are three ways to test your newly configured OpenClaw agent. Let's introduce them. 
+
+#### Custom Client
+
+You can use the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button> we have custom built for this workshop for a browser-based chat interface. 
+
+The client connects to your running gateway automatically, or falls back to a deterministic mock agent if no connection is detected.
+
+<!-- fold:break -->
+
+#### Interactive Text UI
+
+With the gateway running in a separate terminal, OpenClaw provides a built-in interactive chat session:
 
 ```bash
 openclaw tui
@@ -135,13 +147,13 @@ The agent should respond based on its SOUL configuration, mentioning it's role a
 
 <!-- fold:break -->
 
+#### Non-interactive Messages
+
 For a single non-interactive message (useful for scripting, testing, etc.), you may also use:
 
 ```bash
 openclaw agent --agent main -m "Hi, how are you?"
 ```
-
-You can also use the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button> for a browser-based chat interface. The client connects to your running gateway automatically, or falls back to a mock agent for testing.
 
 <!-- fold:break -->
 

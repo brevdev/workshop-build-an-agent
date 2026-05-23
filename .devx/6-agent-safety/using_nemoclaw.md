@@ -12,7 +12,7 @@ Your NemoClaw sandbox is running. The agent lives inside four enforcement layers
 | 4 | Remove the keys from the agent | Inference + Network | Probe 3 |
 | 5 | Route sensitive queries locally | Inference | — |
 
-> Each exercise follows a simple pattern: **recall** the vanilla behavior, **observe** it against the sandbox, **harden** with a policy, and **validate** the outcome. Python sidekicks — short TODOs in <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 1');"><i class="fas fa-code"></i> agent_safety.py</button> — let you automate the same checks for CI/CD. Once you've finished this page, head to [Evaluating Agent Safety](evaluating_safety) for the red-team + continuous-evaluation capstone.
+> Each exercise follows a simple pattern: **recall** the vanilla behavior, **observe** it against the sandbox, **harden** with a policy, and **validate** the outcome. Exercise 5 ends with an optional Python sidekick — a short TODO in <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> agent_safety.py</button> — that wires a content classifier in front of the inference router. Once you've finished this page, head to [Evaluating Agent Safety](evaluating_safety) for the red-team + continuous-evaluation capstone.
 
 <!-- fold:break -->
 
@@ -35,7 +35,7 @@ From inside the sandbox:
 
 ```bash
 nemoclaw my-assistant connect
-curl -s https://httpbin.org/ip
+curl https://httpbin.org/ip
 ```
 
 Expected output:
@@ -54,7 +54,7 @@ The proxy intercepted your request, checked the policy, found no matching `netwo
 From a host terminal (outside the sandbox):
 
 ```bash
-openshell policy get my-assistant
+openshell policy get my-assistant --full
 ```
 
 You'll see three sections: `filesystem_policy` and `process` (both static — locked at creation) and `network_policies` (dynamic — hot-reloadable). `httpbin.org` is nowhere in `network_policies`, so the proxy denied it.
@@ -62,12 +62,15 @@ You'll see three sections: `filesystem_policy` and `process` (both static — lo
 </details>
 
 <details>
-<summary><strong>Step 3 — Write and apply a policy</strong></summary>
+<summary><strong>Step 3 — Apply the policy</strong></summary>
 
-On the host, create `httpbin-readonly.yaml`:
+Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button>. We've pre-authored the **full** sandbox policy here — the baseline `filesystem_policy`, `process`, `landlock`, and the existing `network_policies` (brave, brew, pypi, …) are all included verbatim because `openshell policy set` does a full policy replacement, and the gateway will refuse a YAML that's missing the kernel-locked static layers (*"filesystem policy cannot be removed on a live sandbox"*).
+
+The interesting part — the one new block we've added on top of the baseline — is under `network_policies.httpbin_access`:
 
 ```yaml
 network_policies:
+  # ... brave, brew, pypi, etc. ...
   httpbin_access:
     name: httpbin-readonly
     endpoints:
@@ -80,13 +83,13 @@ network_policies:
       - { path: /usr/bin/curl }
 ```
 
-Apply to the live sandbox:
+That's the whole rule: *let `/usr/bin/curl` reach `httpbin.org:443`, but only with read-only HTTP methods (GET/HEAD), enforced at L7*. Apply the full file to the live sandbox:
 
 ```bash
-openshell policy set my-assistant --policy httpbin-readonly.yaml --wait
+openshell policy set my-assistant --policy code/6-agent-safety/policies/httpbin-readonly.yaml --wait
 ```
 
-The `--wait` flag blocks until the proxy picks up the new rule. **No sandbox restart required** — this is dynamic enforcement in action.
+The `--wait` flag blocks until the proxy picks up the new policy revision. **No sandbox restart required** — this is dynamic enforcement in action.
 
 </details>
 
@@ -96,7 +99,8 @@ The `--wait` flag blocks until the proxy picks up the new rule. **No sandbox res
 Back inside the sandbox:
 
 ```bash
-curl -s https://httpbin.org/ip
+nemoclaw my-assistant connect
+curl https://httpbin.org/ip
 ```
 
 Expected: a JSON response with your origin IP. The agent can now reach `httpbin.org`.
@@ -105,62 +109,7 @@ Expected: a JSON response with your origin IP. The agent can now reach `httpbin.
 
 </details>
 
-<details>
-<summary><strong>Step 5 — Python sidekick: validate the policy</strong></summary>
-
-Open <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 1');"><i class="fas fa-code"></i> # TODO: Exercise 1</button> and complete `load_and_validate_policy()`. It checks three classes of violation: root process identity (critical), overly-broad writable paths like `/`, `/etc`, `/usr`, `/var` (critical), and missing network controls (warning).
-
-Test against the two fixtures in `policies/`:
-
-```bash
-cd /project/code/6-agent-safety
-python -c "from agent_safety import load_and_validate_policy; r = load_and_validate_policy('policies/baseline_permissive.yaml'); print(r.is_safe, len(r.violations))"
-```
-
-Expected: `False 3`. Wire this into CI and weak policies never reach a sandbox.
-
-<details>
-<summary>🆘 Need some help?</summary>
-
-```python
-def load_and_validate_policy(policy_path: str) -> PolicyValidationResult:
-    with open(policy_path, "r") as f:
-        policy_data = yaml.safe_load(f)
-
-    violations = []
-    process_config = policy_data.get("process", {})
-    if process_config.get("run_as_user", "") in ("root", "0"):
-        violations.append(PolicyViolation(
-            rule="runs_as_root", severity="critical",
-            description="Agent runs as root — a compromised agent with root access owns the entire system",
-        ))
-
-    fs_policy = policy_data.get("filesystem_policy", {})
-    for path in fs_policy.get("read_write", []):
-        if path in ["/", "/etc", "/usr", "/var"]:
-            violations.append(PolicyViolation(
-                rule="overly_broad_write", severity="critical",
-                description=f"Write access to '{path}' is overly broad — agent can modify system files",
-            ))
-
-    if not policy_data.get("network_policies") and policy_data.get("default_network_action", "") != "deny":
-        violations.append(PolicyViolation(
-            rule="no_network_controls", severity="warning",
-            description="No network controls defined — agent can reach any endpoint on the internet",
-        ))
-
-    has_critical = any(v.severity == "critical" for v in violations)
-    return PolicyValidationResult(
-        policy_path=policy_path, policy_data=policy_data,
-        violations=violations, is_safe=not has_critical,
-    )
-```
-
-</details>
-
-</details>
-
-> **What you just learned:** deny-by-default is the posture, hot-reload is the operational affordance, and programmatic validation is the safety net that catches policy regressions before they hit production.
+> **What you just learned:** deny-by-default is the posture, and hot-reload is the operational affordance that lets you grant scoped access to a live agent without rebuilding the sandbox.
 
 <!-- fold:break -->
 
@@ -168,7 +117,7 @@ def load_and_validate_policy(policy_path: str) -> PolicyValidationResult:
 
 > *Layer: **Network** (L7 vs L4) · Continues from Exercise 1*
 
-You wrote `access: read-only` in Exercise 1. Let's find out what that actually enforces — and what it doesn't.
+The rule you applied in Exercise 1 set `access: read-only`. Let's find out what that actually enforces — and what it doesn't.
 
 <details>
 <summary><strong>Step 1 — Try a POST against the read-only endpoint</strong></summary>
@@ -182,21 +131,33 @@ curl -s -X POST https://httpbin.org/post -H "Content-Type: application/json" -d 
 Expected: blocked at the L7 layer. Check the deny from a host terminal:
 
 ```bash
-openshell logs my-assistant --since 2m | grep "OCSF HTTP"
+openshell logs my-assistant --since 2m | grep "DENIED POST"
 ```
 
-Look for: `OCSF HTTP:POST [MED] DENIED POST https://httpbin.org/post [policy:httpbin_access engine:opa]`. The proxy terminated TLS, inspected the HTTP request, and denied the POST because `access: read-only`. That's L7 — layer 7 — enforcement.
+Look for: 
+
+```
+[1779525948.286] [sandbox] [OCSF ] [ocsf] HTTP:POST [MED] DENIED POST http://httpbin.org:443/post [policy:httpbin_access engine:l7] [reason:L7_REQUEST deny POST httpbin.org:443/post reason=POST /post not permitted by pol...]
+```
+
+The proxy terminated TLS, inspected the HTTP request, and denied the POST because `access: read-only`. That's L7 — layer 7 — enforcement.
 
 </details>
 
 <details>
 <summary><strong>Step 2 — Remove the L7 hint and watch the POST slip through</strong></summary>
 
-Edit `httpbin-readonly.yaml`: change `protocol: rest` to `protocol: tcp` (or omit the `protocol:` line). Reapply with `openshell policy set --wait`. Retry the POST — it succeeds.
+Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button> again and **delete the `protocol: rest` line** under `network_policies.httpbin_access.endpoints[0]`. Reapply:
 
-**Why?** Without `protocol: rest`, the proxy treats the rule as plain TCP — binary/host/port match pass, then *any* payload tunnels through. `access: read-only` is meaningless at the TCP layer.
+```bash
+openshell policy set my-assistant --policy code/6-agent-safety/policies/httpbin-readonly.yaml --wait
+```
 
-Restore `protocol: rest` and reapply. POST is blocked again.
+Retry the POST from inside the sandbox — it now succeeds.
+
+**Why?** Without the L7 protocol hint, the proxy treats the rule as plain TCP — binary/host/port match pass, then *any* payload tunnels through. `access: read-only` is meaningless at the TCP layer.
+
+Put the `protocol: rest` line back, reapply, and POST is blocked again.
 
 </details>
 
@@ -209,7 +170,13 @@ A rule for `/usr/bin/curl` does **not** cover `/usr/bin/python3`. From the sandb
 python3 -c "import urllib.request; print(urllib.request.urlopen('https://httpbin.org/ip').read())"
 ```
 
-Expected: `urllib.error.URLError` — the proxy denied Python because it isn't in the binary list. Add `- { path: /usr/bin/python3 }` to the policy's `binaries`, reapply, re-run. Python now succeeds.
+Expected: `urllib.error.URLError` — the proxy denied Python because it isn't in the binary list. Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button>, add `- { path: /usr/bin/python3 }` under `network_policies.httpbin_access.binaries`, and reapply:
+
+```bash
+openshell policy set my-assistant --policy code/6-agent-safety/policies/httpbin-readonly.yaml --wait
+```
+
+Re-run the Python snippet from inside the sandbox — it now succeeds.
 
 </details>
 
@@ -398,22 +365,14 @@ Credential isolation removes one attack class — *in-process secret dumps*. It 
 <details>
 <summary><strong>Step 3 — Bypass attempt: add curl to the NVIDIA endpoint's allow-list</strong></summary>
 
-From the host:
+From the host, merge a new `nvidia_curl` rule into the live policy with the same `policy update` pattern from Exercise 1:
 
 ```bash
-cat > nvidia-curl.yaml <<'EOF'
-network_policies:
-  nvidia_curl:
-    endpoints:
-      - host: integrate.api.nvidia.com
-        port: 443
-        protocol: rest
-        enforcement: enforce
-        access: read-write
-    binaries:
-      - { path: /usr/bin/curl }
-EOF
-openshell policy set my-assistant --policy nvidia-curl.yaml --wait
+openshell policy update my-assistant \
+  --add-endpoint integrate.api.nvidia.com:443:read-write:rest:enforce \
+  --binary /usr/bin/curl \
+  --rule-name nvidia_curl \
+  --wait
 ```
 
 From the sandbox, try to call the upstream directly without a key:
@@ -431,7 +390,13 @@ Expected: **401 Unauthorized**. The agent reached the endpoint because the netwo
 <details>
 <summary><strong>Step 4 — Close the gap</strong></summary>
 
-Remove the `nvidia_curl` block and reapply. `curl` can no longer reach `integrate.api.nvidia.com`; the agent is back to using only `inference.local`.
+Remove the `nvidia_curl` rule with the incremental `--remove-rule` flag — no full policy reapply needed:
+
+```bash
+openshell policy update my-assistant --remove-rule nvidia_curl --wait
+```
+
+`curl` can no longer reach `integrate.api.nvidia.com`; the agent is back to using only `inference.local`.
 
 </details>
 

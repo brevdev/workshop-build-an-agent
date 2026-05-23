@@ -129,7 +129,7 @@ Your shell prompt will change to indicate you are now inside the sandboxed envir
 
 <!-- fold:break -->
 
-From inside the sandbox, verify the OpenClaw gateway is running:
+From inside the sandbox, verify the OpenClaw gateway is running (``Connectivity probe: ok``):
 
 ```bash
 openclaw gateway status
@@ -253,7 +253,7 @@ The workshop includes a Streamlit-based NemoClaw Client that connects to your sa
 
 The client connects to your running gateway automatically. If the gateway is not reachable, it falls back to a mock agent for testing the UI.
 
-You can also continue using the CLI for direct interaction:
+**Note:** Just like from the OpenClaw setup page, you can also continue using the CLI for direct interaction:
 
 ```bash
 nemoclaw my-assistant connect

@@ -39,94 +39,83 @@ graph TB
 
 <!-- fold:break -->
 
-## Step 1: Install NemoClaw
+## Step 1: Install and Onboard NemoClaw
 
-Let's get NemoClaw installed. This downloads the CLI, installs OpenShell if not already present, and prepares the system for sandbox creation:
+Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run the workshop's NemoClaw installer:
 
 ```bash
-curl -fsSL https://www.nvidia.com/nemoclaw.sh | bash
+bash code/6-agent-safety/scripts/install-nemoclaw.sh
 ```
 
-This takes a minute or two depending on your connection.
+The script handles three workshop-environment quirks for you (described below) and then runs the official NemoClaw installer in **interactive mode** — you'll be prompted to accept the license, choose your inference backend, and configure your sandbox.
 
 <!-- fold:break -->
 
-The installer will:
-- Install the `nemoclaw` CLI via npm
-- Deploy OpenShell if it is not already installed
-- Deploy Node.js if absent (you already have it from the OpenClaw setup)
-- Launch the onboarding wizard automatically
-
-The onboarding wizard will start, but it will hang at **"Still waiting for gateway health..."** inside this workshop environment. This is expected -- press `Ctrl+C` to cancel, then continue with the steps below.
-
-<!-- fold:break -->
-
-## Step 2: Fix the Gateway Endpoint
-
-The onboarding wizard hangs because the workshop runs your terminal inside a containerized environment. By default, the OpenShell gateway advertises itself at `127.0.0.1:8080`, but inside the container `127.0.0.1` is the container's own loopback -- not the Docker host where the gateway port is actually mapped. We need to recreate the gateway with the correct host address.
-
-First, destroy the gateway that the installer created:
-
-```bash
-openshell gateway destroy -g nemoclaw
-```
-
-<!-- fold:break -->
-
-Then start a new gateway with `--gateway-host` set to the Docker host IP (the container's default route):
-
-```bash
-DOCKER_HOST_IP=$(cat /proc/net/route | awk 'NR==2{printf "%d.%d.%d.%d\n", "0x"substr($3,7,2), "0x"substr($3,5,2), "0x"substr($3,3,2), "0x"substr($3,1,2)}')
-openshell gateway start --name nemoclaw --gateway-host "$DOCKER_HOST_IP"
-```
-
-Verify the gateway is reachable:
-
-```bash
-openshell status -g nemoclaw
-```
-
-You should see `Status: Connected` with an endpoint like `https://172.18.0.1:8080` instead of `https://127.0.0.1:8080`.
-
-<!-- fold:break -->
-
-## Step 3: Run the Onboarding Wizard
-
-Now that the gateway is healthy, run the onboarding wizard. It will detect the existing gateway and skip straight to sandbox configuration:
-
-```bash
-nemoclaw onboard
-```
+### What you'll be asked
 
 Walk through each prompt as follows:
 
-1. **Inference provider** — Select **NVIDIA Endpoints** (option 1)
-2. **Model** — Select **Nemotron 3 Super 120B** (option 1). This is the same model used in your OpenClaw setup.
-3. **Brave Web Search** — Select **N** to skip (requires an API key from brave.com/search/api; you can add this later)
-4. **Messaging channels** — Press **Enter** to skip (not needed for this module)
-5. **Sandbox name** — Enter `my-assistant`
-6. **Policy presets** — Toggle **npm** and **pypi** (use arrow keys and Space to select, then Enter to confirm)
+1. **License notice** — Type `yes` to accept.
+2. **Inference provider** — Select **NVIDIA Endpoints** (option 1).
+3. **Model** — Select **Nemotron 3 Super 120B** (option 1). This is the same model used in your OpenClaw setup.
+4. **Sandbox name** — Press Enter to accept the default (`my-assistant`).
+5. **Confirm configuration** — Type `Y` to apply.
+6. **Brave Web Search** — Type `N` to skip (not needed for this module).
+7. **Messaging channels** — Press Enter to skip (not needed for this module).
 
-The wizard will build the sandbox image (~2.4 GB compressed), upload it to the gateway, configure DNS, and launch OpenClaw inside the sandbox. This takes a few minutes on first run.
+When prompted for policy options:
+
+1. Leave **Policy tier** as "Balanced".
+2. Leave **Presets** as the default options.
+
+The script will then build the sandbox image (~2.4 GB compressed), upload it to the gateway, configure DNS, and launch OpenClaw inside the sandbox. This takes a few minutes on first run.
+
+<!-- fold:break -->
 
 <details>
-<summary><strong>What does the onboarding wizard do behind the scenes?</strong></summary>
+<summary><strong>What does the install script do behind the scenes?</strong></summary>
 
-The wizard orchestrates several operations in sequence:
+The Workbench project container talks to the host's Docker daemon via a mounted socket, but NemoClaw's gateway listens on the host's network namespace — not the container's. The script bridges this with three small fixes:
 
-1. **Detects the OpenShell gateway** -- Reuses the gateway you started in Step 2 (or creates one if none exists)
-2. **Builds the sandbox image** -- Packages your OpenClaw installation, workspace files, and security policies into a container image (~2.4 GB compressed)
-3. **Applies the network policy** -- Writes the default-deny egress rules that OpenShell enforces at the kernel level
-4. **Registers the inference provider** -- Configures the NemoClaw TypeScript plugin with your endpoint and credentials
-5. **Starts the sandbox** -- Deploys the image into the OpenShell runtime with all security layers active
+1. **socat tunnel** — Forwards `127.0.0.1:8080` inside this container to the Docker bridge IP, where the host's gateway listens. Without this, NemoClaw's CLI dials a loopback that has nothing on it.
+2. **Deferred-start watcher** — NemoClaw's preflight check requires port 8080 to be *free* in the container, but its readiness check requires it to *reach the gateway*. A background watcher waits for the gateway container to appear, then starts socat in the gap between those two checks.
+3. **Stale-container cleanup** — If a previous install attempt failed, the script removes the leftover gateway container before retrying.
 
-This process may take several minutes on first run, as the sandbox image must be built and pushed to the cluster's container registry.
+These are workarounds for NemoClaw v0.0.49 specifically. The script is idempotent — re-running it on an already-installed setup just ensures the tunnel is up. See `code/6-agent-safety/scripts/install-nemoclaw.sh` for the implementation.
+
+</details>
+
+<details>
+<summary><strong>Troubleshooting: install fails or NemoClaw stops responding</strong></summary>
+
+The install script writes detailed logs to two files:
+
+| File | What's in it |
+|------|--------------|
+| `/tmp/nemoclaw-install.log` | Each step of the script plus the official installer's output |
+| `/tmp/nemoclaw-tunnel.log` | socat tunnel activity (when the gateway came up, any forward errors) |
+
+**Common recovery steps:**
+
+1. **Re-run the script.** It's idempotent — if NemoClaw is already installed and the gateway is healthy, it just restarts the tunnel and exits. If the install partially failed, it cleans up and retries.
+
+    ```bash
+    bash code/6-agent-safety/scripts/install-nemoclaw.sh
+    ```
+
+2. **Full reset.** If something went very wrong (e.g., conflicting state from earlier attempts), remove the gateway container and any tunnel, then re-run:
+
+    ```bash
+    docker rm -f nemoclaw-openshell-gateway
+    pkill -f "socat TCP-LISTEN:8080"
+    bash code/6-agent-safety/scripts/install-nemoclaw.sh
+    ```
 
 </details>
 
 <!-- fold:break -->
 
-## Step 4: Connect to Your Sandbox
+## Step 2: Connect to Your Sandbox
 
 Time to step inside your new sandbox. Connecting to the sandbox is like stepping through an airlock -- you're entering a controlled environment where the rules are different.
 
@@ -156,7 +145,7 @@ To return to the host shell, type `exit` or press `Ctrl+D`.
 
 <!-- fold:break -->
 
-## Step 5: Verify the Stack
+## Step 3: Verify the Stack
 
 Let's make sure everything came up correctly. You will check status from both the host and the monitoring TUI.
 
@@ -235,7 +224,7 @@ This confirms the kernel-level network enforcement is active.
 
 <!-- fold:break -->
 
-## Step 6: Configure the Workshop Workspace
+## Step 4: Configure the Workshop Workspace
 
 The workshop's sensitive test data (used for red-team probes and safety evaluation) lives at `/tmp/deepagent_workspace`. Configure the sandbox to use this data by uploading it:
 

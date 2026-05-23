@@ -106,3 +106,7 @@ execution:
           target: /var/host-run/
           description: Host's Run Directory
           options: ""
+        - type: host
+          target: /run/cdi/
+          description: Mount for NemoClaw Install
+          options: ""

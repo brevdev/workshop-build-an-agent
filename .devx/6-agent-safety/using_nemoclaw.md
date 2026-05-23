@@ -12,7 +12,7 @@ Your NemoClaw sandbox is running. The agent lives inside four enforcement layers
 | 4 | Remove the keys from the agent | Inference + Network | Probe 3 |
 | 5 | Route sensitive queries locally | Inference | — |
 
-> Each exercise follows a simple pattern: **recall** the vanilla behavior, **observe** it against the sandbox, **harden** with a policy, and **validate** the outcome. Python sidekicks — short TODOs in <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 1');"><i class="fas fa-code"></i> agent_safety.py</button> — let you automate the same checks for CI/CD. Once you've finished this page, head to [Evaluating Agent Safety](evaluating_safety) for the red-team + continuous-evaluation capstone.
+> Each exercise follows a simple pattern: **recall** the vanilla behavior, **observe** it against the sandbox, **harden** with a policy, and **validate** the outcome. Exercise 5 ends with an optional Python sidekick — a short TODO in <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> agent_safety.py</button> — that wires a content classifier in front of the inference router. Once you've finished this page, head to [Evaluating Agent Safety](evaluating_safety) for the red-team + continuous-evaluation capstone.
 
 <!-- fold:break -->
 
@@ -35,7 +35,7 @@ From inside the sandbox:
 
 ```bash
 nemoclaw my-assistant connect
-curl -s https://httpbin.org/ip
+curl https://httpbin.org/ip
 ```
 
 Expected output:
@@ -54,7 +54,7 @@ The proxy intercepted your request, checked the policy, found no matching `netwo
 From a host terminal (outside the sandbox):
 
 ```bash
-openshell policy get my-assistant
+openshell policy get my-assistant --full
 ```
 
 You'll see three sections: `filesystem_policy` and `process` (both static — locked at creation) and `network_policies` (dynamic — hot-reloadable). `httpbin.org` is nowhere in `network_policies`, so the proxy denied it.
@@ -62,12 +62,15 @@ You'll see three sections: `filesystem_policy` and `process` (both static — lo
 </details>
 
 <details>
-<summary><strong>Step 3 — Write and apply a policy</strong></summary>
+<summary><strong>Step 3 — Apply the policy</strong></summary>
 
-On the host, create `httpbin-readonly.yaml`:
+Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button>. We've pre-authored the **full** sandbox policy here — the baseline `filesystem_policy`, `process`, `landlock`, and the existing `network_policies` (brave, brew, pypi, …) are all included verbatim because `openshell policy set` does a full policy replacement, and the gateway will refuse a YAML that's missing the kernel-locked static layers (*"filesystem policy cannot be removed on a live sandbox"*).
+
+The interesting part — the one new block we've added on top of the baseline — is under `network_policies.httpbin_access`:
 
 ```yaml
 network_policies:
+  # ... brave, brew, pypi, etc. ...
   httpbin_access:
     name: httpbin-readonly
     endpoints:
@@ -80,13 +83,13 @@ network_policies:
       - { path: /usr/bin/curl }
 ```
 
-Apply to the live sandbox:
+That's the whole rule: *let `/usr/bin/curl` reach `httpbin.org:443`, but only with read-only HTTP methods (GET/HEAD), enforced at L7*. Apply the full file to the live sandbox:
 
 ```bash
-openshell policy set my-assistant --policy httpbin-readonly.yaml --wait
+openshell policy set my-assistant --policy code/6-agent-safety/policies/httpbin-readonly.yaml --wait
 ```
 
-The `--wait` flag blocks until the proxy picks up the new rule. **No sandbox restart required** — this is dynamic enforcement in action.
+The `--wait` flag blocks until the proxy picks up the new policy revision. **No sandbox restart required** — this is dynamic enforcement in action.
 
 </details>
 
@@ -96,7 +99,8 @@ The `--wait` flag blocks until the proxy picks up the new rule. **No sandbox res
 Back inside the sandbox:
 
 ```bash
-curl -s https://httpbin.org/ip
+nemoclaw my-assistant connect
+curl https://httpbin.org/ip
 ```
 
 Expected: a JSON response with your origin IP. The agent can now reach `httpbin.org`.
@@ -105,62 +109,7 @@ Expected: a JSON response with your origin IP. The agent can now reach `httpbin.
 
 </details>
 
-<details>
-<summary><strong>Step 5 — Python sidekick: validate the policy</strong></summary>
-
-Open <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 1');"><i class="fas fa-code"></i> # TODO: Exercise 1</button> and complete `load_and_validate_policy()`. It checks three classes of violation: root process identity (critical), overly-broad writable paths like `/`, `/etc`, `/usr`, `/var` (critical), and missing network controls (warning).
-
-Test against the two fixtures in `policies/`:
-
-```bash
-cd /project/code/6-agent-safety
-python -c "from agent_safety import load_and_validate_policy; r = load_and_validate_policy('policies/baseline_permissive.yaml'); print(r.is_safe, len(r.violations))"
-```
-
-Expected: `False 3`. Wire this into CI and weak policies never reach a sandbox.
-
-<details>
-<summary>🆘 Need some help?</summary>
-
-```python
-def load_and_validate_policy(policy_path: str) -> PolicyValidationResult:
-    with open(policy_path, "r") as f:
-        policy_data = yaml.safe_load(f)
-
-    violations = []
-    process_config = policy_data.get("process", {})
-    if process_config.get("run_as_user", "") in ("root", "0"):
-        violations.append(PolicyViolation(
-            rule="runs_as_root", severity="critical",
-            description="Agent runs as root — a compromised agent with root access owns the entire system",
-        ))
-
-    fs_policy = policy_data.get("filesystem_policy", {})
-    for path in fs_policy.get("read_write", []):
-        if path in ["/", "/etc", "/usr", "/var"]:
-            violations.append(PolicyViolation(
-                rule="overly_broad_write", severity="critical",
-                description=f"Write access to '{path}' is overly broad — agent can modify system files",
-            ))
-
-    if not policy_data.get("network_policies") and policy_data.get("default_network_action", "") != "deny":
-        violations.append(PolicyViolation(
-            rule="no_network_controls", severity="warning",
-            description="No network controls defined — agent can reach any endpoint on the internet",
-        ))
-
-    has_critical = any(v.severity == "critical" for v in violations)
-    return PolicyValidationResult(
-        policy_path=policy_path, policy_data=policy_data,
-        violations=violations, is_safe=not has_critical,
-    )
-```
-
-</details>
-
-</details>
-
-> **What you just learned:** deny-by-default is the posture, hot-reload is the operational affordance, and programmatic validation is the safety net that catches policy regressions before they hit production.
+> **What you just learned:** deny-by-default is the posture, and hot-reload is the operational affordance that lets you grant scoped access to a live agent without rebuilding the sandbox.
 
 <!-- fold:break -->
 
@@ -168,7 +117,7 @@ def load_and_validate_policy(policy_path: str) -> PolicyValidationResult:
 
 > *Layer: **Network** (L7 vs L4) · Continues from Exercise 1*
 
-You wrote `access: read-only` in Exercise 1. Let's find out what that actually enforces — and what it doesn't.
+The rule you applied in Exercise 1 set `access: read-only`. Let's find out what that actually enforces — and what it doesn't.
 
 <details>
 <summary><strong>Step 1 — Try a POST against the read-only endpoint</strong></summary>
@@ -182,21 +131,33 @@ curl -s -X POST https://httpbin.org/post -H "Content-Type: application/json" -d 
 Expected: blocked at the L7 layer. Check the deny from a host terminal:
 
 ```bash
-openshell logs my-assistant --since 2m | grep "OCSF HTTP"
+openshell logs my-assistant --since 2m | grep "DENIED POST"
 ```
 
-Look for: `OCSF HTTP:POST [MED] DENIED POST https://httpbin.org/post [policy:httpbin_access engine:opa]`. The proxy terminated TLS, inspected the HTTP request, and denied the POST because `access: read-only`. That's L7 — layer 7 — enforcement.
+Look for: 
+
+```
+[1779525948.286] [sandbox] [OCSF ] [ocsf] HTTP:POST [MED] DENIED POST http://httpbin.org:443/post [policy:httpbin_access engine:l7] [reason:L7_REQUEST deny POST httpbin.org:443/post reason=POST /post not permitted by pol...]
+```
+
+The proxy terminated TLS, inspected the HTTP request, and denied the POST because `access: read-only`. That's L7 — layer 7 — enforcement.
 
 </details>
 
 <details>
 <summary><strong>Step 2 — Remove the L7 hint and watch the POST slip through</strong></summary>
 
-Edit `httpbin-readonly.yaml`: change `protocol: rest` to `protocol: tcp` (or omit the `protocol:` line). Reapply with `openshell policy set --wait`. Retry the POST — it succeeds.
+Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button> again and **delete the `protocol: rest` line** under `network_policies.httpbin_access.endpoints[0]`. Reapply:
 
-**Why?** Without `protocol: rest`, the proxy treats the rule as plain TCP — binary/host/port match pass, then *any* payload tunnels through. `access: read-only` is meaningless at the TCP layer.
+```bash
+openshell policy set my-assistant --policy code/6-agent-safety/policies/httpbin-readonly.yaml --wait
+```
 
-Restore `protocol: rest` and reapply. POST is blocked again.
+Retry the POST from inside the sandbox — it now succeeds.
+
+**Why?** Without the L7 protocol hint, the proxy treats the rule as plain TCP — binary/host/port match pass, then *any* payload tunnels through. `access: read-only` is meaningless at the TCP layer.
+
+Put the `protocol: rest` line back, reapply, and POST is blocked again.
 
 </details>
 
@@ -209,7 +170,13 @@ A rule for `/usr/bin/curl` does **not** cover `/usr/bin/python3`. From the sandb
 python3 -c "import urllib.request; print(urllib.request.urlopen('https://httpbin.org/ip').read())"
 ```
 
-Expected: `urllib.error.URLError` — the proxy denied Python because it isn't in the binary list. Add `- { path: /usr/bin/python3 }` to the policy's `binaries`, reapply, re-run. Python now succeeds.
+Expected: `urllib.error.URLError` — the proxy denied Python because it isn't in the binary list. Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button>, add `- { path: /usr/bin/python3 }` under `network_policies.httpbin_access.binaries`, and reapply:
+
+```bash
+openshell policy set my-assistant --policy code/6-agent-safety/policies/httpbin-readonly.yaml --wait
+```
+
+Re-run the Python snippet from inside the sandbox — it now succeeds.
 
 </details>
 
@@ -280,14 +247,15 @@ Both fail. Landlock resolves paths at the kernel before the syscall, so symlinks
 From a host terminal:
 
 ```bash
-cat > fs-widen.yaml <<'EOF'
+cat > code/6-agent-safety/policies/fs-widen.yaml <<'EOF'
+version: 1
 filesystem_policy:
   read_write: [/sandbox, /tmp, /dev/null, /etc]
 EOF
 openshell policy set my-assistant --policy fs-widen.yaml --wait
 ```
 
-Expected: either the `filesystem_policy` field is rejected outright, or silently accepted but not applied. **Filesystem policy is creation-time only.** To change it, `nemoclaw my-assistant destroy` + re-onboard. This rigidity is intentional — the strongest containment boundary shouldn't be reachable at operational speed.
+Expected: the gateway rejects the request with `InvalidArgument: filesystem ... cannot be changed on a live sandbox`. **Filesystem policy is creation-time only.** To change it, `nemoclaw my-assistant destroy` + re-onboard. This rigidity is intentional — the strongest containment boundary shouldn't be reachable at operational speed.
 
 </details>
 
@@ -315,7 +283,15 @@ mount -t tmpfs tmpfs /mnt 2>&1 | head -1
 unshare -U bash -c whoami 2>&1 | head -1
 ```
 
-Expected: all three fail with `Operation not permitted`. Capabilities are dropped, `no-new-privileges` is set, and seccomp BPF rejects dangerous syscalls (`mount`, `unshare(CLONE_NEWUSER)`, `ptrace`, `reboot`, `kexec_load`) before they reach the kernel's main dispatch.
+Expected: all three fail to escalate, each at a different layer:
+
+| Probe | Failure |
+|---|---|
+| `sudo -n whoami` | `sudo: command not found` — `sudo` isn't installed in the sandbox image at all |
+| `mount -t tmpfs tmpfs /mnt` | `mount: /mnt: must be superuser to use mount.` — userspace check fails before the syscall |
+| `unshare -U bash -c whoami` | `unshare: unshare failed: Operation not permitted` — seccomp + dropped capabilities block the syscall |
+
+Capabilities are dropped, `no-new-privileges` is set, and seccomp BPF rejects dangerous syscalls (`mount`, `unshare(CLONE_NEWUSER)`, `ptrace`, `reboot`, `kexec_load`) before they reach the kernel's main dispatch.
 
 </details>
 
@@ -326,7 +302,7 @@ Expected: all three fail with `Operation not permitted`. Capabilities are droppe
 which gcc g++ make netcat nc 2>&1 | head -5
 ```
 
-Expected: all report `not found`. An attacker who achieves code execution still has to bring their own compiler.
+Expected: all report empty. An attacker who achieves code execution still has to bring their own compiler.
 
 </details>
 
@@ -371,7 +347,9 @@ Inside the sandbox:
 env | grep -iE 'api_key|token|secret'
 ```
 
-Expected: empty. The sandbox process does not inherit host-side credentials. The NVIDIA API key lives only on the host, in the OpenShell Gateway's provider record.
+Expected output: a single line — `OPENCLAW_GATEWAY_TOKEN=...`. That's a sandbox-scoped bearer token the agent uses to reach the gateway's loopback services (e.g. `inference.local`); it isn't a vendor API key. 
+
+Crucially, **`NVIDIA_API_KEY` is not present** — the sandbox process does not inherit host-side vendor credentials, so even if the agent gets owned and dumps `env`, the upstream provider key never leaves the host. The NVIDIA API key lives only on the host, in the OpenShell Gateway's provider record.
 
 </details>
 
@@ -396,42 +374,40 @@ Expected: a valid JSON response. No auth header was set. The gateway stripped an
 Credential isolation removes one attack class — *in-process secret dumps*. It does not prevent the agent from routing around `inference.local` if the network policy permits direct access to a provider host.
 
 <details>
-<summary><strong>Step 3 — Bypass attempt: add curl to the NVIDIA endpoint's allow-list</strong></summary>
+<summary><strong>Step 3 — Bypass attempt: add curl to an unrelated provider's allow-list</strong></summary>
 
-From the host:
+We need a provider host that's **not** already in the baseline policy. `integrate.api.nvidia.com` won't work — the baseline `nvidia` rule already permits `/usr/bin/curl` to reach it (necessary for the gateway's own inference plumbing), so adding our rule would be a no-op. Use `api.openai.com` instead — it's denied at baseline, so adding the rule actually opens new egress:
 
 ```bash
-cat > nvidia-curl.yaml <<'EOF'
-network_policies:
-  nvidia_curl:
-    endpoints:
-      - host: integrate.api.nvidia.com
-        port: 443
-        protocol: rest
-        enforcement: enforce
-        access: read-write
-    binaries:
-      - { path: /usr/bin/curl }
-EOF
-openshell policy set my-assistant --policy nvidia-curl.yaml --wait
+openshell policy update my-assistant \
+  --add-endpoint api.openai.com:443:read-write:rest:enforce \
+  --binary /usr/bin/curl \
+  --rule-name openai_curl \
+  --wait
 ```
 
 From the sandbox, try to call the upstream directly without a key:
 
 ```bash
-curl -s -X POST https://integrate.api.nvidia.com/v1/chat/completions \
+curl -X POST https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"nvidia/nemotron-3-super-120b-a12b","messages":[{"role":"user","content":"hi"}]}'
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"hi"}]}'
 ```
 
-Expected: **401 Unauthorized**. The agent reached the endpoint because the network policy allowed it, but couldn't authenticate without the gateway. That's the point: a hijacked agent could have POSTed sensitive data as the request body, and while the call would fail auth, the data has already left the sandbox.
+Expected: **HTTP 401** with body `"You didn't provide an API key. ..."`. The agent reached the endpoint because the new network rule allowed it, but couldn't authenticate. That's the point: a hijacked agent could have POSTed sensitive data as the request body, and while the call fails auth, the data has already left the sandbox.
 
 </details>
 
 <details>
 <summary><strong>Step 4 — Close the gap</strong></summary>
 
-Remove the `nvidia_curl` block and reapply. `curl` can no longer reach `integrate.api.nvidia.com`; the agent is back to using only `inference.local`.
+Exit the sandbox and remove the `openai_curl` rule with the incremental `--remove-rule` flag — no full policy reapply needed:
+
+```bash
+openshell policy update my-assistant --remove-rule openai_curl --wait
+```
+
+Retry the same curl from inside the sandbox — you should now see **HTTP 000** (the proxy denied the CONNECT). `curl` can no longer reach `api.openai.com`; the agent is back to using only `inference.local`.
 
 </details>
 
@@ -459,39 +435,61 @@ Expected: one provider + one model (e.g. `nvidia-prod` / `nvidia/nemotron-3-supe
 </details>
 
 <details>
-<summary><strong>Step 2 — Register a local Ollama provider and swap to it</strong></summary>
+<summary><strong>Step 2 — Swap the inference target without touching the agent</strong></summary>
 
-Pull a small Ollama model (replace with `nemotron-3-super:120b` if you're on a DGX Spark per [NVIDIA's setup guide](https://build.nvidia.com/spark/nemoclaw/instructions) Step 2):
+The Privacy Router's headline property is that **operators choose where inference runs and the agent never sees the change**. We'll demonstrate that by switching the active model on the live gateway and watching the next request from the sandbox land on the new target.
 
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-sudo mkdir -p /etc/systemd/system/ollama.service.d
-printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0"\n' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
-sudo systemctl daemon-reload && sudo systemctl restart ollama
-ollama pull llama3.2:3b
-```
-
-Register and activate:
+Swap the model on the gateway. `meta/llama-3.2-3b-instruct` is a small, fast pick that obviously differs from the baseline (any catalog entry from `curl -s https://inference.local/v1/models | jq '.data[].id'` works):
 
 ```bash
-openshell provider create --name local-ollama --type openai \
-    --config OPENAI_BASE_URL=http://host.docker.internal:11434/v1
-openshell inference set --provider local-ollama --model llama3.2:3b
+sudo apt-get update && sudo apt-get install -y jq
+openshell inference set --provider nvidia-prod --model meta/llama-3.2-3b-instruct
 ```
 
-If `host.docker.internal` doesn't resolve, substitute the Docker-host IP from `cat /proc/net/route`.
-
-Within ~5 seconds, the swap propagates to every sandbox. Verify from inside:
+Within seconds, the new route propagates to every sandbox. Don't run `nemoclaw connect` for this test — connect re-pins the gateway to the sandbox's *recorded* model (stored in `~/.nemoclaw/sandboxes.json`) on every entry, which would silently roll your swap back. Instead, exec into the sandbox non-interactively from the same workbench shell, and **put a *bogus* model name in the request body** to prove the agent's request value is *ignored* by the gateway:
 
 ```bash
-curl -s https://inference.local/v1/models | head -10
+nemoclaw my-assistant exec -- bash -c "curl -s -X POST https://inference.local/v1/chat/completions \
+    -H 'Content-Type: application/json' \
+    -d '{\"model\":\"agent-thinks-this-matters\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}' \
+  | jq '{returned_model: .model, content: .choices[0].message.content}'"
 ```
 
-The advertised model changed. **Agent code didn't** — the agent still POSTs to `inference.local`. Only the operator-side routing target changed.
+The `returned_model` field in the response will be `"meta/llama-3.2-3b-instruct"` — the gateway-configured model — not the bogus string the agent sent. **Agent code didn't change at all.** Only the operator-side routing did.
+
+Swap back when you're done:
+
+```bash
+openshell inference set --provider nvidia-prod --model nvidia/nemotron-3-super-120b-a12b
+```
+
+> What you just demonstrated is the **transient / runtime** half of operator routing. For **durable per-sandbox routing** (the pattern an operator would use in production: "agent A always uses local Ollama, agent B always uses cloud Nemotron"), the source of truth is the sandbox *pin* — see the first aside below.
+
+<details>
+<summary><strong>The two-layer Privacy Router model: gateway-live vs sandbox-pin</strong></summary>
+
+When you `nemoclaw connect`, the CLI reads the entering sandbox's pin, compares it to the gateway's live route, and if they don't match it forcibly resets to the pinned model *before* opening your SSH session — printing `Switching inference route to ...` when it does. The pin wins; the live route gets reconciled.
+
+That's why the workshop's demo above used `nemoclaw exec` (which skips reconciliation) rather than `nemoclaw connect` (which would reconcile back to the pin and hide the swap). It's also why this design is *stronger* than a single gateway-wide switch: hosting multiple sandboxes can have each pinned to a different backend, and `connect` will flip the gateway to the right one each time — so a finance-data agent can stay local while a public-Q&A agent can run in the cloud, no matter who last touched the gateway live route.
+
+**To make a swap *durable*** for a sandbox: either re-run `nemoclaw onboard --recreate-sandbox --name <sandbox>` with the new provider/model, or (faster, for an existing sandbox) edit `~/.nemoclaw/sandboxes.json` to update the pin and then run `nemoclaw <name> connect --probe-only` to trigger the reconciliation. The gateway will flip to the new pin and stay there.
 
 </details>
 
-> This is Privacy Router in action: operator-chosen routing enforced at the gateway. Sensitive context stays on local compute when the operator points `inference.local` at a local model, and routes to the frontier when the operator allows that. There is no per-request content inspection — that's a feature you build in front.
+<details>
+<summary><strong>Why this exercise swaps the model within `nvidia-prod` rather than the provider (e.g. to a local Ollama)</strong></summary>
+
+A full provider swap (the "cloud → local for sensitive data" pattern) requires the OpenShell gateway to run in **cluster mode**, where the sandbox-side `inference.local` DNS proxy can be refreshed by `kubectl` against the cluster's CoreDNS. 
+
+This workshop environment runs OpenShell in **Docker-driver mode** (a single-container deployment), and the cluster-mode DNS refresh path doesn't apply — `openshell inference set` against a different provider would succeed, but `nemoclaw connect` would detect a broken `inference.local` proxy, fail to repair it, and silently revert. 
+
+The in-provider model swap above demonstrates the operator-chosen-routing half of the Privacy Router story end-to-end; the keep-data-local half unlocks when your gateway runs in cluster mode outside of this workshop environment.
+
+</details>
+
+</details>
+
+> This is Privacy Router in action: operator-chosen routing enforced at the gateway. The same primitive that swaps a model within one provider also swaps providers entirely (cloud ↔ local) on a cluster-mode gateway, keeping sensitive context on local compute when the operator routes there. There is no per-request content inspection — that's a feature you build in front.
 
 <details>
 <summary><strong>Step 3 — Python sidekick: build the content classifier</strong></summary>
@@ -506,20 +504,20 @@ Open <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '
 
 Your classifier decides before the call which backend to use (e.g. `openshell inference set` swaps, or the agent routes to an endpoint you've pre-approved). OpenShell ships the routing primitive; the classification layer is yours.
 
-Test against the fixture:
+Test against the fixture — the corpus has 16 entries spanning all three categories, so iterate the whole list to verify each branch fires:
 
 ```bash
 cd /project/code/6-agent-safety
 python -c "
 import json
 from agent_safety import classify_sensitivity
-for doc in json.load(open('test_data/mixed_sensitivity_corpus.json'))[:5]:
+for doc in json.load(open('test_data/mixed_sensitivity_corpus.json')):
     r = classify_sensitivity(doc['text'])
-    print(f'{doc[\"id\"]} → {r.level} → {r.route_to}')
+    print(f'{doc[\"id\"]:12} → {r.level:12} → {r.route_to}')
 "
 ```
 
-Expected: PII → `restricted` → `local`; proprietary → `confidential` → `local`; public → `public` → `cloud`.
+Expected: `pii-*` rows → `restricted → local`; `prop-*` and `mixed-*` rows → `confidential → local`; `pub-*` rows → `public → cloud`.
 
 <details>
 <summary>🆘 Need some help?</summary>

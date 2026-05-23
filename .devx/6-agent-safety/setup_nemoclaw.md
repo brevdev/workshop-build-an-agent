@@ -47,7 +47,7 @@ Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>termi
 bash code/6-agent-safety/scripts/install-nemoclaw.sh
 ```
 
-The script handles three workshop-environment quirks for you (described below) and then runs the official NemoClaw installer in **interactive mode** — you'll be prompted to accept the license, choose your inference backend, and configure your sandbox.
+The script handles workshop-environment quirks for you and then runs the official NemoClaw installer in **interactive mode** — you'll be prompted to accept the license, choose your inference backend, and configure your sandbox.
 
 <!-- fold:break -->
 
@@ -138,7 +138,7 @@ openclaw gateway status
 You can also send a test message to confirm inference is working:
 
 ```bash
-openclaw agent --agent main --local -m "hello" --session-id test
+openclaw agent --agent main -m "hello"
 ```
 
 To return to the host shell, type `exit` or press `Ctrl+D`.
@@ -226,16 +226,12 @@ This confirms the kernel-level network enforcement is active.
 
 ## Step 4: Configure the Workshop Workspace
 
-The workshop's sensitive test data (used for red-team probes and safety evaluation) lives at `/tmp/deepagent_workspace`. Configure the sandbox to use this data by uploading it:
+The workshop's sensitive test data (decoy `passwords.txt` and `ssn_records.txt` files used as targets for the red-team probes in the next page) lives on the host at `/tmp/deepagent_workspace`. Upload it into the sandbox so the safety evaluation suite has something to probe against.
+
+**Run this from the host shell** — if you're still inside the sandbox from the previous step, type `exit` first.
 
 ```bash
 openshell sandbox upload my-assistant /tmp/deepagent_workspace /sandbox/workspace
-```
-
-If your OpenClaw configuration inside the sandbox needs to reference the workshop code, set the environment variable:
-
-```bash
-export OPENCLAW_HOME=/project/code/6-agent-safety/.openclaw
 ```
 
 Workspace files inside the sandbox are located at `/sandbox/.openclaw/workspace/`. These files persist across sandbox restarts but are **lost** if you run `nemoclaw my-assistant destroy`. The key workspace files are:

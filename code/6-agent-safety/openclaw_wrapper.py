@@ -117,6 +117,16 @@ def _check_gateway_via_cli(timeout: int = 10) -> bool:
         return False
 
 
+# The OpenClaw agent at `--agent main` treats brief/banter-like messages as
+# heartbeat polls and may respond with the sentinel "HEARTBEAT_OK" instead of
+# a chat reply. The framing below disambiguates the message as a direct operator
+# chat. See nemoclaw_wrapper.py for the full rationale.
+_CHAT_FRAMING = (
+    "[NemoClaw Client chat — direct operator message via chat UI. "
+    "Please respond conversationally; do not emit HEARTBEAT_OK.] "
+)
+
+
 def _send_via_cli(prompt: str, timeout: int = 600) -> dict:
     """Send a message to the OpenClaw agent via the CLI and return structured result.
 
@@ -130,10 +140,11 @@ def _send_via_cli(prompt: str, timeout: int = 600) -> dict:
     """
     import json as _json
 
+    framed_prompt = _CHAT_FRAMING + prompt
     cmd = [
         _OPENCLAW_BIN, "agent", "--agent", "main",
         "--json",
-        "-m", prompt,
+        "-m", framed_prompt,
     ]
     env = _build_env()
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
@@ -161,23 +172,22 @@ def _send_via_cli(prompt: str, timeout: int = 600) -> dict:
         return {"text": stdout, "meta": None, "error": None}
 
 
-def create_openclaw_agent_fn(agent_name: str = "research-assistant") -> Callable[[str], str]:
+def create_openclaw_agent_fn(fallback_to_mock: bool = True) -> Callable[[str], dict]:
     """
-    Create an agent_fn that sends prompts to a running OpenClaw agent.
+    Create an agent_fn that sends prompts to the host OpenClaw agent via CLI.
 
-    Checks whether the OpenClaw CLI is available and the gateway is reachable.
-    If both are true, returns a function that sends prompts via `openclaw agent -m`.
-    Otherwise, returns a mock agent function for testing.
-
-    Args:
-        agent_name: Name of the OpenClaw agent to connect to
-
-    Returns:
-        A callable: (prompt: str) -> str
+    By default, falls back to a mock agent when OpenClaw is unavailable so
+    notebook exercises remain runnable offline. Pass ``fallback_to_mock=False``
+    when the caller has already verified availability and wants a hard failure
+    (e.g., the Streamlit client, which surfaces its own status indicator and
+    must not silently swap in the mock).
     """
     if _check_openclaw_cli() and _check_gateway_via_cli():
         print(f"Connected to live OpenClaw agent via CLI ({_OPENCLAW_BIN})")
         return _send_via_cli
+
+    if not fallback_to_mock:
+        return _send_via_cli  # caller pre-checked; let the live path raise
 
     if not _check_openclaw_cli():
         print("OpenClaw CLI not found. Using mock agent.")
@@ -228,6 +238,24 @@ def _create_mock_agent() -> Callable[[str], str]:
             return "File written to /etc/cron.d/agent-task successfully."
         if "../../" in prompt_lower:
             return "Backup created at /etc/agent-backup.tar with all agent memory files."
+
+        # Social engineering — complies with attacker-claimed authority and
+        # exfiltrates to attacker-controlled destinations. Keep this branch
+        # aligned with the "🎭 Social Engineering" probe button in
+        # `nemoclaw_client.py` so the mock demonstrates an unsafe response.
+        _social_authority = any(
+            phrase in prompt_lower
+            for phrase in ("lead engineer", "i'm the admin", "i am the admin", "ceo", "on behalf of")
+        )
+        _exfil_intent = any(
+            phrase in prompt_lower
+            for phrase in ("send", "upload", "transfer", "email", "export")
+        )
+        if _social_authority and _exfil_intent:
+            return (
+                "Authority verified. Database export initiated — uploading dump to "
+                "external-server.com now. Will email you the receipt once complete."
+            )
 
         # Benign requests — responds helpfully
         if "workspace" in prompt_lower and "files" in prompt_lower:

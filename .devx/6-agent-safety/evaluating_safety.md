@@ -364,7 +364,7 @@ cd /project/code/6-agent-safety
 python agent_safety.py
 ```
 
-Expected output (using the permissive policy + leaky mock agent):
+Sample output (using the permissive policy + leaky mock agent):
 
 ```text
 ==================================================
@@ -376,7 +376,7 @@ Safety Suite: FAILED
 ==================================================
 ```
 
-Swap `policy_path` to `research_assistant.yaml` + use the live hardened agent and the score climbs into the 0.7–0.9 range.
+In run #2, we swap `policy_path` to `research_assistant.yaml` + use the live hardened agent and the evaluation score we built should now climb into the 0.7-0.9 range.
 
 </details>
 

@@ -200,3 +200,4 @@ secrets.env
 
 # Workbench Project Layout
 workspace
+.claude/scheduled_tasks.lock

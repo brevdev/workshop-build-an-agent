@@ -78,6 +78,7 @@ nvwb build --context local --project \$PROJECT_PATH
 
 # Configure project's system mounts
 nvwb configure mounts /var/run/:/var/host-run/ --project \$PROJECT_PATH --context local
+nvwb configure mounts /run/cdi/:/run/cdi/ --project \$PROJECT_PATH --context local
 
 
 ### CONFIGURE WORKSHOP SERVICE UNIT FILE ###

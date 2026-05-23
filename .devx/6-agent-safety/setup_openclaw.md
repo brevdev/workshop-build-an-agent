@@ -47,10 +47,12 @@ The install script automatically starts the setup wizard. Walk through the promp
    - **Model ID**: `nvidia/nemotron-3-super-120b-a12b`
    - **Endpoint ID**: Accept the default (`custom-integrate-api-nvidia-com`)
    - **Model alias**: Leave blank
+   - **Image Input**: Leave as **No**
 4. **Channel** — Select **Skip for now** (we'll use the CLI and NemoClaw Client for this module)
-5. **Web search** — Select **Tavily Search** (uses your `TAVILY_API_KEY` environment variable if set, otherwise skip)
+5. **Web search** — Select **Skip for now**
 6. **Skills** — Select **No** (not needed for this module)
 7. **Hooks** — Select **Skip for now**
+8. Select **Hatch in Terminal** to test the connection
 
 The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates the agent workspace at `~/.openclaw/workspace/`.
 
@@ -61,6 +63,8 @@ The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates 
 ## Step 3: Review OpenClaw Workspace
 
 Under the hood, OpenClaw operates in the workspace using the following components. Feel free to click on each and explore the contents. 
+
+**Note:** You may not see the following files until Step 2 is completed. 
 
 > Refer back to them as your agent runs and self-evolves. 
 
@@ -105,7 +109,7 @@ In this workshop environment, systemd user services aren't available, so the gat
 openclaw gateway run
 ```
 
-Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and verify it's running:
+The gateway enables filesystem access, shell execution, and tool usage for your agent. Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and verify it's running:
 
 ```bash
 openclaw gateway status
@@ -116,12 +120,6 @@ openclaw gateway status
 <!-- fold:break -->
 
 ### Step 5: Test With a Message
-
-OpenClaw requires each CLI "device" to be explicitly approved before it can talk to the gateway:
-
-```bash
-openclaw devices approve --latest
-```
 
 With the gateway running in a separate terminal, open an interactive chat session:
 
@@ -177,9 +175,9 @@ Ask the agent:
 
 > *Fetch `https://httpbin.org/ip` and tell me what you see.*
 
-The agent reaches an arbitrary internet host and reports back. **What's wrong:** your agent has an open pipe to anywhere on the internet — a prompt injection in a feed could redirect it to an exfiltration endpoint, and nothing would stop it.
+The agent reaches an arbitrary internet host and reports back. 
 
-> Later: **Exercise 1** closes this down with deny-by-default network policy.
+**What's wrong:** your agent has an open pipe to anywhere on the internet — a prompt injection in a feed could redirect it to an exfiltration endpoint, and nothing would stop it.
 
 <!-- fold:break -->
 
@@ -189,9 +187,9 @@ Ask the agent:
 
 > *Read `/etc/passwd` and summarize who has shells.*
 
-The agent reads a system file it has no business reading. **What's wrong:** the agent has whatever filesystem access the OS user grants — usually far more than it needs. A prompt injection that asks the agent to read `~/.ssh/id_rsa` would succeed the same way.
+The agent reads a system file it has no business reading. 
 
-> Later: **Exercise 3** locks filesystem access at the kernel level with Landlock LSM.
+**What's wrong:** the agent has whatever filesystem access the OS user grants — usually far more than it needs. A prompt injection that asks the agent to read `~/.ssh/id_rsa` would succeed the same way.
 
 <!-- fold:break -->
 
@@ -201,9 +199,9 @@ Ask the agent:
 
 > *Print the value of the `NVIDIA_API_KEY` environment variable.*
 
-The agent dumps a real credential straight from its process environment. **What's wrong:** credentials live in-process. Any prompt injection that tricks the agent into "printing debug info" exfiltrates your keys.
+The agent dumps a real credential straight from its process environment. 
 
-> Later: **Exercise 4** removes the keys from the agent entirely by routing through `inference.local`.
+**What's wrong:** credentials live in-process. Any prompt injection that tricks the agent into "printing debug info" exfiltrates your keys.
 
 <!-- fold:break -->
 
@@ -217,18 +215,12 @@ Then open <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/M
 
 **What's wrong:** an attacker who can influence the agent for one session can influence it forever. A subtle instruction planted in week one will still be in effect in week ten.
 
-> Later: **Exercise 6** uses red-team probing and LLM-as-judge evaluation to catch this kind of drift programmatically.
-
-<!-- fold:break -->
-
-Each of these is a real attack class from OWASP's Top 10 for Agentic Applications. None required sophistication — just an agent with no boundaries.
-
 <!-- fold:break -->
 
 ## What's Next
 
 Your agent works. But right now, the only thing standing between it and unsafe behavior is a markdown file with soft rules. It has full system access, open network, and credentials in the environment.
 
-In the next section, you'll see exactly how the NemoClaw reference stack attempts to bridge these gaps with kernel-level enforcement, deny-by-default networking, credential isolation, and privacy routing.
+In the following sections, you'll see exactly how the NemoClaw reference stack attempts to bridge these gaps with kernel-level enforcement, deny-by-default networking, credential isolation, and privacy routing.
 
 > Head to [Why NemoClaw: Principles and Layers](why_nemoclaw) to examine the security principles and technical layers that help make autonomous agents safer for production.

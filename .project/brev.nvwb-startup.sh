@@ -76,6 +76,12 @@ nvwb switch-branch $TARGET_BRANCH --context local --project \$PROJECT_PATH
 # Build the application
 nvwb build --context local --project \$PROJECT_PATH
 
+# Ensure /run/cdi/ exists with a populated NVIDIA CDI spec before NVWB validates
+# the mount source. On a fresh Brev node, nvidia-cdi-refresh.service may not have
+# run yet — generate the spec eagerly so NemoClaw can attach the GPU in M6.
+sudo mkdir -p /run/cdi
+sudo nvidia-ctk cdi generate --output=/run/cdi/nvidia.yaml 2>/dev/null || true
+
 # Configure project's system mounts
 nvwb configure mounts /var/run/:/var/host-run/ --project \$PROJECT_PATH --context local
 nvwb configure mounts /run/cdi/:/run/cdi/ --project \$PROJECT_PATH --context local

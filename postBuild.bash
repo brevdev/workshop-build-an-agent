@@ -6,7 +6,7 @@ command -v npm >/dev/null 2>&1 || { sudo apt-get update && sudo apt-get install 
 
 sudo apt-get update && sudo apt-get install -y openssh-client socat
 
-sudo npm install n -g
+sudo npm install n@10.2.0 -g
 sudo n stable
 
 # Deep Agent Setup File

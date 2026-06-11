@@ -19,8 +19,8 @@ from langchain_core.tools.retriever import create_retriever_tool
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data", "it-knowledge-base")
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
-EMBEDDING_MODEL = "nvidia/llama-3.2-nv-embedqa-1b-v2"
-RERANK_MODEL = "nvidia/llama-3.2-nv-rerankqa-1b-v2"
+EMBEDDING_MODEL = "nvidia/nv-embedqa-e5-v5"
+RERANK_MODEL = "nvidia/llama-nemotron-rerank-1b-v2"
 
 # ── Lazy singleton ────────────────────────────────────────────────────────────
 

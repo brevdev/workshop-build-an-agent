@@ -218,8 +218,8 @@ So far, we've only migrated one of our three models to run locally.
 
 Recall that our agent also uses two additional models:
 
-  - [Reranker: llama-3_2-nv-rerankqa-1b-v2](https://build.nvidia.com/nvidia/llama-3_2-nv-rerankqa-1b-v2)
-  - [Embedding: llama-3_2-nv-embedqa-1b-v2](https://build.nvidia.com/nvidia/llama-3_2-nv-embedqa-1b-v2)
+  - [Reranker: llama-nemotron-rerank-1b-v2](https://build.nvidia.com/nvidia/llama-nemotron-rerank-1b-v2)
+  - [Embedding: nv-embedqa-e5-v5](https://build.nvidia.com/nvidia/nv-embedqa-e5-v5)
 
 If you have access to a second GPU, consider running these models locally as well. You can follow the same process as before: consult the official docs for each model, launch their NIM endpoints, and update your agent code to point to the new local URLs (using the `base_url` parameter).
 

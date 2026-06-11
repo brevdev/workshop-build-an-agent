@@ -1,6 +1,6 @@
 # Build An Agent Workshop  [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-32kC34ErT9wsqTcJyaKMxBEuhr2)
 
-The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through six progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating, improving, and securing agent performance.
+The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through seven progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating, improving, and securing agent performance.
 
 This workshop provides everything you need to become proficient in agentic AI development:
 
@@ -10,17 +10,18 @@ This workshop provides everything you need to become proficient in agentic AI de
 * **Module 4 - Agent Customization**: Customize your agent beyond prompt engineering and tools with agent skills and reinforcement learning (RL).
 * **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation.
 * **Module 6 - Agent Safety**: Secure autonomous agents with kernel-level enforcement (via OpenShell) and privacy routing using NVIDIA's NemoClaw stack.
+* **Module 7 - Agent Harnesses & Skills**: Separate the harness layer from the LLM, survey harness architectures from OpenClaw to pi to Claude Code, and supercharge any of them with portable, GPU-accelerated NVIDIA Verified Skills.
 
 At the end of this workshop, you will take home:
 
 * Deep understanding of agent architecture and design patterns
-* Six working agents demonstrating different capabilities
+* Seven working agents demonstrating different capabilities
 * Knowledge of NVIDIA NIM, NeMo models, and evaluation tools
 * Comprehensive evaluation framework for production agents
 * A turn-key, portable development environment
 * Best practices for continuous agent improvement
 
-The entire workshop can take anywhere from 12 to 18 hours to complete, depending on depth of exploration.
+The entire workshop can take anywhere from 14 to 21 hours to complete, depending on depth of exploration.
 
 ## Workshop Modules
 
@@ -102,6 +103,20 @@ Secure autonomous agents with kernel-level enforcement, data routing, and contin
 - Safety evaluation using LLM-as-judge (extending M3's evaluation framework)
 - The NemoClaw reference architecture (OpenClaw + OpenShell + Nemotron + Privacy Router)
 
+### Module 7: Agent Harnesses & Skills (2-3 hours)
+
+Understand the harness layer that turns a stateless LLM into a capable agent — and the open skills format that makes capability portable across every harness.
+
+**What you'll build**: A minimal pi-style harness from scratch (four tools, sub-1k-token prompt), a context-tax measurement suite with lazy skill loading, a portable skill that runs unchanged in your harness and OpenClaw, and a GPU-accelerated agent powered by the NVIDIA-verified cuDF skill.
+
+**Key concepts**:
+- The harness vs. LLM separation, and the five things harnesses own (memory, self-evolution, skills, tool calling, token efficiency)
+- The harness landscape and philosophies: OpenClaw, Hermes, OpenCode, LangChain Deep Agents, pi, Claude Code, and Codex
+- The context tax, and lazy skill loading as token efficiency in action
+- The open Agent Skills specification and skill authoring
+- NVIDIA Verified Skills (github.com/NVIDIA/skills): signature verification, skill cards, and capability governance
+- Driving your local GPU from inside any harness — open source or closed
+
 ## Learning Objectives
 
 By the end of this workshop, you'll know how to:
@@ -112,6 +127,7 @@ By the end of this workshop, you'll know how to:
 - **Customize agents** through synthetic data generation and reinforcement learning
 - **Build deep agents** with planning, delegation, and sandboxed execution
 - **Secure agents** with kernel-level enforcement, data classification, and red-team evaluation
+- **Choose and extend agent harnesses** using the context-tax framework and portable, NVIDIA-verified skills
 - **Deploy and monitor** agents in production environments
 - **Continuously improve** agent performance through systematic evaluation
 

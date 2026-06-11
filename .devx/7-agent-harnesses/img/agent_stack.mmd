@@ -1,0 +1,45 @@
+graph TB
+    EVAL["EVALUATION — M3 quality · M6 safety<br/>measures the whole stack from outside"]
+
+    subgraph HARNESS["HARNESS — the program around the model (in-process · you build this in M7)"]
+        LOOP["Loop<br/>ReAct (M1) · deep loop (M5)"]
+        CTX["Context assembly<br/>system prompt (M1) · RAG (M2)<br/>skills (M2/M4) · compaction (M5)"]
+        TOOLS["Tool registry + dispatch (M1)<br/>MCP client (M2)"]
+        GATES["Gates<br/>HITL approval (M4/M5)"]
+        STATE["State<br/>history (M1) · MEMORY.md (M6/M7)<br/>todos + subagents (M5)"]
+    end
+
+    subgraph MODEL["MODEL — weights behind an API (stateless)"]
+        NIM["Nemotron via NIM endpoint (M1–M7)"]
+        FT["Fine-tuned weights<br/>SDG + GRPO (M4) — the one time<br/>you changed THIS layer"]
+    end
+
+    subgraph ENV["ENVIRONMENT — where actions land (out-of-process · the agent cannot lift it)"]
+        FS["Filesystem · shell · APIs (M1+)"]
+        MCPS["MCP servers (M2)"]
+        SBX["Docker sandbox (M5)"]
+        KERNEL["OpenShell: Landlock · seccomp<br/>egress policy (M6)"]
+        GW["Privacy Router gateway (M6)<br/>operator-chosen backend<br/>+ credential injection"]
+    end
+
+    HARNESS -->|"chat completion request"| MODEL
+    MODEL -->|"text / tool_call"| HARNESS
+    HARNESS -->|"tool executions"| ENV
+    ENV -->|"results · denials"| HARNESS
+    EVAL -.-> HARNESS
+    EVAL -.-> MODEL
+    EVAL -.-> ENV
+
+    style LOOP fill:#4caf50,color:#fff
+    style CTX fill:#4caf50,color:#fff
+    style TOOLS fill:#4caf50,color:#fff
+    style GATES fill:#4caf50,color:#fff
+    style STATE fill:#4caf50,color:#fff
+    style NIM fill:#2196f3,color:#fff
+    style FT fill:#2196f3,color:#fff
+    style FS fill:#ff9800,color:#000
+    style MCPS fill:#ff9800,color:#000
+    style SBX fill:#ff9800,color:#000
+    style KERNEL fill:#ff9800,color:#000
+    style GW fill:#ff9800,color:#000
+    style EVAL fill:#607d8b,color:#fff

@@ -1,0 +1,31 @@
+graph TB
+    subgraph FW["FRAMEWORKS & LIBRARIES — code you build WITH"]
+        LC["LangChain / LangGraph<br/>(M1–M3)"]
+        DA["deepagents (M5)<br/>a harness construction kit:<br/>create_deep_agent() manufactures one"]
+    end
+
+    subgraph HARN["HARNESSES — running programs that wrap a model in a loop"]
+        CC["Claude Code<br/>terminal coding harness"]
+        OC["OpenClaw (M6)<br/>always-on autonomous harness"]
+        DAB["Deep Agent Builder (M5)<br/>deepagents + backend + UI, assembled"]
+        HERM["Hermes (M7)<br/>glass-box teaching harness"]
+    end
+
+    subgraph APP["APPLICATIONS — purpose-bound products on top"]
+        RG["Report generator (M1)"]
+        HD["IT Help Desk (M2)"]
+        NC["NemoClaw Client (M6)"]
+    end
+
+    FW -->|"used to build"| HARN
+    HARN -->|"specialized into"| APP
+
+    style LC fill:#607d8b,color:#fff
+    style DA fill:#607d8b,color:#fff
+    style CC fill:#4caf50,color:#fff
+    style OC fill:#4caf50,color:#fff
+    style DAB fill:#4caf50,color:#fff
+    style HERM fill:#4caf50,color:#fff
+    style RG fill:#9c27b0,color:#fff
+    style HD fill:#9c27b0,color:#fff
+    style NC fill:#9c27b0,color:#fff

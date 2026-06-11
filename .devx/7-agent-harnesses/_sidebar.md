@@ -1,0 +1,7 @@
+* [Setting up Secrets](secrets.md)
+* [The Invisible Machine](intro_agent_harnesses.md)
+* [The Agent Stack](agent_stack.md)
+* [Build Hermes: The Loop](build_hermes.md)
+* [Build Hermes: Tools and Gates](tools_and_gates.md)
+* [The Harness Face-Off](harness_faceoff.md)
+* [Hermes Enters the Sandbox](into_the_sandbox.md)

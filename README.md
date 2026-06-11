@@ -1,6 +1,6 @@
 # Build An Agent Workshop  [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-32kC34ErT9wsqTcJyaKMxBEuhr2)
 
-The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through six progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating, improving, and securing agent performance.
+The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through seven progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating, improving, and securing agent performance.
 
 This workshop provides everything you need to become proficient in agentic AI development:
 
@@ -10,17 +10,18 @@ This workshop provides everything you need to become proficient in agentic AI de
 * **Module 4 - Agent Customization**: Customize your agent beyond prompt engineering and tools with agent skills and reinforcement learning (RL).
 * **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation.
 * **Module 6 - Agent Safety**: Secure autonomous agents with kernel-level enforcement (via OpenShell) and privacy routing using NVIDIA's NemoClaw stack.
+* **Module 7 - Agent Harnesses**: Discover the invisible machine around the model — build Hermes, a from-scratch glass-box agent harness, and run it inside Module 6's kernel-enforced sandbox.
 
 At the end of this workshop, you will take home:
 
 * Deep understanding of agent architecture and design patterns
-* Six working agents demonstrating different capabilities
+* Seven working agents demonstrating different capabilities
 * Knowledge of NVIDIA NIM, NeMo models, and evaluation tools
 * Comprehensive evaluation framework for production agents
 * A turn-key, portable development environment
 * Best practices for continuous agent improvement
 
-The entire workshop can take anywhere from 12 to 18 hours to complete, depending on depth of exploration.
+The entire workshop can take anywhere from 14 to 21 hours to complete, depending on depth of exploration.
 
 ## Workshop Modules
 
@@ -102,6 +103,19 @@ Secure autonomous agents with kernel-level enforcement, data routing, and contin
 - Safety evaluation using LLM-as-judge (extending M3's evaluation framework)
 - The NemoClaw reference architecture (OpenClaw + OpenShell + Nemotron + Privacy Router)
 
+### Module 7: Agent Harnesses (2.5-3 hours)
+
+Discover the invisible machine that turns a stateless model into an agent — by building one from scratch.
+
+**What you'll build**: Hermes — a zero-framework Python agent harness with a terminal REPL, context budgeting, persistent memory, tool dispatch, and human-in-the-loop gates — validated against a bare model call and OpenClaw, then run under OpenShell policy with keyless inference.
+
+**Key concepts**:
+- The agent stack: placing every concept from Modules 1–6 into model, harness, and environment layers
+- Why the same model produces different agents (the harness is the variable)
+- Context assembly, token budgeting, and compaction
+- Tool registries, dispatch, and in-process permission gates vs. kernel enforcement
+- The harness landscape: framework vs. harness vs. application
+
 ## Learning Objectives
 
 By the end of this workshop, you'll know how to:
@@ -112,6 +126,7 @@ By the end of this workshop, you'll know how to:
 - **Customize agents** through synthetic data generation and reinforcement learning
 - **Build deep agents** with planning, delegation, and sandboxed execution
 - **Secure agents** with kernel-level enforcement, data classification, and red-team evaluation
+- **Understand agent harnesses** by building one from scratch and attributing every agent behavior to the subsystem that produces it
 - **Deploy and monitor** agents in production environments
 - **Continuously improve** agent performance through systematic evaluation
 

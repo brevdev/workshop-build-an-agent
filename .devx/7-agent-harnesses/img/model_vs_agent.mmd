@@ -1,0 +1,20 @@
+graph TB
+    subgraph Illusion["What it feels like"]
+        U1["You"] -->|"message"| A1["The Agent<br/>remembers · acts · refuses"]
+        A1 -->|"reply"| U1
+    end
+
+    subgraph Reality["What is actually running"]
+        U2["You"] -->|"message"| H["HARNESS — a program<br/>loop · context · tools · gates · state"]
+        H -->|"POST /v1/chat/completions<br/>(the ENTIRE conversation, every turn)"| M["MODEL<br/>nvidia/nemotron-3-super-120b-a12b<br/>stateless · text in, text out"]
+        M -->|"one response:<br/>text or tool_call JSON"| H
+        H -->|"executes tools · persists memory<br/>shows you the reply"| U2
+    end
+
+    Illusion -.->|"this module dissolves the illusion"| Reality
+
+    style A1 fill:#9c27b0,color:#fff
+    style H fill:#4caf50,color:#fff
+    style M fill:#2196f3,color:#fff
+    style U1 fill:#fff,color:#222
+    style U2 fill:#fff,color:#222

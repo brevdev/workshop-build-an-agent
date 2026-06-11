@@ -1,0 +1,321 @@
+# ============================================================================
+# OpenShell Policy - Module 7 (Hermes in the sandbox)
+# ============================================================================
+# Full active policy for `my-assistant`. The static layers (filesystem_policy,
+# landlock, process) MUST be present: `openshell policy set` is a FULL
+# replacement, so a partial file would be rejected (see Module 6, Exercise 1).
+#
+# This file is Module 6's baseline with two deliberate changes:
+#   * The Module 6 `httpbin_access` rule is REMOVED. httpbin.org (and every
+#     other unlisted host) is therefore DENIED. Hermes' fetch_url tool will be
+#     approved by Hermes' own gate, then refused by the kernel proxy -> the
+#     "harness asks, kernel enforces" demo.
+#   * `managed_inference` lists python3 path variants so Hermes (/usr/bin/python3
+#     and friends) can reach https://inference.local with NO API key -- the
+#     Privacy Router injects the operator's credentials at the gateway.
+#
+# Landlock still confines writes to /sandbox and /tmp, so write_file to /etc/...
+# fails with PermissionError even after the gate approves.
+#
+# Apply (from the project root):
+#   openshell policy set my-assistant \
+#     --policy code/7-agent-harnesses/policies/hermes-sandbox.yaml --wait
+#
+# NOTE: if you added httpbin access in Module 6, applying this file REVOKES it.
+# That revocation is the point of the exercise.
+# ============================================================================
+
+version: 1
+filesystem_policy:
+  include_workdir: true
+  read_only:
+  - /usr
+  - /lib
+  - /dev/urandom
+  - /app
+  - /etc
+  - /var/log
+  read_write:
+  - /tmp
+  - /dev/null
+  - /sandbox/.openclaw
+  - /sandbox/.nemoclaw
+  - /home/linuxbrew
+  - /proc
+  - /sandbox
+  - /dev/nvidiactl
+  - /dev/nvidia-uvm
+  - /dev/nvidia-uvm-tools
+  - /dev/nvidia-modeset
+  - /dev/nvidia0
+landlock:
+  compatibility: best_effort
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox
+network_policies:
+  brave:
+    name: brave
+    endpoints:
+    - host: api.search.brave.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: POST
+          path: /**
+    binaries:
+    - path: /usr/local/bin/node
+    - path: /usr/bin/node
+    - path: /usr/bin/curl
+  brew:
+    name: brew
+    endpoints:
+    - host: formulae.brew.sh
+      port: 443
+      tls: skip
+      access: full
+    - host: github.com
+      port: 443
+      tls: skip
+      access: full
+    - host: ghcr.io
+      port: 443
+      tls: skip
+      access: full
+    - host: pkg-containers.githubusercontent.com
+      port: 443
+      tls: skip
+      access: full
+    - host: objects.githubusercontent.com
+      port: 443
+      tls: skip
+      access: full
+    - host: raw.githubusercontent.com
+      port: 443
+      tls: skip
+      access: full
+    binaries:
+    - path: /usr/bin/curl
+    - path: /usr/bin/git
+    - path: /usr/local/bin/brew
+    - path: /home/linuxbrew/.linuxbrew/bin/brew
+    - path: /home/linuxbrew/.linuxbrew/bin/*
+    - path: /home/linuxbrew/.linuxbrew/Homebrew/bin/*
+  clawhub:
+    name: clawhub
+    endpoints:
+    - host: clawhub.ai
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: POST
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+    - path: /usr/local/bin/node
+  huggingface:
+    name: huggingface
+    endpoints:
+    - host: huggingface.co
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+    - host: cdn-lfs.huggingface.co
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+    - host: router.huggingface.co
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: POST
+          path: /**
+    binaries:
+    - path: /usr/local/bin/python3
+    - path: /usr/local/bin/node
+  managed_inference:
+    name: managed_inference
+    endpoints:
+    - host: inference.local
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: POST
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+    - path: /usr/local/bin/node
+    - path: /usr/bin/node
+    - path: /usr/bin/curl
+    - path: /usr/bin/python3
+    - path: /usr/bin/python3*
+    - path: /usr/local/bin/python3
+    - path: /usr/local/bin/python3*
+  npm_registry:
+    name: npm_registry
+    endpoints:
+    - host: registry.npmjs.org
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+  npm_yarn:
+    name: npm_yarn
+    endpoints:
+    - host: registry.npmjs.org
+      port: 443
+      tls: skip
+      access: full
+    - host: registry.yarnpkg.com
+      port: 443
+      tls: skip
+      access: full
+    binaries:
+    - path: /usr/local/bin/npm*
+    - path: /usr/local/bin/npx*
+    - path: /usr/local/bin/node*
+    - path: /usr/local/bin/yarn*
+    - path: /usr/bin/npm*
+    - path: /usr/bin/node*
+  nvidia:
+    name: nvidia
+    endpoints:
+    - host: integrate.api.nvidia.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: POST
+          path: /v1/chat/completions
+      - allow:
+          method: POST
+          path: /v1/completions
+      - allow:
+          method: POST
+          path: /v1/embeddings
+      - allow:
+          method: GET
+          path: /v1/models
+      - allow:
+          method: GET
+          path: /v1/models/**
+    - host: inference-api.nvidia.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: POST
+          path: /v1/chat/completions
+      - allow:
+          method: POST
+          path: /v1/completions
+      - allow:
+          method: POST
+          path: /v1/embeddings
+      - allow:
+          method: GET
+          path: /v1/models
+      - allow:
+          method: GET
+          path: /v1/models/**
+    binaries:
+    - path: /usr/local/bin/openclaw
+  openclaw_api:
+    name: openclaw_api
+    endpoints:
+    - host: openclaw.ai
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: POST
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+    - path: /usr/local/bin/node
+  openclaw_docs:
+    name: openclaw_docs
+    endpoints:
+    - host: docs.openclaw.ai
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+    binaries:
+    - path: /usr/local/bin/openclaw
+  pypi:
+    name: pypi
+    endpoints:
+    - host: pypi.org
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: HEAD
+          path: /**
+    - host: files.pythonhosted.org
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow:
+          method: GET
+          path: /**
+      - allow:
+          method: HEAD
+          path: /**
+    binaries:
+    - path: /usr/bin/python3*
+    - path: /usr/bin/pip*
+    - path: /usr/local/bin/python3*
+    - path: /usr/local/bin/pip*
+    - path: /sandbox/.venv/bin/python*
+    - path: /sandbox/.venv/bin/pip*
+    - path: /sandbox/.uv/python/**/python*
+    - path: /sandbox/.local/bin/pip*

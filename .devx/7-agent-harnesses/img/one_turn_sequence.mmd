@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant U as You (terminal)
+    participant R as REPL<br/>harness.py
+    participant C as Context<br/>context.py
+    participant M as Model API<br/>(stateless)
+    participant G as Gate<br/>gates.py
+    participant T as Tools<br/>tools.py
+    participant S as State<br/>state.py
+
+    U->>R: "save 'ship it' to notes.txt"
+    R->>C: build_system_prompt() + history
+    Note over C: HERMES.md + MEMORY.md<br/>+ compacted history + tool schemas
+    C->>M: POST /v1/chat/completions
+    M-->>R: tool_call: write_file("notes.txt", "ship it")
+    R->>G: check_gate("write_file")
+    G->>U: PERMISSION GATE — approve? [y/N]
+    U->>G: y
+    G->>T: dispatch(write_file)
+    T-->>R: "Wrote 7 chars to notes.txt"
+    R->>M: POST … (+ role:"tool" result)
+    M-->>R: "Done — saved to notes.txt."
+    R->>S: history appended (MEMORY.md only via remember)
+    R->>U: "Done — saved to notes.txt."

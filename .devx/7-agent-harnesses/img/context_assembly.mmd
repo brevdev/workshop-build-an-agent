@@ -1,0 +1,28 @@
+graph LR
+    HM["HERMES.md<br/>identity + rules<br/>(loaded every turn)"]
+    MEM["MEMORY.md<br/>facts that survived<br/>past sessions"]
+    HIST["Session history<br/>every prior turn"]
+    SUM["Eviction stub<br/>(production harnesses<br/>summarize instead)"]
+    SCH["Tool schemas<br/>(JSON, advertised<br/>every turn)"]
+    NEW["Your new message"]
+
+    B{"Token budget<br/>HERMES_BUDGET"}
+    REQ["messages[] in ONE request —<br/>everything the model<br/>will EVER see this turn"]
+
+    HM --> B
+    MEM --> B
+    HIST --> B
+    SCH --> B
+    NEW --> B
+    HIST -.->|"over budget?<br/>oldest turns evicted"| SUM
+    SUM --> B
+    B --> REQ
+
+    style HM fill:#4caf50,color:#fff
+    style MEM fill:#4caf50,color:#fff
+    style HIST fill:#4caf50,color:#fff
+    style SUM fill:#ffeb3b,color:#000
+    style SCH fill:#4caf50,color:#fff
+    style NEW fill:#fff,color:#222
+    style B fill:#ff9800,color:#000
+    style REQ fill:#2196f3,color:#fff

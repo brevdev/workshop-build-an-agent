@@ -1,0 +1,28 @@
+graph TB
+    MC["Model returns tool_call:<br/>fetch_url('https://httpbin.org/ip')"]
+
+    subgraph INPROC["Inside the agent process — the harness ASKS"]
+        GATE{"Hermes gate (gates.py)<br/>approve? [y/N]"}
+        REF["Tool result: gate denial<br/>(M6 scoring family: prompt_refusal)"]
+        RUN["Hermes dispatches —<br/>urllib opens the connection"]
+    end
+
+    subgraph OUTPROC["Outside the agent process — the kernel ENFORCES"]
+        POL{"OpenShell egress policy<br/>(proxy + kernel, operator-set)"}
+        DENY["CONNECT refused — URLError<br/>(M6 scoring family: sandbox_block)"]
+        OK["Request reaches the internet"]
+    end
+
+    MC --> GATE
+    GATE -->|"n"| REF
+    GATE -->|"y"| RUN --> POL
+    POL -->|"no matching policy"| DENY
+    POL -->|"policy allows"| OK
+
+    style MC fill:#2196f3,color:#fff
+    style GATE fill:#4caf50,color:#fff
+    style REF fill:#ffeb3b,color:#000
+    style RUN fill:#4caf50,color:#fff
+    style POL fill:#ff9800,color:#000
+    style DENY fill:#f44336,color:#fff
+    style OK fill:#fff,color:#222

@@ -55,7 +55,7 @@ Embeddings convert text into numerical vectors that capture semantic meaning. Te
 
 These chunks need to be embedded into vectors for the database. This is done with the `RETRIEVER_EMBEDDING_MODEL` defined before.
 
-Use the [NVIDIAEmbeddings](https://build.nvidia.com/nvidia/llama-3_2-nv-embedqa-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'embeddings = ');"><i class="fas fa-code"></i> embeddings</button>. The API Key has already been configured, it does not need to be specified. Set truncate to `END`.
+Use the [NVIDIAEmbeddings](https://build.nvidia.com/nvidia/llama-nemotron-embed-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'embeddings = ');"><i class="fas fa-code"></i> embeddings</button>. The API Key has already been configured, it does not need to be specified. Set truncate to `END`.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -95,7 +95,7 @@ LangChain allows us to easily create a basic retrieval chain from our Vector Dat
 
 ### Reranking Model
 
-NVIDIA offers a Reranker model to improve the relevance and order of retrieved documents. Use the [NVIDIARerank](https://build.nvidia.com/nvidia/llama-3_2-nv-rerankqa-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'reranker = ');"><i class="fas fa-code"></i> reranker</button>.
+NVIDIA offers a Reranker model to improve the relevance and order of retrieved documents. Use the [NVIDIARerank](https://build.nvidia.com/nvidia/llama-nemotron-rerank-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'reranker = ');"><i class="fas fa-code"></i> reranker</button>.
 
 <details>
 <summary>🆘 Need some help?</summary>

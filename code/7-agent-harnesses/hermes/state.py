@@ -38,4 +38,5 @@ def remember(note: str) -> str:
         # ── TODO: Exercise 2.4 — append the note as a dated bullet ──
         # Write one line so it survives a restart and reloads via build_system_prompt().
         f.write(...)  # Hint: "- [{}] {}\n".format(date.today().isoformat(), note.strip())
-    return "Noted. MEMORY.md now has {} entries.".format(memory_note_count())
+    n = memory_note_count()
+    return "Noted. MEMORY.md now has {} {}.".format(n, "entry" if n == 1 else "entries")

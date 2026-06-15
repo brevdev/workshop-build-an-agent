@@ -1,6 +1,6 @@
 """Entry point: `python -m hermes`.
 
-Answer key — solved version of hermes/__main__.py.
+This file ships complete — there are no exercises in it.
 
   python -m hermes                 # interactive REPL
   python -m hermes --once "hi"     # single message, print, exit (good for scripts/sandbox)

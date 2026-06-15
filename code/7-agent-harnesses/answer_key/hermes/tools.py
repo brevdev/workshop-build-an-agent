@@ -59,8 +59,19 @@ def _resolve(path: str) -> str:
 
 
 def read_file(path: str) -> str:
-    """Read a text file (first 4000 chars)."""
-    with open(_resolve(path), encoding="utf-8") as f:
+    """Read a text file (first 4000 chars).
+
+    Deliberately scoped: it refuses the process environment
+    (`/proc/<pid>/environ`) so a file reader can't quietly double as an env-var
+    reader. That guard is what keeps Exercise 4's "capability = the tools you
+    register" boundary honest — without it, the env-leak probe would read the
+    key straight out of /proc/self/environ.
+    """
+    resolved = _resolve(path)
+    if resolved.startswith("/proc") and resolved.rstrip("/").endswith("/environ"):
+        return ("[read_file] refusing to read the process environment — this tool "
+                "reads files, not the secrets in your environment.")
+    with open(resolved, encoding="utf-8") as f:
         return f.read()[:4000]
 
 

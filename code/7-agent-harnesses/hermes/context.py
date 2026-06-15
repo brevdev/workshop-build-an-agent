@@ -11,7 +11,6 @@ harness falls back to a default prompt and skips compaction).
 """
 from __future__ import annotations
 
-import json
 from datetime import date
 
 from . import config, state

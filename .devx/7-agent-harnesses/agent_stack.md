@@ -111,7 +111,7 @@ Two things worth calling out:
 Take the classic attack from Module 6's probes and follow it down the stack:
 
 - **Model layer**: can only emit *text*. On its own it can "leak" a key only if the key is somewhere in its context to begin with.
-- **Harness layer**: decides whether a key is *ever placed in context*, and whether a tool exists that could read the environment. No env-reading tool → no path.
+- **Harness layer**: decides whether a key is *ever placed in context*, and which tools exist. Careful, though — a *general* file-reading tool can open `/proc/self/environ` and so doubles as an env-var reader unless you explicitly scope it (Hermes' `read_file` refuses that path). The boundary is real, but only as tight as each tool is written.
 - **Environment layer** (Module 6): made sure there is *no key in the process at all* — the Privacy Router keeps credentials at the gateway, so even a fully compromised agent has nothing to print.
 
 Three independent layers, three independent chances to stop the same attack. That's defense in depth — and it's exactly what Exercises 4 and 5 will make you feel firsthand.

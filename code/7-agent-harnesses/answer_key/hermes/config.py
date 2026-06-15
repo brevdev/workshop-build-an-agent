@@ -1,9 +1,8 @@
 """Hermes configuration — every knob the harness has, in one place.
 
-Answer key — Module 7. This file ships complete (no exercises); it is the
-same in the student package and here. Everything is overridable by an
-environment variable so Exercise 5 can repoint Hermes at the sandbox gateway
-without editing code.
+Answer key copy — identical in code to the student package (this file has no
+exercises). Everything is overridable by an environment variable so Exercise 5
+can repoint Hermes at the sandbox gateway without editing code.
 """
 from __future__ import annotations
 

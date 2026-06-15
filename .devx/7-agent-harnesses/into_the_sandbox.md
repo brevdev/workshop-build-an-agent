@@ -105,7 +105,7 @@ export HERMES_BASE_URL=https://inference.local/v1
 python3 -m hermes
 ```
 
-The banner now reads `inference: gateway-managed (no local key)`, and chat *works* — with no API key anywhere in the agent's environment.
+The banner's `model :` line now ends with `@ gateway-managed (no local key)` instead of the usual URL, and chat *works* — with no API key anywhere in the agent's environment.
 
 How? Hermes attaches an `Authorization` header only when it has a key (look back at `client.py`). Inside the sandbox it has none, so it sends **no** header — and the OpenShell gateway injects the operator's real credentials at the network boundary. This is the credential-isolation half of Module 6's **Privacy Router**: the operator chooses the backend and the gateway injects the keys. It is *not* inspecting your prompts — it is keeping secrets out of the agent's process entirely.
 
@@ -150,7 +150,7 @@ hermes> The write was approved by my gate but denied by the kernel — Landlock
 That `PermissionError` is Landlock (recall Module 6's "this isn't a POSIX permission error, it's the kernel"). Now the contrast — write *inside* the allowed area:
 
 ```text
-you> Use write_file to write 'hello' to workspace/notes.txt
+you> Use write_file to write 'hello' to notes.txt
   ... Approve? [y/N]: y
 [tool] write_file -> Wrote 5 chars to /sandbox/hermes/workspace/notes.txt
 ```
@@ -162,13 +162,16 @@ Same tool, same gate approval — allowed here, denied at `/etc`. The kernel, no
 <details>
 <summary><strong>Step 6 — Flip the contrast on the host</strong></summary>
 
-Exit the sandbox and run the *same two requests* against Hermes on the host (outside any sandbox). With your gate approval, both succeed — the host has no Landlock policy and no egress proxy. Who answered "may I?" at each layer?
+Exit the sandbox and run the *same requests* against Hermes on the host (outside any sandbox). Your harness and its gate are byte-for-byte identical — only the environment changed. Who answered "may I?" at each layer?
 
-| Run | Gate (harness) | Kernel (environment) | Result |
-|-----|---------------|---------------------|--------|
-| `fetch_url httpbin` in sandbox | approved | **denied** (egress policy) | blocked |
-| `write_file /etc/...` in sandbox | approved | **denied** (Landlock) | blocked |
-| same, on the host | approved | no policy | succeeds |
+| Run | Gate (harness) | Environment | Result |
+|-----|---------------|-------------|--------|
+| `fetch_url httpbin` in sandbox | approved | **denied** — egress policy | blocked |
+| `fetch_url httpbin` on the host | approved | no egress policy | **succeeds** |
+| `write_file /etc/…` in sandbox | approved | **denied** — Landlock | blocked |
+| `write_file /etc/…` on the host | approved | **denied** — POSIX (you're not root) | blocked |
+
+The `fetch_url` rows are the clean contrast: the *same* request, blocked in the sandbox and open on the host — the harness never moved, the environment did. The `/etc` write is refused in both places, but notice *how*: Landlock in the sandbox, ordinary Unix permissions on the host. Same outcome, different mechanism — and Landlock is the stronger guarantee, because it would refuse the write **even if the agent were root**.
 
 </details>
 

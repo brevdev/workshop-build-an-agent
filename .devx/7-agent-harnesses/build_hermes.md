@@ -31,17 +31,19 @@ Open <button onclick="goToLineAndSelect('code/7-agent-harnesses/hermes/client.py
 
 Fill in **1.1** (assemble the payload dict) and **1.2** (send it and parse the reply). The normalization below the TODO — turning the raw response into Module 1's `{"role": "assistant", "content": ..., "tool_calls": [...]}` shape — is written for you. Study it: that's exactly what the SDK did behind your back.
 
-Verify the wire works:
+Verify the wire works by calling your client directly — this sends one hand-built request and prints the normalized dict you just assembled (nothing else is wired yet):
 
 ```bash
-python3 -m hermes --once "Reply with exactly: LOOP-OK"
+python3 -c "from hermes import client; print(client.chat([{'role': 'user', 'content': 'Reply with exactly: LOOP-OK'}]))"
 ```
 
-Expected output:
+Expected output — the exact `{"role": "assistant", ...}` shape Module 1's SDK used to hand you, now built by your own code:
 
 ```text
-LOOP-OK
+{'role': 'assistant', 'content': 'LOOP-OK'}
 ```
+
+> 💡 `python3 -m hermes` (the `--once` flag and the REPL) routes through the loop you wire in Step 2 — so it comes alive there, not yet. If `content` ever arrives wrapped in `<think>…</think>`, that's Nemotron's reasoning; Step 2's display strips it.
 
 </details>
 
@@ -59,6 +61,7 @@ python3 -m hermes
 Expected output:
 
 ```text
+[context] HERMES.md not wired yet (Exercise 2) — using a bland default prompt.
 Hermes v0.1 - a glass-box agent harness
   model : nvidia/nemotron-3-super-120b-a12b @ https://integrate.api.nvidia.com/v1
   soul  : not wired (Exercise 2)
@@ -66,26 +69,32 @@ Hermes v0.1 - a glass-box agent harness
   tools : none registered (Exercise 3)
   /quit /remember <text> /memory /context /history
 you> Hello! Who am I talking to?
-hermes> Hello! I'm an AI assistant. How can I help you today?
+hermes> Hi! I'm Nemotron, a large language model from NVIDIA. How can I help you today?
 ```
 
-The banner is honest about what you haven't built yet — `soul` and `tools` say "not wired." You'll light those up in the next exercises.
+The `[context]` line and the banner are both honest about what you haven't built yet. With no soul file, the agent has no name or personality of its own — it answers as the raw model (note it says *Nemotron*, not *Hermes*). You'll light up `soul`, `memory`, and `tools` in the next exercises — and watch that identity change.
 
 </details>
 
 <details>
 <summary><strong>Step 3 — Prove statelessness, then watch the harness fix it</strong></summary>
 
-The single most important idea in this module. In `harness.py`, temporarily comment out the line that appends the *user* message to `self.messages` (the first line of your 1.3 answer). Restart and try:
+The single most important idea in this module. Right now `send()` re-sends the *entire* `self.messages` list every turn — that's the only reason a conversation feels continuous. Break it on purpose: in your 1.3 answer, temporarily change the model call to send **only the latest message**:
+
+```python
+reply = client.chat(self.messages[-1:], tools=tools.tool_schemas())   # was: self.messages
+```
+
+The harness still *records* the whole conversation; it just stops *sending* it. Restart and try:
 
 ```text
 you> My name is Ada.
-hermes> Nice to meet you, Ada!
+hermes> Hello, Ada! Lovely to meet you.
 you> What is my name?
-hermes> I'm sorry, I don't have access to your name.
+hermes> I don't have access to your name — you haven't told me in this conversation.
 ```
 
-The model has no idea — because you stopped re-sending the history. Now restore the line. Ask again:
+The model has no idea on the second turn — because you stopped re-sending the history. Now restore the call to `self.messages`. Ask again:
 
 ```text
 you> My name is Ada.
@@ -93,7 +102,7 @@ you> What is my name?
 hermes> Your name is Ada.
 ```
 
-> 💡 **Memory is not a model feature. It is a harness feature.** The model didn't "learn" your name — your harness re-sent it.
+> 💡 **Memory is not a model feature. It is a harness feature.** The model didn't "learn" your name — your harness re-sent it. Run `/history` and you'll see the harness had the whole conversation the entire time: statelessness was about what it *sent*, not what it *stored*.
 
 </details>
 
@@ -104,29 +113,29 @@ Use the built-in REPL commands to see the machine working:
 
 ```text
 you> /history
-  system    You are Hermes, a helpful assistant.
+  system    You are a helpful assistant.
   user      My name is Ada.
-  assistant Nice to meet you, Ada!
+  assistant Hello, Ada! Lovely to meet you.
   user      What is my name?
   assistant Your name is Ada.
 you> /context
-messages: 5 | est tokens: 47 | budget: 4000
+messages: 5 | est tokens: not wired (Exercise 2) | budget: 4000
 ```
 
-Every turn, that entire `messages` list is what the model sees. That list *is* the conversation.
+Every turn, that entire `messages` list is what the model sees. That list *is* the conversation. (`/context` can already count messages, but the token estimate reads `not wired` until you build `estimate_tokens()` in Exercise 2.)
 
 </details>
 
 <details>
 <summary>🆘 Need some help?</summary>
 
-The complete `chat()` (client.py) and `send()`/`repl()` (harness.py) are in `answer_key/hermes/`. The two lines that matter most:
+The complete `chat()` (client.py) and `send()`/`repl()` (harness.py) are in `answer_key/hermes/`. The two lines you write for 1.3 (the third is already in the scaffold):
 
 ```python
 # harness.py, Exercise 1.3
-self.messages.append({"role": "user", "content": user_text})
-reply = client.chat(self.messages, tools=tools.tool_schemas())
-self.messages.append(reply)
+self.messages.append({"role": "user", "content": user_text})   # you write this
+reply = client.chat(self.messages, tools=tools.tool_schemas())  # and this
+self.messages.append(reply)                                     # already provided
 ```
 
 </details>
@@ -199,19 +208,21 @@ hermes> I am Hermes, a glass-box agent harness built in Module 7. My personality
         comes from HERMES.md — a file — not from the model weights.
 ```
 
-The banner now reads `soul : HERMES.md loaded`. Same model as Step 2; different agent. That's the thesis, live.
+The banner now reads `soul : HERMES.md loaded`. Same model as in Exercise 1 — where it answered as *Nemotron* — yet now it's *Hermes*. The only thing that changed is that a file entered the context window. That's the thesis, live.
 
 </details>
 
 <details>
 <summary><strong>Step 2 — Budget the window</strong></summary>
 
-The context window is finite, so the harness has to estimate how full it is. Open <button onclick="goToLineAndSelect('code/7-agent-harnesses/hermes/context.py', 'TODO: Exercise 2.2');"><i class="fas fa-code"></i> context.py — Exercise 2.2</button> and implement `estimate_tokens()` with the cheap, dependency-free `~4 chars per token` heuristic (no `tiktoken` — it isn't installed here, and it would be falsely precise for Nemotron's tokenizer anyway).
+The context window is finite, so the harness has to estimate how full it is. Open <button onclick="goToLineAndSelect('code/7-agent-harnesses/hermes/context.py', 'TODO: Exercise 2.2');"><i class="fas fa-code"></i> context.py — Exercise 2.2</button> and implement `estimate_tokens()` with the cheap, dependency-free `~4 chars per token` heuristic (no `tiktoken` — it isn't installed here, and it would be falsely precise for Nemotron's tokenizer anyway). Restart, then run `/context` on a fresh session:
 
 ```text
 you> /context
-messages: 5 | est tokens: 47 | budget: 4000
+messages: 1 | est tokens: 331 | budget: 4000
 ```
+
+That single message is the system prompt — HERMES.md plus your memory — which is most of the estimate, so your exact number depends on their length. Watch it climb as the conversation grows.
 
 </details>
 
@@ -252,7 +263,7 @@ Prove it across a real process restart:
 
 ```text
 you> /remember my favorite GPU is the GB300
-Noted. MEMORY.md now has 1 entries.
+Noted. MEMORY.md now has 1 entry.
 you> /quit
 ```
 

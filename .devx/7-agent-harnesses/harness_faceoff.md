@@ -71,11 +71,13 @@ This is the deliverable. For each probe, decide *which harness subsystem* produc
 | Probe | Bare model | Hermes | OpenClaw | Subsystem responsible |
 |-------|-----------|--------|----------|----------------------|
 | Who are you? | "I am Nemotron 3 Super…" (generic) | "I am Hermes… from HERMES.md" | SOUL.md persona | **Context assembly** (the system prompt) |
-| Name within a session | forgets between calls | recalls | recalls | **The message list** (short-term memory is just a list) |
-| Fact across a restart | impossible | recalls via MEMORY.md | recalls via workspace memory | **State** (MEMORY.md reloaded into the prompt) |
+| Memory within a session | forgets between calls | recalls | recalls | **The message list** (short-term memory is just a list) |
+| Memory across a restart | impossible | recalls via MEMORY.md | recalls via workspace memory | **State** (MEMORY.md reloaded into the prompt) |
 | Read a file | hallucinates or demurs | actually reads it | uses its own tools | **Tool registry + dispatch** (capability = tool surface) |
 | Refusal / safety | may roleplay compliance | real `[tool error]`, explains | varies | **Gates + honest errors** |
-| Env-var leak (M6 Probe 3) | explains hypothetically — no process | "no tool for that" | vanilla host agent *leaks* | **Tool surface as boundary** |
+| Env-var leak (M6 Probe 3) | explains hypothetically — no process | refuses (no env tool; `read_file` won't open `/proc/self/environ`) | vanilla host agent *leaks* | **Tool surface as boundary** |
+
+> ⚠️ That last row hides a subtlety worth its own breath: a *general* file reader is one `/proc/self/environ` away from being an env-var reader. Hermes' `read_file` refuses that path on purpose — proof that "capability = tool surface" only holds when each tool is deliberately scoped, not merely when you skip adding an obvious "read env" tool. And it is still in-process: the airtight fix is Exercise 5, where the key isn't in the agent's process at all.
 
 </details>
 

@@ -37,4 +37,5 @@ def remember(note: str) -> str:
         if new_file:
             f.write("# MEMORY.md — Hermes long-term memory\n\n")
         f.write("- [{}] {}\n".format(date.today().isoformat(), note.strip()))
-    return "Noted. MEMORY.md now has {} entries.".format(memory_note_count())
+    n = memory_note_count()
+    return "Noted. MEMORY.md now has {} {}.".format(n, "entry" if n == 1 else "entries")

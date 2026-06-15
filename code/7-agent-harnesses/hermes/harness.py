@@ -13,8 +13,11 @@ import json
 
 from . import __version__, client, config, context, gates, state, tools
 
-# Used in Exercise 1, before context.build_system_prompt() is wired up.
-DEFAULT_SYSTEM_PROMPT = "You are Hermes, a helpful assistant."
+# Used in Exercise 1, before context.build_system_prompt() is wired up. It names
+# no persona on purpose: with only this bland prompt the model answers as the
+# raw Nemotron model, so Exercise 2's HERMES.md is visibly what gives the agent
+# its name and personality.
+DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
 
 
 def banner() -> str:
@@ -129,8 +132,10 @@ class Harness:
                 print(state.load_memory() or "(no memories yet)")
                 continue
             if line == "/context":
+                est = context.estimate_tokens(self.messages)
                 print("messages: {} | est tokens: {} | budget: {}".format(
-                    len(self.messages), context.estimate_tokens(self.messages),
+                    len(self.messages),
+                    est if isinstance(est, int) else "not wired (Exercise 2)",
                     config.CONTEXT_BUDGET_TOKENS))
                 continue
             if line == "/history":

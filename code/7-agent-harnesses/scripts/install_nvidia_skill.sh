@@ -58,5 +58,7 @@ echo
 echo "The lazy loader will now index it. Try:  python harness_lab.py --exercise 4"
 echo
 echo "Same skill, other harnesses (the portability story):"
+echo "  hermes skills install nvidia/skills/${SKILL}              # Hermes (NVIDIA/skills is a default tap)"
+echo "  npx skills add nvidia/skills --skill ${SKILL} --agent hermes-agent"
 echo "  npx skills add nvidia/skills --skill ${SKILL} --agent claude-code"
 echo "  npx skills add nvidia/skills --skill ${SKILL} --agent codex"

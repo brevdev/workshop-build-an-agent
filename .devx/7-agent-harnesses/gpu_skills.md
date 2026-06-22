@@ -1,6 +1,4 @@
-# GPU Skills in Any Harness
-
-<img src="_static/robots/datacenter.png" alt="Datacenter Robot" style="float:right;max-width:300px;margin:25px;" />
+<div class="m7-hero" data-eyebrow="MODULE 07 / 04 - GPU SKILLS" data-title="Your GPU works in every harness." data-sub="Skills execute locally on your silicon while the model loop runs anywhere - your datacenter, someone else's, it does not matter." data-meta="SKILL::accelerated-computing-cudf|PROOF::nvidia-smi"></div>
 
 Here's a question that trips up almost everyone:
 
@@ -32,6 +30,8 @@ The cloud model never touches your data at GPU scale — it writes a few hundred
 <!-- fold:break -->
 
 ## Why the Skill Matters
+
+<img src="_static/robots/datacenter.png" alt="Datacenter Robot" style="float:right;max-width:240px;margin:20px;" />
 
 Without the skill, a model asked to process a big DataFrame writes... pandas. Single-threaded, CPU-bound pandas. It doesn't know your machine has a GPU, and it doesn't know the patterns that make cuDF fast.
 
@@ -87,5 +87,14 @@ Then, inside Codex, with `watch nvidia-smi` running:
 <!-- tabs:end -->
 
 Same SKILL.md. Same GPU. Different harness. **That's the open skills layer doing its job** — and it's why NVIDIA publishes skills for every harness rather than betting on one: rising GPU capability in every agent lifts the whole ecosystem.
+
+<div class="m7-island m7-quiz m7-reveal">
+  <p class="m7-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="m7-quiz-q">You ask Claude Code (cloud model) to aggregate a 10M-row CSV with the cuDF skill installed. Where does the heavy compute run?</p>
+  <button class="m7-quiz-opt" data-fb="The model only writes a few hundred tokens of code - it never touches your data at GPU scale.">In Anthropics datacenter</button>
+  <button class="m7-quiz-opt" data-right data-fb="The harness executes the generated cudf code on your machine - watch nvidia-smi.">On your local GPU</button>
+  <button class="m7-quiz-opt" data-fb="Tools and skills execute locally by design; that is the whole point of this page.">Nowhere - subscriptions cannot use local hardware</button>
+  <button class="m7-quiz-opt" data-fb="There is a clean division: cloud writes code, your GPU runs it.">Split 50/50</button>
+</div>
 
 > Enough theory — time to build. Head to [The Harness Lab](harness_lab) for the hands-on exercises.

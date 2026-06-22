@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5 m7-dark" lang="en">
 
 <head>
   <meta charset="utf-8" />
@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="_static/css/fonts.css" />
   <link rel="stylesheet" href="_static/css/brand.css" />
   <link rel="stylesheet" href="_static/css/custom.css" />
+  <link rel="stylesheet" href="theme/module7.css" />
 
   <!-- SVG loader for external SVG files -->
   <script type="text/javascript" src="https://unpkg.com/external-svg-loader@latest/svg-loader.min.js" async></script>
@@ -69,6 +70,9 @@
     };
   </script>
 
+  <!-- Module 7 widget runtime (must load after $docsify config, before docsify) -->
+  <script src="theme/module7.js"></script>
+
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
 
@@ -86,7 +90,33 @@
   <!-- Mermaid Support -->
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-    mermaid.initialize({ startOnLoad: true });
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        fontFamily: "'JetBrains Mono', ui-monospace, Menlo, monospace",
+        fontSize: "13px",
+        primaryColor: "#161616",
+        primaryTextColor: "#f2f2f2",
+        primaryBorderColor: "#313131",
+        secondaryColor: "#222222",
+        tertiaryColor: "#0c0c0c",
+        lineColor: "#5e5e5e",
+        textColor: "#202020",
+        clusterBkg: "#0c0c0c",
+        clusterBorder: "#313131",
+        actorBkg: "#161616",
+        actorTextColor: "#f2f2f2",
+        actorBorder: "#313131",
+        signalColor: "#5e5e5e",
+        signalTextColor: "#343434",
+        labelBoxBkgColor: "#161616",
+        labelTextColor: "#f2f2f2",
+        noteBkgColor: "#222222",
+        noteTextColor: "#e2e2e2",
+        noteBorderColor: "#313131",
+      },
+    });
     window.mermaid = mermaid;
   </script>
   <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>

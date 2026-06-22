@@ -1,6 +1,4 @@
-# The Harness Lab
-
-<img src="_static/robots/wrench.png" alt="Wrench Robot" style="float:right;max-width:300px;margin:25px;" />
+<div class="m7-hero" data-eyebrow="MODULE 07 / 05 - HANDS ON" data-title="Build the harness. Measure the tax. Drive the GPU." data-sub="Five exercises that take you from a minimal loop you write yourself to an agent that evolves its own skills." data-meta="EXERCISES::5|FORMAT::notebook or .py|ANSWERS::included"></div>
 
 Five exercises. You'll build a minimal harness from scratch, measure the context tax, author a portable skill, put your GPU to work through a verified NVIDIA skill, and finish with an agent that writes its own skills.
 
@@ -12,14 +10,57 @@ Work in the notebook <button onclick="openOrCreateFileInJupyterLab('code/7-agent
 
 pi proves a complete harness needs surprisingly little: a short system prompt, four tools, and a loop. You'll build exactly that — Read, Write, Edit, Bash around Nemotron.
 
+Here's what a finished Exercise 1 run looks like:
+
+<div class="m7-term">
+  <span class="m7-term-title">python harness_lab.py --exercise 1</span>
+  <span class="m7-term-line" data-kind="prompt">create harness_hello.txt with the words minimal harness</span>
+  <span class="m7-term-line" data-kind="think" data-delay="350">thinking...</span>
+  <span class="m7-term-line" data-kind="tool" data-delay="250">[tool] write_file(harness_hello.txt)</span>
+  <span class="m7-term-line" data-kind="tool" data-delay="250">[tool] read_file(harness_hello.txt)</span>
+  <span class="m7-term-line" data-kind="tokens">tokens: 1,102 / 128,000</span>
+  <span class="m7-term-line" data-kind="answer" data-delay="400">Done - file created and verified: minimal harness</span>
+</div>
+
 Complete the agent loop in <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'def build_bare_agent');"><i class="fas fa-code"></i> build_bare_agent( ... )</button> — wire the four tools to the model and implement the tool-calling loop.
 
-Then run the same task in both your harnesses:
+Then run the same task in two very different harnesses. For the full, batteries-included end we'll use **Hermes** — NousResearch's open harness, branded *"the agent that grows with you,"* the one NVIDIA ships a [NemoClaw blueprint for](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent), and the one you'll lean on again in Exercises 3 and 5.
+
+<details>
+<summary><strong>Set up Hermes (one-time, ~2 min)</strong></summary>
+
+Install it and point it at the same Nemotron endpoint your minimal harness uses:
+
+```bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+```
+
+Run the wizard and choose the **Custom OpenAI-compatible endpoint** option:
+
+```bash
+hermes setup
+```
+
+When prompted, enter the NVIDIA endpoint, model, and your key — or skip the wizard and write `~/.hermes/config.yaml` directly:
+
+```yaml
+model:
+  provider: custom
+  default: nvidia/nemotron-3-super-120b-a12b
+  base_url: https://integrate.api.nvidia.com/v1
+  api_key: ${NVIDIA_API_KEY}
+```
+
+> Prefer to reuse the **OpenClaw** agent you already hardened in Module 6? That works too — the point is *a* full harness, not a specific one.
+
+</details>
+
+Now run the identical task in each:
 
 1. **Your minimal harness:** `python harness_lab.py --exercise 1`
-2. **OpenClaw (Module 6):** send the identical task via `openclaw agent --agent main -m "..."`
+2. **Hermes:** run `hermes` and type the same request.
 
-Both complete the task. Feel how different they are — verbosity, persistence, initiative. Same model. Different car.
+Both complete the task. Feel how different they are — verbosity, persistence, initiative, how much each one says before it acts. Same model. Different car.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -58,6 +99,14 @@ Maximal harness:  8,212 tokens/turn        (9.7× tax)
 10 lazy skills:     +236 tokens/turn       (63× savings)
 ```
 
+<div class="m7-island m7-reveal">
+  <p class="m7-island-title">YOUR TARGETS</p>
+  <div class="m7-gauges">
+    <div class="m7-gauge" data-pct="1"><div class="m7-gauge-ring">0%</div><p class="m7-gauge-label"><b>minimal</b><br>365 tokens / 32K</p></div>
+    <div class="m7-gauge" data-pct="12"><div class="m7-gauge-ring">0%</div><p class="m7-gauge-label"><b>maximal</b><br>3,922 tokens / 32K</p></div>
+  </div>
+</div>
+
 <details>
 <summary>🆘 Need some help?</summary>
 
@@ -76,14 +125,22 @@ For lazy loading, parse just the YAML frontmatter of each `SKILL.md` and inject 
 
 ## Exercise 3 — Author a Portable Skill
 
+<img src="_static/robots/wrench.png" alt="Wrench Robot" style="float:right;max-width:240px;margin:20px;" />
+
 Write your own `SKILL.md` — a **dataset profiler** skill that teaches an agent a systematic procedure for summarizing an unfamiliar CSV. Follow the format of <button onclick="openOrCreateFileInJupyterLab('skills/code_review/SKILL.md');"><i class="fa-solid fa-book"></i> skills/code_review/SKILL.md</button>: frontmatter with `name` and a trigger-worthy `description`, then the procedure.
 
 Save it to `code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`, then prove portability:
 
 1. **Your harness:** load it through your Exercise 2 lazy loader and ask the agent to profile `test_data/sensor_readings.csv`. Watch it follow *your* procedure.
-2. **OpenClaw:** copy the same folder into your OpenClaw workspace skills directory and ask the same question.
+2. **Hermes:** drop the very same folder into Hermes's skills directory — Hermes auto-discovers everything in `~/.hermes/skills/` and is [agentskills.io](https://agentskills.io)-compatible, so there are zero changes to make:
 
-One file. Two harnesses. Zero changes.
+```bash
+cp -r code/7-agent-harnesses/skills/dataset_profiler ~/.hermes/skills/
+```
+
+Then start `hermes` and ask it to profile the same CSV. It follows the identical procedure you wrote. (For a skill that already lives in a repo or at a URL, Hermes can pull it directly — e.g. `hermes skills install NVIDIA/skills/accelerated-computing-cudf`, which you'll use in Exercise 4.)
+
+One file. Two harnesses. Zero changes. *That* is the open skills spec doing its job.
 
 <details>
 <summary>🆘 Need some help?</summary>
@@ -130,6 +187,8 @@ The pi finale: an agent that improves its own scaffolding. Complete <button oncl
 3. Saves it into the skills directory — where your lazy loader picks it up on the very next run
 
 Run the same task twice (`--exercise 5`). The second run starts with the skill the agent wrote for itself the first time — fewer steps, fewer tokens, same result. That's **memory**, **skills**, **self-evolution**, and **token efficiency** — four of the five harness responsibilities — collapsing into a single loop.
+
+> This is exactly the bet Hermes makes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
 
 <details>
 <summary>🆘 Need some help?</summary>

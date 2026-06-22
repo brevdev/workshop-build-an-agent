@@ -16,6 +16,7 @@ import json
 import os
 import re
 import subprocess
+import time
 from pathlib import Path
 
 import tiktoken
@@ -84,6 +85,17 @@ CORE_TOOLS = [read_file, write_file, edit_file, run_bash]
 TOOL_REGISTRY = {t.name: t for t in CORE_TOOLS}
 
 
+def invoke_with_retry(model, messages, attempts=3):
+    """Harnesses own retries (responsibility #4): survive transient API errors."""
+    for attempt in range(attempts):
+        try:
+            return model.invoke(messages)
+        except Exception:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(2 * (attempt + 1))
+
+
 def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
     """Exercise 1: a complete harness in ~20 lines.
 
@@ -97,7 +109,7 @@ def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
     def run(task: str, max_turns: int = 20) -> str:
         messages = [SystemMessage(content=system_prompt), HumanMessage(content=task)]
         for _ in range(max_turns):
-            response = model.invoke(messages)
+            response = invoke_with_retry(model, messages)
             messages.append(response)
             if not response.tool_calls:
                 return response.content

@@ -1,6 +1,4 @@
-# Agent Skills
-
-<img src="_static/robots/study.png" alt="Study Robot" style="float:right;max-width:300px;margin:25px;" />
+<div class="m7-hero" data-eyebrow="MODULE 07 / 03 - SKILLS" data-title="Capability that travels." data-sub="One SKILL.md, written once, runs in every harness on the market." data-meta="SPEC::agentskills.io|CATALOG::github.com/NVIDIA/skills"></div>
 
 If harnesses are where agents are won or lost, **skills** are how capability moves between them.
 
@@ -9,6 +7,8 @@ A skill is a packaged set of instructions — procedural knowledge an agent load
 <!-- fold:break -->
 
 ## Anatomy of a Skill
+
+<img src="_static/robots/study.png" alt="Study Robot" style="float:right;max-width:240px;margin:20px;" />
 
 A skill is a folder with a `SKILL.md` at its root. The file has two parts:
 
@@ -24,10 +24,8 @@ You are now operating as a code reviewer. Follow this systematic approach.
 ...full instructions, checklists, examples...
 ```
 
-<ul style="margin-left:1em;">
-  <li><b>Frontmatter</b> — the <code>name</code> and a one-line <code>description</code>. This is the <i>only</i> part the harness keeps in context at all times.</li>
-  <li><b>Body</b> — the full instructions. Loaded into context <i>only</i> when the description matches the task at hand.</li>
-</ul>
+- **Frontmatter** — the `name` and a one-line `description`. This is the *only* part the harness keeps in context at all times.
+- **Body** — the full instructions. Loaded into context *only* when the description matches the task at hand.
 
 This repo ships two examples you can open right now: <button onclick="openOrCreateFileInJupyterLab('skills/code_review/SKILL.md');"><i class="fa-solid fa-book"></i> code_review</button> and <button onclick="openOrCreateFileInJupyterLab('skills/technical_writing/SKILL.md');"><i class="fa-solid fa-book"></i> technical_writing</button>.
 
@@ -51,8 +49,6 @@ This is pi's signature design generalized — and it's now how every serious har
 
 ## One Skill, Every Harness: The Open Spec
 
-<img src="_static/robots/relocate.png" alt="Relocate Robot" style="float:right;max-width:250px;margin:25px;" />
-
 The format above isn't proprietary to any harness. It's the open **Agent Skills specification** ([agentskills.io](https://agentskills.io)) — and because the major harnesses all consume it, the *same SKILL.md* runs in OpenClaw, Hermes, Claude Code, Codex, Cursor, and more.
 
 ```mermaid
@@ -63,7 +59,6 @@ flowchart TB
     SKILL --> CC["🤖 Claude Code"]
     SKILL --> CX["🛰️ Codex"]
     SKILL --> CU["⌨️ Cursor"]
-    style SKILL fill:#76b900,color:#fff,stroke:#5b8f00
 ```
 
 Stop and appreciate how unusual this is. The harness market is fiercely competitive — open vs. closed, maximal vs. minimal — yet capability packaged as a skill is **portable across all of it**. Write once, supercharge any agent.
@@ -79,13 +74,16 @@ The catalog is synced daily from the NVIDIA product teams that own each skill, a
 Installation is one command, and the `--agent` flag *is* the portability story in miniature:
 
 ```bash
-# Same skill, four harnesses:
+# Same skill, five harnesses:
 npx skills add nvidia/skills --skill accelerated-computing-cudf \
+  --agent hermes-agent \
   --agent claude-code \
   --agent codex \
   --agent cursor \
   --agent kiro-cli
 ```
+
+Hermes goes one better — `NVIDIA/skills` is a built-in tap, so its own CLI installs the verified skill directly: `hermes skills install nvidia/skills/accelerated-computing-cudf`. You'll do exactly this in the lab.
 
 <!-- fold:break -->
 
@@ -95,21 +93,26 @@ Remember Module 6's lesson: an autonomous agent will eventually encounter advers
 
 Here's what a verified skill looks like in the catalog:
 
-<div style="border:2px solid #76b900;border-radius:10px;padding:18px 22px;margin:1em 0;max-width:640px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
-    <b style="font-size:1.15em;">📦 accelerated-computing-cudf</b>
-    <span style="background:#76b900;color:white;border-radius:5px;padding:2px 10px;font-size:0.8em;font-weight:bold;">NVIDIA VERIFIED ✓</span>
-  </div>
-  <p style="margin:10px 0 6px 0;font-size:0.92em;">Official NVIDIA-authored guidance for cuDF GPU DataFrames, pandas acceleration, dask-cuDF, ETL, joins, groupby, CSV/Parquet I/O, and multi-GPU DataFrame workloads.</p>
-  <hr style="border:none;border-top:1px solid rgba(128,128,128,0.3);margin:8px 0;" />
-  <ul style="list-style:none;padding:0;margin:0;font-size:0.88em;line-height:1.8;">
-    <li>👤 <b>Owner:</b> NVIDIA &nbsp;·&nbsp; ⚖️ <b>License:</b> CC-BY-4.0 AND Apache-2.0</li>
-    <li>🛡️ <b>SkillSpector scan:</b> ✅ prompt injection · ✅ tool poisoning · ✅ dangerous code patterns</li>
-    <li>🔏 <b>Signature:</b> <code>skill.oms.sig</code> — verifiable with OpenSSF Model Signing</li>
-    <li>📋 <b>Skill card:</b> use case, risks & mitigations, dependencies, eval agents (claude-code, codex)</li>
+<div class="m7-skillcard m7-reveal">
+  <div class="m7-skillcard-head"><span class="m7-skillcard-name">accelerated-computing-cudf</span><span class="m7-chip is-green">NVIDIA VERIFIED ✓</span></div>
+  <p>Official NVIDIA-authored guidance for cuDF GPU DataFrames, pandas acceleration, dask-cuDF, ETL, joins, groupby, CSV/Parquet I/O, and multi-GPU DataFrame workloads.</p>
+  <ul>
+    <li><b>Owner</b> NVIDIA · <b>License</b> CC-BY-4.0 AND Apache-2.0</li>
+    <li><b>SkillSpector</b> <span class="m7-check">✓</span> prompt injection <span class="m7-check">✓</span> tool poisoning <span class="m7-check">✓</span> dangerous code</li>
+    <li><b>Signature</b> skill.oms.sig - OpenSSF Model Signing</li>
+    <li><b>Skill card</b> use case, risks & mitigations, dependencies, eval agents (claude-code, codex)</li>
   </ul>
 </div>
 
 The principle, straight from the program: *trust should come from verifiable integrity and authenticity, not from implied provenance alone.* In the lab, you'll verify that signature yourself before letting the skill anywhere near your agent.
+
+<div class="m7-island m7-quiz">
+  <p class="m7-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="m7-quiz-q">Your agent has 30 skills installed but is not using any right now - what is in its context?</p>
+  <button class="m7-quiz-opt" data-fb="That is eager loading - about 45,000 tokens of tax every turn.">All 30 full skill bodies</button>
+  <button class="m7-quiz-opt" data-fb="Then the model could never know when to load one.">Nothing at all</button>
+  <button class="m7-quiz-opt" data-right data-fb="About 750 tokens - the descriptions are the trigger surface, bodies load on demand.">Thirty one-line descriptions</button>
+  <button class="m7-quiz-opt" data-fb="Recency is not how skills trigger - descriptions match against the task.">Only the most recently used skill</button>
+</div>
 
 > Time for the punchline of this module: what happens when a verified skill meets the GPU sitting under this very workshop. Head to [GPU Skills in Any Harness](gpu_skills).

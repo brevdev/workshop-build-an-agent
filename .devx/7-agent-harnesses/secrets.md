@@ -1,6 +1,6 @@
-# Setting up Secrets
+<div class="m7-hero" data-eyebrow="MODULE 07 / SETUP" data-title="Two minutes of setup." data-sub="One NVIDIA API key is all this module needs - set it once and every harness ahead just works." data-meta="NEEDS::NVIDIA_API_KEY|TIME::2 min"></div>
 
-<img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right;max-width:300px;margin:25px;" />
+<img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right;max-width:240px;margin:20px;" />
 
 Before exploring agent harnesses, let's make sure you have the API key you need for this module. The agents and harnesses in this module run on NVIDIA's models, so you'll need your NVIDIA API Key ready.
 

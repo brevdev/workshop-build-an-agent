@@ -244,6 +244,76 @@
     });
   }
 
+  /* Count <!--fold:break--> comment nodes the same way the progressive-unfold
+     plugin splits the page. 0 breaks => single-section page (no Next/Prev nav),
+     so reaching it IS completing it. >0 => multi-section: completion is deferred
+     until the reader opens the final section (handled in watchUnfoldProgress). */
+  function countFoldBreaks(root) {
+    if (!root) return 0;   /* Element or document are both valid walker roots */
+    var n = 0, node;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT, {
+      acceptNode: function (c) {
+        return c.nodeValue.trim() === 'fold:break' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    while ((node = walker.nextNode())) { n++; }
+    return n;
+  }
+
+  /* Full reset: clear the completion checkmarks AND every page's saved
+     progressive-unfold position. Clearing the unfold cookies matters — without
+     it, revisiting a previously-finished page would restore its last section
+     and immediately re-earn the checkmark, so the reset wouldn't "stick". */
+  function clearAllProgress() {
+    try { localStorage.removeItem(DONE_KEY); } catch (e) { /* private mode */ }
+    try {
+      document.cookie.split(';').forEach(function (c) {
+        var name = c.split('=')[0].trim();
+        if (name.indexOf('docsify-unfold-') === 0) {
+          document.cookie = name + '=; path=/; max-age=0';
+        }
+      });
+    } catch (e) { /* noop */ }
+  }
+
+  /* Inject a compact reset icon into the sidebar controls row, on the same line
+     as the search bar (right after its .input-wrap). Idempotent and self-healing:
+     re-runs each navigation; if it was placed before the search field finished
+     rendering (or ended up elsewhere), it relocates next to the search input. The
+     .search element persists across navigation, so once placed it stays put. */
+  function ensureResetControl() {
+    var search = document.querySelector('.search');   /* docsify inserts .search OUTSIDE .sidebar (sibling before the aside) */
+    var inputWrap = search && search.querySelector('.input-wrap');
+    var existing = document.getElementById('m7-reset');
+    if (existing) {
+      if (inputWrap && existing.previousElementSibling !== inputWrap) {
+        inputWrap.insertAdjacentElement('afterend', existing);   /* settle into the controls row */
+      }
+      return;
+    }
+    var btn = document.createElement('button');
+    btn.id = 'm7-reset';
+    btn.type = 'button';
+    btn.className = 'm7-reset';
+    btn.title = 'Reset module progress';
+    btn.setAttribute('aria-label', 'Reset module progress: clears all completion checkmarks and saved page positions');
+    btn.innerHTML = '<span class="m7-reset-icon" aria-hidden="true">↺</span>';
+    btn.addEventListener('click', function () {
+      if (!window.confirm('Reset module progress? This clears every completion checkmark and your saved position on each page.')) return;
+      clearAllProgress();
+      paintSidebar();          /* clear checks immediately, in case reload is blocked */
+      location.reload();       /* fresh start: every page reopens at section 1 */
+    });
+    if (inputWrap) {
+      inputWrap.insertAdjacentElement('afterend', btn);   /* same row as the search bar */
+    } else if (search) {
+      search.appendChild(btn);
+    } else {
+      var nav = document.querySelector('.sidebar-nav');   /* graceful fallback if search is absent */
+      if (nav) nav.appendChild(btn);
+    }
+  }
+
   /* ---- 9. module progress beam (reads the unfold nav's "Section x of y") ----- */
   function ensureProgressBeam() {
     var beam = document.getElementById('m7-progress');
@@ -255,12 +325,46 @@
     }
     return beam;
   }
-  function watchUnfoldProgress() {
+
+  /* Relabel the shared unfold plugin's Prev/Next buttons so they read as
+     "more of THIS page" (a vertical reveal) rather than competing with the
+     page-level pagination Next. The plugin hard-codes '← Previous' / 'Next →'
+     once in createNavigation and never rewrites them, so a one-time relabel per
+     button (guarded by a data flag, re-applied when the nav is rebuilt on each
+     navigation) holds across section clicks. Done here, not in the plugin file,
+     because that file is shared across all modules. */
+  function relabelUnfoldNav() {
+    var nav = document.querySelector('.progressive-unfold-nav');
+    if (!nav) return;
+    nav.querySelectorAll('button').forEach(function (b) {
+      if (b.dataset.m7Relabelled) return;
+      var t = (b.textContent || '').toLowerCase();
+      if (t.indexOf('prev') >= 0) {
+        b.textContent = '▴ Previous section';
+        b.dataset.m7Relabelled = '1';
+      } else if (t.indexOf('next') >= 0) {
+        b.textContent = 'Next section ▾';
+        b.dataset.m7Relabelled = '1';
+      }
+    });
+  }
+
+  function watchUnfoldProgress(route) {
     var beam = ensureProgressBeam();
+    var completed = false;   /* mark done + repaint at most once per page-view */
     function update() {
+      relabelUnfoldNav();
       var ind = document.querySelector('.progressive-unfold-nav .section-indicator');
       var m = ind && ind.textContent.match(/(\d+)\s+of\s+(\d+)/i);
       beam.style.setProperty('--m7-progress', m ? String(parseInt(m[1], 10) / parseInt(m[2], 10)) : '0');
+      /* The sidebar checkmark is earned only when the reader opens the FINAL
+         section (current >= total). A page restored from a saved position at
+         the last section counts as complete too — they finished it before. */
+      if (!completed && m && parseInt(m[1], 10) >= parseInt(m[2], 10)) {
+        completed = true;
+        markVisited(route);
+        paintSidebar();
+      }
     }
     update();
     var mo = new MutationObserver(update);
@@ -278,7 +382,8 @@
         void root.offsetWidth;            /* restart the entrance animation */
         root.classList.add('m7-page-in');
       }
-      watchUnfoldProgress();
+      var route = (vm.route.path || '/').replace(/^\//, '') || 'README';
+      watchUnfoldProgress(route);
       initHero(root);
       initTerminals(root);
       initGauges(root);
@@ -288,8 +393,11 @@
       initReveals(root);
       // tag code panels with their language for the pre::after chip
       root.querySelectorAll('pre[data-lang]').forEach(function () { /* docsify sets data-lang already */ });
-      markVisited((vm.route.path || '/').replace(/^\//, '') || 'README');
+      // Completion checkmark: single-section pages (no fold:breaks) are earned on
+      // open; multi-section pages defer to watchUnfoldProgress (final section).
+      if (countFoldBreaks(root) === 0) { markVisited(route); }
       paintSidebar();
+      ensureResetControl();
     });
   }
 

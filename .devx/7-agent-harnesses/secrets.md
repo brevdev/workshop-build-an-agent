@@ -6,7 +6,7 @@ Before exploring agent harnesses, let's make sure you have the API key you need 
 
 If you've already set this up in an earlier module, you're good to go — skip straight to the next page.
 
-Use the <button onclick="openVoila('code/secrets_management/secrets_management_6.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set up your API Keys. You can also launch the Secrets Manager directly from the Jupyterlab launcher.
+Use the <button onclick="openVoila('code/secrets_management/secrets_management_7.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set up your API Keys. You can also launch the Secrets Manager directly from the Jupyterlab launcher.
 
 <details>
 <summary><strong>Still need to set up your NVIDIA API Key? Expand for details.</strong></summary>

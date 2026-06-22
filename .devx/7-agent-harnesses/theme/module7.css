@@ -873,6 +873,33 @@
 }
 .sidebar-nav > ul > li.m7-done > a { opacity: 0.65; }
 
+/* Secrets is setup, not a numbered lesson — align the sidebar with the hero
+   eyebrows (Harness Layer = 01, ... Wrapping Up = 06). Stop the first item from
+   advancing the counter so the lessons number 01-06, and show a key glyph
+   instead of the "00" the counter would otherwise render. The :not(.m7-done)
+   guard lets the ✓ completion rule above take over once Secrets is done. */
+.sidebar-nav > ul > li:first-child { counter-increment: none; }
+.sidebar-nav > ul > li:first-child:not(.m7-done) > a::before {
+  content: "\f084";                  /* Font Awesome key — matches secrets.md's fa-key */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+/* Left-justify the page titles. The shared theme makes each link a flex row
+   (justify-content: space-between) whose items are the counter (::before),
+   the title text, and the chevron (::after); space-between drops the title
+   into the gap, so it floats near center and drifts with each title's length.
+   Pack the row to the left and let the chevron absorb the free space on the
+   right via an auto margin. text-align:left also covers the case where the
+   base/CDN theme centers via text-align rather than flex. */
+.sidebar-nav > ul > li > a {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+.sidebar-nav > ul > li > a::after {
+  margin-left: auto;
+}
+
 /* pagination: quiet dark cards */
 .pagination-item-title { color: #1a1a1a !important; }
 .docsify-pagination-container {
@@ -917,6 +944,14 @@
 
 /* dark scrollbars everywhere in the module */
 html.m7-dark {
+  /* The shared custom.css adds `padding-bottom: calc(100vh - 100px)` to <html>
+     so the progressive-unfold plugin can scroll a page's last section up to the
+     top of the viewport. That pad sits BELOW the footer and, because <html>
+     itself was never given a background, rendered as a jarring white band on
+     the otherwise-black page. Painting <html> black makes the pad seamless
+     (it also becomes the canvas/overscroll color). Scoped to m7-dark, so other
+     modules are untouched. */
+  background-color: var(--m7-black);
   scrollbar-color: var(--m7-overlay) var(--m7-black);
 }
 html.m7-dark ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -965,21 +1000,98 @@ html.m7-dark ::-webkit-scrollbar-thumb:hover { background: var(--m7-border-hover
 
 /* sidebar search goes terminal */
 .sidebar .search { border-bottom: 1px solid var(--m7-border) !important; }
-.sidebar .search input {
+/* The whole .input-wrap is the bordered m7 field, so the (icon-less) input AND the
+   clear button live inside ONE box — matching the reset icon beside it. The input
+   is transparent and fills the box; the × is pinned at the right, inside it. This
+   replaces the old "border on the input + sibling × nudged left over it" approach
+   that caused the overlap. */
+.sidebar .search .input-wrap {
   background: var(--m7-raised) !important;
   border: 1px solid var(--m7-border) !important;
   border-radius: var(--m7-radius) !important;
+  height: 32px !important;          /* pin the field height so it ALWAYS equals the 32px reset icon (and can't be resized by focus) */
+  box-sizing: border-box !important;
+  padding: 0 !important;            /* custom.css :focus-within adds padding on focus; zero it so nothing shifts inside the fixed box */
+  transition: border-color var(--m7-ease);
+}
+.sidebar .search .input-wrap:hover { border-color: var(--m7-border-hover) !important; }
+.sidebar .search .input-wrap:focus-within { border-color: var(--m7-green) !important; border-width: 1px !important; padding: 0 !important; }
+.sidebar .search .input-wrap::before { display: none !important; }   /* drop the broken magnifier slot */
+.sidebar .search input {
+  flex: 1 1 auto !important;        /* fill the field */
+  width: auto !important;
+  min-width: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   color: var(--m7-fg) !important;
   font-family: var(--m7-mono) !important;
   font-size: 0.78rem !important;
-  transition: border-color var(--m7-ease);
 }
-.sidebar .search input:focus { border-color: var(--m7-green) !important; }
-.sidebar .search .results-panel { background: var(--m7-raised); }
+.sidebar .search input:focus { outline: none !important; }
+.sidebar .search input::placeholder { color: var(--m7-fg-mute) !important; opacity: 1; }
+/* clear (×): undo custom.css's leftward shift (position:relative + right) that put it
+   over the input; keep it static at the right inside the field, and recolor the circle */
+.sidebar .search .clear-button { position: static !important; right: auto !important; top: auto !important; flex: 0 0 auto; margin: 0 4px 0 0; }
+.sidebar .search .clear-button svg circle { fill: var(--m7-overlay) !important; }
+.sidebar .search .results-panel { background: var(--m7-black) !important; }   /* black to match the sidebar/theme, not raised grey */
 .sidebar .search .matching-post { border-bottom: 1px solid var(--m7-border) !important; }
+.sidebar .search .matching-post:hover { background: var(--m7-overlay) !important; }   /* subtle m7 hover instead of the base theme's brand color */
 .sidebar .search .matching-post h2 { color: var(--m7-fg) !important; }
 .sidebar .search .matching-post p { color: var(--m7-fg-mute) !important; }
 .sidebar .search .search-keyword { color: var(--m7-green) !important; }
+
+/* Sidebar controls row: lay the search bar and the reset icon on one line.
+   (.search is the first child of <aside class="sidebar"> — confirmed from the
+   live DOM. Bare `.search` selectors are used here because the plugin styles it
+   with bare selectors too; specificity ties resolve in our favor by load order.)
+   Horizontal padding owns the left/right insets; gap is the space between the
+   input and the icon; vertical padding (6px) matches the plugin default. */
+.search {
+  display: flex !important;     /* plugin leaves .search display unset; !important guards against any runtime-injected rule */
+  flex-wrap: wrap !important;
+  align-items: center;          /* center the icon against the input row; stretch made it match the taller input-wrap, not the input box */
+  gap: 6px;                     /* a touch tighter than the old 8px */
+  padding: 6px 14px !important; /* more breathing room on both outer sides (overrides the plugin's 6px) */
+}
+/* flex-basis MUST be 0, not auto. With flex-wrap, line breaks are decided from
+   each item's flex-basis BEFORE shrinking — so an `auto` (content ~200px) basis
+   made the input claim the whole ~228px row and bumped the 32px icon to the next
+   line, where the lone input then grew to full width. Zero basis lets the icon
+   share line 1; the input grows into the remainder. !important wins over the
+   docsify-themeable theme + the plugin's own injected .search rules. */
+.search .input-wrap { flex: 1 1 0 !important; min-width: 0; }
+.search .input-wrap input,
+.search input { min-width: 0; }
+.search .results-panel { flex: 1 0 100%; }              /* dropdown drops to its own full-width line */
+
+/* progress reset control — injected into the controls row by module7.js, right
+   after the search input. Carries a class, so the base theme's class-less
+   <button> rules and the module's markdown-button rule never touch it. Icon-only:
+   the label lives in title + aria-label. Fixed 32x32; the search field (.input-wrap)
+   is pinned to the SAME 32px, so the two match by construction. align-self:stretch
+   was tried but overshoots the flex line height here, so both use an explicit height.
+   To resize the pair, change BOTH this height and .input-wrap's height together. */
+.m7-reset {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;            /* equals the field height pinned on .input-wrap */
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;               /* right inset is handled by .search padding now */
+  background: var(--m7-raised);
+  border: 1px solid var(--m7-border);
+  border-radius: var(--m7-radius);
+  color: var(--m7-fg-mute);
+  cursor: pointer;
+  transition: border-color var(--m7-ease), color var(--m7-ease);
+}
+.m7-reset:hover { border-color: var(--m7-green); color: var(--m7-green); }
+.m7-reset:focus-visible { outline: 2px solid var(--m7-green); outline-offset: 2px; }
+.m7-reset .m7-reset-icon { font-size: 0.95rem; line-height: 1; }
 
 /* route-change transition: content rises in (class set by module7.js) */
 @media (prefers-reduced-motion: no-preference) {

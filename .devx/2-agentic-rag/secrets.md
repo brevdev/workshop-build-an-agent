@@ -7,7 +7,7 @@ For this agent to work, we will need to configure a few secrets. Use the <button
 
 You can also launch the Secrets Manager from the launcher.
 
-## NGC API Key <span class="dx-chip">REQUIRED</span>
+## NGC API Key <span class="dx-chip is-green">REQUIRED</span>
 
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
@@ -24,7 +24,7 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 </details>
 
-## Tavily API Key <span class="dx-chip">REQUIRED</span>
+## Tavily API Key <span class="dx-chip is-green">REQUIRED</span>
 
 Tavily is a search API designed for AI agents. Later in this module, you'll use it to add web search capabilities via MCP. If you already set this up in Module 1, it should persist here.
 
@@ -41,7 +41,7 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 </details>
 
-## LangSmith API Key <span class="dx-chip is-outline-green">OPTIONAL</span>
+## LangSmith API Key <span class="dx-chip">OPTIONAL</span>
 
 LangSmith provides tracing and monitoring for your agent. You'll use it in the [Running Your Agent](running.md) section to inspect your agent's behavior.
 

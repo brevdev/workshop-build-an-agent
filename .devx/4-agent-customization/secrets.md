@@ -7,7 +7,7 @@ For this customization module to work, we will need to configure the NVIDIA API 
 
 You can also launch the Secrets Manager directly from the Jupyterlab launcher.
 
-## NVIDIA API Key <span class="dx-chip">REQUIRED</span>
+## NVIDIA API Key <span class="dx-chip is-green">REQUIRED</span>
 
 NVIDIA API Key provides access to NVIDIA's AI services and models. For this customization module, we will need an API Key to access and customize NVIDIA models.
 
@@ -31,7 +31,7 @@ If you had set these previously, they should persist in the Secrets Manager! The
 <details>
 <summary>⚠️ Still Want to Set These? Expand Me!</summary>
 
-## Tavily API Key <span class="dx-chip is-outline-green">OPTIONAL</span>
+## Tavily API Key <span class="dx-chip">OPTIONAL</span>
 
 Tavily is a search API designed for AI agents. It provides real-time web search capabilities that help agents gather up-to-date information from the internet.
 
@@ -48,7 +48,7 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 </details>
 
-## LangSmith API Key <span class="dx-chip is-outline-green">OPTIONAL</span>
+## LangSmith API Key <span class="dx-chip">OPTIONAL</span>
 
 LangSmith is LangChain's platform for testing, evaluating, and monitoring LLM applications. It provides tracing and debugging capabilities for your AI agents.
 

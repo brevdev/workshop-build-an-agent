@@ -901,6 +901,15 @@
   margin-left: auto;
 }
 
+/* De-clutter the auto sub-TOC. With subMaxLevel set, Docsify builds the nested
+   page nav from each heading's rendered HTML (it strips only <a> tags), so a chip
+   tagged onto a heading — e.g. secrets.md's `## NGC API Key <span class="dx-chip">
+   REQUIRED</span>` or harness_landscape.md's `OPEN SOURCE` tags — rides along into
+   the sidebar and clogs it. Keep the chip on the page; hide only the sidebar copy.
+   Safe to scope to .sidebar broadly: chips only ever live in .content, never in the
+   hand-written _sidebar.md nav or the search results (which render as plain text). */
+.sidebar .dx-chip { display: none; }
+
 /* pagination: quiet dark cards */
 .pagination-item-title { color: #1a1a1a !important; }
 .docsify-pagination-container {

@@ -9,7 +9,7 @@ Use the <button onclick="openVoila('code/secrets_management/secrets_management_3
 <details>
 <summary>⚠️ Still Need to Set These? Expand for details! </summary>
 
-## NVIDIA API Key <span class="dx-chip">REQUIRED</span>
+## NVIDIA API Key <span class="dx-chip is-green">REQUIRED</span>
 
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
@@ -26,7 +26,7 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 </details>
 
-## Tavily API Key <span class="dx-chip">REQUIRED</span>
+## Tavily API Key <span class="dx-chip is-green">REQUIRED</span>
 
 Tavily is a search API designed for AI agents. It provides real-time web search capabilities that help agents gather up-to-date information from the internet. We will also need a Tavily API key for this workshop.
 
@@ -43,7 +43,7 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 </details>
 
-## LangSmith API Key <span class="dx-chip is-outline-green">OPTIONAL</span>
+## LangSmith API Key <span class="dx-chip">OPTIONAL</span>
 
 LangSmith is LangChain's platform for testing, evaluating, and monitoring LLM applications. It provides tracing and debugging capabilities for your AI agents. Get your LangSmith API Key down below!
 

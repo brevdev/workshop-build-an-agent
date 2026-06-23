@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / AGENT EVALUATION" data-title="Agent Evaluation Workshop"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / AGENT EVALUATION" data-title="Agent Evaluation Workshop" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
 
 The Agent Evaluation Workshop teaches you how to measure and improve the quality of your AI agents using systematic evaluation techniques. You'll learn to evaluate both the **Report Generation Agent** and **IT Help Desk Agent** you built in previous modules using industry-standard metrics, LLM-as-a-judge approaches, and NVIDIA's evaluation tooling. Unlike manual testing, systematic evaluation provides quantitative insights into agent performance, helping you identify weaknesses and track improvements over time.
 

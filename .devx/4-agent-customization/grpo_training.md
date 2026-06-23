@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 04 / 04 - GRPO TRAINING" data-title="GRPO Training"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 04 - GRPO TRAINING" data-title="GRPO Training" data-meta="DURATION::3-4 hrs|MODEL::Nemotron Nano 9B (GRPO-trained)|GPU::A100-80GB+ recommended"></div>
 
 You have your dataset. Now how do you teach the model with it?
 

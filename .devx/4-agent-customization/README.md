@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 04 / AGENT CUSTOMIZATION" data-title="Agent Customization Workshop"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / AGENT CUSTOMIZATION" data-title="Agent Customization Workshop" data-meta="DURATION::3-4 hrs|MODEL::Nemotron Nano 9B (GRPO-trained)|GPU::A100-80GB+ recommended"></div>
 
 The Agent Customization Workshop teaches you how to **customize AI agents for specific domains** using NVIDIA technology. You'll transform a generic bash agent into a **LangGraph CLI expert** using Synthetic Data Generation (SDG) and Reinforcement Learning with Verifiable Rewards (RLVR).
 

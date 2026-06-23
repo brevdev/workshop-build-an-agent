@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / AGENT SAFETY" data-title="Agent Safety with NemoClaw"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / AGENT SAFETY" data-title="Agent Safety with NemoClaw" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
 
 Your agent runs 24/7, evolves its own behavior, and processes sensitive data. How do you make it safer when you're not watching?
 

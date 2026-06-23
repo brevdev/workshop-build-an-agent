@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / 06 - LOCAL NIM" data-title="Migrate to Local NIM Microservices"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 06 - LOCAL NIM" data-title="Migrate to Local NIM Microservices" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
 
 [NVIDIA's API Catalog](https://build.nvidia.com) is an excellent resource for discovering and evaluating many different Generative AI models. There is a wide breadth of available models, and getting started is free.
 
@@ -18,7 +18,7 @@ In this exercise, we will run our LLM model locally and transition our code to o
 
 <img src="_static/robots/relocate.png" alt="Box 'em up and bring 'em home." style="float:right;max-width:300px;margin:25px;" />
 
-We've been using the [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b) LLM from NVIDIA's API Catalog. For any model you want to run locally, look for the *Deploy* tab on its API Catalog page. Here you can find step-by-step instructions for running the model as a container.
+Our agent has been running on **Nemotron 3 Super (120B)** through NVIDIA's hosted API Catalog - powerful, and no local GPU required. To run locally, we'll switch to the smaller, more accessible [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b), which fits comfortably on a single GPU. For any model you want to run locally, look for the *Deploy* tab on its API Catalog page for step-by-step container instructions.
 
 For our model, you can find the relevant details on the [deployment page](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b/deploy), including Docker commands and environment setup.
 
@@ -180,7 +180,7 @@ You should see the model start to answer the question, then get cut off after 64
 
 Now that your NIM is running locally, let's update your agent to use it.
 
-In your agent code, you previously created the `llm` object with the <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= ChatNVIDIA(');"><i class="fas fa-code"></i> ChatNVIDIA</button> class. Connect to your local NIM by setting the `base_url` parameter to `http://nemotron:8000/v1` when initializing `ChatNVIDIA`.
+In your agent code, you previously created the `llm` object with the <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= ChatNVIDIA(');"><i class="fas fa-code"></i> ChatNVIDIA</button> class. Connect to your local NIM by setting `base_url` to `http://nemotron:8000/v1` and pointing `model` at the Nano you just launched (`nvidia/nemotron-3-nano`) when initializing `ChatNVIDIA`.
 
 Refer to the [official LangChain documentation](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#working-with-nvidia-nims) for more details.
 
@@ -188,10 +188,10 @@ Refer to the [official LangChain documentation](https://python.langchain.com/doc
 <summary>🆘 Need some help?</summary>
 
 ```python
-# Define the LLM model to be used for this agent
+# Point the agent at your local Nemotron 3 Nano NIM
 llm = ChatNVIDIA(
     base_url="http://nemotron:8000/v1",
-    model=LLM_MODEL,
+    model="nvidia/nemotron-3-nano",
     temperature=0.6,
     top_p=0.95,
     max_tokens=8192

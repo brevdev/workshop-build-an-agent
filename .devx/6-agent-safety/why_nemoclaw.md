@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 03 - PRINCIPLES" data-title="Why NemoClaw: Agent Security Principles and Layers"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 03 - PRINCIPLES" data-title="Why NemoClaw: Agent Security Principles and Layers" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
 
 <img src="_static/robots/supervisor.png" alt="Agent Security Deep-Dive Robot" style="float:right;max-width:300px;margin:25px;" />
 

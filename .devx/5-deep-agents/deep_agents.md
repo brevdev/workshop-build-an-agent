@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 05 / 02 - FUNDAMENTALS" data-title="What Are Deep Agents?"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / 02 - FUNDAMENTALS" data-title="What Are Deep Agents?" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 **Deep agents** are AI agents equipped with planning tools, file system access, shell execution, and sub-agent spawning, operating through an autonomous reasoning loop to handle complex, multi-step tasks. They use the same LLM-in-a-loop foundation as the ReAct agents you built in earlier modules, but with a **middleware pipeline** around every interaction.
 

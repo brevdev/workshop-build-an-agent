@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / AGENTIC RAG" data-title="Agentic RAG Workshop"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / AGENTIC RAG" data-title="Agentic RAG Workshop" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
 
 The Agentic RAG Workshop teaches you how to build intelligent Retrieval Augmented Generation (RAG) systems using NVIDIA technology and LangGraph. You'll create an **IT Help Desk Agent** - an intelligent system that can dynamically decide when and how to search knowledge bases to answer user queries. Unlike traditional RAG systems that always perform the same retrieval steps, agentic RAG gives the model control over when and how to use retrieval as a tool.
 

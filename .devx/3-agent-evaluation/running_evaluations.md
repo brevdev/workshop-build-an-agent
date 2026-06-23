@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / 04 - HANDS ON" data-title="Running Evaluations"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / 04 - HANDS ON" data-title="Running Evaluations" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
 
 <img src="_static/robots/blueprint.png" alt="Running Evaluations" style="float:right;max-width:300px;margin:25px;" />
 

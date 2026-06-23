@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / 03 - HANDS ON" data-title="Running Your Agent"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 03 - HANDS ON" data-title="Running Your Agent" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
 
 <img src="_static/robots/operator.png" alt="Klondike 5, 4 6 5 2. On the double, we gotta 23 skidoo!" style="float:right;max-width:300px;margin:25px;" />
 

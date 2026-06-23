@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / SETUP" data-title="Setting up Secrets"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / SETUP" data-title="Setting up Secrets" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right;max-width:300px;margin:25px;" />
 

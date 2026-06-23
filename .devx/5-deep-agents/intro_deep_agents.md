@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 05 / 01 - CONCEPTS" data-title="Introduction to Deep Agents"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / 01 - CONCEPTS" data-title="Introduction to Deep Agents" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 In Modules 1 through 4, we built increasingly capable agents — from a report generator to a RAG-powered help desk to a customized bash agent. Each used the same fundamental pattern: a **ReAct loop** where a single model reasons, calls a tool, observes the result, and repeats.
 

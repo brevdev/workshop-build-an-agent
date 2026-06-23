@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 01 / 01 - CONCEPTS" data-title="Why Agents?"></div>
+<div class="dx-hero" data-eyebrow="MODULE 01 / 01 - CONCEPTS" data-title="Why Agents?" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 Before we dive into building agents, let's take a step back. What are agents, really? And why would you use one instead of just calling an LLM directly?
 

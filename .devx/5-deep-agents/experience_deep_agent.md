@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 05 / 03 - EXPERIENCE" data-title="Experience a Deep Agent"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / 03 - EXPERIENCE" data-title="Experience a Deep Agent" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 <img src="_static/robots/plumber.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 

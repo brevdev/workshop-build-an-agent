@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 05 - HANDS ON" data-title="Working with NemoClaw"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 05 - HANDS ON" data-title="Working with NemoClaw" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
 
 Your NemoClaw sandbox is running. The agent lives inside four enforcement layers: **Network** (egress policy), **Filesystem** (Landlock), **Process** (seccomp + least privilege), and **Inference** (Privacy Router). Reading about those layers and *feeling* them are very different things. This page walks you through five hands-on exercises that turn each layer into a copy-pasteable experience — and revisit the four probes from the [previous page](setup_openclaw) to see NemoClaw shut them down.
 

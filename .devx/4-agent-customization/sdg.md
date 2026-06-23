@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 04 / 03 - SYNTHETIC DATA" data-title="Synthetic Data Generation"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 03 - SYNTHETIC DATA" data-title="Synthetic Data Generation" data-meta="DURATION::3-4 hrs|MODEL::Nemotron Nano 9B (GRPO-trained)|GPU::A100-80GB+ recommended"></div>
 
 Training requires examples—lots of them. Each example shows the model:
 - **Input**: What the user says (*"Create a new project with the react template"*)

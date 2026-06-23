@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 01 / 04 - WRAP UP" data-title="Next Steps"></div>
+<div class="dx-hero" data-eyebrow="MODULE 01 / 04 - WRAP UP" data-title="Next Steps" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 Congratulations on completing Module 1! You've taken your first steps into the world of AI agents.
 

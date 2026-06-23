@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / 01 - CONCEPTS" data-title="Introduction to RAG"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 01 - CONCEPTS" data-title="Introduction to RAG" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
 
 <img src="_static/robots/bluegrass.png" alt="The tall tale of RAG" style="float:right;max-width:300px;margin:25px;" />
 

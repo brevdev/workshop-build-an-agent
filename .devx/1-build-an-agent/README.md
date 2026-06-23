@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 01 / BUILD AN AGENT" data-title="Build An Agent Workshop"></div>
+<div class="dx-hero" data-eyebrow="MODULE 01 / BUILD AN AGENT" data-title="Build An Agent Workshop" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 The Build An Agent Workshop teaches you how to create AI agents that can perform complex tasks using Large Language Models (LLMs) and tools. You'll build a **Report Generation Agent** - an intelligent system that can research any topic, create comprehensive outlines, write detailed sections, and compile professional reports automatically. Unlike simple workflows, agents are intelligent programs that can adapt to changing requirements, choose tools dynamically, and perform complex reasoning and planning.
 

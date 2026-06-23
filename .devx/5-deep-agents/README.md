@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 05 / DEEP AGENTS" data-title="Deep Agents Workshop"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / DEEP AGENTS" data-title="Deep Agents Workshop" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 In Modules 1 through 4, you built agents that reason, call tools, retrieve knowledge, and even execute shell commands. In this capstone module, you'll graduate from those shallow ReAct agents to **deep agents** — autonomous systems that can plan, code, execute, delegate, and self-manage. These are the same architectural patterns behind products like deep research assistants and AI coding agents. You'll build a production-grade deep agent using NVIDIA models, secure it with Docker sandboxing, and understand the architecture that makes it all work.
 

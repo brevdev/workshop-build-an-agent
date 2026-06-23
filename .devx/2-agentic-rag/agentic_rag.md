@@ -1,4 +1,4 @@
-# Agentic Retrieval Augmented Generation
+<div class="m7-hero" data-eyebrow="MODULE 02 / 02 - BUILDING" data-title="Agentic Retrieval Augmented Generation"></div>
 
 <img src="_static/robots/datacenter.png" alt="Data Center Robot" style="float:right;max-width:300px;margin:25px;" />
 

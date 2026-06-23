@@ -1,4 +1,4 @@
-# Why NemoClaw: Agent Security Principles and Layers
+<div class="m7-hero" data-eyebrow="MODULE 06 / 03 - PRINCIPLES" data-title="Why NemoClaw: Agent Security Principles and Layers"></div>
 
 <img src="_static/robots/supervisor.png" alt="Agent Security Deep-Dive Robot" style="float:right;max-width:300px;margin:25px;" />
 

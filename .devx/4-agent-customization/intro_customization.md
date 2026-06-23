@@ -1,4 +1,4 @@
-# Introduction to Customization
+<div class="m7-hero" data-eyebrow="MODULE 04 / 01 - CONCEPTS" data-title="Introduction to Customization"></div>
 
 <img src="_static/robots/study.png" alt="Understanding Customization" style="float:right;max-width:250px;margin:15px;" />
 

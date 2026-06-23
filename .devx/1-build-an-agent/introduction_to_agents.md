@@ -1,4 +1,4 @@
-# Introduction to Agents
+<div class="m7-hero" data-eyebrow="MODULE 01 / 02 - FUNDAMENTALS" data-title="Introduction to Agents"></div>
 
 <img src="_static/robots/blueprint.png" alt="VSS Robot Character" style="float:left; max-width:300px;margin:25px;" />
 

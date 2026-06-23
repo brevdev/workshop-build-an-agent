@@ -226,7 +226,16 @@
   }
 
   /* ---- 8. sidebar completion checkmarks -------------------------------------- */
-  var DONE_KEY = 'm7-visited';
+  /* Per-module identity (shared theme): prefer an html.m7-mod<N> class; else derive
+     the module number from the URL path (e.g. /1-build-an-agent/) and inject the
+     class so the CSS breadcrumb resolves too. Keeps each module's completion state
+     isolated — a reset in one module doesn't clear another's. */
+  var M7_MOD = (document.documentElement.className.match(/m7-mod(\d+)/) || [])[1] || '';
+  if (!M7_MOD) {
+    M7_MOD = (window.location.pathname.match(/\/(\d+)-[a-z0-9]/) || [])[1] || '';
+    if (M7_MOD) { document.documentElement.classList.add('m7-mod' + M7_MOD); }
+  }
+  var DONE_KEY = 'm7-visited' + (M7_MOD ? '-' + M7_MOD : '');
   function markVisited(route) {
     try {
       var seen = JSON.parse(localStorage.getItem(DONE_KEY) || '[]');

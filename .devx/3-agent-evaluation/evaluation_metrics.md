@@ -1,4 +1,4 @@
-# Understanding Evaluation Metrics
+<div class="m7-hero" data-eyebrow="MODULE 03 / 02 - METRICS" data-title="Understanding Evaluation Metrics"></div>
 
 <img src="_static/robots/datacenter.png" alt="Metrics and Data" style="float:left;max-width:250px;margin:25px;" />
 

@@ -1,4 +1,4 @@
-# Setting up Secrets
+<div class="m7-hero" data-eyebrow="MODULE 06 / SETUP" data-title="Setting up Secrets"></div>
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right;max-width:300px;margin:25px;" />
 

@@ -1,4 +1,4 @@
-# Continuous Improvement
+<div class="m7-hero" data-eyebrow="MODULE 03 / 05 - WRAP UP" data-title="Continuous Improvement"></div>
 
 <img src="_static/robots/hiking.png" alt="Continuous Journey" style="float:right;max-width:300px;margin:25px;" />
 

@@ -1,4 +1,4 @@
-# Report Generation Agent
+<div class="m7-hero" data-eyebrow="MODULE 01 / 03 - HANDS ON" data-title="Report Generation Agent"></div>
 
 <img src="_static/robots/surf.png" alt="Research Agent Robot" style="float:right; max-width:300px;margin:25px;" />
 

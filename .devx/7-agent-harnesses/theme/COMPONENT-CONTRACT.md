@@ -1,6 +1,6 @@
 # Module 7 component contract (for page authors)
 
-Markup that `theme/module7.css` + `theme/module7.js` understand. Pages carry ONLY
+Markup that `_static/css/m7-theme.css` + `_static/js/m7-theme.js` (the shared theme) understand. Pages carry ONLY
 attribute-driven HTML — never `<script>` or `<style>` blocks, never `{{ }}`
 (docsify-mustache mangles them). Every widget is ONE root element (the
 progressive-unfold plugin splits pages by top-level element count).

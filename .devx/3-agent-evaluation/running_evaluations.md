@@ -1,4 +1,4 @@
-# Running Evaluations
+<div class="m7-hero" data-eyebrow="MODULE 03 / 04 - HANDS ON" data-title="Running Evaluations"></div>
 
 <img src="_static/robots/blueprint.png" alt="Running Evaluations" style="float:right;max-width:300px;margin:25px;" />
 

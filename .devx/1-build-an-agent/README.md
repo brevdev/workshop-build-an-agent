@@ -1,4 +1,4 @@
-# Build An Agent Workshop
+<div class="m7-hero" data-eyebrow="MODULE 01 / BUILD AN AGENT" data-title="Build An Agent Workshop"></div>
 
 <img src="_static/robots/hero.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 

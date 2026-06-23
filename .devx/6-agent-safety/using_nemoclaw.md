@@ -1,4 +1,4 @@
-# Working with NemoClaw
+<div class="m7-hero" data-eyebrow="MODULE 06 / 05 - HANDS ON" data-title="Working with NemoClaw"></div>
 
 <img src="_static/robots/supervisor.png" alt="NemoClaw Hands-On Robot" style="float:right;max-width:300px;margin:25px;" />
 

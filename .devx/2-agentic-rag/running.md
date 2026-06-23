@@ -1,4 +1,4 @@
-# Running Your Agent
+<div class="m7-hero" data-eyebrow="MODULE 02 / 03 - HANDS ON" data-title="Running Your Agent"></div>
 
 <img src="_static/robots/operator.png" alt="Klondike 5, 4 6 5 2. On the double, we gotta 23 skidoo!" style="float:right;max-width:300px;margin:25px;" />
 

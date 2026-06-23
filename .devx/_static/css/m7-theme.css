@@ -1,8 +1,9 @@
 /* ==========================================================================
-   Module 7 — Agent Harnesses & Skills
+   M7 design system — SHARED across all DevX Workshop modules
    "Hybrid NVIDIA" design system: dark hero + dark widget islands + dark
-   terminal panels on the light reading surface. Kaizen tokens throughout.
-   Scoped to this module only (loaded from 7-agent-harnesses/index.html).
+   terminal panels on the reading surface. Kaizen tokens throughout.
+   Loaded by every module from _static/css/m7-theme.css + _static/js/m7-theme.js;
+   each module's index.html carries `m7-dark m7-mod<N>` on <html>.
    ========================================================================== */
 
 @font-face {
@@ -987,7 +988,7 @@ html.m7-dark ::-webkit-scrollbar-thumb:hover { background: var(--m7-border-hover
   background: var(--m7-green);
 }
 .app-name::after {
-  content: 'DEVX WORKSHOP / MODULE 07';
+  content: 'DEVX WORKSHOP';                 /* fallback; per-module text set by the html.m7-mod* rules below */
   display: block;
   font-family: var(--m7-mono);
   font-size: 0.55rem;
@@ -997,6 +998,15 @@ html.m7-dark ::-webkit-scrollbar-thumb:hover { background: var(--m7-border-hover
   margin-top: 4px;
   opacity: 0.9;
 }
+/* Per-module breadcrumb — driven by the html.m7-mod<N> class on each module's index.html.
+   This is the shared design system, so the module number is parameterized here. */
+html.m7-mod1 .app-name::after { content: 'DEVX WORKSHOP / MODULE 01'; }
+html.m7-mod2 .app-name::after { content: 'DEVX WORKSHOP / MODULE 02'; }
+html.m7-mod3 .app-name::after { content: 'DEVX WORKSHOP / MODULE 03'; }
+html.m7-mod4 .app-name::after { content: 'DEVX WORKSHOP / MODULE 04'; }
+html.m7-mod5 .app-name::after { content: 'DEVX WORKSHOP / MODULE 05'; }
+html.m7-mod6 .app-name::after { content: 'DEVX WORKSHOP / MODULE 06'; }
+html.m7-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
 
 /* sidebar search goes terminal */
 .sidebar .search { border-bottom: 1px solid var(--m7-border) !important; }

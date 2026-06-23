@@ -1,4 +1,4 @@
-# The Bash Agent
+<div class="m7-hero" data-eyebrow="MODULE 04 / 02 - BASH AGENT" data-title="The Bash Agent"></div>
 
 <img src="_static/robots/operator.png" alt="Bash Agent" style="float:right;max-width:250px;margin:15px;" />
 

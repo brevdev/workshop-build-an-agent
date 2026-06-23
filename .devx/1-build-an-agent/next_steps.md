@@ -1,4 +1,4 @@
-# Next Steps
+<div class="m7-hero" data-eyebrow="MODULE 01 / 04 - WRAP UP" data-title="Next Steps"></div>
 
 <img src="_static/robots/cake.png" alt="Cake Robot" style="float:right; max-width:300px;margin:25px;" />
 

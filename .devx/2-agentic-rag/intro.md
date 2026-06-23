@@ -1,4 +1,4 @@
-# Introduction to RAG
+<div class="m7-hero" data-eyebrow="MODULE 02 / 01 - CONCEPTS" data-title="Introduction to RAG"></div>
 
 <img src="_static/robots/bluegrass.png" alt="The tall tale of RAG" style="float:right;max-width:300px;margin:25px;" />
 

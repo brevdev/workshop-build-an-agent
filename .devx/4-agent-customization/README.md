@@ -1,4 +1,4 @@
-# Agent Customization Workshop
+<div class="m7-hero" data-eyebrow="MODULE 04 / AGENT CUSTOMIZATION" data-title="Agent Customization Workshop"></div>
 
 <img src="_static/robots/magician.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 

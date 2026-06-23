@@ -1,4 +1,4 @@
-# Agent Evaluation Workshop
+<div class="m7-hero" data-eyebrow="MODULE 03 / AGENT EVALUATION" data-title="Agent Evaluation Workshop"></div>
 
 <img src="_static/robots/magician.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 

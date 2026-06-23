@@ -1,4 +1,4 @@
-# Build a Deep Agent
+<div class="m7-hero" data-eyebrow="MODULE 05 / 04 - HANDS ON" data-title="Build a Deep Agent"></div>
 
 <img src="_static/robots/plumber.png" alt="Build Robot" style="float:right;max-width:300px;margin:25px;" />
 

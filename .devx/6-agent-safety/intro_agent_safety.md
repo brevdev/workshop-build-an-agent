@@ -1,4 +1,4 @@
-# The Autonomous Agent Problem
+<div class="m7-hero" data-eyebrow="MODULE 06 / 01 - THE PROBLEM" data-title="The Autonomous Agent Problem"></div>
 
 <img src="_static/robots/supervisor.png" alt="Agent Safety Robot" style="float:right;max-width:300px;margin:25px;" />
 

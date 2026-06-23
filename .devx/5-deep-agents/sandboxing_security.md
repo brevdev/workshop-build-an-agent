@@ -1,4 +1,4 @@
-# Sandboxing and Security
+<div class="m7-hero" data-eyebrow="MODULE 05 / 05 - SECURITY" data-title="Sandboxing and Security"></div>
 
 <img src="_static/robots/spyglass.png" alt="Security Robot" style="float:right;max-width:300px;margin:25px;" />
 

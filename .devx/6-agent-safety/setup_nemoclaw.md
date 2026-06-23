@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 04 - SETUP NEMOCLAW" data-title="Set Up NemoClaw" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 04 - SETUP NEMOCLAW" data-title="Set Up NemoClaw" data-meta="TIME::20 min|STEPS::5|RUNTIME::OpenShell sandbox"></div>
 
 You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router isolates credentials and enforces the operator's choice of inference backend, and how Nemotron can serve as that backend when sensitive queries need to stay local. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
 

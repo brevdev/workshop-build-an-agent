@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 01 / 03 - HANDS ON" data-title="Report Generation Agent" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 01 / 03 - HANDS ON" data-title="Report Generation Agent" data-meta="TIME::30 min|EXERCISES::3|NOTEBOOKS::2"></div>
 
 Now that you have a grip on the basics of agents, let's check out a more true-to-life agent architecture with your own report generation agent!
 The report generation agent will automatically research any topic and write a professional report.

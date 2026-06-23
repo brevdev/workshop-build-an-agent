@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 01 - THE PROBLEM" data-title="The Autonomous Agent Problem" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 01 - THE PROBLEM" data-title="The Autonomous Agent Problem" data-meta="READ::12 min|CONCEPTS::5"></div>
 
 <img src="_static/robots/supervisor.png" alt="Agent Safety Robot" style="float:right;max-width:300px;margin:25px;" />
 

@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / 05 - WRAP UP" data-title="Continuous Improvement" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / 05 - WRAP UP" data-title="Continuous Improvement" data-meta="READ::20 min|CONCEPTS::5+|NEXT::Module 04"></div>
 
 <img src="_static/robots/hiking.png" alt="Continuous Journey" style="float:right;max-width:300px;margin:25px;" />
 

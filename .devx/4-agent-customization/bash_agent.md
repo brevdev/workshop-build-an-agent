@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 04 / 02 - BASH AGENT" data-title="The Bash Agent" data-meta="DURATION::3-4 hrs|MODEL::Nemotron Nano 9B (GRPO-trained)|GPU::A100-80GB+ recommended"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 02 - BASH AGENT" data-title="The Bash Agent" data-meta="TIME::30 min|EXERCISES::3|FILE::bash_agent.ipynb"></div>
 
 <img src="_static/robots/operator.png" alt="Bash Agent" style="float:right;max-width:250px;margin:15px;" />
 

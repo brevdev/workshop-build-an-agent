@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / SETUP" data-title="Setting up Secrets" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / SETUP" data-title="Setting up Secrets" data-meta="NEEDS::NVIDIA + Tavily keys|TIME::3 min"></div>
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right; max-width:300px;margin:25px;" />
 

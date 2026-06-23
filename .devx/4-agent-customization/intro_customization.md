@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 04 / 01 - CONCEPTS" data-title="Introduction to Customization" data-meta="DURATION::3-4 hrs|MODEL::Nemotron Nano 9B (GRPO-trained)|GPU::A100-80GB+ recommended"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 01 - CONCEPTS" data-title="Introduction to Customization" data-meta="READ::15 min|CONCEPTS::3"></div>
 
 In Module 3, you learned to **measure** agent performance — faithfulness, relevance, tone, and so on. But what happens when the metrics reveal problems?
 

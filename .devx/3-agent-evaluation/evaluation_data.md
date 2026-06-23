@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / 03 - DATASETS" data-title="Creating Evaluation Datasets" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / 03 - DATASETS" data-title="Creating Evaluation Datasets" data-meta="READ::15 min|CONCEPTS::5|NOTEBOOKS::2"></div>
 
 <img src="_static/robots/operator.png" alt="Dataset Design" style="float:right;max-width:300px;margin:25px;" />
 

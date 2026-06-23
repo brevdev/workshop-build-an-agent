@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / 04 - MCP" data-title="Implementing MCP" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 04 - MCP" data-title="Implementing MCP" data-meta="TIME::35 min|CONCEPTS::4|EXERCISES::3"></div>
 
 The Model Context Protocol (MCP) is an open standard developed by Anthropic that defines how AI agents connect to external tools, data sources, and services. Think of it as a universal adapter that lets your agent plug into anything.
 

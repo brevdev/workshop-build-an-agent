@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / 02 - METRICS" data-title="Understanding Evaluation Metrics" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / 02 - METRICS" data-title="Understanding Evaluation Metrics" data-meta="READ::25 min|CONCEPTS::5+"></div>
 
 <img src="_static/robots/datacenter.png" alt="Metrics and Data" style="float:left;max-width:250px;margin:25px;" />
 

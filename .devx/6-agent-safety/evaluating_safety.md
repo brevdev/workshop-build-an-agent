@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 06 - WRAP UP" data-title="Evaluating Agent Safety" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 06 - WRAP UP" data-title="Evaluating Agent Safety" data-meta="TIME::30 min|EXERCISES::5+|MODEL::Nemotron judge"></div>
 
 On the previous page, you hardened the agent: deny-by-default network, kernel-level filesystem + process containment, credential isolation, and operator-chosen inference routing. Those four layers **contain blast radius**. They do not — and cannot — catch every class of unsafe behavior. Prompt injection that stays inside the agent's permitted boundaries, memory poisoning that survives heartbeats, subtle behavioral drift over weeks — all pass through kernel-level enforcement because they look like *normal agent work*.
 

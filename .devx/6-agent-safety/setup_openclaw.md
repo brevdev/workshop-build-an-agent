@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 02 - SETUP OPENCLAW" data-title="Set Up Your OpenClaw Agent" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 02 - SETUP OPENCLAW" data-title="Set Up Your OpenClaw Agent" data-meta="TIME::20 min|STEPS::5+|AGENT::OpenClaw"></div>
 
 <img src="_static/robots/supervisor.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 

@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / 02 - BUILDING" data-title="Agentic Retrieval Augmented Generation" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 02 - BUILDING" data-title="Agentic Retrieval Augmented Generation" data-meta="TIME::45 min|EXERCISES::5|MODEL::Super + Retriever"></div>
 
 <img src="_static/robots/datacenter.png" alt="Data Center Robot" style="float:right;max-width:300px;margin:25px;" />
 

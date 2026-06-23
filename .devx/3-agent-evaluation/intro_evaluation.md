@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / 01 - CONCEPTS" data-title="Introduction to Agent Evaluation" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / 01 - CONCEPTS" data-title="Introduction to Agent Evaluation" data-meta="READ::15 min|CONCEPTS::5+"></div>
 
 <img src="_static/robots/study.png" alt="Understanding Evaluation" style="float:right;max-width:300px;margin:25px;" />
 

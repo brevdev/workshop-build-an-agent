@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 05 / 04 - HANDS ON" data-title="Build a Deep Agent" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / 04 - HANDS ON" data-title="Build a Deep Agent" data-meta="TIME::40 min|EXERCISES::5|FILE::deep_agent.py"></div>
 
 Time to get hands-on. In this section, you'll build a deep agent step by step by filling in the core functions that power it. We'll work through the backend code and then test everything using the interactive Deep Agent Client from the previous section.
 

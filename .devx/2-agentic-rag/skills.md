@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / 05 - SKILLS" data-title="Agent Skills" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 05 - SKILLS" data-title="Agent Skills" data-meta="TIME::35 min|CONCEPTS::5|EXERCISES::3"></div>
 
 <img src="_static/robots/study.png" alt="Skills Robot Character" style="float:left;max-width:300px;margin:25px;" />
 

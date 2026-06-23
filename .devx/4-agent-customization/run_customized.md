@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 04 / 05 - HANDS ON" data-title="Run Customized Agent" data-meta="DURATION::3-4 hrs|MODEL::Nemotron Nano 9B (GRPO-trained)|GPU::A100-80GB+ recommended"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 05 - HANDS ON" data-title="Run Customized Agent" data-meta="TIME::30 min|EXERCISES::3|MODEL::trained Nano 9B"></div>
 
 <img src="_static/robots/typewriter.png" alt="Running" style="float:right;max-width:250px;margin:15px;" />
 

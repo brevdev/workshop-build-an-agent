@@ -1,7 +1,5 @@
 <div class="dx-hero" data-eyebrow="MODULE 05 / 01 - CONCEPTS" data-title="Introduction to Deep Agents"></div>
 
-<img src="_static/robots/magician.png" alt="Deep Agent Robot" style="float:right;max-width:300px;margin:25px;" />
-
 In Modules 1 through 4, we built increasingly capable agents — from a report generator to a RAG-powered help desk to a customized bash agent. Each used the same fundamental pattern: a **ReAct loop** where a single model reasons, calls a tool, observes the result, and repeats.
 
 These agents are powerful, but they're **shallow**. In this module, we'll explore what happens when we go *deep*.
@@ -12,12 +10,12 @@ These agents are powerful, but they're **shallow**. In this module, we'll explor
 
 Here's a quick recap of what you've accomplished across the workshop:
 
-| Module | What You Built | Key Pattern |
-|--------|---------------|-------------|
-| 1 | Report generation agent | ReAct loop with tool calling |
-| 2 | RAG-augmented IT help desk agent | Retrieval + generation |
-| 3 | Evaluation pipelines for agent quality | LLM-as-judge, RAGAS metrics |
-| 4 | Customized CLI agent via SDG + RLVR  | Domain specialization |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>ReAct loop with tool calling</div>
+  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>Retrieval + generation</div>
+  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>LLM-as-judge, RAGAS metrics</div>
+  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>Domain specialization via SDG + RLVR</div>
+</div>
 
 But all of these agents share a common architecture: a **single model in a single loop**, with all state living inside the context window. We call these "shallow" agents — not because they're simple, but because their reasoning stays within a single layer of execution.
 
@@ -27,7 +25,7 @@ But all of these agents share a common architecture: a **single model in a singl
 
 Every agent we've built so far follows the same architecture:
 
-![Shallow Agent Pattern](img/shallow_agent_pattern.png)
+![Shallow Agent Pattern](img/shallow_agent_pattern_dark.svg)
 
 One model. One context window. One tool at a time. The bash agent from Module 4 pushed this pattern to its limit — it could execute shell commands, but it still operated in a single flat loop.
 
@@ -46,16 +44,15 @@ These capabilities cover a wide range of real-world tasks. For focused problems 
 
 <!-- fold:break -->
 
-#### Shallow Agent Limitations
-
-But what happens when the task outgrows the architecture? The shallow agent pattern breaks down because it can't:
-
-- **Plan ahead** — Break down a complex task, track progress over long time horizons
-- **Delegate work** — Spawn a sub-agent to handle a sub-task in parallel
-- **Manage files** — Read, write, edit, search, and organize files across a project
-- **Manage its own context** — Summarize long conversations to avoid running out of tokens
-
-For simple tasks, this is fine. But real-world production tasks — "research this topic, write code, test it, fix any bugs, and write documentation" — require something more.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHERE SHALLOW AGENTS BREAK DOWN</p>
+  <p>For simple tasks, the flat loop is fine. But real production work - research a topic, write code, test it, fix the bugs, and document it - outgrows the architecture, because a shallow agent can't:</p>
+  <p><span class="dx-chip">NO PLANNING</span> Break down a complex task or track progress over long time horizons.</p>
+  <p><span class="dx-chip">NO DELEGATION</span> Spawn a sub-agent to handle a sub-task in parallel.</p>
+  <p><span class="dx-chip">NO FILE MEMORY</span> Read, write, edit, search, and organize files across a project.</p>
+  <p><span class="dx-chip">NO CONTEXT MGMT</span> Summarize long conversations to avoid running out of tokens.</p>
+  <p>These four gaps map directly onto the four pillars of deep agents - exactly what the next page covers.</p>
+</div>
 
 <details>
 <summary><strong>A concrete example of shallow agent breakdown</strong></summary>
@@ -103,6 +100,8 @@ Deep agents aren't just agents with more tools — they're agents with an **arch
 
 ### From Bash Agent to Deep Agent
 
+<img src="_static/robots/magician.png" alt="Deep Agent Robot" style="float:right;max-width:300px;margin:25px;" />
+
 Remember the bash agent from Module 4? It could translate natural language into shell commands. That was a big step — an agent touching the real system.
 
 Now imagine that agent with the following capabilities:
@@ -135,6 +134,15 @@ agent = create_deep_agent(
 One function call gives you an agent with planning, filesystem access, shell execution, sub-agents, and context management — all wired up and ready to go.
 
 > To learn more about NVIDIA's integrations with LangChain, check out [these docs](https://docs.langchain.com/oss/python/integrations/providers/nvidia). 
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">What actually makes an agent deep rather than shallow?</p>
+  <button class="dx-quiz-opt" data-fb="A bigger model reasons better, but a deep agent built on the same model still beats a shallow one. The difference is architecture, not raw model size.">It runs on a larger, more capable model</button>
+  <button class="dx-quiz-opt" data-fb="More tools help, but a shallow agent can have many tools too. Depth comes from how the agent is structured, not the size of its toolbox.">It is given access to many more tools</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Planning, delegation, external memory, and skills are capabilities layered around the loop - the same model becomes a deep agent through structure.">It adds planning, delegation, memory, and skills around the loop</button>
+  <button class="dx-quiz-opt" data-fb="A longer window delays overflow but does not solve it. Deep agents manage context with external memory and summarization, not just a bigger window.">It uses a much longer context window</button>
+</div>
 
 <!-- fold:break -->
 

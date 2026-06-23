@@ -1,16 +1,22 @@
 <div class="dx-hero" data-eyebrow="MODULE 02 / 06 - LOCAL NIM" data-title="Migrate to Local NIM Microservices"></div>
 
-<img src="_static/robots/relocate.png" alt="Box 'em up and bring 'em home. " style="float:right;max-width:300px;margin:25px;" />
-
 [NVIDIA's API Catalog](https://build.nvidia.com) is an excellent resource for discovering and evaluating many different Generative AI models. There is a wide breadth of available models, and getting started is free.
 
 These APIs are useful for fast starts and experiments. However, for the unlimited performance and control needed in production, deploy models locally with NVIDIA NIM microservice containers.
 
 In this exercise, we will run our LLM model locally and transition our code to our private model.
 
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">API CATALOG vs LOCAL NIM</p>
+  <p><span class="dx-chip">API CATALOG</span> Free, instant, and a huge model selection - ideal for fast starts, evaluation, and experiments.</p>
+  <p><span class="dx-chip">LOCAL NIM</span> Unlimited performance, full control, and data privacy - what you want for production. This exercise migrates your LLM to a local NIM container.</p>
+</div>
+
 <!-- fold:break -->
 
 ## Find Deployment Instructions
+
+<img src="_static/robots/relocate.png" alt="Box 'em up and bring 'em home." style="float:right;max-width:300px;margin:25px;" />
 
 We've been using the [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b) LLM from NVIDIA's API Catalog. For any model you want to run locally, look for the *Deploy* tab on its API Catalog page. Here you can find step-by-step instructions for running the model as a container.
 

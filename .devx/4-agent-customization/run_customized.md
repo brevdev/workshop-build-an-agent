@@ -22,7 +22,7 @@ But how do we actually *use* the trained model? The training notebook saved a me
 
 During GRPO training, the model learned to map natural language requests to structured JSON tool calls. At inference time, the flow looks like this:
 
-![Inference Pipeline](img/inference_pipeline.png)
+![Inference Pipeline](img/inference_pipeline_dark.svg)
 
 The key difference from the base agent in `bash_agent.ipynb`: instead of calling a remote NIM model via API, we're running the trained model **locally** with HuggingFace Transformers. The `HuggingFaceLLM` class handles model loading, tokenization, and parsing the structured JSON output.
 
@@ -111,12 +111,15 @@ python3.12 -m bash_agent.main_hf
 
 Try some of the following commands and compare how the trained agent performs versus the base agent you ran earlier:
 
-| Request | Before Training | After Training |
-|---------|-----------------|----------------|
-| "List files" | ✅ `ls` | ✅ `ls` |
-| "Create a react agent" | ❌ Hallucinated command | ✅ `langgraph new ./myapp --template react-agent-python` |
-| "Start dev server on 8080" | ❌ Wrong parameters | ✅ `langgraph dev --port 8080` |
-| "Build image tagged v2" | ❌ Missing flags | ✅ `langgraph build --tag v2` |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">BEFORE vs AFTER TRAINING</p>
+  <ul>
+    <li><b>List files</b> - both get it right: <code>ls</code> (generic bash was never the gap).</li>
+    <li><b>Create a react agent</b> - base: hallucinated &rarr; trained: <code>langgraph new ./myapp --template react-agent-python</code></li>
+    <li><b>Start dev server on 8080</b> - base: wrong parameters &rarr; trained: <code>langgraph dev --port 8080</code></li>
+    <li><b>Build image tagged v2</b> - base: missing flags &rarr; trained: <code>langgraph build --tag v2</code></li>
+  </ul>
+</div>
 
 Notice that generic bash commands (like `ls`) work the same — GRPO training added LangGraph expertise without destroying existing capabilities. This is because GRPO's exploration-based learning reinforces correct patterns rather than overwriting the model's knowledge wholesale.
 
@@ -126,12 +129,15 @@ Notice that generic bash commands (like `ls`) work the same — GRPO training ad
 
 The reward function you built for GRPO training doubles as an evaluation metric. Run your validation set against both the base and trained models to quantify the improvement:
 
-| Metric | Base Model | Trained Model |
-|--------|-----------|---------------|
-| **JSON Format Accuracy** | ~30% | ~95% |
-| **Command Correctness** | ~10% | ~90% |
-| **Flag Accuracy** | ~5% | ~85% |
-| **Overall Mean Reward** | ~0.15 | ~0.90 |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">BASE vs TRAINED ON THE HELD-OUT SET (ILLUSTRATIVE)</p>
+  <div class="dx-gauges">
+    <div class="dx-gauge" data-pct="95"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>JSON Format</b><br>30% &rarr; 95%</p></div>
+    <div class="dx-gauge" data-pct="90"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Command Correct</b><br>10% &rarr; 90%</p></div>
+    <div class="dx-gauge" data-pct="85"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Flag Accuracy</b><br>5% &rarr; 85%</p></div>
+    <div class="dx-gauge" data-pct="90"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Mean Reward</b><br>0.15 &rarr; 0.90</p></div>
+  </div>
+</div>
 
 This closes the loop with Module 3: the same evaluation mindset applies, but now your reward function provides **objective, automated scoring** rather than relying on an LLM judge.
 
@@ -160,16 +166,17 @@ Congratulations! You've completed the Agent Customization module. Let's recap wh
 
 <!-- fold:break -->
 
-### What You Learned
-
-| Topic | Key Takeaway |
-|-------|--------------|
-| **Why Customize** | Training beats Skills/MCP for depth; use both for breadth + depth |
-| **The Pipeline** | SDG → GRPO → Deployment is a repeatable pattern |
-| **Synthetic Data** | Schema-driven generation ensures coverage, diversity, and validity |
-| **Verifiable Rewards** | Code-based verification is faster and more consistent than LLM judges |
-| **GRPO Training** | Exploration-based learning discovers better solutions than imitation |
-| **Safe Execution** | Allowlists and human-in-the-loop protect against dangerous commands |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHAT YOU LEARNED</p>
+  <ul>
+    <li><b>Why customize</b> - training beats Skills/MCP for depth; use both for breadth + depth.</li>
+    <li><b>The pipeline</b> - SDG to GRPO to deployment is a repeatable pattern.</li>
+    <li><b>Synthetic data</b> - schema-driven generation ensures coverage, diversity, and validity.</li>
+    <li><b>Verifiable rewards</b> - code-based verification is faster and more consistent than LLM judges.</li>
+    <li><b>GRPO training</b> - exploration-based learning discovers better solutions than imitation.</li>
+    <li><b>Safe execution</b> - allowlists and human-in-the-loop protect against dangerous commands.</li>
+  </ul>
+</div>
 
 <!-- fold:break -->
 
@@ -197,12 +204,12 @@ The pattern is always:
 
 Each module in this workshop so far introduced a different customization lever while enabling you to complete agent development lifecycle: 
 
-| Module | What You Learned | Key Capability | Customization Lever |
-|--------|-----------------|----------------|----------------|
-| **Module 1** | Build agents with ReAct | Agent fundamentals | System Prompt Engineering | 
-| **Module 2** | Extend with RAG, tools, and skills | Agent capabilities | Adding MCP Tools and Skills | 
-| **Module 3** | Measure and evaluate systematically | Agent quality | Recognizing Customization Opportunities | 
-| **Module 4** | Customize through training | Agent expertise | Adding Domains of Knowledge | 
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODULE 1</h4>Build agents with ReAct - agent fundamentals. <span class="dx-chip">System Prompts</span></div>
+  <div class="dx-cell"><h4>MODULE 2</h4>Extend with RAG, tools, and skills - agent capabilities. <span class="dx-chip">MCP + Skills</span></div>
+  <div class="dx-cell"><h4>MODULE 3</h4>Measure and evaluate systematically - agent quality. <span class="dx-chip">Evaluation</span></div>
+  <div class="dx-cell"><h4>MODULE 4</h4>Customize through training - agent expertise. <span class="dx-chip">Training</span></div>
+</div>
 
 This is the same cycle production teams follow: build, extend, measure, improve. Each module's skills compound—evaluation informs customization, customization produces measurable improvement, and the cycle continues.
 
@@ -227,10 +234,19 @@ This is the same cycle production teams follow: build, extend, measure, improve.
 
 <!-- fold:break -->
 
-### Final Thoughts
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">FINAL THOUGHTS</p>
+  <p>Agent customization isn't magic - it's engineering. You've learned a systematic approach: measure the gap (Module 3), generate targeted data (SDG), define success criteria (rewards), and train (GRPO). This cycle applies wherever you need agents with domain expertise.</p>
+  <p>The best agents aren't built in one pass. They're refined iteratively through measurement and improvement. You now have the tools to make that process systematic.</p>
+  <p>Happy building! 🚀</p>
+</div>
 
-Agent customization isn't magic—it's engineering. You've learned a systematic approach: measure the gap (Module 3), generate targeted data (SDG), define success criteria (rewards), and train (GRPO). This cycle applies wherever you need agents with domain expertise.
+<!-- fold:break -->
 
-The best agents aren't built in one pass. They're refined iteratively through measurement and improvement. You now have the tools to make that process systematic.
+## What's Next?
 
-Happy building!
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>MODULE 05: DEEP AGENTS</h4><span class="dx-chip is-green">NEXT UP</span> Autonomous agents that plan, delegate to sub-agents, and tackle long-horizon multi-step tasks - plus sandboxing to contain them.</div>
+  <div class="dx-cell"><h4>MODULE 06: AGENT SAFETY</h4>Run agents that touch real systems safely - sandboxing, guardrails, and operator controls.</div>
+  <div class="dx-cell"><h4>MODULE 07: AGENT HARNESSES</h4>Same model, different harness - how the scaffolding around an agent shapes what it can do.</div>
+</div>

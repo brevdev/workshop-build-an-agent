@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 188" width="720" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark SVG; mirrors img/customization_pipeline.mmd. Colors from index.html mermaid themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,3.5 L0,7 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+  <rect x="10" y="8" width="700" height="112" rx="10" fill="#76b900" fill-opacity="0.05" stroke="#76b900" stroke-width="1.5"/>
+  <text x="24" y="28" fill="#76b900" font-size="13" font-weight="700" letter-spacing="1">Customization Pipeline</text>
+  <line x1="192" y1="74" x2="246" y2="74" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="454" y1="74" x2="508" y2="74" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <rect x="32" y="48" width="160" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="112" y="74" fill="#f2f2f2" font-size="13" text-anchor="middle"><tspan x="112" dy="-3">1. Generate</tspan><tspan x="112" dy="16">Data (SDG)</tspan></text>
+  <rect x="250" y="48" width="204" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="352" y="74" fill="#f2f2f2" font-size="13" text-anchor="middle"><tspan x="352" dy="-3">2. Define Rewards</tspan><tspan x="352" dy="16">(NeMo Gym)</tspan></text>
+  <rect x="512" y="48" width="178" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="601" y="74" fill="#f2f2f2" font-size="13" text-anchor="middle"><tspan x="601" dy="-3">3. Train</tspan><tspan x="601" dy="16">(GRPO)</tspan></text>
+  <line x1="112" y1="100" x2="112" y2="138" stroke="#6e6e6e" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <line x1="352" y1="100" x2="352" y2="138" stroke="#6e6e6e" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <line x1="601" y1="100" x2="601" y2="138" stroke="#6e6e6e" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="112" y="154" fill="#8a8a8a" font-size="11" text-anchor="middle"><tspan x="112" dy="0">NeMo Data</tspan><tspan x="112" dy="13">Designer</tspan></text>
+  <text x="352" y="154" fill="#8a8a8a" font-size="11" text-anchor="middle"><tspan x="352" dy="0">Code-based</tspan><tspan x="352" dy="13">verification</tspan></text>
+  <text x="601" y="154" fill="#8a8a8a" font-size="11" text-anchor="middle"><tspan x="601" dy="0">Exploration-based</tspan><tspan x="601" dy="13">RL training</tspan></text>
+</svg>

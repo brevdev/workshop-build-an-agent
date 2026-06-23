@@ -28,6 +28,12 @@ In production, the design of the database service and ingestion pipelines should
 
 To ingest the documents, we will **Chunk** the documents, **Embed** those chunks into vectors, and then **Insert** the vectors into the database.
 
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>CHUNK</h4>Split the knowledge-base docs into overlapping pieces (size 800, overlap 120) with RecursiveCharacterTextSplitter.</div>
+  <div class="dx-cell"><h4>EMBED</h4>Turn each chunk into a vector with NVIDIA NeMo Retriever embeddings - similar meaning lands close together.</div>
+  <div class="dx-cell is-wide"><h4>INSERT</h4>Store the vectors in an in-memory FAISS database, ready for similarity search at query time.</div>
+</div>
+
 <!-- fold:break -->
 
 ### Split documents into chunks
@@ -87,7 +93,7 @@ LangChain allows us to easily create a basic retrieval chain from our Vector Dat
 
 <center>
 
-![Simple Retrieval Chain](img/simple_retrieval_chain.png)
+![Simple Retrieval Chain](img/simple_retrieval_chain_dark.svg)
 
 </center>
 
@@ -114,7 +120,7 @@ LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.p
 
 <center>
 
-![Retrieval Chain](img/retrieval_chain.png)
+![Retrieval Chain](img/retrieval_chain_dark.svg)
 
 </center>
 
@@ -124,13 +130,20 @@ We expose this enhanced retrieval pipeline as a tool for the agent using LangGra
 
 ## Create the Agent
 
-<img src="_static/robots/gitfu.png" alt="Graphs!" style="float:right;max-width:300px;margin:25px;" />
-
 With our vector database and retriever chain in place, we're ready to construct the agent graph. Think of this graph as a flowchart that maps out the possible steps the model can take to solve a task. In traditional, step-by-step LLM applications, these are called "chains." When the workflow involves more dynamic, non-linear decision-making, like with agents, we refer to them as "graphs."
+
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODEL</h4>NVIDIA Nemotron Super via ChatNVIDIA - the agent's reasoning and language.</div>
+  <div class="dx-cell"><h4>RETRIEVER TOOL</h4>The reranking retrieval chain, exposed as a tool the agent can choose to call.</div>
+  <div class="dx-cell"><h4>SYSTEM PROMPT</h4>Instructions that shape when and how the agent uses its tools.</div>
+  <div class="dx-cell"><h4>GRAPH</h4>create_react_agent wires model + tools + prompt into a ReAct loop.</div>
+</div>
 
 <!-- fold:break -->
 
 ### Define the Model
+
+<img src="_static/robots/gitfu.png" alt="Graphs!" style="float:right;max-width:300px;margin:25px;" />
 
 Every agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Super model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
 

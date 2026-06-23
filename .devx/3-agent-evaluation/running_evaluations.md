@@ -28,11 +28,13 @@ Now let's evaluate!
 
 A robust evaluation pipeline consists of several key components:
 
-1. **Agent Under Test**: The agent you're evaluating
-2. **Judging Mechanism**: The LLM, human, or other mechanism that will judge the agent
-3. **Test Dataset**: Collection of test cases with inputs and optional ground truth
-4. **Evaluation Prompts and Metrics**: Instructions on how to score agent outputs
-5. **Analysis of Results**: Interpret results for areas of improvement
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide is-tall"><h4>AGENT UNDER TEST</h4>The agent you're evaluating - your RAG agent from Module 2 or Report agent from Module 1. Everything else exists to measure it.</div>
+  <div class="dx-cell"><h4>JUDGING MECHANISM</h4>The LLM, human, or deterministic check that scores the agent.</div>
+  <div class="dx-cell"><h4>TEST DATASET</h4>Test cases with inputs and optional ground truth.</div>
+  <div class="dx-cell"><h4>EVAL PROMPTS &amp; METRICS</h4>Instructions for how to score the agent's outputs.</div>
+  <div class="dx-cell"><h4>ANALYSIS OF RESULTS</h4>Interpret the scores to find areas to improve.</div>
+</div>
 
 Let's start by crafting effective evaluation prompts!
 
@@ -191,6 +193,20 @@ Let's get used to what it means to use an LLM as a judge for agent evaluation. F
 
 This may take a few minutes as the judge processes each response.
 
+Here's what a single judge call looks like under the hood - the same faithfulness/relevancy/helpfulness scoring you just triggered, on one IT Help Desk response:
+
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">llm-as-a-judge</span>
+  <span class="dx-term-line" data-kind="prompt">Score this IT Help Desk response on faithfulness, relevancy, helpfulness.</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">Judge: nvidia/nemotron-3-super-120b-a12b at temperature 0 for consistent grading.</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[context] Password resets take 5-10 minutes to propagate. Use the self-service portal.</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[question] How long until my password reset takes effect?</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[response] Your reset takes effect in 5-10 minutes via the self-service portal.</span>
+  <span class="dx-term-line" data-kind="think" data-delay="350">Every claim is supported by the context, and it directly answers the question.</span>
+  <span class="dx-term-line" data-kind="tokens">judge calls: 3 (one per metric)</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="400">faithfulness 5/5 - relevancy 5/5 - helpfulness 4/5  =>  aggregate 0.93 / 1.0</span>
+</div>
+
 <!-- fold:break -->
 
 ### Compute RAGAS Metrics
@@ -221,8 +237,6 @@ Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluatio
 <!-- fold:break -->
 
 ### Analyze Results
-
-<img src="_static/robots/debug.png" alt="Analyzing Results" style="float:right;max-width:300px;margin:25px;" />
 
 Let's dig into the evaluation results to understand how well your RAG agent is performing.
 
@@ -268,8 +282,6 @@ Your results should score the responses on a raw scale of 1-5. Do your agent's r
 <!-- fold:break -->
 
 ## Evaluating the Report Generation Agent
-
-<img src="_static/robots/typewriter.png" alt="Report Evaluation" style="float:left;max-width:300px;margin:25px;" />
 
 Now that you've thoroughly evaluated your IT Help Desk agent using both standard and custom metrics, you're familiar with the process of running an evaluation! Next, let's put that hard-earned knowledge into practice by evaluating the Report Generation Agent you built in Module 1.
 
@@ -354,79 +366,28 @@ Consider:
 
 ## Interpreting Results and Taking Action
 
-<img src="_static/robots/supervisor.png" alt="Taking Action" style="float:right;max-width:300px;margin:25px;" />
+Evaluation results should drive improvements. Here is where to look when a metric comes back low:
 
-Evaluation results should drive improvements. Here are some ideas on how to act on common findings from the two notebooks you just completed:
-
-### Low Context Precision
-
-**Problem**: Retrieving too many irrelevant documents
-
-**Solutions**:
-- Adjust retrieval parameters (reduce `k`)
-- Improve embedding model
-- Enhance document chunking strategy
-- Add metadata filtering
-
-### Low Context Recall
-
-**Problem**: Missing relevant information
-
-**Solutions**:
-- Increase number of retrieved documents
-- Improve query formulation
-- Expand knowledge base coverage
-- Use query expansion techniques
-
-### Low Faithfulness
-
-**Problem**: Agent making unsupported claims
-
-**Solutions**:
-- Strengthen system prompt to emphasize grounding
-- Add explicit citation requirements
-- Reduce model temperature
-- Implement fact-checking step
-
-### Low Answer Relevancy
-
-**Problem**: Responses don't address the question
-
-**Solutions**:
-- Improve system prompt clarity
-- Add question understanding step
-- Use few-shot examples
-- Implement response validation
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHEN A RAG METRIC IS LOW - WHERE TO LOOK</p>
+  <ul>
+    <li><span class="dx-chip">CONTEXT PRECISION</span> Too many irrelevant docs - reduce <code>k</code>, improve the embedding model, refine chunking, add metadata filtering.</li>
+    <li><span class="dx-chip">CONTEXT RECALL</span> Missing information - retrieve more docs, expand the knowledge base, use query expansion.</li>
+    <li><span class="dx-chip">FAITHFULNESS</span> Unsupported claims - strengthen grounding in the system prompt, require citations, lower temperature, add a fact-check step.</li>
+    <li><span class="dx-chip">ANSWER RELEVANCY</span> Off-topic answers - clarify the system prompt, add a question-understanding step, use few-shot examples.</li>
+  </ul>
+</div>
 
 <!-- fold:break -->
 
-### Incomplete Structure
-
-**Problem**: Incomplete or unexpected output structure
-
-**Solutions**:
-- Strengthen section-by-section outline in the system prompt
-- Provide examples of well-structured outputs
-- Enforce required headings via templates
-
-### Inaccurate Content
-
-**Problem**: Unsupported or inaccurate claims
-
-**Solutions**:
-- Require source citations for factual claims
-- Add a fact-checking or verification step in the prompt
-- Lower temperature to reduce hallucinations
-
-### Poor Writing Quality
-
-**Problem**: Output is unclear, incorrect tone, or contains improper grammar
-
-**Solutions**:
-- Add explicit style and tone guidelines
-- Include a revision pass for clarity and grammar
-- Provide strong exemplars for desired writing quality
-- Use a formatting checklist for final output
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHEN REPORT QUALITY IS LOW - WHERE TO LOOK</p>
+  <ul>
+    <li><span class="dx-chip">STRUCTURE</span> Missing or disordered sections - enforce a section-by-section outline and required headings via templates.</li>
+    <li><span class="dx-chip">CONTENT</span> Unsupported or inaccurate claims - require source citations, add a verification step, lower temperature.</li>
+    <li><span class="dx-chip">WRITING</span> Unclear tone or grammar - add style and tone guidelines, a revision pass, and strong exemplars.</li>
+  </ul>
+</div>
 
 <!-- fold:break -->
 

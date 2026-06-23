@@ -15,13 +15,16 @@ We'll start with the RAG agent since it has a simpler evaluation structure, then
 
 ## Dataset Design for Your Agents
 
-Evaluation datasets work best when they align with the following principles: 
-
-1. **Cover Diverse Scenarios**: Include common cases, edge cases, and failure modes
-2. **Include Ground Truth**: Where possible, provide correct answers for comparison
-3. **Represent Real Usage**: Base test cases on actual user interactions
-4. **Start Small**: Begin with a small set of high-quality examples and expand over time
-5. **Version Control**: Track your datasets alongside your code
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHAT MAKES A GOOD EVALUATION DATASET</p>
+  <ul>
+    <li><span class="dx-chip">COVER DIVERSE SCENARIOS</span> common cases, edge cases, and failure modes.</li>
+    <li><span class="dx-chip">INCLUDE GROUND TRUTH</span> provide correct answers for comparison where possible.</li>
+    <li><span class="dx-chip">REPRESENT REAL USAGE</span> base test cases on actual user interactions.</li>
+    <li><span class="dx-chip">START SMALL</span> begin with a few high-quality examples and expand over time.</li>
+    <li><span class="dx-chip">VERSION CONTROL</span> track datasets alongside your code.</li>
+  </ul>
+</div>
 
 In addition to these general principles, you'll need to make sure your data is tailored to your particular evaluation use case. Different agent tasks require different types of evaluation data.
 
@@ -29,35 +32,12 @@ To understand dataset design, let's look at what you'll need to evaluate the age
 
 <!-- fold:break -->
 
-### Dataset for the IT Help Desk RAG Agent (Module 2)
+We'll create one dataset per agent - and their shapes differ because the agents differ:
 
-For the IT Help Desk RAG agent from Module 2, each evaluation test case should include:
-
-- **Question**: The user's query (common IT help desk questions)
-- **Ground Truth Answer**: The expected response
-- **Expected Context Keywords**: Keywords that should appear in retrieved documents
-- **Category**: The type of question (password_management, vpn_access, network_issues, etc.)
-
-In your evaluation pipeline, you'll query the RAG agent with each generated test **Question**. The RAG agent's generated response can then be compared to the test data to evaluate multiple dimensions of the agent's performance.
-
-Since this RAG agent produces brief responses with an objective sense of correctness, we'll create a dataset with ground-truth answers included for comparison. 
-
-**Want to see an example?** Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button> to see the structure of the starter dataset we've provided.
-
-<!-- fold:break -->
-
-### Dataset for the Report Generation Agent (Module 1)
-
-For the Report Generation agent from Module 1, each evaluation test case should include:
-- **Topic**: The report subject
-- **Expected Sections**: Sections that should appear in the report
-- **Quality Criteria**: Custom metrics that define what makes a "good" report on this topic
-
-Unlike the Help Desk agent, this dataset we'll create doesn't include ground truth answers - the length and variability of reports makes exact comparison impractical. 
-
-Instead, the test cases include expected section names and quality criteria, which we'll use to evaluate each report's structure and content. You'll dive into using these quality criteria in the next lesson, [Running Evaluations](running_evaluations.md).
-
-**Want to see an example?** Check out the <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Evaluation Dataset</button> to see the structure of the starter dataset we've provided.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>IT HELP DESK RAG AGENT &middot; MODULE 2</h4>Each test case pairs a <b>Question</b> with a <b>Ground Truth Answer</b>, <b>Expected Context Keywords</b>, and a <b>Category</b> (password_management, vpn_access...). Answers are brief and objectively correct, so we include ground truth for direct comparison.<br><button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Evaluation Dataset</button></div>
+  <div class="dx-cell is-wide"><h4>REPORT GENERATION AGENT &middot; MODULE 1</h4>Each test case carries a <b>Topic</b>, <b>Expected Sections</b>, and <b>Quality Criteria</b>. Reports are long and variable, so there is no single ground-truth answer - we score structure and content instead (see <a href="running_evaluations.md">Running Evaluations</a>).<br><button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Evaluation Dataset</button></div>
+</div>
 
 <!-- fold:break -->
 
@@ -69,52 +49,27 @@ Now that you understand what evaluation datasets look like for each agent, let's
 
 <!-- fold:break -->
 
-### Strategy 1: Real-World Data Collection
-
-The first strategy is to use existing, real-world data. This approach is often considered the "gold standard" for realism because it captures authentic user experiences and needs. You can either collect this data yourself or leverage existing datasets from online repositories like HuggingFace. 
-
-However, real-world data comes with trade-offs. 
-
-* Manual collection requires substantial human labor and time. 
-* Privacy concerns may limit what data you can use.
-* Quality issues, like biased or inappropriate content, can compromise your evaluation.
-* Real-world data may simply not exist for your specific use case, particularly for complex or niche applications.
-
-**Use When**: You have access to existing user interactions or logs, have resources for manual curation and privacy review, or when your application is already deployed and collecting real usage data.
-
-<!-- fold:break -->
-
-### Strategy 2: Synthetic Data Generation (SDG)
-
-The second strategy is to generate synthetic data using an LLM. This type of data is highly versatile: it enables developers to rapidly create large datasets, control diversity and coverage, and support use cases where real-world data is difficult or impossible to obtain.
-
-However, synthetic data has its weaknesses as well. It typically requires careful human validation before use, and it may fail to accurately capture real-world behaviors, edge cases, or distributions, which can reduce the reliability of any evaluations that rely on it.
-
-**Use When**: You need to rapidly create test cases, want to control for specific scenarios or edge cases, lack access to real-world data, or need to expand coverage beyond what real data provides.
-
-<!-- fold:break -->
-
-### Strategy 3: Hybrid Approach
-
-A hybrid approach combines real-world and synthetic data to leverage the strengths of both while mitigating their weaknesses. It allows developers to ground systems in realistic data, then augment coverage with synthetic examples.
-
-**Use When**: You have some real-world data but need more coverage, want to balance realism with controlled test scenarios, need to fill gaps in your real-world dataset, or want the most robust evaluation approach combining authenticity with comprehensive coverage.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>REAL-WORLD DATA</h4>The realism gold standard - authentic user needs. But manual collection is slow, raises privacy concerns, and may not exist for niche use cases. <i>Use when you already have user logs or deployed usage.</i></div>
+  <div class="dx-cell"><h4>SYNTHETIC (SDG)</h4>Fast and versatile - generate large, controllable datasets on demand. But it needs human validation and may miss real edge cases. <i>Use when you lack real data or need broad coverage fast.</i></div>
+  <div class="dx-cell"><h4>HYBRID</h4>Ground in real data, then augment coverage with synthetic examples - the strengths of both. <i>Use when you have some real data but need more.</i></div>
+</div>
 
 <!-- fold:break -->
 
 ## Generate Evaluation Data for Your Agents
 
-<img src="_static/robots/typewriter.png" alt="Tools for Generation" style="float:left;max-width:250px;margin:25px;" />
-
 Now it's time to create evaluation datasets for the agents you built!
 
 For this workshop, we'll use **Synthetic Data Generation** with **NVIDIA NeMo Data Designer**, an open source tool for generating high-quality synthetic data. This approach is ideal for getting started with agent evaluation and learning the fundamentals.
 
-When you're ready, follow the first notebook to generate data for your RAG agent from Module 2 and get familiar with SDG concepts:
-<button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/generate_rag_eval_dataset.ipynb');"><i class="fa-solid fa-flask"></i> RAG Evaluation Data Notebook</button>
-
-Next, generate data for your Report Generation agent from Module 1: 
-<button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/generate_report_eval_dataset.ipynb');"><i class="fa-solid fa-flask"></i> Report Generation Evaluation Data Notebook</button>
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">GENERATE YOUR DATASETS</p>
+  <p>Follow the first notebook to generate data for your RAG agent from Module 2 and get familiar with SDG concepts:</p>
+  <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/generate_rag_eval_dataset.ipynb');"><i class="fa-solid fa-flask"></i> RAG Evaluation Data Notebook</button>
+  <p>Next, generate data for your Report Generation agent from Module 1:</p>
+  <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/generate_report_eval_dataset.ipynb');"><i class="fa-solid fa-flask"></i> Report Generation Evaluation Data Notebook</button>
+</div>
 
 <details>
 <summary>💡 NEED SOME HELP?</summary>
@@ -130,7 +85,20 @@ These pre-made datasets can also serve as reference examples when you create you
 
 <!-- fold:break -->
 
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">You use an LLM to synthetically generate 500 evaluation test cases in minutes. What matters most before trusting evaluations built on them?</p>
+  <button class="dx-quiz-opt" data-right data-fb="Right. The page's key caution: synthetic data requires careful human validation and may not capture real distributions or edge cases. Speed is its strength; unverified realism is its risk.">Have a human validate a sample - synthetic data can miss real edge cases and inherit the generator's biases</button>
+  <button class="dx-quiz-opt" data-fb="This is the trap. Synthetic data is fast and controllable, but using it unverified means your eval may not reflect real user behavior or edge cases.">Nothing - data from a strong LLM is ready to use as-is</button>
+  <button class="dx-quiz-opt" data-fb="Too far. Real-world data is the realism gold standard, but it is slow, privacy-constrained, and may not exist for your use case. The hybrid approach combines both on purpose.">Discard it - only real-world data is ever trustworthy</button>
+  <button class="dx-quiz-opt" data-fb="More volume does not fix unverified quality. A larger unvalidated set just scales the same blind spots.">Generate 500 more to increase coverage</button>
+</div>
+
+<!-- fold:break -->
+
 ## What's Next
+
+<img src="_static/robots/typewriter.png" alt="Next Steps" style="float:right;max-width:250px;margin:25px;" />
 
 Once you have your evaluation datasets ready, you're prepared to run comprehensive evaluations! 
 

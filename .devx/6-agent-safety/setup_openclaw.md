@@ -179,6 +179,13 @@ Before you harden it, let's see what your agent can quietly do when you're not w
 
 > These probes will fail — that is, succeed in doing unsafe things — on vanilla OpenClaw. You'll revisit each one on the [Working with NemoClaw](using_nemoclaw) page and watch NemoClaw's enforcement layers shut them down.
 
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>PROBE 1 - PHONE HOME</h4>Agent reaches any URL on the internet. The <b>Network</b> layer shuts this down.</div>
+  <div class="dx-cell"><h4>PROBE 2 - READ THE DIARY</h4>Agent reads /etc/passwd and other host files. The <b>Filesystem</b> layer shuts this down.</div>
+  <div class="dx-cell"><h4>PROBE 3 - SPILL THE KEYS</h4>Agent dumps NVIDIA_API_KEY from its environment. The <b>Inference</b> layer shuts this down.</div>
+  <div class="dx-cell"><h4>PROBE 4 - POISON THE MEMORY</h4>A rogue instruction persists across restarts. <b>Continuous eval</b> catches this one.</div>
+</div>
+
 <!-- fold:break -->
 
 ### Probe 1: Phone Home

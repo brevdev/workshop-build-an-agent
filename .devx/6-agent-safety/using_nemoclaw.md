@@ -1,16 +1,14 @@
 <div class="dx-hero" data-eyebrow="MODULE 06 / 05 - HANDS ON" data-title="Working with NemoClaw"></div>
 
-<img src="_static/robots/supervisor.png" alt="NemoClaw Hands-On Robot" style="float:right;max-width:300px;margin:25px;" />
-
 Your NemoClaw sandbox is running. The agent lives inside four enforcement layers: **Network** (egress policy), **Filesystem** (Landlock), **Process** (seccomp + least privilege), and **Inference** (Privacy Router). Reading about those layers and *feeling* them are very different things. This page walks you through five hands-on exercises that turn each layer into a copy-pasteable experience — and revisit the four probes from the [previous page](setup_openclaw) to see NemoClaw shut them down.
 
-| # | Exercise | Layer | Recalls |
-|---|---|---|---|
-| 1 | Stop the agent from phoning home | Network | Probe 1 |
-| 2 | Not all allow-rules are equal | Network (L7 vs L4) | — |
-| 3 | Make containment irrevocable | Filesystem + Process | Probe 2 |
-| 4 | Remove the keys from the agent | Inference + Network | Probe 3 |
-| 5 | Route sensitive queries locally | Inference | — |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>EXERCISE 1</h4><span class="dx-big">Network</span>Stop the agent from phoning home (recalls Probe 1).</div>
+  <div class="dx-cell"><h4>EXERCISE 2</h4><span class="dx-big">Network L7</span>Not all allow-rules are equal.</div>
+  <div class="dx-cell"><h4>EXERCISE 3</h4><span class="dx-big">FS + Process</span>Make containment irrevocable (recalls Probe 2).</div>
+  <div class="dx-cell"><h4>EXERCISE 4</h4><span class="dx-big">Inference</span>Remove the keys from the agent (recalls Probe 3).</div>
+  <div class="dx-cell is-wide"><h4>EXERCISE 5</h4><span class="dx-big">Inference</span>Route sensitive queries locally with your own classifier.</div>
+</div>
 
 > Each exercise follows a simple pattern: **recall** the vanilla behavior, **observe** it against the sandbox, **harden** with a policy, and **validate** the outcome. Exercise 5 ends with an optional Python sidekick — a short TODO in <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> agent_safety.py</button> — that wires a content classifier in front of the inference router. Once you've finished this page, head to [Evaluating Agent Safety](evaluating_safety) for the red-team + continuous-evaluation capstone.
 
@@ -185,6 +183,8 @@ Re-run the Python snippet from inside the sandbox — it now succeeds.
 <!-- fold:break -->
 
 ## Section 2 — Layers 2 & 3: Filesystem + Process (kernel-level containment)
+
+<img src="_static/robots/supervisor.png" alt="NemoClaw Hands-On Robot" style="float:right;max-width:300px;margin:25px;" />
 
 Layers 2 and 3 share an exercise because they're both **kernel-level, static containment**. They're set once when the sandbox is created, locked in by the kernel, and unchangeable from inside the agent process by design. That tradeoff — stronger guarantee for less flexibility — is the core teaching point.
 

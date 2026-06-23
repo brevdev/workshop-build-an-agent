@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 270" width="900" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark hierarchical-delegation diagram for the DevX dark theme.
+       Mirrors img/hierarchical_delegation.mmd; colors match index.html mermaid themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <!-- edges (orchestrator <-> each specialist) -->
+  <path d="M400,82 C 320,110 230,128 165,156" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-start="url(#ah)" marker-end="url(#ah)"/>
+  <path d="M470,84 L470,154" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-start="url(#ah)" marker-end="url(#ah)"/>
+  <path d="M540,82 C 620,110 720,128 775,156" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-start="url(#ah)" marker-end="url(#ah)"/>
+
+  <!-- orchestrator (green-accented) -->
+  <rect x="350" y="20" width="240" height="62" rx="6" fill="#161616" stroke="#76b900" stroke-width="2"/>
+  <text x="470" y="44" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Orchestrator</text>
+  <text x="470" y="64" fill="#c6c6c6" font-size="11.5" font-style="italic" text-anchor="middle" dominant-baseline="central">high-level planning</text>
+
+  <!-- specialists -->
+  <rect x="20" y="158" width="250" height="84" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="145" y="190" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Researcher</text>
+  <text x="145" y="212" fill="#c6c6c6" font-size="11" font-style="italic" text-anchor="middle" dominant-baseline="central">web search, source analysis</text>
+
+  <rect x="345" y="158" width="250" height="84" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="470" y="190" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Analyst</text>
+  <text x="470" y="212" fill="#c6c6c6" font-size="11" font-style="italic" text-anchor="middle" dominant-baseline="central">data processing, comparison</text>
+
+  <rect x="670" y="158" width="250" height="84" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="795" y="190" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Writer</text>
+  <text x="795" y="212" fill="#c6c6c6" font-size="11" font-style="italic" text-anchor="middle" dominant-baseline="central">synthesis, report generation</text>
+</svg>

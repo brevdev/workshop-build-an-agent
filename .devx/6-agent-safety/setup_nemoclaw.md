@@ -1,39 +1,10 @@
 <div class="dx-hero" data-eyebrow="MODULE 06 / 04 - SETUP NEMOCLAW" data-title="Set Up NemoClaw"></div>
 
-<img src="_static/robots/supervisor.png" alt="NemoClaw Setup Robot" style="float:right;max-width:300px;margin:25px;" />
-
 You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router isolates credentials and enforces the operator's choice of inference backend, and how Nemotron can serve as that backend when sensitive queries need to stay local. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
 
 Here's what your NemoClaw deployment will look like when we're done. The agent lives inside the sandbox; all its traffic passes through the proxy; and credentials are designed to stay outside the sandbox.
 
-```mermaid
----
-config:
-  theme: 'base'
-  themeVariables:
-    primaryColor: '#eaf6e0'
-    secondaryColor: '#eaf6e0'
-    background: white
----
-graph TB
-    subgraph Host Machine
-        CLI[nemoclaw CLI]
-        GW[OpenShell Gateway]
-        CREDS[Credential Providers]
-    end
-    subgraph NemoClaw Sandbox
-        AGENT[OpenClaw Agent]
-        PROXY[Network Proxy]
-        FS[Landlock Filesystem]
-    end
-    CLI -->|manages| GW
-    GW -->|enforces policies| PROXY
-    CREDS -->|injects credentials| GW
-    AGENT -->|all traffic through| PROXY
-
-    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
-    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111;
-```
+![NemoClaw Deployment](img/nemoclaw_deployment_dark.svg)
 
 > **Where you are:** You completed the OpenClaw setup on the previous page and have a working agent with an active gateway. This page adds NemoClaw's enforcement layers on top.
 
@@ -116,6 +87,8 @@ The install script writes detailed logs to two files:
 <!-- fold:break -->
 
 ## Step 2: Connect to Your Sandbox
+
+<img src="_static/robots/supervisor.png" alt="NemoClaw Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
 Time to step inside your new sandbox. Connecting to the sandbox is like stepping through an airlock -- you're entering a controlled environment where the rules are different.
 

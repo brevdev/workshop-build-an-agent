@@ -96,19 +96,31 @@ How do I reset my password?
 
 Try out a few follow up questions, see what kind of answer you get.
 
+Here's what that first turn looks like under the hood:
+
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">rag_agent</span>
+  <span class="dx-term-line" data-kind="prompt">How do I reset my password?</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">This is a company IT question - try the knowledge base first.</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[action] company_llc_it_knowledge_base("reset password")</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[observation] 6 chunks retrieved, reranked; top match: Password Reset Procedure</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">The KB has the procedure. Summarize it and cite the source.</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="400">Open the self-service portal, choose Reset Password, verify via email, then set a new one. [KB]</span>
+</div>
+
 <!-- fold:break -->
 
 ## Agent Observability
 
 > **NOTE:** This step will only work if you configured the `LANGSMITH_API_KEY` during the [Setting up Secrets](secrets.md) step.
 
-<img src="_static/robots/controls.png" alt="At the controls." style="float:right;max-width:300px;margin:25px;" />
+As your agents become more sophisticated, managing their internal complexity becomes a struggle. Observability gives you two lenses:
 
-As your agents become more sophisticated, managing their internal complexity becomes a struggle.
-
-Tracing helps visualize each step your agent takes. This makes it much easier to debug and optimize your agent's behavior.
-
-Monitoring tracks long term trends of your agent. This helps ensure quality of service while also helping developers balance costs, latency, and complexity.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">TWO LENSES ON YOUR AGENT</p>
+  <p><span class="dx-chip">TRACING</span> Visualize each step a single run takes - the fastest way to debug and optimize agent behavior.</p>
+  <p><span class="dx-chip">MONITORING</span> Track long-term trends across many runs - quality of service, plus cost, latency, and complexity tradeoffs.</p>
+</div>
 
 Because we are using LangGraph to build our agent, [LangSmith](https://www.langchain.com/langsmith) is a good choice for observability as it is automatically integrated and requires no code changes.
 
@@ -139,6 +151,8 @@ The sidebar menu contains a link called `Monitoring`. Clicking on that results i
 <!-- fold:break -->
 
 ## Next Steps
+
+<img src="_static/robots/controls.png" alt="At the controls." style="float:right;max-width:300px;margin:25px;" />
 
 Before we wrap up, let's augment our baseline RAG agent with some additional capabilities and learn more about MCP Tools and agent skills along the way. 
 

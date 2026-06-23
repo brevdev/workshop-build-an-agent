@@ -1,14 +1,19 @@
 <div class="dx-hero" data-eyebrow="MODULE 06 / AGENT SAFETY" data-title="Agent Safety with NemoClaw"></div>
 
-<img src="_static/robots/supervisor.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
-
 Your agent runs 24/7, evolves its own behavior, and processes sensitive data. How do you make it safer when you're not watching?
 
 In this module, you'll learn about **NVIDIA NemoClaw** — a reference stack for strengthening the security of autonomous agents — to build a defense system that adds safety enforcement at the kernel level, gives operators a single primitive for routing inference between local and cloud backends, layers a content classifier in front of it so sensitive data can stay local, and continuously verifies the agent hasn't drifted. NemoClaw combines OpenClaw (agent), OpenShell (enforcement), Nemotron (local inference), and the Privacy Router (operator-controlled routing) into one deployable system.
 
-This learning module can take around 2 to 2.5 hours to complete.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide is-tall"><h4>YOU WILL BUILD</h4><span class="dx-big">A hardened autonomous agent</span>Four kernel-level enforcement layers, plus a continuous red-team and LLM-judge safety suite.</div>
+  <div class="dx-cell"><h4>DURATION</h4><span class="dx-big">2-2.5 h</span>self-paced</div>
+  <div class="dx-cell"><h4>BUILT WITH</h4>OpenClaw - OpenShell - Nemotron - Privacy Router</div>
+  <div class="dx-cell"><h4>YOU'LL TAKE HOME</h4>Kernel-level enforcement, operator-controlled routing, and continuous safety evaluation.</div>
+</div>
 
 ## Learning Objectives
+
+<img src="_static/robots/supervisor.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 
 At the end of this module, you will take home:
 

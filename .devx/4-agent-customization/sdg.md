@@ -1,24 +1,24 @@
 <div class="dx-hero" data-eyebrow="MODULE 04 / 03 - SYNTHETIC DATA" data-title="Synthetic Data Generation"></div>
 
-<img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
-
 Training requires examples—lots of them. Each example shows the model:
 - **Input**: What the user says (*"Create a new project with the react template"*)
 - **Output**: What the agent should produce (`{"command": "new", "template": "react-agent-python", ...}`)
 
 But where do these examples come from?
 
-| Source | Pros | Cons |
-|--------|------|------|
-| **Real user logs** | Authentic patterns | You don't have them yet |
-| **Manual writing** | High quality | Slow, expensive, limited diversity |
-| **Synthetic generation** | Fast, scalable, diverse | Requires careful design |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>REAL USER LOGS</h4>Authentic patterns - but you don't have them yet for a brand-new CLI.</div>
+  <div class="dx-cell"><h4>MANUAL WRITING</h4>High quality, but slow, expensive, and limited in diversity.</div>
+  <div class="dx-cell"><h4>SYNTHETIC (SDG)</h4>Fast, scalable, diverse - it just requires careful design.</div>
+</div>
 
 For a new domain like the LangGraph CLI, we don't have the real logs from the agent. Manual writing doesn't scale. **SDG is the answer.**
 
 <!-- fold:break -->
 
 ## Why Synthetic Data Works
+
+<img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
 
 **The Cold Start Problem:** New CLI tools face a chicken-and-egg problem:
 - You need training data to build a good agent
@@ -38,10 +38,10 @@ SDG breaks this cycle:
 
 **SDG vs. LLM Prompting:** You might wonder: "Why not just ask GPT to generate 200 training examples?"
 
-| Approach | Coverage | Validity | Diversity | Control |
-|----------|----------|----------|-----------|---------|
-| **LLM prompting** | Random, gaps likely | May hallucinate invalid outputs | Tends toward common patterns | Low |
-| **NeMo Data Designer** | Guaranteed by samplers | Guaranteed by schema | Controlled by sampler config | High |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>LLM PROMPTING</h4><span class="dx-chip">LOW CONTROL</span> Random coverage with likely gaps, may hallucinate invalid outputs, drifts toward common patterns.</div>
+  <div class="dx-cell is-wide"><h4>NeMo DATA DESIGNER</h4><span class="dx-chip">HIGH CONTROL</span> Coverage guaranteed by samplers, validity guaranteed by the schema, diversity controlled by config.</div>
+</div>
 
 **The key difference**: Data Designer generates outputs *first* (from your schema), then creates matching inputs. LLM prompting generates inputs and hopes the outputs are valid.
 
@@ -59,6 +59,15 @@ inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixe
 ```
 
 </details>
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Why does NeMo Data Designer generate the structured OUTPUT first, then write a matching user request - instead of prompting an LLM for input/output pairs directly?</p>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Sampling outputs from the Pydantic schema makes every example valid by construction; LLM-first generation can invent commands or flags that do not exist.">Sampling outputs from the schema guarantees every example is valid; LLM-first can hallucinate invalid commands</button>
+  <button class="dx-quiz-opt" data-fb="Speed isn't the point - both approaches call an LLM. The point is guaranteed validity and coverage.">Because generating JSON is faster than generating natural language</button>
+  <button class="dx-quiz-opt" data-fb="LLMs are great at phrasing requests - that's exactly the step Data Designer uses them for. The risk is on the output side.">Because LLMs cannot write natural-language requests</button>
+  <button class="dx-quiz-opt" data-fb="Backwards - the schema is the whole foundation. Outputs are sampled FROM it, which is what guarantees validity.">To avoid having to define a schema at all</button>
+</div>
 
 **What makes Training Data "Good Enough"?** Training data quality matters more than quantity. Here's what to aim for:
 
@@ -86,7 +95,7 @@ inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixe
 3. **Generate natural language** — An LLM creates realistic user requests for each command
 4. **Combine into examples** — Input/output pairs ready for training
 
-![SDG Pipeline](img/sdg_pipeline.png)
+![SDG Pipeline](img/sdg_pipeline_dark.svg)
 
 This is different from just prompting an LLM to "make up examples." Data Designer ensures coverage, diversity and validity of training data. 
 
@@ -158,13 +167,11 @@ print("All outputs valid!")
 
 <!-- fold:break -->
 
-### Sample Datasets
-
-We recommend generating your own datasets to get hands-on experience with the synthetic data generation process. However, if you're running into issues or want to move ahead quickly, we've provided a starter dataset you can use. 
-
-> 📁 Sample Training Data (225 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>
-
-These pre-made dataset can also serve as reference examples when you create your own.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">PREFER A HEAD START?</p>
+  <p>We recommend generating your own dataset for the hands-on experience. But if you'd rather move ahead quickly, a starter set is provided - it also makes a good reference when you build your own:</p>
+  <p>📁 Sample Training Data (225 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button></p>
+</div>
 
 <!-- fold:break -->
 
@@ -234,9 +241,14 @@ train_df, val_df = train_test_split(dataset_df, test_size=0.1, random_state=42)
 
 Before moving to training, spot-check a few examples from your generated data in <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>:
 
-- **Do the inputs sound natural?** They should read like something a real user would type, not robotic templates.
-- **Do the outputs parse correctly?** Every output should be valid JSON matching the `CLIToolCall` schema.
-- **Is there variety?** Scan for repetitive phrasing. If many examples start with the same words, the model may learn to depend on those patterns rather than understanding intent.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">SPOT-CHECK BEFORE YOU TRAIN</p>
+  <ul>
+    <li><b>Do the inputs sound natural?</b> They should read like a real user, not robotic templates.</li>
+    <li><b>Do the outputs parse correctly?</b> Every output should be valid JSON matching the <code>CLIToolCall</code> schema.</li>
+    <li><b>Is there variety?</b> Scan for repetitive phrasing - if many examples start the same way, the model may latch onto those patterns instead of intent.</li>
+  </ul>
+</div>
 
 A few minutes of inspection now can save hours of debugging during training. If your data contains invalid outputs, the reward function will score them as failures—confusing the training signal rather than strengthening it.
 

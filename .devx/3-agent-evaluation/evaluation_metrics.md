@@ -16,6 +16,8 @@ LLM-as-a-judge provides a neat middle ground.
 
 ## Evaluating RAG Agents
 
+<img src="_static/robots/assembly.png" alt="RAG Components" style="float:right;max-width:300px;margin:25px;" />
+
 The IT Help Desk agent you built in Module 2 is a Retrieval Augmented Generation (RAG) system. RAG agents have two distinct components that need evaluation:
 
 1. **Retrieval Quality**: How well does the agent find relevant information?
@@ -27,9 +29,26 @@ Let's explore the key metrics for each.
 
 ## RAGAS Metrics Deep Dive
 
-<img src="_static/robots/assembly.png" alt="Building Blocks" style="float:right;max-width:300px;margin:25px;" />
+RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric addresses a specific aspect of quality - and together they map onto the same retrieval/generation split from the last lesson:
 
-RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric addresses a specific aspect of quality.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>CONTEXT PRECISION</h4><span class="dx-chip">RETRIEVAL</span> Are the retrieved chunks relevant - and ranked near the top?</div>
+  <div class="dx-cell is-wide"><h4>CONTEXT RECALL</h4><span class="dx-chip">RETRIEVAL</span> Did we retrieve everything needed to answer?</div>
+  <div class="dx-cell is-wide"><h4>FAITHFULNESS</h4><span class="dx-chip">GENERATION</span> Is every claim grounded in the context - no hallucinations?</div>
+  <div class="dx-cell is-wide"><h4>ANSWER RELEVANCY</h4><span class="dx-chip">GENERATION</span> Does the answer actually address the question?</div>
+</div>
+
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">READING THE SCORES - EVERY RAGAS METRIC RUNS 0 TO 1</p>
+  <div class="dx-tax">
+    <div class="dx-tax-row" style="--dx-w:30"><span class="dx-tax-name">Poor</span><div class="dx-tax-track"><div class="dx-tax-fill">&lt; 0.50</div></div><span class="dx-tax-note">urgent - not production-ready</span></div>
+    <div class="dx-tax-row" style="--dx-w:55"><span class="dx-tax-name">Fair</span><div class="dx-tax-track"><div class="dx-tax-fill">0.50 - 0.69</div></div><span class="dx-tax-note">needs improvement</span></div>
+    <div class="dx-tax-row" style="--dx-w:80"><span class="dx-tax-name">Good</span><div class="dx-tax-track"><div class="dx-tax-fill">0.70 - 0.89</div></div><span class="dx-tax-note">acceptable for many uses</span></div>
+    <div class="dx-tax-row" style="--dx-w:97"><span class="dx-tax-name">Excellent</span><div class="dx-tax-track"><div class="dx-tax-fill">0.90 - 1.00</div></div><span class="dx-tax-note">production-ready</span></div>
+  </div>
+</div>
+
+<!-- fold:break -->
 
 ### Context Precision
 
@@ -286,75 +305,44 @@ Low relevancy: "Passwords are important for security. Our company requires passw
 
 <!-- fold:break -->
 
-## Evaluating General Task Agents
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">An agent answers How do I reset my password? with three accurate paragraphs about your password-complexity policy - every claim quoted from the retrieved docs. Which metric flags this response?</p>
+  <button class="dx-quiz-opt" data-right data-fb="Exactly. Faithfulness only checks that claims are grounded; it says nothing about whether the answer is on-topic. A grounded-but-off-topic answer scores high on faithfulness and low on relevancy.">Answer Relevancy - it is faithful to the context but never answers the question asked</button>
+  <button class="dx-quiz-opt" data-fb="No - every claim is accurately quoted from the docs, so faithfulness is high. Faithfulness measures grounding, not relevance to the question.">Faithfulness - the answer contains hallucinations</button>
+  <button class="dx-quiz-opt" data-fb="Context Precision grades the retrieved documents, not the generated answer. The docs may be perfectly relevant; the problem is how the agent used them.">Context Precision - the retrieval was poor</button>
+  <button class="dx-quiz-opt" data-fb="This is the core misconception. An answer can be fully faithful (no hallucinations) yet completely miss what the user asked - which is exactly what Answer Relevancy catches.">None - a faithful answer is always a good answer</button>
+</div>
 
-<img src="_static/robots/wrench.png" alt="Tool Usage" style="float:right;max-width:300px;margin:25px;" />
+<!-- fold:break -->
+
+## Evaluating General Task Agents
 
 For agents like the Report Generation Agent from Module 1, we need different metrics that focus on task completion and tool usage. 
 
-<!-- fold:break -->
-
-### Task Completion Rate
-
-**What it measures**: Percentage of tasks the agent successfully completes.
-
-**How to measure**: Define clear success criteria for each task type, then evaluate whether the agent met those criteria.
-
-**Example for Report Agent**:
-- Did it generate a report?
-- Does the report have all requested sections?
-- Is each section substantive (not just placeholders)?
-
-<!-- fold:break -->
-
-### Tool Usage Accuracy
-
-**What it measures**: Whether the agent uses the right tools at the right time.
-
-**How to measure**: Track which tools were called and compare against expected tool usage patterns.
-
-**Example for Report Agent**:
-- Did it search for information when needed?
-- Did it avoid unnecessary searches?
-- Did it use appropriate search queries?
-
-<!-- fold:break -->
-
-### Output Quality
-
-**What it measures**: Subjective quality of the agent's final output. This can be largely user-defined based on the particular task the agent is asked to do. 
-
-**How to measure**: Use LLM-as-a-judge with specific criteria, such as:
-- Coherence and structure
-- Factual accuracy
-- Completeness
-- Writing quality
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>TASK COMPLETION RATE</h4>Percent of tasks finished against clear success criteria. <i>Report agent: did it produce a report with every requested section, each one substantive?</i></div>
+  <div class="dx-cell"><h4>TOOL USAGE ACCURACY</h4>Did the agent call the right tools at the right time - searching when needed, skipping needless calls, with good queries?</div>
+  <div class="dx-cell"><h4>OUTPUT QUALITY</h4>Subjective quality of the final output - coherence, structure, factual accuracy, completeness, writing - scored by an LLM-as-a-judge rubric.</div>
+</div>
 
 <!-- fold:break -->
 
 ## Combining Metrics
 
-<img src="_static/robots/supervisor.png" alt="Holistic View" style="float:right;max-width:300px;margin:25px;" />
+No single metric tells the whole story. Effective evaluation combines multiple signals for a comprehensive view:
 
-No single metric tells the whole story. Effective evaluation combines multiple metrics to provide a comprehensive view:
-
-### For RAG Agents:
-1. **Context Precision** + **Context Recall** = Retrieval quality
-2. **Faithfulness** + **Answer Relevancy** = Generation quality
-
-### For Task Agents:
-1. **Task Completion Rate** = Core functionality
-2. **Tool Usage Accuracy** = Efficiency
-3. **Output Quality** = User satisfaction
-
-### Cross-Cutting Metrics:
-- **Latency**: How long does the agent take?
-- **Cost**: How many tokens/API calls are used?
-- **Error Rate**: How often does the agent fail or produce errors?
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>RAG AGENTS</h4><b>Context Precision + Recall</b> = retrieval quality. <b>Faithfulness + Answer Relevancy</b> = generation quality.</div>
+  <div class="dx-cell"><h4>TASK AGENTS</h4><b>Task Completion</b> = core function. <b>Tool Usage</b> = efficiency. <b>Output Quality</b> = user satisfaction.</div>
+  <div class="dx-cell"><h4>CROSS-CUTTING</h4><b>Latency</b>, <b>Cost</b> (tokens / API calls), and <b>Error Rate</b> - track these for every agent.</div>
+</div>
 
 <!-- fold:break -->
 
 ## Choosing the Right Metrics
+
+<img src="_static/robots/supervisor.png" alt="Choosing Metrics" style="float:right;max-width:300px;margin:25px;" />
 
 When deciding which metrics to use, consider:
 

@@ -35,6 +35,12 @@ In December 2025, OWASP published the **Top 10 Risks for Agentic Applications** 
 
 These ten risks organize into three clusters. Click on each cluster to learn more about agentic AI risks and why they need addressing. 
 
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>GOAL / IDENTITY</h4><span class="dx-big">ASI 01, 04, 10</span>Who the agent is and what it tries to accomplish.</div>
+  <div class="dx-cell"><h4>CAPABILITY / TOOL</h4><span class="dx-big">ASI 02, 03, 05, 06</span>What the agent is able to do.</div>
+  <div class="dx-cell"><h4>STATE / COMMS</h4><span class="dx-big">ASI 07, 08, 09</span>What it remembers and how agents interact.</div>
+</div>
+
 <details>
 <summary><strong>1. Goal and Identity Attacks</strong></summary>
 
@@ -99,6 +105,20 @@ Some risks -- notably ASI08 (inter-agent communication) and ASI10 (human trust e
 
 Defense in depth is a security principle borrowed from military strategy: arrange multiple independent barriers so that an attacker must defeat *all* of them, not just one. Applied to autonomous agents, it has four properties - click each to learn more. 
 
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">DEFENSE IN DEPTH - BYPASS DIFFICULTY BY LAYER</p>
+  <div class="dx-tax">
+    <div class="dx-tax-row" style="--dx-w:16"><span class="dx-tax-name">HITL gate</span><div class="dx-tax-track"><div class="dx-tax-fill">soft</div></div><span class="dx-tax-note">M4 - human approval</span></div>
+    <div class="dx-tax-row" style="--dx-w:28"><span class="dx-tax-name">Allowlists</span><div class="dx-tax-track"><div class="dx-tax-fill">app</div></div><span class="dx-tax-note">M4 - regex + command</span></div>
+    <div class="dx-tax-row" style="--dx-w:40"><span class="dx-tax-name">App sandbox</span><div class="dx-tax-track"><div class="dx-tax-fill">app</div></div><span class="dx-tax-note">M5 - framework limits</span></div>
+    <div class="dx-tax-row" style="--dx-w:55"><span class="dx-tax-name">Docker</span><div class="dx-tax-track"><div class="dx-tax-fill">container</div></div><span class="dx-tax-note">M5 - namespace + limits</span></div>
+    <div class="dx-tax-row" style="--dx-w:72"><span class="dx-tax-name">Landlock LSM</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - per-file</span></div>
+    <div class="dx-tax-row" style="--dx-w:82"><span class="dx-tax-name">seccomp BPF</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - syscall filter</span></div>
+    <div class="dx-tax-row" style="--dx-w:92"><span class="dx-tax-name">Network proxy</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - per-endpoint</span></div>
+    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">Privacy Router</span><div class="dx-tax-track"><div class="dx-tax-fill">gateway</div></div><span class="dx-tax-note">M6 - operator routing</span></div>
+  </div>
+</div>
+
 <details>
 <summary><strong>1. No single layer covers all threats</strong></summary>
 
@@ -160,44 +180,7 @@ With the defense-in-depth principle and the OpenShell runtime established, here 
 | **Agent Drift** | Out-of-process enforcement that the agent cannot reach. Even as the agent's memory and context evolve over weeks, the kernel policy remains fixed and irrevocable. | Filesystem (Landlock), Process (seccomp) |
 | **Mixed-Sensitivity Data** | Operator-controlled inference routing — pair with an app-layer classifier (built in Exercise 5) to keep sensitive data on a local model and route public data to a cloud endpoint. | Inference (Privacy Router) |
 
-```mermaid
----
-config:
-  theme: 'base'
-  themeVariables:
-    primaryColor: '#eaf6e0'
-    secondaryColor: '#eaf6e0'
-    background: white
----
-graph TB
-    subgraph Host["Host Machine"]
-        NC["NemoClaw CLI\n(orchestrator)"]
-        GW["OpenShell Gateway\n(credential store)"]
-        Policy["Policy YAML\n(operator-defined)"]
-    end
-
-    subgraph Sandbox["OpenShell Sandbox"]
-        Agent["OpenClaw Agent"]
-        Proxy["Network Proxy\n+ OPA Engine"]
-        LL["Landlock LSM\n(kernel)"]
-        SC["seccomp BPF\n(kernel)"]
-        IL["inference.local\n(gateway endpoint)"]
-    end
-
-    Agent -->|"outbound request"| Proxy
-    Proxy -->|"policy check"| Policy
-    Proxy -->|"allowed traffic"| Internet["External Services"]
-    Agent -->|"file I/O"| LL
-    Agent -->|"syscalls"| SC
-    Agent -->|"inference call"| IL
-    IL -->|"strip creds, inject real keys"| GW
-    GW -->|"authenticated request"| API["Inference API"]
-    NC -->|"manages"| Sandbox
-
-    classDef host fill:#f9f9f9,stroke:#444,stroke-width:2px,color:#222;
-    classDef sandbox fill:#eaf6e0,stroke:#444,stroke-width:2px,color:#222;
-    classDef external fill:#fff,stroke:#444,stroke-width:2px,color:#222;
-```
+![NemoClaw Architecture](img/nemoclaw_architecture_dark.svg)
 
 The rest of this page walks through each of these four layers in detail, following a consistent pattern: the security principle at stake, the specific threat it addresses, and how NemoClaw implements it through OpenShell.
 
@@ -449,29 +432,7 @@ NemoClaw eliminates this by routing all inference through `inference.local` -- a
 5. The request is forwarded to the actual inference endpoint (NVIDIA, OpenAI, Anthropic, etc.)
 6. The response flows back to the agent
 
-```mermaid
----
-config:
-  theme: 'base'
-  themeVariables:
-    primaryColor: '#eaf6e0'
-    secondaryColor: '#eaf6e0'
-    background: white
----
-sequenceDiagram
-    participant Agent as Agent (sandbox)
-    participant Proxy as OpenShell Proxy
-    participant GW as Gateway (host)
-    participant API as Inference API
-
-    Agent->>Proxy: POST inference.local/v1/chat
-    Proxy->>GW: Forward (strip agent creds)
-    GW->>GW: Inject real API key from Provider
-    GW->>API: POST api.nvidia.com/v1/chat
-    API-->>GW: Response
-    GW-->>Proxy: Forward response
-    Proxy-->>Agent: Response (no keys exposed)
-```
+![Credential Injection Flow](img/credential_flow_dark.svg)
 
 The agent process **is designed to never have access to the API key**. Even if the agent dumps its environment, inspects `/proc/self/environ`, or reads every file it can access, the credentials exist only on the host side in the Provider record.
 
@@ -628,5 +589,14 @@ This opens a terminal UI showing every allow and deny decision as the agent oper
 You've covered the full arc: from understanding what makes agent security a distinct challenge, through the threat landscape and defense-in-depth principle, to the technical details of each enforcement layer and the YAML policy that ties them together.
 
 You now understand the four layers that NemoClaw adds to a vanilla OpenClaw agent -- deny-by-default network policies, kernel-level filesystem sandboxing via Landlock, process hardening with seccomp and least privilege, and operator-controlled inference routing through the `inference.local` gateway. The next page walks you through installing and configuring the full NemoClaw stack so you can see these layers enforce policy in real time.
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">What does the NemoClaw Privacy Router actually do?</p>
+  <button class="dx-quiz-opt" data-fb="Common misreading. The router does NOT inspect request content. Content-aware routing is a classifier you build in front of the gateway (Exercise 5) - not something the router does on its own.">It inspects each query and automatically sends sensitive ones to a local model</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. It enforces the operator's chosen backend and injects host-side credentials at the gateway, so the agent calls inference.local and never holds an API key.">It enforces the operator's chosen backend and injects credentials, so the agent never holds keys</button>
+  <button class="dx-quiz-opt" data-fb="It does not encrypt prompts. Its job is credential isolation plus operator-chosen backend selection, not transport encryption.">It encrypts the agent's prompts before they reach the cloud</button>
+  <button class="dx-quiz-opt" data-fb="There is no response scanning. The router forwards requests to the operator-set backend; it never reads or redacts content.">It scans responses for PII and redacts sensitive values</button>
+</div>
 
 > Head to [Set Up NemoClaw](setup_nemoclaw) to get the full stack running.

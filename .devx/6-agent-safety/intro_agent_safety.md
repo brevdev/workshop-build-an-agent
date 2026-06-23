@@ -57,13 +57,13 @@ These five properties define the threat landscape that any agent security archit
 
 To see where we stand so far, here's a quick recap of the capabilities and safety patterns you've built across the workshop:
 
-| Module | What You Built | Key Safety Pattern |
-|--------|---------------|-------------------|
-| 1 | Report generation agent | Tool selection and scoping |
-| 2 | RAG-augmented IT help desk | Data access boundaries |
-| 3 | Evaluation pipelines | Adversarial test cases |
-| 4 | Customized CLI agent via SDG + RLVR | Human-in-the-loop + command allowlists |
-| 5 | Deep agent with Docker sandboxing | Container isolation + resource limits |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>Tool selection and scoping</div>
+  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>Data access boundaries</div>
+  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Adversarial test cases</div>
+  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>HITL + command allowlists</div>
+  <div class="dx-cell is-wide"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
+</div>
 
 > Need a refresher? Click on the following for a quick recap. 
 
@@ -186,12 +186,12 @@ The progression is clear: from trusting the model, to trusting the container, to
 
 NemoClaw ships with deny-by-default security controls across four layers: **network**, **filesystem**, **process**, and **inference**. Each layer addresses a different dimension of agent behavior, and together they provide defense in depth that goes well beyond what application-level controls or container isolation alone can offer.
 
-| Layer | What It Controls | Activation |
-|-------|-----------------|------------|
-| Network | Where the agent can connect | Hot-reloadable at runtime |
-| Filesystem | What the agent can read and write | Locked at sandbox creation |
-| Process | What the agent can execute | Locked at sandbox creation |
-| Inference | Which AI models the agent can use | Hot-reloadable at runtime |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>NETWORK</h4><span class="dx-big">Where it connects</span>Deny-by-default egress - hot-reloadable at runtime.</div>
+  <div class="dx-cell"><h4>FILESYSTEM</h4><span class="dx-big">What it reads/writes</span>Landlock LSM - locked at sandbox creation.</div>
+  <div class="dx-cell"><h4>PROCESS</h4><span class="dx-big">What it executes</span>seccomp + non-root - locked at sandbox creation.</div>
+  <div class="dx-cell"><h4>INFERENCE</h4><span class="dx-big">Which models</span>Privacy Router - hot-reloadable at runtime.</div>
+</div>
 
 <!-- fold:break -->
 
@@ -224,6 +224,15 @@ Controls what the agent can execute. The agent runs as a non-root user with drop
 Controls which AI models the agent can use and how credentials are handled. The agent calls a local inference endpoint (`inference.local`) while the host manages provider credentials separately — the agent is designed to never have direct access to API keys.
 
 > In NemoClaw, **OpenShell routes all inference through the gateway**, which strips sandbox-supplied credentials and injects host-side ones from the configured Provider record. The **Privacy Router** enforces the operator's choice of one backend per gateway — a local model (like Nemotron) or a cloud endpoint — and supports hot-swapping the active backend without recreating sandboxes. Per-request, content-aware routing is a pattern you build on top of this primitive (covered in Exercise 5).
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">An autonomous agent runs overnight with no human watching. A prompt injection tells it to POST your data to an external server. Which control actually stops the exfiltration?</p>
+  <button class="dx-quiz-opt" data-fb="SOUL.md rules are soft - the agent itself decides whether to follow them, and a prompt injection can talk it right past them. Nothing enforces the rule.">A rule in SOUL.md forbidding the agent from sending data to outside servers</button>
+  <button class="dx-quiz-opt" data-fb="No human is awake at 2 AM. Human-in-the-loop degrades to approve-everything or block-everything when nobody is there to approve - neither is acceptable.">A human-in-the-loop approval gate</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Deny-by-default egress is enforced at the proxy, outside the agent process. Even a fully hijacked agent has no network path to the exfiltration endpoint.">Deny-by-default network egress enforced by OpenShell</button>
+  <button class="dx-quiz-opt" data-fb="A container isolates the process, but it still has an open pipe to the internet. Docker does not restrict which external hosts the agent can reach.">Docker container isolation</button>
+</div>
 
 <!-- fold:break -->
 

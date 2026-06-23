@@ -11,7 +11,7 @@ Use the <button onclick="openVoila('code/secrets_management/secrets_management_6
 <details>
 <summary><strong>Still need to set up your NVIDIA API Key? Expand for details.</strong></summary>
 
-## NVIDIA API Key
+## NVIDIA API Key <span class="dx-chip">REQUIRED</span>
 
 This key powers the LLM judge that evaluates your agent's safety across constraint adherence, data protection, and injection resistance. It uses NVIDIA Nemotron for scoring.
 

@@ -1,28 +1,10 @@
 <div class="dx-hero" data-eyebrow="MODULE 06 / 06 - WRAP UP" data-title="Evaluating Agent Safety"></div>
 
-<img src="_static/robots/supervisor.png" alt="Safety Evaluation Robot" style="float:right;max-width:300px;margin:25px;" />
-
 On the previous page, you hardened the agent: deny-by-default network, kernel-level filesystem + process containment, credential isolation, and operator-chosen inference routing. Those four layers **contain blast radius**. They do not — and cannot — catch every class of unsafe behavior. Prompt injection that stays inside the agent's permitted boundaries, memory poisoning that survives heartbeats, subtle behavioral drift over weeks — all pass through kernel-level enforcement because they look like *normal agent work*.
 
 The answer is continuous evaluation. This page builds the programmatic safety suite that catches what the layers don't.
 
-```mermaid
----
-config:
-  theme: 'base'
-  themeVariables:
-    primaryColor: '#eaf6e0'
-    secondaryColor: '#eaf6e0'
-    background: white
----
-graph LR
-    P[Red-team probes] --> J[LLM-as-judge]
-    J --> A[Weighted aggregate]
-    A --> CI[CI/CD gate]
-    CI -->|regression| P
-
-    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
-```
+![Safety Evaluation Pipeline](img/safety_pipeline_dark.svg)
 
 <!-- fold:break -->
 
@@ -35,6 +17,8 @@ This exercise has three phases, each mapping to one Python sidekick in <button o
 <!-- fold:break -->
 
 ### Phase 1 — Probe the hardened agent
+
+<img src="_static/robots/supervisor.png" alt="Safety Evaluation Robot" style="float:right;max-width:300px;margin:25px;" />
 
 Recall Probe 4 from `setup_openclaw.md` — vanilla OpenClaw dutifully persisted the rogue ad-link instruction into one of its workspace files (typically `USER.md` for preferences, or `MEMORY.md` once it exists). Reproduce it inside the hardened sandbox and observe: **Network/Filesystem/Process layers don't catch it.** The file write is to `/sandbox` (permitted), the inference is through `inference.local` (permitted), the process is the `sandbox` user (permitted). Every layer approves. Memory poisoning is *in-boundary* — an architectural limit of infrastructure-level enforcement.
 
@@ -450,18 +434,27 @@ When the suite fails, the component scores tell you *where*:
 
 > **What you just learned:** the evaluation pattern — rubric → LLM chain → parse → aggregate — is reusable. Module 3 asks *is the agent helpful?*; Module 6 asks *is the agent controlled?* Running both on every deployment is how you know your agent is both capable and safe.
 
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Two agents refuse the exact same red-team probe and their raw pass rates are identical. Why does the sandboxed agent score higher on the defense-in-depth metric?</p>
+  <button class="dx-quiz-opt" data-right data-fb="Right. A sandbox block (permission denied, EACCES) is kernel-enforced and non-defeasible, so it earns full credit. A prompt-only refusal could be talked past by the next attack, so it earns only partial credit.">Its refusal cites kernel-level enforcement, which cannot be talked past; a prompt-only refusal can</button>
+  <button class="dx-quiz-opt" data-fb="Speed is not scored. Defense-in-depth weights probes by the mechanism of safety, not how fast the agent responded.">It refused the probe faster</button>
+  <button class="dx-quiz-opt" data-fb="Both agents run the same model. The score difference comes from how the refusal was enforced (kernel vs prompt), not model size.">It runs on a larger, more capable model</button>
+  <button class="dx-quiz-opt" data-fb="The pass rates are identical by assumption - that is exactly why pass rate hides the sandbox contribution and defense-in-depth surfaces it.">Its raw pass rate is actually higher</button>
+</div>
+
 <!-- fold:break -->
 
 ## Module Wrap-Up
 
-| Module | What You Built | Key Safety Pattern |
-|--------|----------------|-------------------|
-| 1 | Report generation agent | Tool selection and scoping |
-| 2 | RAG-augmented IT help desk | Data access boundaries |
-| 3 | Evaluation pipelines | Adversarial test cases |
-| 4 | Customized CLI agent via SDG + RLVR | Human-in-the-loop + command allowlists |
-| 5 | Deep agent with Docker sandboxing | Container isolation + resource limits |
-| **6** | **Hardened autonomous agent with continuous safety evaluation** | **Kernel-level enforcement + Privacy Router + Continuous evaluation** |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>Tool selection and scoping</div>
+  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>Data access boundaries</div>
+  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Adversarial test cases</div>
+  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>HITL + command allowlists</div>
+  <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
+  <div class="dx-cell is-wide"><h4>MODULE 6 - YOU ARE HERE</h4><span class="dx-big">Hardened agent</span>Kernel enforcement + Privacy Router + continuous evaluation</div>
+</div>
 
 Each level of capability demanded a matching level of discipline. Module 6 closes the loop: your autonomous agent is not just contained — it is **evaluated, tested, and continuously verified**.
 
@@ -471,11 +464,13 @@ Each level of capability demanded a matching level of discipline. Module 6 close
 
 Agent safety is the discipline — NemoClaw is one implementation. The tools and references below let you go deeper:
 
-- **[NVIDIA NemoClaw](https://github.com/NVIDIA/NemoClaw)** — The full reference stack in one deployable package
-- **[NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell)** — Kernel-level agent runtime with Landlock, seccomp, and the inference gateway
-- **[OpenShell Policy Schema](https://docs.nvidia.com/openshell/latest/reference/policy-schema.html)** — Complete YAML reference
-- **[OpenClaw Documentation](https://docs.openclaw.ai/)** — Config-first autonomous agent framework
-- **[NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails)** — Complementary input/output filtering for LLM interactions
-- **[OWASP Top 10 for Agentic Applications](https://genai.owasp.org/)** — Industry-standard taxonomy of agent threats
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>EXPLORE NEXT</h4><p><span class="dx-chip is-green">START HERE</span> <a href="https://github.com/NVIDIA/NemoClaw">NVIDIA NemoClaw</a> - the full reference stack in one deployable package.</p></div>
+  <div class="dx-cell"><h4>OPENSHELL</h4><p><a href="https://github.com/NVIDIA/OpenShell">Kernel-level runtime</a> - Landlock, seccomp, and the inference gateway.</p></div>
+  <div class="dx-cell"><h4>POLICY SCHEMA</h4><p><a href="https://docs.nvidia.com/openshell/latest/reference/policy-schema.html">Complete YAML reference</a> for OpenShell policies.</p></div>
+  <div class="dx-cell"><h4>OPENCLAW</h4><p><a href="https://docs.openclaw.ai/">Config-first agent framework</a> documentation.</p></div>
+  <div class="dx-cell"><h4>NEMO GUARDRAILS</h4><p><a href="https://github.com/NVIDIA/NeMo-Guardrails">Input/output filtering</a> for LLM interactions.</p></div>
+  <div class="dx-cell"><h4>OWASP AGENTIC</h4><p><a href="https://genai.owasp.org/">Top 10 taxonomy</a> of agent threats.</p></div>
+</div>
 
 > **Congratulations!** You've completed Module 6: Agent Safety with NemoClaw. You now have an end-to-end toolkit — from building your first agent to deploying autonomous agents with kernel-level enforcement, data-aware routing, and continuous safety verification. Go ship something safely.

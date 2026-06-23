@@ -16,41 +16,16 @@ In this module, we will transform your agent development process from an art int
 
 ## The Challenge of Evaluating Agents
 
-<img src="_static/robots/debug.png" alt="Debugging Complexity" style="float:right;max-width:300px;margin:25px;" />
+Evaluating AI agents is harder than traditional software testing for several reasons - and a complete evaluation strategy has to account for all of them:
 
-Evaluating AI agents is more complex than traditional software testing because of several factors:
-
-**Malicious Behavior**: Agents can exhibit harmful behaviors on their own or when manipulated by bad actors. Evaluation should include adversarial test cases to ensure safe behavior.
-
-- *Toxic outputs*: Offensive or inappropriate content, even when not prompted
-- *Prompt injection*: Malicious inputs that override instructions or leak system prompts
-- *Adversarial queries*: Inputs designed to exploit model weaknesses 
-
-**Non-Determinism**: Agents can produce different valid responses to the same input.
-
-This variability is a feature that allows creativity and flexibility, but also makes evaluation tricky - you can't just check for an exact expected output.
-
-<!-- fold:break -->
-
-**Subjective Quality**: Agent quality often depends on subjective attributes like tone, style, and helpfulness.
-
-There isn't always one "right" answer. A response might be factually correct but unhelpful, or seem helpful but contain hallucinations. Evaluation methods need to capture this nuance.
-
-**Multi-Step Reasoning**: Agents chain together complex thoughts and actions to solve problems.
-
-You must evaluate the entire chain, not just isolated steps. A minor early error (like misinterpreting intent) can cascade into a completely wrong result, even if later steps were technically correct.
-
-<!-- fold:break -->
-
-<img src="_static/robots/controls.png" alt="How to Measure" style="float:right;max-width:300px;margin:25px;" />
-
-**Tool Usage**: Agents interact with external APIs, databases, and other systems.
-
-Evaluation must verify not just the final response, but also that the agent selected the right tool, used correct arguments, and properly incorporated the tool's output.
-
-**Context Dependence**: Agent behavior changes based on conversation history and retrieved data.
-
-An agent's answer might differ based on what was said three turns ago. Testing should cover varied conversational flows and retrieval contexts, not just single-turn inputs.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>MALICIOUS BEHAVIOR</h4>Agents can act harmfully on their own or when manipulated, so evaluation needs adversarial test cases. <span class="dx-chip">TOXIC OUTPUTS</span> <span class="dx-chip">PROMPT INJECTION</span> <span class="dx-chip">ADVERSARIAL QUERIES</span></div>
+  <div class="dx-cell is-wide"><h4>NON-DETERMINISM</h4>The same input can yield different valid responses - you cannot just assert on one exact expected output.</div>
+  <div class="dx-cell is-wide"><h4>SUBJECTIVE QUALITY</h4>Tone, style, and helpfulness rarely have one right answer; a response can be factually correct yet unhelpful.</div>
+  <div class="dx-cell is-wide"><h4>MULTI-STEP REASONING</h4>Evaluate the whole chain - an early misstep cascades into a wrong result even when later steps are sound.</div>
+  <div class="dx-cell is-wide"><h4>TOOL USAGE</h4>Verify the agent chose the right tool, with correct arguments, and used the result - not just the final text.</div>
+  <div class="dx-cell is-wide"><h4>CONTEXT DEPENDENCE</h4>Behavior shifts with conversation history and retrieved data, so test varied flows, not single turns.</div>
+</div>
 
 <!-- fold:break -->
 
@@ -62,21 +37,20 @@ When debugging a RAG agent, for example, a wrong answer could come from two plac
 1. **Bad Retrieval**: The agent didn't find the relevant documents.
 2. **Bad Generation**: The agent found the documents but hallucinated the answer.
 
-We break these down into specific signals.
+We break these down into specific signals - and for a RAG agent they form a tidy 2x2:
 
-### Retrieval Metrics (Did we find the right data?)
-
-* **Context Precision**: Is the stuff we found actually useful?
-* **Context Recall**: Did we miss anything else important?
-
-### Generation Metrics (Did we write a good answer?)
-
-* **Faithfulness**: Is the answer grounded in the facts we found? (No hallucinations!)
-* **Answer Relevance**: Did we actually answer the user's question?
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>CONTEXT PRECISION</h4><span class="dx-chip">RETRIEVAL</span> Are the retrieved chunks relevant - and ranked near the top?</div>
+  <div class="dx-cell is-wide"><h4>CONTEXT RECALL</h4><span class="dx-chip">RETRIEVAL</span> Did we retrieve everything needed to answer?</div>
+  <div class="dx-cell is-wide"><h4>FAITHFULNESS</h4><span class="dx-chip">GENERATION</span> Is every claim grounded in the context - no hallucinations?</div>
+  <div class="dx-cell is-wide"><h4>ANSWER RELEVANCY</h4><span class="dx-chip">GENERATION</span> Does the answer actually address the question?</div>
+</div>
 
 <!-- fold:break -->
 
 ### Other Agents
+
+<img src="_static/robots/wrench.png" alt="Other Agent Metrics" style="float:right;max-width:250px;margin:25px;" />
 
 For more traditional autonomous agents (like the report generator from Module 1), we also track metrics such as:
 * **Tool Usage**: Did the agent use the search tool correctly?
@@ -86,8 +60,6 @@ We'll get a better understanding of how these metrics work in the next section, 
 
 <!-- fold:break -->
 
-<img src="_static/robots/wrench.png" alt="Judge" style="float:left;max-width:250px;margin:25px;" />
-
 ## The "Judge" Problem
 
 In addition to what it is we should be evaluating, there's also a question of who should be the one doing the evaluating. 
@@ -96,100 +68,60 @@ If an agent writes a poem or summarizes a document, how do you write a unit test
 
 We generally rely on three approaches: 
 
-<!-- fold:break -->
-
-### 1. LLM-as-a-Judge (The Modern Standard)
-
-We use a specialized NVIDIA Nemotron model to grade the output of our agent. We prompt the judge a special rubric (e.g., "Is this helpful? 1-5"), and it scales well. 
-
-**Pros**
-
-- Can assess subjective qualities
-- Handles variation in correct responses
-- Scalable
-
-**Cons**
-
-- Adds cost and latency
-- Can inherit biases from the judge model
-- Requires careful prompt engineering
-
-**This is the primary method we will use in this module.**
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>LLM-AS-A-JUDGE</h4><span class="dx-chip is-green">PRIMARY METHOD</span> A specialized NVIDIA Nemotron model grades outputs against a rubric. Scalable and handles subjective qualities - but adds cost and latency, and can inherit the judge model's biases.</div>
+  <div class="dx-cell"><h4>HUMAN EVALUATION</h4>The gold standard for subjective quality - most accurate, but slow, expensive, and not scalable. Used sparingly to grade the grader.</div>
+  <div class="dx-cell"><h4>DETERMINISTIC CHECKS</h4>Code-based pass/fail (did the JSON parse? is the keyword present?). Objective and cheap, but misses nuance and valid alternatives.</div>
+</div>
 
 <!-- fold:break -->
 
-#### Calibrating Your LLM Judge
-
-An LLM judge is only useful if it agrees with human judgment. Before trusting automated scores, you should **calibrate** your judge by comparing its ratings to human ratings on a small sample.
-
-**A simple calibration workflow:**
-1. Select 5-10 representative agent responses
-2. Have a human rate each response on your rubric (e.g., 1-5 for helpfulness)
-3. Run the same responses through your LLM judge
-4. Compare: Do scores align? Where do they disagree?
-5. If alignment is poor, refine your evaluation prompt or add examples
-
-Even a quick spot-check on 5 samples can reveal systematic biases in your judge—like being too lenient, too harsh, or misunderstanding your criteria. 
-
-We'll practice this calibration step in the hands-on notebooks later in the module.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">CALIBRATING YOUR LLM JUDGE</p>
+  <p>An LLM judge is only useful if it agrees with human judgment. Before trusting automated scores, <b>calibrate</b> it against human ratings on a small sample:</p>
+  <ol>
+    <li>Select 5-10 representative agent responses.</li>
+    <li>Have a human rate each on your rubric (e.g. 1-5 for helpfulness).</li>
+    <li>Run the same responses through your LLM judge.</li>
+    <li>Compare: do the scores align? Where do they disagree?</li>
+    <li>If alignment is poor, refine the evaluation prompt or add examples.</li>
+  </ol>
+  <p>Even a quick spot-check on 5 samples can reveal a judge that is too lenient, too harsh, or misreads your criteria. We'll practice this in the hands-on notebooks.</p>
+</div>
 
 <!-- fold:break -->
 
-### 2. Human Evaluation (The Gold Standard)
-
-Real humans reviewing outputs: this is the most accurate signal for subjective qualities but it can be the slowest and most expensive method. 
-
-It's best used to "grade the grader", meaning ensuring your LLM Judge aligns with human preferences. 
-
-**Pros**
-
-- Most accurate for subjective qualities
-- Catches issues automated metrics miss
-
-**Cons**
-
-- Expensive, slow, not scalable
-- Subject to human bias and inconsistency
-
-In practice, we use human evaluation sparingly to align the LLM judge to human preference rather than as a go-to method. 
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">IN PRACTICE: A HYBRID APPROACH</p>
+  <ul>
+    <li><b>LLM-as-a-judge</b> to evaluate the agent's reasoning and subjective quality.</li>
+    <li><b>Deterministic checks</b> to verify intermediate and final outputs are well-formed.</li>
+    <li><b>Occasional human calibration</b> to keep the judge aligned with human preferences.</li>
+  </ul>
+</div>
 
 <!-- fold:break -->
 
-### 3. Deterministic Checks
-
-Good old-fashioned code-based unit testing. Did the generated SQL query execute without error? Did the JSON parse correctly? Does the response have a specific keyword? 
-
-These are objective, easy to automate pass/fail checks that are essential for reliable agents, though on their own they may not capture nuance well and may miss valid alternative responses. 
-
-**Pros**
-
-- Objective
-- Easiest to automate
-- Clear pass/fail criteria
-
-**Cons**
-
-- Doesn't capture nuance
-- May miss valid alternative responses
-
-Often, evaluation workflows will take on a hybrid approach. 
-
-* LLM-as-a-judge to evaluate the agent's thought process
-* Deterministic checks to verify an agent's intermediate and/or final outputs are well-formed
-* Occasional calibration with a human evaluator to ensure alignment of judging standards with subjective human preferences. 
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Your IT Help Desk RAG agent gives a wrong answer. Where should you look first?</p>
+  <button class="dx-quiz-opt" data-fb="Not necessarily. The wrong answer may come from bad RETRIEVAL - the agent never saw the right document. Rewriting generation prompts cannot fix a retrieval miss.">Assume it hallucinated and rewrite the system prompt</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. RAG failures split into two independent causes: the agent did not find the right docs (retrieval), or it found them but answered poorly (generation). Localize before you fix.">Measure retrieval and generation separately - the fault could be in either</button>
+  <button class="dx-quiz-opt" data-fb="That only helps if the cause is missing information (low context recall). If retrieval ranking or generation is the real problem, a bigger knowledge base will not move the score.">Add more documents to the knowledge base</button>
+  <button class="dx-quiz-opt" data-fb="A reasonable generation tweak, but it does nothing if the real failure is retrieval - the agent never had the right context to ground on.">Lower the model temperature</button>
+</div>
 
 <!-- fold:break -->
-
-<img src="_static/robots/surf.png" alt="Judge" style="float:right;max-width:300px;margin:25px;" />
 
 ## Your Journey in this Module
 
 We will guide you through the following steps to build your evaluation pipeline:
 
-1.  **[Understanding Evaluation Metrics](evaluation_metrics.md)**: Learn the specific signals we look for, like "Faithfulness" and "Context Recall".
-2.  **[Creating Evaluation Datasets](evaluation_data.md)**: Create a dataset for agent evaluation using synthetic data generation. 
-3.  **[Running Evaluations](running_evaluations.md)**: Execute the pipeline on your own agents and interpret the results.
-4.  **[Continuous Improvement](continuous_improvement.md)**: Close the loop by using data to make your agents smarter.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>01 &middot; METRICS</h4><a href="evaluation_metrics.md">Understanding Evaluation Metrics</a> - the signals we look for, like Faithfulness and Context Recall.</div>
+  <div class="dx-cell"><h4>02 &middot; DATASETS</h4><a href="evaluation_data.md">Creating Evaluation Datasets</a> - build a dataset using synthetic data generation.</div>
+  <div class="dx-cell"><h4>03 &middot; RUN</h4><a href="running_evaluations.md">Running Evaluations</a> - execute the pipeline on your agents and interpret the results.</div>
+  <div class="dx-cell"><h4>04 &middot; IMPROVE</h4><a href="continuous_improvement.md">Continuous Improvement</a> - close the loop and make your agents smarter.</div>
+</div>
 
 Ready to turn your "vibe checks" into rigorous engineering? Let's continue to [Understanding Evaluation Metrics](evaluation_metrics.md) to learn about the tools we'll need.
-

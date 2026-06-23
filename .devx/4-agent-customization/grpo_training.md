@@ -1,13 +1,11 @@
 <div class="dx-hero" data-eyebrow="MODULE 04 / 04 - GRPO TRAINING" data-title="GRPO Training"></div>
 
-<img src="_static/robots/debug.png" alt="Training" style="float:right;max-width:250px;margin:15px;" />
-
 You have your dataset. Now how do you teach the model with it?
 
-| Approach | How It Works | Best For |
-|----------|--------------|----------|
-| **SFT (Supervised Fine-Tuning)** | "Memorize: input X → output Y" | Simple tasks, abundant data |
-| **GRPO (RL-based)** | "Try multiple outputs, learn which score highest" | Complex tasks, verifiable correctness |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>SFT - SUPERVISED FINE-TUNING</h4>Memorize: input X produces output Y. Best for simple tasks with abundant data.</div>
+  <div class="dx-cell is-wide"><h4>GRPO - RL-BASED</h4>Try multiple outputs, learn which score highest. Best for complex tasks with verifiable correctness.</div>
+</div>
 
 **GRPO (Group Relative Policy Optimization)** is a form of reinforcement learning with verifiable rewards (RLVR) that generates multiple candidate responses per prompt, scores them with a reward function, and reinforces the better ones. This exploration often discovers solutions that pure imitation would miss.
 
@@ -22,10 +20,14 @@ CLI commands are either correct or wrong—no subjectivity. A reward server can 
 - Is `command` one of `[new, dev, up, build, dockerfile]`?
 - Are the parameters correct for that command type?
 
-This is **RLVR (RL with Verifiable Rewards)**:
-- **Objective** — No judge bias or inconsistency
-- **Fast** — Milliseconds per verification
-- **Scalable** — No human annotators needed
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">RLVR - RL WITH VERIFIABLE REWARDS</p>
+  <ul>
+    <li><span class="dx-chip">OBJECTIVE</span> no judge bias or inconsistency.</li>
+    <li><span class="dx-chip">FAST</span> milliseconds per verification.</li>
+    <li><span class="dx-chip">SCALABLE</span> no human annotators needed.</li>
+  </ul>
+</div>
 
 The NeMo Gym server runs these checks and returns reward scores to guide training.
 
@@ -113,6 +115,8 @@ Outputs that score above the group average get reinforced; below-average outputs
 
 ## Reward Engineering
 
+<img src="_static/robots/debug.png" alt="Reward Engineering" style="float:right;max-width:250px;margin:15px;" />
+
 Your reward function is the most important piece of GRPO training. It defines what "good" means—get it wrong, and your model learns the wrong behaviors.
 
 ### Principles of Good Rewards
@@ -196,28 +200,47 @@ Always test your reward function on edge cases before training.
 
 The NeMo Gym verifier computes a **composite reward** with multiple components:
 
-| Component | Weight | What It Checks |
-|-----------|--------|----------------|
-| `json_format_reward` | 0.2 | Is the output valid JSON? |
-| `command_reward` | 0.3 | Is `command` one of the valid CLI commands? |
-| `flag_accuracy_reward` | 0.5 | Are the flags/parameters correct for this command? |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">COMPOSITE REWARD - WHERE THE POINTS COME FROM</p>
+  <div class="dx-tax">
+    <div class="dx-tax-row" style="--dx-w:20"><span class="dx-tax-name">json_format</span><div class="dx-tax-track"><div class="dx-tax-fill">0.2</div></div><span class="dx-tax-note">is it valid JSON?</span></div>
+    <div class="dx-tax-row" style="--dx-w:30"><span class="dx-tax-name">command</span><div class="dx-tax-track"><div class="dx-tax-fill">0.3</div></div><span class="dx-tax-note">a real CLI command?</span></div>
+    <div class="dx-tax-row" style="--dx-w:50"><span class="dx-tax-name">flag_accuracy</span><div class="dx-tax-track"><div class="dx-tax-fill">0.5</div></div><span class="dx-tax-note">flags correct for that command?</span></div>
+  </div>
+</div>
 
 **Why these weights?** Flags carry the most information (many possible values), so they get the highest weight. JSON format is easiest, so it gets the lowest. Commands are intermediate.
 
 <!-- fold:break -->
 
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Your reward returns 1.0 for any output that parses as valid JSON. Training reward soars, but real CLI accuracy is terrible. What happened?</p>
+  <button class="dx-quiz-opt" data-right data-fb="Reward hacking. The model found a shortcut - e.g. emitting an empty {} - that scores high without doing the task. The reward is misaligned with the goal.">Reward hacking - the model maximizes the metric without doing the task</button>
+  <button class="dx-quiz-opt" data-fb="The learning rate isn't the issue - the reward itself rewards the wrong thing. Even a perfect LR would just optimize the shortcut faster.">The learning rate is too high</button>
+  <button class="dx-quiz-opt" data-fb="GRPO works fine for CLI tasks - that's the whole module. The failure is in reward design, not the algorithm.">GRPO doesn't work for CLI tasks</button>
+  <button class="dx-quiz-opt" data-fb="An LLM judge is slower and less consistent, and wouldn't fix this. The fix is a granular, aligned code reward (format + command + flags).">You need an LLM judge instead of code</button>
+</div>
+
+<!-- fold:break -->
+
 ## The Full Training Loop
 
-![GRPO Training Loop](img/grpo_training_loop.png)
+![GRPO Training Loop](img/grpo_training_loop_dark.svg)
 
 To make this concrete, here's what happens in a single training step. The model sees: *"Create a new project with the react template"* and generates 4 candidates:
 
-| # | Model Output | Reward |
-|---|-------------|--------|
-| 1 | `{"command": "new", "template": "react-agent-python", "path": "./myapp"}` | **0.95** |
-| 2 | `{"command": "new", "template": "wrong-template"}` | **0.50** |
-| 3 | `{"command": "create", "template": "react"}` | **0.20** |
-| 4 | `not valid json` | **0.00** |
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">grpo-step</span>
+  <span class="dx-term-line" data-kind="prompt">Create a new project with the react template</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">Generate 4 candidates, score each with the NeMo Gym verifier, reinforce the best.</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[1] {command: new, template: react-agent-python, path: ./myapp}   reward 0.95</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[2] {command: new, template: wrong-template}   reward 0.50</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[3] {command: create, template: react}   reward 0.20</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[4] not valid json   reward 0.00</span>
+  <span class="dx-term-line" data-kind="think" data-delay="350">Candidate 1 is above the group average -> reinforce; candidate 4 far below -> suppress.</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="400">Over 50+ steps the model converges on candidate-1-style outputs.</span>
+</div>
 
 GRPO computes that Response #1 scored above the group average and reinforces its patterns. Response #4 scored far below, so those patterns are suppressed. Over many steps, the model converges toward reliably producing correct outputs.
 

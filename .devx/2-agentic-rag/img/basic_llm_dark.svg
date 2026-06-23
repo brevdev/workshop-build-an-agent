@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 96" width="520" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <defs><marker id="ah" markerWidth="8" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,3.5 L0,7 Z" fill="#8a8a8a"/></marker></defs>
+  <line x1="133" y1="48" x2="203" y2="48" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="315" y1="48" x2="380" y2="48" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <rect x="23" y="26" width="110" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="78" y="48" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Prompt</text>
+  <rect x="205" y="26" width="110" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="260" y="48" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">LLM</text>
+  <rect x="382" y="26" width="120" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="442" y="48" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Response</text>
+</svg>

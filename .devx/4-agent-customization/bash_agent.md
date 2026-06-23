@@ -12,11 +12,11 @@ This is the same ReAct agentic pattern from Module 1, applied to a different dom
 
 We chose this agent use case for customization because:
 
-1. **Observable outputs** — Shell commands are concrete and verifiable. Unlike creative writing, we can objectively check if a command like `langgraph new --template react-agent-python` is correct.
-
-2. **Clear improvement target** — The base model knows generic bash but not LangGraph CLI. This gap is measurable and fixable with training.
-
-3. **Real-world applicability** — Many developers want agents that understand their specific CLIs, APIs, and toolchains.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>OBSERVABLE OUTPUTS</h4>Shell commands are concrete and verifiable - we can objectively check if <code>langgraph new --template react-agent-python</code> is correct (unlike creative writing).</div>
+  <div class="dx-cell"><h4>CLEAR TARGET</h4>The base model knows generic bash but not the LangGraph CLI - a gap that's measurable and fixable with training.</div>
+  <div class="dx-cell"><h4>REAL-WORLD</h4>Many developers want agents that understand their specific CLIs, APIs, and toolchains.</div>
+</div>
 
 <!-- fold:break -->
 
@@ -24,7 +24,7 @@ We chose this agent use case for customization because:
 
 The agent follows the **ReAct pattern** from Module 1—Reason, Act, Observe in a loop—with a critical addition: human approval before any command runs.
 
-![ReAct Loop](img/react_loop.png)
+![ReAct Loop](img/react_loop_dark.svg)
 
 **LangGraph** orchestrates this state machine. The human-in-the-loop gate is what makes this agent safe to use on a real system—more on that below.
 
@@ -61,17 +61,20 @@ The consequences range from inconvenient to catastrophic. For agents with real-w
 
 Human-in-the-loop execution adds a confirmation step between generation and execution:
 
-![HITL Execution Flow](img/hitl_flow.png)
+![HITL Execution Flow](img/hitl_flow_dark.svg)
 
 **The agent never executes directly.** Instead, it proposes a command and waits for human approval. This simple change provides:
 
-| Benefit | Description |
-|---------|-------------|
-| **Catch errors** | Human spots hallucinated or incorrect commands |
-| **Verify intent** | Confirm the command matches what you actually wanted |
-| **Learn from mistakes** | See what the agent gets wrong before it causes harm |
-| **Build trust** | Gain confidence in the agent's capabilities over time |
-| **Modify on the fly** | Adjust the proposed command before execution |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHAT THE APPROVAL GATE BUYS YOU</p>
+  <ul>
+    <li><span class="dx-chip">CATCH ERRORS</span> a human spots hallucinated or incorrect commands.</li>
+    <li><span class="dx-chip">VERIFY INTENT</span> confirm the command matches what you actually wanted.</li>
+    <li><span class="dx-chip">LEARN</span> see what the agent gets wrong before it causes harm.</li>
+    <li><span class="dx-chip">BUILD TRUST</span> gain confidence in the agent over time.</li>
+    <li><span class="dx-chip">MODIFY</span> adjust the proposed command before execution.</li>
+  </ul>
+</div>
 
 <!-- fold:break -->
 
@@ -79,20 +82,17 @@ Human-in-the-loop execution adds a confirmation step between generation and exec
 
 When you run the bash agent, every command goes through confirmation:
 
-```
-You: Create a new react agent project
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">bash-agent (HITL)</span>
+  <span class="dx-term-line" data-kind="prompt">Create a new react agent project</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">The user wants a LangGraph project from the react template. I propose the command - I never run it directly.</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[proposed] langgraph new ./myapp --template react-agent-python</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="300">Execute? [y/N]</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">Nothing happens until a human approves - this pause is the safety gate.</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="350">y -> executed. New project created at ./myapp</span>
+</div>
 
-Agent: I'll create a new LangGraph project with the react-agent template.
-
-Proposed command: langgraph new ./myapp --template react-agent-python
-
-Execute? [y/N]: _
-```
-
-You can:
-- **Approve (`y`)** — Execute the command as proposed
-- **Reject (`n` or Enter)** — Abort without executing
-- **Review** — Take time to verify the command is correct
+You can **approve** (`y`) to run it, **reject** (`n` or Enter) to abort, or **review** and modify before executing.
 
 This pause is intentional. It forces you to read and understand what's about to happen.
 
@@ -102,12 +102,20 @@ This pause is intentional. It forces you to read and understand what's about to 
 
 HITL is your first line of defense, but production systems often add more layers:
 
-1. **Allowlists** — Only permit known-safe commands (implemented in our agent's config)
-2. **Input validation** — Parse and verify command structure before execution
-3. **Sandboxing** — Execute in isolated environments where damage is contained
-4. **Audit logging** — Record all commands for review and accountability
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">DEFENSE IN DEPTH - LAYERS BEYOND HITL</p>
+  <ul>
+    <li><span class="dx-chip">ALLOWLISTS</span> only permit known-safe commands (in our agent's config).</li>
+    <li><span class="dx-chip">INPUT VALIDATION</span> parse and verify command structure before execution.</li>
+    <li><span class="dx-chip">SANDBOXING</span> execute in isolated environments where damage is contained.</li>
+    <li><span class="dx-chip">AUDIT LOGGING</span> record all commands for review and accountability.</li>
+  </ul>
+</div>
 
-> 💡 **Looking Ahead**: Module 5 covers **deep agents**—autonomous agents that tackle complex, multi-step tasks. You'll also learn about **sandboxing**, running agents in isolated containers where even dangerous commands can't harm your real system. HITL catches mistakes; sandboxing contains them.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">LOOKING AHEAD &middot; MODULE 5</p>
+  <p>Module 5 covers <b>deep agents</b> - autonomous agents that tackle complex, multi-step tasks - and <b>sandboxing</b>, running agents in isolated containers where even dangerous commands can't harm your real system. HITL catches mistakes; sandboxing contains them.</p>
+</div>
 
 <!-- fold:break -->
 
@@ -203,13 +211,16 @@ Try a sample query: `"List all files"` → `ls`
 
 The Bash Agent includes skills from the [Superpowers](https://github.com/obra/superpowers) framework—structured workflows that guide the agent through complex tasks.
 
-| Skill | Purpose |
-|-------|---------|
-| `systematic-debugging` | 4-phase root cause analysis before fixing bugs |
-| `test-driven-development` | RED-GREEN-REFACTOR workflow |
-| `brainstorming` | Socratic design refinement |
-| `writing-plans` | Create detailed implementation plans |
-| `executing-plans` | Execute plans with checkpoints |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">BUNDLED SUPERPOWERS SKILLS</p>
+  <ul>
+    <li><span class="dx-chip">systematic-debugging</span> 4-phase root cause analysis before fixing bugs.</li>
+    <li><span class="dx-chip">test-driven-development</span> RED-GREEN-REFACTOR workflow.</li>
+    <li><span class="dx-chip">brainstorming</span> Socratic design refinement.</li>
+    <li><span class="dx-chip">writing-plans</span> create detailed implementation plans.</li>
+    <li><span class="dx-chip">executing-plans</span> execute plans with checkpoints.</li>
+  </ul>
+</div>
 
 <!-- fold:break -->
 
@@ -229,11 +240,14 @@ Skills transform the agent from a simple command executor into a methodical prob
 
 Now that we've built our baseline bash agent, let's identify the gap we'll close through customization. Try these prompts and note what the base agent produces:
 
-| Prompt | What You Might Get | What It Should Be |
-|--------|-------------------|-------------------|
-| *"Create a new LangGraph project with the react template"* | Hallucinated or generic command | `langgraph new ./myapp --template react-agent-python` |
-| *"Start a dev server on port 8080"* | Wrong flags or syntax | `langgraph dev --port 8080` |
-| *"Build a docker image tagged v2"* | Missing LangGraph-specific flags | `langgraph build --tag v2` |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">THE GAP - BASE MODEL vs WHAT IT SHOULD DO</p>
+  <ul>
+    <li><b>Create a new LangGraph project with the react template</b><br>base model: hallucinated or generic &rarr; should be <code>langgraph new ./myapp --template react-agent-python</code></li>
+    <li><b>Start a dev server on port 8080</b><br>base model: wrong flags or syntax &rarr; should be <code>langgraph dev --port 8080</code></li>
+    <li><b>Build a docker image tagged v2</b><br>base model: missing flags &rarr; should be <code>langgraph build --tag v2</code></li>
+  </ul>
+</div>
 
 The base model knows generic bash but has never seen the LangGraph CLI. It guesses—and guesses wrong. By the end of this module, that same agent will reliably produce correct commands because the knowledge will be **baked into the model's weights**.
 

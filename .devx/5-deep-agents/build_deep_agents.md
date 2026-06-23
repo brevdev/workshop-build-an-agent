@@ -1,7 +1,5 @@
 <div class="dx-hero" data-eyebrow="MODULE 05 / 04 - HANDS ON" data-title="Build a Deep Agent"></div>
 
-<img src="_static/robots/plumber.png" alt="Build Robot" style="float:right;max-width:300px;margin:25px;" />
-
 Time to get hands-on. In this section, you'll build a deep agent step by step by filling in the core functions that power it. We'll work through the backend code and then test everything using the interactive Deep Agent Client from the previous section.
 
 <button onclick="openOrCreateFileInJupyterLab('code/5-deep-agents/deep_agent.py');"><i class="fa-brands fa-python"></i> code/5-deep-agents/deep_agent.py</button> is the skeleton file you'll complete. This is a mirror of the Client code in `demo/backend/agent.py` but with key sections left as exercises.
@@ -12,11 +10,13 @@ Time to get hands-on. In this section, you'll build a deep agent step by step by
 
 Our deep agent factory has five core functions:
 
-1. **`_get_model()`** — Connect to an NVIDIA NIM model
-2. **`_build_extra_tools()`** — Add optional tools like web search
-3. **`_build_system_prompt()`** — Craft the instructions that guide the agent
-4. **`_build_backend()`** — Configure file system and shell execution
-5. **`create_agent()`** — Wire everything together with `create_deep_agent()`
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>STEP 1</h4><span class="dx-big">Model</span>_get_model() connects to an NVIDIA NIM model.</div>
+  <div class="dx-cell"><h4>STEP 2</h4><span class="dx-big">Tools</span>_build_extra_tools() adds web search and other optional tools.</div>
+  <div class="dx-cell"><h4>STEP 3</h4><span class="dx-big">Prompt</span>_build_system_prompt() crafts the instructions that guide the agent.</div>
+  <div class="dx-cell"><h4>STEP 4</h4><span class="dx-big">Backend</span>_build_backend() configures file system and shell execution.</div>
+  <div class="dx-cell is-wide"><h4>STEP 5</h4><span class="dx-big">Assemble</span>create_agent() wires it all together with create_deep_agent().</div>
+</div>
 
 Let's build each one.
 
@@ -255,6 +255,8 @@ Watch the tool traces in real-time — you'll see each tool call, its input, out
 <!-- fold:break -->
 
 ## What Just Happened?
+
+<img src="_static/robots/plumber.png" alt="Build Robot" style="float:right;max-width:300px;margin:25px;" />
 
 When you clicked Build, the frontend sent your deep agent configuration to the backend:
 

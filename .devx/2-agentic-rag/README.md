@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 02 / AGENTIC RAG" data-title="Agentic RAG Workshop"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / AGENTIC RAG" data-title="Agentic RAG Workshop"></div>
 
 <img src="_static/robots/surfwithshorts.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 

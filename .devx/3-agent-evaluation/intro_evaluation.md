@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 03 / 01 - CONCEPTS" data-title="Introduction to Agent Evaluation"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / 01 - CONCEPTS" data-title="Introduction to Agent Evaluation"></div>
 
 <img src="_static/robots/study.png" alt="Understanding Evaluation" style="float:right;max-width:300px;margin:25px;" />
 

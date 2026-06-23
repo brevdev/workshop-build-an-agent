@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 02 / 06 - LOCAL NIM" data-title="Migrate to Local NIM Microservices"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 06 - LOCAL NIM" data-title="Migrate to Local NIM Microservices"></div>
 
 <img src="_static/robots/relocate.png" alt="Box 'em up and bring 'em home. " style="float:right;max-width:300px;margin:25px;" />
 

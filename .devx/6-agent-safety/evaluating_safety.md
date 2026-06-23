@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 06 / 06 - WRAP UP" data-title="Evaluating Agent Safety"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 06 - WRAP UP" data-title="Evaluating Agent Safety"></div>
 
 <img src="_static/robots/supervisor.png" alt="Safety Evaluation Robot" style="float:right;max-width:300px;margin:25px;" />
 

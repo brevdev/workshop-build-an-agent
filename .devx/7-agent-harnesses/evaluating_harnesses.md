@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 07 / 06 - WRAP UP" data-title="You know what was running your agents." data-sub="You leave with a framework for choosing harnesses - not a favorite." data-meta="TAKEAWAY::context-tax framework|NEXT::keep skills with you"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 06 - WRAP UP" data-title="You know what was running your agents." data-sub="You leave with a framework for choosing harnesses - not a favorite." data-meta="TAKEAWAY::context-tax framework|NEXT::keep skills with you"></div>
 
 You came into this module having built six agents. You leave knowing what was actually running them.
 

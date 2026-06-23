@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 07 / 02 - THE LANDSCAPE" data-title="Seven harnesses. One axis." data-sub="The fastest way to sort the ecosystem is by context tax - how much permanent per-turn overhead each harness spends before your task even starts." data-meta="HARNESSES::7|AXIS::context tax"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 02 - THE LANDSCAPE" data-title="Seven harnesses. One axis." data-sub="The fastest way to sort the ecosystem is by context tax - how much permanent per-turn overhead each harness spends before your task even starts." data-meta="HARNESSES::7|AXIS::context tax"></div>
 
 Seven harnesses dominate the conversation today — five open source (bring any model) and two closed source (subscription). They don't differ much in *what* they do. They differ enormously in *how much context they spend doing it*.
 
@@ -10,26 +10,26 @@ Let's start with that picture, then meet each one.
 
 Approximate **permanent per-turn overhead** (system prompt + always-loaded tool schemas) for each design philosophy:
 
-<div class="m7-island m7-bet" data-answer="3,922 tokens" data-explain="measured with tiktoken in Exercise 2; the minimal harness pays just 365.">
-  <p class="m7-island-title">PLACE YOUR BET</p>
-  <p class="m7-quiz-q">Before you scroll: how many tokens does the bundled maximal config inject per turn?</p>
-  <div class="m7-bet-opts">
-    <button class="m7-bet-opt">~500</button>
-    <button class="m7-bet-opt">~1,500</button>
-    <button class="m7-bet-opt">~4,000</button>
-    <button class="m7-bet-opt">~9,000</button>
+<div class="dx-island dx-bet" data-answer="3,922 tokens" data-explain="measured with tiktoken in Exercise 2; the minimal harness pays just 365.">
+  <p class="dx-island-title">PLACE YOUR BET</p>
+  <p class="dx-quiz-q">Before you scroll: how many tokens does the bundled maximal config inject per turn?</p>
+  <div class="dx-bet-opts">
+    <button class="dx-bet-opt">~500</button>
+    <button class="dx-bet-opt">~1,500</button>
+    <button class="dx-bet-opt">~4,000</button>
+    <button class="dx-bet-opt">~9,000</button>
   </div>
 </div>
 
-<div class="m7-island">
-  <p class="m7-island-title">CONTEXT TAX METER - PERMANENT PER-TURN OVERHEAD</p>
-  <div class="m7-tax">
-    <div class="m7-tax-row" style="--m7-w:10"><span class="m7-tax-name">pi</span><div class="m7-tax-track"><div class="m7-tax-fill">~1k</div></div><span class="m7-tax-note">minimal</span></div>
-    <div class="m7-tax-row" style="--m7-w:35"><span class="m7-tax-name">OpenCode</span><div class="m7-tax-track"><div class="m7-tax-fill">~3.5k</div></div><span class="m7-tax-note">you decide</span></div>
-    <div class="m7-tax-row" style="--m7-w:45"><span class="m7-tax-name">LC Deep Agents</span><div class="m7-tax-track"><div class="m7-tax-fill">~4.5k</div></div><span class="m7-tax-note">moderate</span></div>
-    <div class="m7-tax-row" style="--m7-w:60"><span class="m7-tax-name">Hermes</span><div class="m7-tax-track"><div class="m7-tax-fill">~6k</div></div><span class="m7-tax-note">curated</span></div>
-    <div class="m7-tax-row" style="--m7-w:75"><span class="m7-tax-name">OpenClaw</span><div class="m7-tax-track"><div class="m7-tax-fill">~7.5k</div></div><span class="m7-tax-note">maximal</span></div>
-    <div class="m7-tax-row" data-tier="max" style="--m7-w:95"><span class="m7-tax-name">Claude Code / Codex</span><div class="m7-tax-track"><div class="m7-tax-fill">7-10k</div></div><span class="m7-tax-note">maximal</span></div>
+<div class="dx-island">
+  <p class="dx-island-title">CONTEXT TAX METER - PERMANENT PER-TURN OVERHEAD</p>
+  <div class="dx-tax">
+    <div class="dx-tax-row" style="--dx-w:10"><span class="dx-tax-name">pi</span><div class="dx-tax-track"><div class="dx-tax-fill">~1k</div></div><span class="dx-tax-note">minimal</span></div>
+    <div class="dx-tax-row" style="--dx-w:35"><span class="dx-tax-name">OpenCode</span><div class="dx-tax-track"><div class="dx-tax-fill">~3.5k</div></div><span class="dx-tax-note">you decide</span></div>
+    <div class="dx-tax-row" style="--dx-w:45"><span class="dx-tax-name">LC Deep Agents</span><div class="dx-tax-track"><div class="dx-tax-fill">~4.5k</div></div><span class="dx-tax-note">moderate</span></div>
+    <div class="dx-tax-row" style="--dx-w:60"><span class="dx-tax-name">Hermes</span><div class="dx-tax-track"><div class="dx-tax-fill">~6k</div></div><span class="dx-tax-note">curated</span></div>
+    <div class="dx-tax-row" style="--dx-w:75"><span class="dx-tax-name">OpenClaw</span><div class="dx-tax-track"><div class="dx-tax-fill">~7.5k</div></div><span class="dx-tax-note">maximal</span></div>
+    <div class="dx-tax-row" data-tier="max" style="--dx-w:95"><span class="dx-tax-name">Claude Code / Codex</span><div class="dx-tax-track"><div class="dx-tax-fill">7-10k</div></div><span class="dx-tax-note">maximal</span></div>
   </div>
 </div>
 
@@ -49,11 +49,11 @@ Click through the tabs — each profile covers the philosophy, what it optimizes
 
 #### **🦞 OpenClaw**
 
-### OpenClaw <span class="m7-chip">OPEN SOURCE</span> · the OG
+### OpenClaw <span class="dx-chip">OPEN SOURCE</span> · the OG
 
 > **Philosophy:** Open community, config-first, always-on. The original — and the harness you already know from Module 6.
 
-The largest open harness community. Agents are defined by markdown (`SOUL.md`, `AGENTS.md`), run continuously on heartbeats, and self-evolve their own memory. Powers the **NVIDIA NemoClaw** reference stack <span class="m7-chip is-green">NemoClaw ✓</span>
+The largest open harness community. Agents are defined by markdown (`SOUL.md`, `AGENTS.md`), run continuously on heartbeats, and self-evolve their own memory. Powers the **NVIDIA NemoClaw** reference stack <span class="dx-chip is-green">NemoClaw ✓</span>
 
 **Choose it when:** you want an always-on autonomous agent, the biggest community and plugin ecosystem, and any model (it runs Nemotron via NVIDIA endpoints, as you configured in Module 6).
 
@@ -61,11 +61,11 @@ The largest open harness community. Agents are defined by markdown (`SOUL.md`, `
 
 #### **📜 Hermes**
 
-### Hermes <span class="m7-chip">OPEN SOURCE</span> · refined & self-improving
+### Hermes <span class="dx-chip">OPEN SOURCE</span> · refined & self-improving
 
 > **Philosophy:** *"The agent that grows with you."* A curated, tested open harness that writes its own memories and skills over time.
 
-[Hermes](https://hermes-agent.nousresearch.com), from NousResearch, takes the open-harness idea and ships it with refined defaults: a tested core, a vetted skill hub, and a `hermes skills install` command that speaks the open [agentskills.io](https://agentskills.io) spec. NVIDIA's tie is the deepest of any open harness — there's a [NemoClaw-for-Hermes blueprint](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent) on build.nvidia.com, and `NVIDIA/skills` is a built-in tap. <span class="m7-chip is-green">NemoClaw ✓</span>
+[Hermes](https://hermes-agent.nousresearch.com), from NousResearch, takes the open-harness idea and ships it with refined defaults: a tested core, a vetted skill hub, and a `hermes skills install` command that speaks the open [agentskills.io](https://agentskills.io) spec. NVIDIA's tie is the deepest of any open harness — there's a [NemoClaw-for-Hermes blueprint](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent) on build.nvidia.com, and `NVIDIA/skills` is a built-in tap. <span class="dx-chip is-green">NemoClaw ✓</span>
 
 **Choose it when:** you want open source with guardrails — strong defaults, curated skills, and a harness that accumulates skills as it works. **It's the harness you'll drive in this module's lab.**
 
@@ -73,7 +73,7 @@ The largest open harness community. Agents are defined by markdown (`SOUL.md`, `
 
 #### **🔧 OpenCode**
 
-### OpenCode <span class="m7-chip">OPEN SOURCE</span> · complete custom builder
+### OpenCode <span class="dx-chip">OPEN SOURCE</span> · complete custom builder
 
 > **Philosophy:** Own every layer. The harness is your codebase.
 
@@ -85,7 +85,7 @@ OpenCode is for teams that want to build the harness itself: bring your own loop
 
 #### **🕸️ LangChain Deep Agents**
 
-### LangChain Deep Agents <span class="m7-chip">OPEN SOURCE</span> · workflow-shaped
+### LangChain Deep Agents <span class="dx-chip">OPEN SOURCE</span> · workflow-shaped
 
 > **Philosophy:** A harness shaped around a specific task graph, not a general-purpose assistant.
 
@@ -97,7 +97,7 @@ You used this in Module 5: `create_deep_agent()` with planning, sub-agent delega
 
 #### **🥧 pi**
 
-### pi <span class="m7-chip">OPEN SOURCE</span> · *"as many as needed, as little as possible"*
+### pi <span class="dx-chip">OPEN SOURCE</span> · *"as many as needed, as little as possible"*
 
 > **Philosophy:** Less harness, more model. No context tax.
 
@@ -111,7 +111,7 @@ Its signature move is **self-extension**: ask for a capability, and the agent wr
 
 #### **🤖 Claude Code**
 
-### Claude Code <span class="m7-chip">SUBSCRIPTION</span> · highest performing
+### Claude Code <span class="dx-chip">SUBSCRIPTION</span> · highest performing
 
 > **Philosophy:** Maximal harness, frontier model, deeply integrated. The reference point the open ecosystem measures against.
 
@@ -123,7 +123,7 @@ Anthropic's subscription harness: rich tool suite, sub-agents, plan modes, hooks
 
 #### **🛰️ Codex**
 
-### Codex <span class="m7-chip">SUBSCRIPTION</span> · best computer use
+### Codex <span class="dx-chip">SUBSCRIPTION</span> · best computer use
 
 > **Philosophy:** Maximal harness optimized for driving full computer environments.
 
@@ -141,7 +141,7 @@ OpenAI's subscription harness, strongest at **computer-use (CUA)** tasks — dri
 
 Work through the questions. Your path ends at a recommendation card.
 
-<div class="m7-choose">
+<div class="dx-choose">
 
 <details>
 <summary><b>❓ Question 1 — Do you need to choose your own model (open weights, on-prem, Nemotron)?</b></summary>
@@ -152,7 +152,7 @@ Work through the questions. Your path ends at a recommendation card.
 <details>
 <summary><b>🔄 Always-on assistant (heartbeats, evolving memory)</b></summary>
 
-> ### 🦞 → **OpenClaw** &nbsp;<span class="m7-chip is-green">recommended</span>
+> ### 🦞 → **OpenClaw** &nbsp;<span class="dx-chip is-green">recommended</span>
 > The community standard for always-on agents — and you already hardened one with NemoClaw in Module 6. Prefer stronger defaults and a curated skill hub? Pick **Hermes** instead.
 
 </details>
@@ -220,13 +220,13 @@ Notice something about that chooser: **NVIDIA wins in every branch** — and so 
 
 NVIDIA isn't picking a harness winner. The harness layer is where the industry is innovating fastest, and NVIDIA's approach is to **drive the technology forward together with the ecosystem** — contributing open models, open safety stacks, and open, portable, verifiable skills that make every harness better.
 
-<div class="m7-island m7-quiz">
-  <p class="m7-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="m7-quiz-q">Your team needs an always-on assistant, on-prem models are mandatory, and you want the largest community. Which harness do you pick?</p>
-  <button class="m7-quiz-opt" data-fb="Closed source means no on-prem model choice.">Claude Code</button>
-  <button class="m7-quiz-opt" data-fb="Minimal and model-flexible but the smallest batteries-included assistant story.">pi</button>
-  <button class="m7-quiz-opt" data-right data-fb="Open source + any model + the biggest always-on community - and NemoClaw hardens it.">OpenClaw</button>
-  <button class="m7-quiz-opt" data-fb="You could build it but you inherit all five responsibilities.">OpenCode</button>
+<div class="dx-island dx-quiz">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Your team needs an always-on assistant, on-prem models are mandatory, and you want the largest community. Which harness do you pick?</p>
+  <button class="dx-quiz-opt" data-fb="Closed source means no on-prem model choice.">Claude Code</button>
+  <button class="dx-quiz-opt" data-fb="Minimal and model-flexible but the smallest batteries-included assistant story.">pi</button>
+  <button class="dx-quiz-opt" data-right data-fb="Open source + any model + the biggest always-on community - and NemoClaw hardens it.">OpenClaw</button>
+  <button class="dx-quiz-opt" data-fb="You could build it but you inherit all five responsibilities.">OpenCode</button>
 </div>
 
 > That portable skills layer is the key that unlocks everything else. Head to [Agent Skills](agent_skills) to take it apart.

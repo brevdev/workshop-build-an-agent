@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 07 / SETUP" data-title="Two minutes of setup." data-sub="One NVIDIA API key is all this module needs - set it once and every harness ahead just works." data-meta="NEEDS::NVIDIA_API_KEY|TIME::2 min"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / SETUP" data-title="Two minutes of setup." data-sub="One NVIDIA API key is all this module needs - set it once and every harness ahead just works." data-meta="NEEDS::NVIDIA_API_KEY|TIME::2 min"></div>
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right;max-width:240px;margin:20px;" />
 

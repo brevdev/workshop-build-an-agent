@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 02 / 05 - SKILLS" data-title="Agent Skills"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 05 - SKILLS" data-title="Agent Skills"></div>
 
 <img src="_static/robots/study.png" alt="Skills Robot Character" style="float:left;max-width:300px;margin:25px;" />
 

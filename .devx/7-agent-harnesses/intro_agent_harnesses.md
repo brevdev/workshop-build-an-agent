@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 07 / 01 - CONCEPTS" data-title="The LLM never remembered anything." data-sub="The harness is the layer that did - memory, tool execution, planning, and the token budget all live outside the model." data-meta="READ::20 min|CONCEPTS::5 responsibilities"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 01 - CONCEPTS" data-title="The LLM never remembered anything." data-sub="The harness is the layer that did - memory, tool execution, planning, and the token budget all live outside the model." data-meta="READ::20 min|CONCEPTS::5 responsibilities"></div>
 
 Here's an uncomfortable truth about every agent you've built in this workshop: the LLM never remembered anything, never called a tool, and never planned a single step.
 
@@ -33,15 +33,15 @@ flowchart TB
 
 Here's what one turn of that agentic loop looks like from the harness's side — the model only ever sees tokens, while the harness does all the reading, running, and budgeting:
 
-<div class="m7-term">
-  <span class="m7-term-title">the agentic loop</span>
-  <span class="m7-term-line" data-kind="prompt">summarize the errors in build.log</span>
-  <span class="m7-term-line" data-kind="think" data-delay="350">thinking...</span>
-  <span class="m7-term-line" data-kind="tool" data-delay="250">[tool] read_file(build.log)</span>
-  <span class="m7-term-line" data-kind="tokens">tokens: 1,847 / 128,000</span>
-  <span class="m7-term-line" data-kind="tool" data-delay="250">[tool] run_bash(grep -c ERROR build.log)</span>
-  <span class="m7-term-line" data-kind="tokens">tokens: 2,210 / 128,000</span>
-  <span class="m7-term-line" data-kind="answer" data-delay="400">3 errors, all missing CUDA headers - fix: install cuda-toolkit-12-8</span>
+<div class="dx-term">
+  <span class="dx-term-title">the agentic loop</span>
+  <span class="dx-term-line" data-kind="prompt">summarize the errors in build.log</span>
+  <span class="dx-term-line" data-kind="think" data-delay="350">thinking...</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[tool] read_file(build.log)</span>
+  <span class="dx-term-line" data-kind="tokens">tokens: 1,847 / 128,000</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[tool] run_bash(grep -c ERROR build.log)</span>
+  <span class="dx-term-line" data-kind="tokens">tokens: 2,210 / 128,000</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="400">3 errors, all missing CUDA headers - fix: install cuda-toolkit-12-8</span>
 </div>
 
 This separation matters because the two layers are **independent choices**:
@@ -85,12 +85,12 @@ We call this recurring overhead the **context tax**. A maximal harness might spe
 >
 > **The minimal bet:** most of that machinery is documentation the model could load *on demand*. Strip the core, lazy-load the rest, and bet on the model itself.
 
-<div class="m7-island">
-  <p class="m7-island-title">WHO EATS A 32K-TOKEN TURN?</p>
-  <div class="m7-gauges">
-    <div class="m7-gauge" data-pct="12"><div class="m7-gauge-ring">0%</div><p class="m7-gauge-label"><b>maximal harness</b><br>3,922 tokens</p></div>
-    <div class="m7-gauge" data-pct="46"><div class="m7-gauge-ring">0%</div><p class="m7-gauge-label"><b>10 eager skills</b><br>~15,000 tokens</p></div>
-    <div class="m7-gauge" data-pct="1"><div class="m7-gauge-ring">0%</div><p class="m7-gauge-label"><b>10 lazy skills</b><br>~240 tokens</p></div>
+<div class="dx-island">
+  <p class="dx-island-title">WHO EATS A 32K-TOKEN TURN?</p>
+  <div class="dx-gauges">
+    <div class="dx-gauge" data-pct="12"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>maximal harness</b><br>3,922 tokens</p></div>
+    <div class="dx-gauge" data-pct="46"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>10 eager skills</b><br>~15,000 tokens</p></div>
+    <div class="dx-gauge" data-pct="1"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>10 lazy skills</b><br>~240 tokens</p></div>
   </div>
 </div>
 
@@ -110,13 +110,13 @@ One more reframe before the tour. In Module 6 you watched OpenClaw run an always
 
 OpenClaw *is* a harness. So is deepagents. So is the bare ReAct loop from Module 1 — just a very small one.
 
-<div class="m7-island m7-quiz">
-  <p class="m7-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="m7-quiz-q">Lazy skill loading — keeping skills as one-line descriptions until the agent invokes them — belongs to which harness responsibility?</p>
-  <button class="m7-quiz-opt" data-fb="Memory is cross-session persistence - lazy loading happens within a single turn's context.">Memory</button>
-  <button class="m7-quiz-opt" data-fb="Tool schemas are part of the context tax, but lazy loading is a budget decision, not an execution mechanism.">Tool calling</button>
-  <button class="m7-quiz-opt" data-right data-fb="Right - keeping one-line descriptions until a skill is invoked is spending the context budget deliberately.">Token efficiency</button>
-  <button class="m7-quiz-opt" data-fb="Self-evolution is the agent rewriting its own scaffolding - lazy loading is the harness managing what enters context.">Self-evolution</button>
+<div class="dx-island dx-quiz">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Lazy skill loading — keeping skills as one-line descriptions until the agent invokes them — belongs to which harness responsibility?</p>
+  <button class="dx-quiz-opt" data-fb="Memory is cross-session persistence - lazy loading happens within a single turn's context.">Memory</button>
+  <button class="dx-quiz-opt" data-fb="Tool schemas are part of the context tax, but lazy loading is a budget decision, not an execution mechanism.">Tool calling</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right - keeping one-line descriptions until a skill is invoked is spending the context budget deliberately.">Token efficiency</button>
+  <button class="dx-quiz-opt" data-fb="Self-evolution is the agent rewriting its own scaffolding - lazy loading is the harness managing what enters context.">Self-evolution</button>
 </div>
 
 > Now that you know what a harness is, let's meet the major ones. Head to [The Harness Landscape](harness_landscape).

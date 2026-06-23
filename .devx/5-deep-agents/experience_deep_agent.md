@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 05 / 03 - EXPERIENCE" data-title="Experience a Deep Agent"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / 03 - EXPERIENCE" data-title="Experience a Deep Agent"></div>
 
 <img src="_static/robots/plumber.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 

@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 04 / 05 - HANDS ON" data-title="Run Customized Agent"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 05 - HANDS ON" data-title="Run Customized Agent"></div>
 
 <img src="_static/robots/typewriter.png" alt="Running" style="float:right;max-width:250px;margin:15px;" />
 

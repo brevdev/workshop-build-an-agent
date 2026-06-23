@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 02 / 04 - MCP" data-title="Implementing MCP"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / 04 - MCP" data-title="Implementing MCP"></div>
 
 <img src="_static/robots/MCP.png" alt="MCP Robot Character" style="float:right;max-width:300px;margin:25px;" />
 

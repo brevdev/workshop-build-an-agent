@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 06 / 02 - SETUP OPENCLAW" data-title="Set Up Your OpenClaw Agent"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 02 - SETUP OPENCLAW" data-title="Set Up Your OpenClaw Agent"></div>
 
 <img src="_static/robots/supervisor.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 

@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 04 / 03 - SYNTHETIC DATA" data-title="Synthetic Data Generation"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 03 - SYNTHETIC DATA" data-title="Synthetic Data Generation"></div>
 
 <img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
 

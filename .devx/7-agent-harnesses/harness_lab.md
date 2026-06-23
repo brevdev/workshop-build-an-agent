@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 07 / 05 - HANDS ON" data-title="Build the harness. Measure the tax. Drive the GPU." data-sub="Five exercises that take you from a minimal loop you write yourself to an agent that evolves its own skills." data-meta="EXERCISES::5|FORMAT::notebook or .py|ANSWERS::included"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 05 - HANDS ON" data-title="Build the harness. Measure the tax. Drive the GPU." data-sub="Five exercises that take you from a minimal loop you write yourself to an agent that evolves its own skills." data-meta="EXERCISES::5|FORMAT::notebook or .py|ANSWERS::included"></div>
 
 Five exercises. You'll build a minimal harness from scratch, measure the context tax, author a portable skill, put your GPU to work through a verified NVIDIA skill, and finish with an agent that writes its own skills.
 
@@ -12,14 +12,14 @@ pi proves a complete harness needs surprisingly little: a short system prompt, f
 
 Here's what a finished Exercise 1 run looks like:
 
-<div class="m7-term">
-  <span class="m7-term-title">python harness_lab.py --exercise 1</span>
-  <span class="m7-term-line" data-kind="prompt">create harness_hello.txt with the words minimal harness</span>
-  <span class="m7-term-line" data-kind="think" data-delay="350">thinking...</span>
-  <span class="m7-term-line" data-kind="tool" data-delay="250">[tool] write_file(harness_hello.txt)</span>
-  <span class="m7-term-line" data-kind="tool" data-delay="250">[tool] read_file(harness_hello.txt)</span>
-  <span class="m7-term-line" data-kind="tokens">tokens: 1,102 / 128,000</span>
-  <span class="m7-term-line" data-kind="answer" data-delay="400">Done - file created and verified: minimal harness</span>
+<div class="dx-term">
+  <span class="dx-term-title">python harness_lab.py --exercise 1</span>
+  <span class="dx-term-line" data-kind="prompt">create harness_hello.txt with the words minimal harness</span>
+  <span class="dx-term-line" data-kind="think" data-delay="350">thinking...</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[tool] write_file(harness_hello.txt)</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[tool] read_file(harness_hello.txt)</span>
+  <span class="dx-term-line" data-kind="tokens">tokens: 1,102 / 128,000</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="400">Done - file created and verified: minimal harness</span>
 </div>
 
 Complete the agent loop in <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'def build_bare_agent');"><i class="fas fa-code"></i> build_bare_agent( ... )</button> — wire the four tools to the model and implement the tool-calling loop.
@@ -99,11 +99,11 @@ Maximal harness:  8,212 tokens/turn        (9.7× tax)
 10 lazy skills:     +236 tokens/turn       (63× savings)
 ```
 
-<div class="m7-island m7-reveal">
-  <p class="m7-island-title">YOUR TARGETS</p>
-  <div class="m7-gauges">
-    <div class="m7-gauge" data-pct="1"><div class="m7-gauge-ring">0%</div><p class="m7-gauge-label"><b>minimal</b><br>365 tokens / 32K</p></div>
-    <div class="m7-gauge" data-pct="12"><div class="m7-gauge-ring">0%</div><p class="m7-gauge-label"><b>maximal</b><br>3,922 tokens / 32K</p></div>
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">YOUR TARGETS</p>
+  <div class="dx-gauges">
+    <div class="dx-gauge" data-pct="1"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>minimal</b><br>365 tokens / 32K</p></div>
+    <div class="dx-gauge" data-pct="12"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>maximal</b><br>3,922 tokens / 32K</p></div>
   </div>
 </div>
 

@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 07 / 03 - SKILLS" data-title="Capability that travels." data-sub="One SKILL.md, written once, runs in every harness on the market." data-meta="SPEC::agentskills.io|CATALOG::github.com/NVIDIA/skills"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 03 - SKILLS" data-title="Capability that travels." data-sub="One SKILL.md, written once, runs in every harness on the market." data-meta="SPEC::agentskills.io|CATALOG::github.com/NVIDIA/skills"></div>
 
 If harnesses are where agents are won or lost, **skills** are how capability moves between them.
 
@@ -93,12 +93,12 @@ Remember Module 6's lesson: an autonomous agent will eventually encounter advers
 
 Here's what a verified skill looks like in the catalog:
 
-<div class="m7-skillcard m7-reveal">
-  <div class="m7-skillcard-head"><span class="m7-skillcard-name">accelerated-computing-cudf</span><span class="m7-chip is-green">NVIDIA VERIFIED ✓</span></div>
+<div class="dx-skillcard dx-reveal">
+  <div class="dx-skillcard-head"><span class="dx-skillcard-name">accelerated-computing-cudf</span><span class="dx-chip is-green">NVIDIA VERIFIED ✓</span></div>
   <p>Official NVIDIA-authored guidance for cuDF GPU DataFrames, pandas acceleration, dask-cuDF, ETL, joins, groupby, CSV/Parquet I/O, and multi-GPU DataFrame workloads.</p>
   <ul>
     <li><b>Owner</b> NVIDIA · <b>License</b> CC-BY-4.0 AND Apache-2.0</li>
-    <li><b>SkillSpector</b> <span class="m7-check">✓</span> prompt injection <span class="m7-check">✓</span> tool poisoning <span class="m7-check">✓</span> dangerous code</li>
+    <li><b>SkillSpector</b> <span class="dx-check">✓</span> prompt injection <span class="dx-check">✓</span> tool poisoning <span class="dx-check">✓</span> dangerous code</li>
     <li><b>Signature</b> skill.oms.sig - OpenSSF Model Signing</li>
     <li><b>Skill card</b> use case, risks & mitigations, dependencies, eval agents (claude-code, codex)</li>
   </ul>
@@ -106,13 +106,13 @@ Here's what a verified skill looks like in the catalog:
 
 The principle, straight from the program: *trust should come from verifiable integrity and authenticity, not from implied provenance alone.* In the lab, you'll verify that signature yourself before letting the skill anywhere near your agent.
 
-<div class="m7-island m7-quiz">
-  <p class="m7-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="m7-quiz-q">Your agent has 30 skills installed but is not using any right now - what is in its context?</p>
-  <button class="m7-quiz-opt" data-fb="That is eager loading - about 45,000 tokens of tax every turn.">All 30 full skill bodies</button>
-  <button class="m7-quiz-opt" data-fb="Then the model could never know when to load one.">Nothing at all</button>
-  <button class="m7-quiz-opt" data-right data-fb="About 750 tokens - the descriptions are the trigger surface, bodies load on demand.">Thirty one-line descriptions</button>
-  <button class="m7-quiz-opt" data-fb="Recency is not how skills trigger - descriptions match against the task.">Only the most recently used skill</button>
+<div class="dx-island dx-quiz">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Your agent has 30 skills installed but is not using any right now - what is in its context?</p>
+  <button class="dx-quiz-opt" data-fb="That is eager loading - about 45,000 tokens of tax every turn.">All 30 full skill bodies</button>
+  <button class="dx-quiz-opt" data-fb="Then the model could never know when to load one.">Nothing at all</button>
+  <button class="dx-quiz-opt" data-right data-fb="About 750 tokens - the descriptions are the trigger surface, bodies load on demand.">Thirty one-line descriptions</button>
+  <button class="dx-quiz-opt" data-fb="Recency is not how skills trigger - descriptions match against the task.">Only the most recently used skill</button>
 </div>
 
 > Time for the punchline of this module: what happens when a verified skill meets the GPU sitting under this very workshop. Head to [GPU Skills in Any Harness](gpu_skills).

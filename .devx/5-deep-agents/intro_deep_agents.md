@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 05 / 01 - CONCEPTS" data-title="Introduction to Deep Agents"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / 01 - CONCEPTS" data-title="Introduction to Deep Agents"></div>
 
 <img src="_static/robots/magician.png" alt="Deep Agent Robot" style="float:right;max-width:300px;margin:25px;" />
 

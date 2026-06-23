@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 04 / 04 - GRPO TRAINING" data-title="GRPO Training"></div>
+<div class="dx-hero" data-eyebrow="MODULE 04 / 04 - GRPO TRAINING" data-title="GRPO Training"></div>
 
 <img src="_static/robots/debug.png" alt="Training" style="float:right;max-width:250px;margin:15px;" />
 

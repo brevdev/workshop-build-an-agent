@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 05 / 02 - FUNDAMENTALS" data-title="What Are Deep Agents?"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / 02 - FUNDAMENTALS" data-title="What Are Deep Agents?"></div>
 
 <img src="_static/robots/datacenter.png" alt="Deep Agent Architecture" style="float:right;max-width:300px;margin:25px;" />
 

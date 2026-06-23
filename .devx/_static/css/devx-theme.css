@@ -1,9 +1,9 @@
 /* ==========================================================================
-   M7 design system — SHARED across all DevX Workshop modules
+   DevX Workshop design system — SHARED across all DevX Workshop modules
    "Hybrid NVIDIA" design system: dark hero + dark widget islands + dark
    terminal panels on the reading surface. Kaizen tokens throughout.
-   Loaded by every module from _static/css/m7-theme.css + _static/js/m7-theme.js;
-   each module's index.html carries `m7-dark m7-mod<N>` on <html>.
+   Loaded by every module from _static/css/devx-theme.css + _static/js/devx-theme.js;
+   each module's index.html carries `dx-dark dx-mod<N>` on <html>.
    ========================================================================== */
 
 @font-face {
@@ -23,45 +23,45 @@
 
 :root {
   /* Kaizen surface ladder */
-  --m7-black: #000000;
-  --m7-sunken: #0c0c0c;
-  --m7-raised: #161616;
-  --m7-overlay: #222222;
-  --m7-border: #313131;
-  --m7-border-hover: #5e5e5e;
+  --dx-black: #000000;
+  --dx-sunken: #0c0c0c;
+  --dx-raised: #161616;
+  --dx-overlay: #222222;
+  --dx-border: #313131;
+  --dx-border-hover: #5e5e5e;
 
   /* Green is a scalpel */
-  --m7-green: #76b900;
-  --m7-green-hover: #549a00;
-  --m7-green-dim: rgba(118, 185, 0, 0.14);
+  --dx-green: #76b900;
+  --dx-green-hover: #549a00;
+  --dx-green-dim: rgba(118, 185, 0, 0.14);
 
   /* Text on dark */
-  --m7-fg: #f2f2f2;
-  --m7-fg-dim: #c6c6c6;
-  --m7-fg-mute: #8f8f8f;
+  --dx-fg: #f2f2f2;
+  --dx-fg-dim: #c6c6c6;
+  --dx-fg-mute: #8f8f8f;
 
-  --m7-radius: 4px;
-  --m7-ease: 0.2s ease-out;
-  --m7-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --m7-sans: 'NVIDIASans', sans-serif;
+  --dx-radius: 4px;
+  --dx-ease: 0.2s ease-out;
+  --dx-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --dx-sans: 'NVIDIASans', sans-serif;
 }
 
 /* ==========================================================================
    1. HERO BAND — one per page. The only place glow + grain + grid exist.
    ========================================================================== */
 
-.m7-hero {
+.dx-hero {
   position: relative;
   margin: 0 0 2.4rem;
   padding: 2.9rem 2.4rem 2.5rem;
-  background: var(--m7-black);
+  background: var(--dx-black);
   overflow: hidden;
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
 }
 
 /* faint engineering dot grid, masked so it fades before the text baseline */
-.m7-hero::before {
+.dx-hero::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -74,7 +74,7 @@
 }
 
 /* the single rationed glow + film grain to kill banding */
-.m7-hero::after {
+.dx-hero::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -86,70 +86,70 @@
   pointer-events: none;
 }
 
-.m7-hero > * { position: relative; z-index: 1; }
+.dx-hero > * { position: relative; z-index: 1; }
 
-.m7-hero .m7-eyebrow {
-  font-family: var(--m7-mono);
+.dx-hero .dx-eyebrow {
+  font-family: var(--dx-mono);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--m7-green);
+  color: var(--dx-green);
   margin: 0 0 0.9rem;
 }
-.m7-hero .m7-eyebrow::before {
+.dx-hero .dx-eyebrow::before {
   content: '';
   display: inline-block;
   width: 22px;
   height: 2px;
-  background: var(--m7-green);
+  background: var(--dx-green);
   vertical-align: middle;
   margin-right: 10px;
 }
 
-.m7-hero h1 {
-  font-family: var(--m7-sans);
+.dx-hero h1 {
+  font-family: var(--dx-sans);
   font-weight: 700;
   font-size: clamp(1.9rem, 4.5vw, 3.1rem);
   line-height: 1.06;
   letter-spacing: -0.015em;
   margin: 0 0 0.9rem;
   max-width: 17em;
-  color: var(--m7-fg);
-  background: linear-gradient(100deg, #ffffff 55%, var(--m7-green) 115%);
+  color: var(--dx-fg);
+  background: linear-gradient(100deg, #ffffff 55%, var(--dx-green) 115%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   border: none;
 }
 
-.m7-hero .m7-sub {
-  font-family: var(--m7-sans);
+.dx-hero .dx-sub {
+  font-family: var(--dx-sans);
   font-weight: 200;
   font-size: 1.02rem;
   line-height: 1.55;
-  color: var(--m7-fg-dim);
+  color: var(--dx-fg-dim);
   max-width: 44em;
   margin: 0;
 }
 
-.m7-hero .m7-meta {
+.dx-hero .dx-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1.4rem;
 }
-.m7-hero .m7-meta span {
-  font-family: var(--m7-mono);
+.dx-hero .dx-meta span {
+  font-family: var(--dx-mono);
   font-size: 0.7rem;
   letter-spacing: 0.06em;
-  color: var(--m7-fg-dim);
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
   padding: 4px 10px;
   background: rgba(255, 255, 255, 0.03);
 }
-.m7-hero .m7-meta span b { color: var(--m7-green); font-weight: 700; }
+.dx-hero .dx-meta span b { color: var(--dx-green); font-weight: 700; }
 
 /* ==========================================================================
    2. READING SURFACE refinements (light, stays close to other modules)
@@ -158,7 +158,7 @@
 .markdown-section { max-width: 56em; }
 
 .markdown-section h2 {
-  font-family: var(--m7-sans);
+  font-family: var(--dx-sans);
   font-weight: 700;
   letter-spacing: -0.01em;
   margin-top: 2.6rem;
@@ -168,44 +168,44 @@
   display: block;
   width: 34px;
   height: 3px;
-  background: var(--m7-green);
+  background: var(--dx-green);
   margin-bottom: 0.55rem;
 }
 
 /* links: dark text, green signal on hover — green is never body-link color.
    !important required: theme-simple sets link color via higher-specificity vars. */
-.markdown-section a:not(.m7-cta) {
+.markdown-section a:not(.dx-cta) {
   color: #1a1a1a !important;
   text-decoration: underline;
-  text-decoration-color: var(--m7-green);
+  text-decoration-color: var(--dx-green);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
-  transition: color var(--m7-ease);
+  transition: color var(--dx-ease);
 }
-.markdown-section a:not(.m7-cta):hover { color: var(--m7-green-hover) !important; }
+.markdown-section a:not(.dx-cta):hover { color: var(--dx-green-hover) !important; }
 
 /* …but on dark surfaces links must stay light (higher specificity wins) */
-.markdown-section .m7-island a,
-.markdown-section .m7-skillcard a,
-.markdown-section .m7-choose a,
+.markdown-section .dx-island a,
+.markdown-section .dx-skillcard a,
+.markdown-section .dx-choose a,
 .markdown-section .docsify-tabs__content a {
-  color: var(--m7-fg) !important;
-  text-decoration-color: var(--m7-green);
+  color: var(--dx-fg) !important;
+  text-decoration-color: var(--dx-green);
 }
-.markdown-section .m7-island a:hover,
-.markdown-section .m7-skillcard a:hover,
-.markdown-section .m7-choose a:hover,
-.markdown-section .docsify-tabs__content a:hover { color: var(--m7-green) !important; }
+.markdown-section .dx-island a:hover,
+.markdown-section .dx-skillcard a:hover,
+.markdown-section .dx-choose a:hover,
+.markdown-section .docsify-tabs__content a:hover { color: var(--dx-green) !important; }
 
 /* bold terms stay ink-dark on the light surface (theme tints them otherwise) */
 .markdown-section strong { color: #202020; }
-.markdown-section .m7-island strong,
+.markdown-section .dx-island strong,
 .markdown-section .docsify-tabs__content strong,
-.markdown-section .m7-choose strong { color: var(--m7-fg); }
+.markdown-section .dx-choose strong { color: var(--dx-fg); }
 
 /* inline code on light surface */
 .markdown-section code:not([class*="lang-"]) {
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.82em;
   background: #f2f2f2;
   border: 1px solid #e2e2e2;
@@ -217,25 +217,25 @@
 /* tables: engineering data sheet */
 .markdown-section table {
   border: 1px solid #e2e2e2;
-  border-radius: var(--m7-radius);
+  border-radius: var(--dx-radius);
   font-size: 0.92em;
 }
 .markdown-section thead th {
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--m7-black);
-  color: var(--m7-fg-dim);
-  border: 1px solid var(--m7-border);
+  background: var(--dx-black);
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border);
 }
 .markdown-section tr:nth-child(2n) { background: #fafafa; }
 
 /* blockquote → quiet aside with green spine */
 .markdown-section blockquote {
-  border-left: 3px solid var(--m7-green);
+  border-left: 3px solid var(--dx-green);
   background: #fafafa;
-  border-radius: 0 var(--m7-radius) var(--m7-radius) 0;
+  border-radius: 0 var(--dx-radius) var(--dx-radius) 0;
   padding: 0.7em 1.1em;
   color: #343434;
 }
@@ -252,9 +252,9 @@
 
 .markdown-section pre {
   position: relative;
-  background: var(--m7-sunken) !important;
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+  background: var(--dx-sunken) !important;
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
   padding: 2.1em 1.1em 1em !important;
   margin: 1.4em 0;
 }
@@ -276,16 +276,16 @@
   position: absolute;
   top: 7px;
   right: 12px;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--m7-fg-mute);
+  color: var(--dx-fg-mute);
   background: none;
   padding: 0;
 }
 .markdown-section pre > code {
-  font-family: var(--m7-mono) !important;
+  font-family: var(--dx-mono) !important;
   font-size: 0.83em;
   line-height: 1.6;
   background: transparent !important;
@@ -304,82 +304,82 @@
 
 /* docsify-copy-code restyled: quiet chip, green confirmation */
 .docsify-copy-code-button {
-  background: var(--m7-overlay) !important;
-  color: var(--m7-fg-dim) !important;
-  font-family: var(--m7-mono) !important;
+  background: var(--dx-overlay) !important;
+  color: var(--dx-fg-dim) !important;
+  font-family: var(--dx-mono) !important;
   font-size: 0.62rem !important;
-  border-radius: var(--m7-radius) !important;
-  border: 1px solid var(--m7-border) !important;
+  border-radius: var(--dx-radius) !important;
+  border: 1px solid var(--dx-border) !important;
 }
-.docsify-copy-code-button.success { background: var(--m7-green) !important; color: #000 !important; }
+.docsify-copy-code-button.success { background: var(--dx-green) !important; color: #000 !important; }
 
 /* ==========================================================================
    4. DARK WIDGET ISLAND — shared shell for all interactive components
    ========================================================================== */
 
-.m7-island {
-  background: var(--m7-raised);
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+.dx-island {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
   padding: 1.4rem 1.5rem;
   margin: 1.6rem 0;
-  color: var(--m7-fg);
-  font-family: var(--m7-sans);
+  color: var(--dx-fg);
+  font-family: var(--dx-sans);
 }
 /* theme-simple colors p/li/blockquote explicitly — force light text inside
    every dark container at the element level */
-.markdown-section .m7-island p,
-.markdown-section .m7-island li,
-.markdown-section .m7-island blockquote,
-.markdown-section .m7-island blockquote p,
-.markdown-section .m7-skillcard p,
-.markdown-section .m7-skillcard li,
-.markdown-section .m7-choose p,
-.markdown-section .m7-choose li,
-.markdown-section .m7-choose blockquote p,
+.markdown-section .dx-island p,
+.markdown-section .dx-island li,
+.markdown-section .dx-island blockquote,
+.markdown-section .dx-island blockquote p,
+.markdown-section .dx-skillcard p,
+.markdown-section .dx-skillcard li,
+.markdown-section .dx-choose p,
+.markdown-section .dx-choose li,
+.markdown-section .dx-choose blockquote p,
 .markdown-section .docsify-tabs__content p,
 .markdown-section .docsify-tabs__content li,
 .markdown-section .docsify-tabs__content blockquote,
 .markdown-section .docsify-tabs__content blockquote p {
-  color: var(--m7-fg-dim) !important;
+  color: var(--dx-fg-dim) !important;
 }
-.markdown-section .m7-island h3,
-.markdown-section .m7-island h4,
-.markdown-section .m7-choose summary,
+.markdown-section .dx-island h3,
+.markdown-section .dx-island h4,
+.markdown-section .dx-choose summary,
 .markdown-section .docsify-tabs__content h3,
 .markdown-section .docsify-tabs__content h4 {
-  color: var(--m7-fg) !important;
+  color: var(--dx-fg) !important;
 }
 
-.m7-island .m7-island-title {
-  font-family: var(--m7-mono);
+.dx-island .dx-island-title {
+  font-family: var(--dx-mono);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--m7-green);
+  color: var(--dx-green);
   margin: 0 0 1rem;
 }
-.m7-island a { color: var(--m7-fg); text-decoration-color: var(--m7-green); }
+.dx-island a { color: var(--dx-fg); text-decoration-color: var(--dx-green); }
 
 /* ==========================================================================
    5. SELF-TYPING AGENT TERMINAL (Termynal-inspired)
    ========================================================================== */
 
-.m7-term {
-  background: var(--m7-sunken);
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+.dx-term {
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
   padding: 2.3rem 1.2rem 1.1rem;
   margin: 1.6rem 0;
   position: relative;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.8rem;
   line-height: 1.75;
   color: #e6e6e6;
   min-height: 8em;
 }
-.m7-term::before {
+.dx-term::before {
   content: '';
   position: absolute;
   top: 12px; left: 14px;
@@ -388,191 +388,191 @@
   background: #3a3a3a;
   box-shadow: 16px 0 0 #3a3a3a, 32px 0 0 #3a3a3a;
 }
-.m7-term .m7-term-title {
+.dx-term .dx-term-title {
   position: absolute;
   top: 6px; left: 0; right: 0;
   text-align: center;
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--m7-fg-mute);
+  color: var(--dx-fg-mute);
 }
-.m7-term-line { display: block; white-space: pre-wrap; min-height: 1.4em; }
-.m7-term-line[data-kind="prompt"]::before { content: '$ '; color: var(--m7-green); font-weight: 700; }
-.m7-term-line[data-kind="think"] { color: #8f8f8f; font-style: italic; }
-.m7-term-line[data-kind="tool"] { color: #8fcb2b; }
-.m7-term-line[data-kind="tokens"] { color: #767676; }
-.m7-term-line[data-kind="answer"] { color: #ffffff; }
-.m7-term-line.m7-typing::after {
+.dx-term-line { display: block; white-space: pre-wrap; min-height: 1.4em; }
+.dx-term-line[data-kind="prompt"]::before { content: '$ '; color: var(--dx-green); font-weight: 700; }
+.dx-term-line[data-kind="think"] { color: #8f8f8f; font-style: italic; }
+.dx-term-line[data-kind="tool"] { color: #8fcb2b; }
+.dx-term-line[data-kind="tokens"] { color: #767676; }
+.dx-term-line[data-kind="answer"] { color: #ffffff; }
+.dx-term-line.dx-typing::after {
   content: '▋';
-  color: var(--m7-green);
-  animation: m7-blink 1s steps(1) infinite;
+  color: var(--dx-green);
+  animation: dx-blink 1s steps(1) infinite;
 }
-@keyframes m7-blink { 50% { opacity: 0; } }
+@keyframes dx-blink { 50% { opacity: 0; } }
 
-.m7-term-replay {
+.dx-term-replay {
   position: absolute;
   top: 6px; right: 10px;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.62rem !important;
   letter-spacing: 0.1em;
-  background: var(--m7-overlay);
-  color: var(--m7-fg-dim);
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+  background: var(--dx-overlay);
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
   padding: 2px 9px;
   cursor: pointer;
-  transition: border-color var(--m7-ease), color var(--m7-ease);
+  transition: border-color var(--dx-ease), color var(--dx-ease);
   animation: none !important;
 }
-.m7-term-replay:hover { border-color: var(--m7-green); color: var(--m7-green); }
+.dx-term-replay:hover { border-color: var(--dx-green); color: var(--dx-green); }
 
 /* ==========================================================================
    6. TOKEN GAUGE — @property conic donut + count-up
    ========================================================================== */
 
-@property --m7-gauge {
+@property --dx-gauge {
   syntax: '<percentage>';
   inherits: false;
   initial-value: 0%;
 }
 
-.m7-gauges {
+.dx-gauges {
   display: flex;
   flex-wrap: wrap;
   gap: 1.4rem;
   justify-content: center;
 }
-.m7-gauge {
+.dx-gauge {
   text-align: center;
   flex: 0 1 150px;
 }
-.m7-gauge .m7-gauge-ring {
-  --m7-gauge: 0%;
+.dx-gauge .dx-gauge-ring {
+  --dx-gauge: 0%;
   width: 110px;
   height: 110px;
   margin: 0 auto 0.6rem;
   border-radius: 50%;
   background:
-    radial-gradient(closest-side, var(--m7-raised) 78%, transparent 79% 100%),
-    conic-gradient(var(--m7-green) var(--m7-gauge), var(--m7-overlay) 0);
+    radial-gradient(closest-side, var(--dx-raised) 78%, transparent 79% 100%),
+    conic-gradient(var(--dx-green) var(--dx-gauge), var(--dx-overlay) 0);
   display: grid;
   place-items: center;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-weight: 700;
   font-size: 1.05rem;
-  color: var(--m7-fg);
+  color: var(--dx-fg);
 }
-.m7-gauge.is-on .m7-gauge-ring {
-  --m7-gauge: var(--m7-gauge-to, 50%);
+.dx-gauge.is-on .dx-gauge-ring {
+  --dx-gauge: var(--dx-gauge-to, 50%);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .m7-gauge.is-on .m7-gauge-ring { transition: --m7-gauge 1.1s ease-out; }
+  .dx-gauge.is-on .dx-gauge-ring { transition: --dx-gauge 1.1s ease-out; }
 }
-.m7-gauge .m7-gauge-label {
-  font-family: var(--m7-mono);
+.dx-gauge .dx-gauge-label {
+  font-family: var(--dx-mono);
   font-size: 0.66rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--m7-fg-mute);
+  color: var(--dx-fg-mute);
   line-height: 1.5;
 }
-.m7-gauge .m7-gauge-label b { color: var(--m7-fg-dim); }
+.dx-gauge .dx-gauge-label b { color: var(--dx-fg-dim); }
 
 /* ==========================================================================
    7. CONTEXT TAX METER v2
    ========================================================================== */
 
-.m7-tax { display: grid; gap: 9px; }
-.m7-tax-row {
+.dx-tax { display: grid; gap: 9px; }
+.dx-tax-row {
   display: grid;
   grid-template-columns: 170px 1fr 86px;
   align-items: center;
   gap: 12px;
 }
-.m7-tax-row .m7-tax-name {
-  font-family: var(--m7-mono);
+.dx-tax-row .dx-tax-name {
+  font-family: var(--dx-mono);
   font-size: 0.74rem;
   font-weight: 700;
-  color: var(--m7-fg-dim);
+  color: var(--dx-fg-dim);
   text-align: right;
 }
-.m7-tax-row .m7-tax-track {
+.dx-tax-row .dx-tax-track {
   height: 20px;
-  background: var(--m7-sunken);
-  border: 1px solid var(--m7-border);
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border);
   border-radius: 3px;
   overflow: hidden;
 }
-.m7-tax-row .m7-tax-fill {
+.dx-tax-row .dx-tax-fill {
   height: 100%;
-  width: calc(var(--m7-w, 0) * 1%);
-  background: linear-gradient(90deg, #3d6600, var(--m7-green));
+  width: calc(var(--dx-w, 0) * 1%);
+  background: linear-gradient(90deg, #3d6600, var(--dx-green));
   display: flex;
   align-items: center;
   justify-content: flex-end;
   padding-right: 7px;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.62rem;
   font-weight: 700;
   color: #000;
   min-width: 2.4em;
 }
-.m7-tax-row[data-tier="max"] .m7-tax-fill { background: linear-gradient(90deg, #5e5e5e, #d8d8d8); color: #000; }
-.m7-tax-row .m7-tax-note {
-  font-family: var(--m7-mono);
+.dx-tax-row[data-tier="max"] .dx-tax-fill { background: linear-gradient(90deg, #5e5e5e, #d8d8d8); color: #000; }
+.dx-tax-row .dx-tax-note {
+  font-family: var(--dx-mono);
   font-size: 0.64rem;
-  color: var(--m7-fg-mute);
+  color: var(--dx-fg-mute);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .m7-tax .m7-tax-fill { width: 0; transition: width 1s ease-out; }
-  .m7-tax.is-on .m7-tax-fill { width: calc(var(--m7-w, 0) * 1%); }
+  .dx-tax .dx-tax-fill { width: 0; transition: width 1s ease-out; }
+  .dx-tax.is-on .dx-tax-fill { width: calc(var(--dx-w, 0) * 1%); }
 }
-.m7-tax-row:hover .m7-tax-track { border-color: var(--m7-border-hover); }
+.dx-tax-row:hover .dx-tax-track { border-color: var(--dx-border-hover); }
 
 /* ==========================================================================
    8. BENTO GRID (module landing)
    ========================================================================== */
 
-.m7-bento {
+.dx-bento {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin: 1.6rem 0;
 }
-.m7-bento .m7-cell {
-  background: var(--m7-raised);
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+.dx-bento .dx-cell {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
   padding: 1.05rem 1.15rem;
-  color: var(--m7-fg-dim);
-  font-family: var(--m7-sans);
+  color: var(--dx-fg-dim);
+  font-family: var(--dx-sans);
   font-size: 0.86rem;
   line-height: 1.5;
-  transition: border-color var(--m7-ease), transform var(--m7-ease);
+  transition: border-color var(--dx-ease), transform var(--dx-ease);
 }
-.m7-bento .m7-cell:hover { border-color: var(--m7-green); transform: translateY(-2px); }
-.m7-bento .m7-cell.is-wide { grid-column: span 2; }
-.m7-bento .m7-cell.is-tall { grid-row: span 2; }
-.m7-bento .m7-cell h4 {
-  font-family: var(--m7-mono);
+.dx-bento .dx-cell:hover { border-color: var(--dx-green); transform: translateY(-2px); }
+.dx-bento .dx-cell.is-wide { grid-column: span 2; }
+.dx-bento .dx-cell.is-tall { grid-row: span 2; }
+.dx-bento .dx-cell h4 {
+  font-family: var(--dx-mono);
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--m7-green);
+  color: var(--dx-green);
   margin: 0 0 0.5rem;
 }
-.m7-bento .m7-cell .m7-big {
-  font-family: var(--m7-sans);
+.dx-bento .dx-cell .dx-big {
+  font-family: var(--dx-sans);
   font-weight: 700;
   font-size: 1.5rem;
-  color: var(--m7-fg);
+  color: var(--dx-fg);
   display: block;
   margin-bottom: 0.2rem;
 }
 @media (max-width: 720px) {
-  .m7-bento { grid-template-columns: repeat(2, 1fr); }
+  .dx-bento { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ==========================================================================
@@ -580,127 +580,127 @@
    ========================================================================== */
 
 .markdown-section .docsify-tabs {
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
-  background: var(--m7-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  background: var(--dx-raised);
   padding: 0;
   margin: 1.6rem 0;
   overflow: hidden;
 }
 .markdown-section .docsify-tabs__tab {
-  font-family: var(--m7-mono) !important;
+  font-family: var(--dx-mono) !important;
   font-size: 0.82rem !important;
   letter-spacing: 0.04em;
-  background: var(--m7-black) !important;
-  color: var(--m7-fg-mute) !important;
+  background: var(--dx-black) !important;
+  color: var(--dx-fg-mute) !important;
   border: none !important;
   border-bottom: 2px solid transparent !important;
   border-radius: 0 !important;
   padding: 0.95em 1.25em !important;
   animation: none !important;
-  transition: color var(--m7-ease);
+  transition: color var(--dx-ease);
 }
-.markdown-section .docsify-tabs__tab:hover { color: var(--m7-fg) !important; }
+.markdown-section .docsify-tabs__tab:hover { color: var(--dx-fg) !important; }
 .markdown-section .docsify-tabs__tab--active {
-  color: var(--m7-green) !important;
-  border-bottom-color: var(--m7-green) !important;
-  background: var(--m7-raised) !important;
+  color: var(--dx-green) !important;
+  border-bottom-color: var(--dx-green) !important;
+  background: var(--dx-raised) !important;
 }
 .markdown-section .docsify-tabs__content {
-  background: var(--m7-raised) !important;
+  background: var(--dx-raised) !important;
   border: none !important;
-  color: var(--m7-fg-dim);
+  color: var(--dx-fg-dim);
   padding: 1.6rem 1.9rem !important;
   font-size: 1.02em;
 }
-.markdown-section .docsify-tabs__content h3 { color: var(--m7-fg); border: none; }
-.markdown-section .docsify-tabs__content a { color: var(--m7-fg); text-decoration-color: var(--m7-green); }
+.markdown-section .docsify-tabs__content h3 { color: var(--dx-fg); border: none; }
+.markdown-section .docsify-tabs__content a { color: var(--dx-fg); text-decoration-color: var(--dx-green); }
 .markdown-section .docsify-tabs__content blockquote {
   background: rgba(255, 255, 255, 0.04);
-  border-left-color: var(--m7-green);
-  color: var(--m7-fg-dim);
+  border-left-color: var(--dx-green);
+  color: var(--dx-fg-dim);
 }
 .markdown-section .docsify-tabs__content code:not([class*="lang-"]) {
-  background: var(--m7-overlay);
-  border-color: var(--m7-border);
-  color: var(--m7-fg-dim);
+  background: var(--dx-overlay);
+  border-color: var(--dx-border);
+  color: var(--dx-fg-dim);
 }
 
 /* chips used inside cards and prose */
-.m7-chip {
+.dx-chip {
   display: inline-block;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   border-radius: 3px;
   padding: 2px 8px;
-  border: 1px solid var(--m7-border);
-  color: var(--m7-fg-dim);
-  background: var(--m7-overlay);
+  border: 1px solid var(--dx-border);
+  color: var(--dx-fg-dim);
+  background: var(--dx-overlay);
   vertical-align: middle;
 }
-.m7-chip.is-green { background: var(--m7-green); border-color: var(--m7-green); color: #000; }
-.m7-chip.is-outline-green { background: var(--m7-green-dim); border-color: var(--m7-green); color: #8fcb2b; }
+.dx-chip.is-green { background: var(--dx-green); border-color: var(--dx-green); color: #000; }
+.dx-chip.is-outline-green { background: var(--dx-green-dim); border-color: var(--dx-green); color: #8fcb2b; }
 
 /* ==========================================================================
    10. CHOOSER v2 + generic details styling (animated reveal)
    ========================================================================== */
 
-.m7-choose details {
-  background: var(--m7-raised);
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
+.dx-choose details {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
   margin: 8px 0;
   overflow: hidden;
 }
-.m7-choose details[open] { border-color: var(--m7-border-hover); }
-.m7-choose summary {
+.dx-choose details[open] { border-color: var(--dx-border-hover); }
+.dx-choose summary {
   cursor: pointer;
   list-style: none;
-  font-family: var(--m7-sans);
+  font-family: var(--dx-sans);
   font-size: 0.92rem;
-  color: var(--m7-fg);
+  color: var(--dx-fg);
   padding: 0.85rem 1.1rem;
-  transition: background var(--m7-ease);
+  transition: background var(--dx-ease);
 }
-.m7-choose summary::-webkit-details-marker { display: none; }
-.m7-choose summary::before {
+.dx-choose summary::-webkit-details-marker { display: none; }
+.dx-choose summary::before {
   content: '+';
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-weight: 700;
-  color: var(--m7-green);
+  color: var(--dx-green);
   display: inline-block;
   width: 1.3em;
 }
-.m7-choose details[open] > summary::before { content: '−'; }
-.m7-choose summary:hover { background: var(--m7-overlay); }
-.m7-choose details > *:not(summary) { padding: 0 1.1rem; color: var(--m7-fg-dim); }
-.m7-choose details details { margin: 8px 0 12px; background: var(--m7-sunken); }
+.dx-choose details[open] > summary::before { content: '−'; }
+.dx-choose summary:hover { background: var(--dx-overlay); }
+.dx-choose details > *:not(summary) { padding: 0 1.1rem; color: var(--dx-fg-dim); }
+.dx-choose details details { margin: 8px 0 12px; background: var(--dx-sunken); }
 
 /* recommendation card inside the chooser */
-.m7-choose blockquote {
-  background: var(--m7-green-dim) !important;
-  border: 1px solid var(--m7-green) !important;
-  border-radius: var(--m7-radius) !important;
-  color: var(--m7-fg) !important;
+.dx-choose blockquote {
+  background: var(--dx-green-dim) !important;
+  border: 1px solid var(--dx-green) !important;
+  border-radius: var(--dx-radius) !important;
+  color: var(--dx-fg) !important;
   margin: 0.6rem 1.1rem 1rem !important;
   padding: 0.8rem 1rem !important;
 }
-.m7-choose blockquote h3 { color: var(--m7-fg); border: none; margin: 0 0 0.3rem; }
+.dx-choose blockquote h3 { color: var(--dx-fg); border: none; margin: 0 0 0.3rem; }
 
 /* progressive enhancement: animate details opening where supported */
 @media (prefers-reduced-motion: no-preference) {
-  .m7-choose details::details-content {
+  .dx-choose details::details-content {
     opacity: 0;
     transition: opacity 0.25s ease-out, content-visibility 0.25s allow-discrete;
   }
-  .m7-choose details[open]::details-content { opacity: 1; }
+  .dx-choose details[open]::details-content { opacity: 1; }
 }
 
 /* hint/solution reveals on the light surface */
-.markdown-section details:not(.m7-choose details) > summary {
+.markdown-section details:not(.dx-choose details) > summary {
   cursor: pointer;
   font-weight: 600;
 }
@@ -709,18 +709,18 @@
    11. VERIFIED SKILL CARD v2
    ========================================================================== */
 
-.m7-skillcard {
-  background: var(--m7-raised);
-  border: 1px solid var(--m7-border);
-  border-top: 3px solid var(--m7-green);
-  border-radius: var(--m7-radius);
+.dx-skillcard {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-top: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
   padding: 1.2rem 1.4rem;
   margin: 1.6rem 0;
   max-width: 640px;
-  font-family: var(--m7-sans);
-  color: var(--m7-fg-dim);
+  font-family: var(--dx-sans);
+  color: var(--dx-fg-dim);
 }
-.m7-skillcard .m7-skillcard-head {
+.dx-skillcard .dx-skillcard-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -728,128 +728,128 @@
   gap: 0.5rem;
   margin-bottom: 0.7rem;
 }
-.m7-skillcard .m7-skillcard-name {
-  font-family: var(--m7-mono);
+.dx-skillcard .dx-skillcard-name {
+  font-family: var(--dx-mono);
   font-weight: 700;
   font-size: 1rem;
-  color: var(--m7-fg);
+  color: var(--dx-fg);
 }
-.m7-skillcard p { font-size: 0.88rem; line-height: 1.55; margin: 0 0 0.8rem; }
-.m7-skillcard ul {
+.dx-skillcard p { font-size: 0.88rem; line-height: 1.55; margin: 0 0 0.8rem; }
+.dx-skillcard ul {
   list-style: none;
   margin: 0;
   padding: 0.7rem 0 0;
-  border-top: 1px solid var(--m7-border);
+  border-top: 1px solid var(--dx-border);
   font-size: 0.8rem;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   line-height: 2.1;
 }
-.m7-skillcard ul b { color: var(--m7-fg); }
-.m7-skillcard .m7-check { color: var(--m7-green); font-weight: 700; }
+.dx-skillcard ul b { color: var(--dx-fg); }
+.dx-skillcard .dx-check { color: var(--dx-green); font-weight: 700; }
 
 /* ==========================================================================
    12. QUIZ — check your understanding (web.dev style)
    ========================================================================== */
 
-.m7-quiz { counter-reset: quizopt; }
-.m7-island .m7-quiz-q {
-  font-family: var(--m7-sans);
+.dx-quiz { counter-reset: quizopt; }
+.dx-island .dx-quiz-q {
+  font-family: var(--dx-sans);
   font-weight: 600;
   font-size: 0.98rem;
-  color: var(--m7-fg);
+  color: var(--dx-fg);
   margin: 0 0 0.9rem;
 }
-.m7-quiz .m7-quiz-opt {
+.dx-quiz .dx-quiz-opt {
   display: block;
   width: 100%;
   text-align: left;
-  background: var(--m7-sunken);
-  border: 1px solid var(--m7-border) !important;
-  border-radius: var(--m7-radius);
-  color: var(--m7-fg-dim);
-  font-family: var(--m7-sans);
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-dim);
+  font-family: var(--dx-sans);
   font-size: 0.88rem !important;
   padding: 0.7rem 0.95rem !important;
   margin: 6px 0;
   cursor: pointer;
-  transition: border-color var(--m7-ease), background var(--m7-ease);
+  transition: border-color var(--dx-ease), background var(--dx-ease);
   animation: none !important;
 }
-.m7-quiz .m7-quiz-opt::before {
+.dx-quiz .dx-quiz-opt::before {
   counter-increment: quizopt;
   content: counter(quizopt, upper-alpha);
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-weight: 700;
   font-size: 0.7rem;
-  color: var(--m7-green);
-  border: 1px solid var(--m7-border);
+  color: var(--dx-green);
+  border: 1px solid var(--dx-border);
   border-radius: 3px;
   padding: 1px 7px;
   margin-right: 10px;
 }
-.m7-quiz .m7-quiz-opt:hover { border-color: var(--m7-border-hover) !important; background: var(--m7-overlay); }
-.m7-quiz .m7-quiz-opt:focus-visible {
-  outline: 2px solid var(--m7-green);
+.dx-quiz .dx-quiz-opt:hover { border-color: var(--dx-border-hover) !important; background: var(--dx-overlay); }
+.dx-quiz .dx-quiz-opt:focus-visible {
+  outline: 2px solid var(--dx-green);
   outline-offset: 2px;
 }
-.m7-quiz .m7-quiz-opt[data-state="right"] {
-  border-color: var(--m7-green) !important;
-  background: var(--m7-green-dim);
-  color: var(--m7-fg);
+.dx-quiz .dx-quiz-opt[data-state="right"] {
+  border-color: var(--dx-green) !important;
+  background: var(--dx-green-dim);
+  color: var(--dx-fg);
 }
-.m7-quiz .m7-quiz-opt[data-state="wrong"] {
+.dx-quiz .dx-quiz-opt[data-state="wrong"] {
   border-color: #8f3b3b !important;
   background: rgba(160, 60, 60, 0.12);
 }
-.m7-quiz .m7-quiz-fb {
+.dx-quiz .dx-quiz-fb {
   font-size: 0.84rem;
   line-height: 1.55;
-  border-left: 3px solid var(--m7-border-hover);
+  border-left: 3px solid var(--dx-border-hover);
   padding: 0.5rem 0.9rem;
   margin: 10px 0 0;
-  color: var(--m7-fg-dim);
-  background: var(--m7-sunken);
-  border-radius: 0 var(--m7-radius) var(--m7-radius) 0;
+  color: var(--dx-fg-dim);
+  background: var(--dx-sunken);
+  border-radius: 0 var(--dx-radius) var(--dx-radius) 0;
 }
-.m7-quiz .m7-quiz-fb.is-right { border-left-color: var(--m7-green); }
-.m7-quiz .m7-quiz-fb b { color: var(--m7-fg); }
+.dx-quiz .dx-quiz-fb.is-right { border-left-color: var(--dx-green); }
+.dx-quiz .dx-quiz-fb b { color: var(--dx-fg); }
 
 /* ==========================================================================
    13. PREDICT-BEFORE-REVEAL (place your bet)
    ========================================================================== */
 
-.m7-bet .m7-bet-opts { display: flex; flex-wrap: wrap; gap: 8px; }
-.m7-bet .m7-bet-opt {
-  font-family: var(--m7-mono) !important;
+.dx-bet .dx-bet-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.dx-bet .dx-bet-opt {
+  font-family: var(--dx-mono) !important;
   font-size: 0.8rem !important;
   font-weight: 700;
-  background: var(--m7-sunken);
-  border: 1px solid var(--m7-border) !important;
-  border-radius: var(--m7-radius);
-  color: var(--m7-fg-dim);
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-dim);
   padding: 0.55rem 1.1rem !important;
   cursor: pointer;
-  transition: border-color var(--m7-ease);
+  transition: border-color var(--dx-ease);
   animation: none !important;
 }
-.m7-bet .m7-bet-opt:hover { border-color: var(--m7-green) !important; color: var(--m7-fg); }
-.m7-bet .m7-bet-opt:focus-visible { outline: 2px solid var(--m7-green); outline-offset: 2px; }
-.m7-bet .m7-bet-opt[data-state="picked"] { border-color: var(--m7-green) !important; background: var(--m7-green-dim); color: var(--m7-fg); }
-.m7-bet .m7-bet-reveal { margin-top: 0.9rem; font-size: 0.88rem; color: var(--m7-fg-dim); }
-.m7-bet .m7-bet-reveal b { color: var(--m7-green); font-family: var(--m7-mono); font-size: 1.05rem; }
+.dx-bet .dx-bet-opt:hover { border-color: var(--dx-green) !important; color: var(--dx-fg); }
+.dx-bet .dx-bet-opt:focus-visible { outline: 2px solid var(--dx-green); outline-offset: 2px; }
+.dx-bet .dx-bet-opt[data-state="picked"] { border-color: var(--dx-green) !important; background: var(--dx-green-dim); color: var(--dx-fg); }
+.dx-bet .dx-bet-reveal { margin-top: 0.9rem; font-size: 0.88rem; color: var(--dx-fg-dim); }
+.dx-bet .dx-bet-reveal b { color: var(--dx-green); font-family: var(--dx-mono); font-size: 1.05rem; }
 
 /* ==========================================================================
    14. REVEAL-ON-SCROLL
    ========================================================================== */
 
 @media (prefers-reduced-motion: no-preference) {
-  .m7-reveal {
+  .dx-reveal {
     opacity: 0;
     transform: translateY(14px);
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     transition-delay: calc(var(--i, 0) * 70ms);
   }
-  .m7-reveal.is-in { opacity: 1; transform: none; }
+  .dx-reveal.is-in { opacity: 1; transform: none; }
 }
 
 /* ==========================================================================
@@ -857,30 +857,30 @@
    ========================================================================== */
 
 .sidebar-nav > ul > li {
-  counter-increment: m7step;
+  counter-increment: dxstep;
 }
 .sidebar-nav > ul > li > a::before {
-  content: counter(m7step, decimal-leading-zero);
-  font-family: var(--m7-mono);
+  content: counter(dxstep, decimal-leading-zero);
+  font-family: var(--dx-mono);
   font-size: 0.66rem;
   font-weight: 700;
-  color: var(--m7-green);
+  color: var(--dx-green);
   margin-right: 9px;
   opacity: 0.85;
 }
-.sidebar-nav > ul > li.m7-done > a::before {
+.sidebar-nav > ul > li.dx-done > a::before {
   content: '✓';
-  color: var(--m7-green);
+  color: var(--dx-green);
 }
-.sidebar-nav > ul > li.m7-done > a { opacity: 0.65; }
+.sidebar-nav > ul > li.dx-done > a { opacity: 0.65; }
 
 /* Secrets is setup, not a numbered lesson — align the sidebar with the hero
    eyebrows (Harness Layer = 01, ... Wrapping Up = 06). Stop the first item from
    advancing the counter so the lessons number 01-06, and show a key glyph
-   instead of the "00" the counter would otherwise render. The :not(.m7-done)
+   instead of the "00" the counter would otherwise render. The :not(.dx-done)
    guard lets the ✓ completion rule above take over once Secrets is done. */
 .sidebar-nav > ul > li:first-child { counter-increment: none; }
-.sidebar-nav > ul > li:first-child:not(.m7-done) > a::before {
+.sidebar-nav > ul > li:first-child:not(.dx-done) > a::before {
   content: "\f084";                  /* Font Awesome key — matches secrets.md's fa-key */
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
@@ -909,21 +909,21 @@
 
 /* jupyter-link buttons (class-less by contract): NVIDIA black-on-green */
 .markdown-section button:not([class]) {
-  font-family: var(--m7-sans);
+  font-family: var(--dx-sans);
   font-weight: 700;
   font-size: 0.84rem;
-  background: var(--m7-green);
+  background: var(--dx-green);
   color: #000;
-  border: 1px solid var(--m7-green);
-  border-radius: var(--m7-radius);
+  border: 1px solid var(--dx-green);
+  border-radius: var(--dx-radius);
   padding: 0.45em 1em;
   cursor: pointer;
   animation: none !important;
-  transition: background var(--m7-ease), transform var(--m7-ease);
+  transition: background var(--dx-ease), transform var(--dx-ease);
 }
 .markdown-section button:not([class]):hover {
-  background: var(--m7-green-hover);
-  border-color: var(--m7-green-hover);
+  background: var(--dx-green-hover);
+  border-color: var(--dx-green-hover);
   transform: translateY(-2px);
 }
 .markdown-section button:not([class]):focus-visible {
@@ -941,41 +941,41 @@
    ========================================================================== */
 
 /* text selection is a brand moment */
-::selection { background: var(--m7-green); color: #000; }
+::selection { background: var(--dx-green); color: #000; }
 
 /* dark scrollbars everywhere in the module */
-html.m7-dark {
+html.dx-dark {
   /* The shared custom.css adds `padding-bottom: calc(100vh - 100px)` to <html>
      so the progressive-unfold plugin can scroll a page's last section up to the
      top of the viewport. That pad sits BELOW the footer and, because <html>
      itself was never given a background, rendered as a jarring white band on
      the otherwise-black page. Painting <html> black makes the pad seamless
-     (it also becomes the canvas/overscroll color). Scoped to m7-dark, so other
+     (it also becomes the canvas/overscroll color). Scoped to dx-dark, so other
      modules are untouched. */
-  background-color: var(--m7-black);
-  scrollbar-color: var(--m7-overlay) var(--m7-black);
+  background-color: var(--dx-black);
+  scrollbar-color: var(--dx-overlay) var(--dx-black);
 }
-html.m7-dark ::-webkit-scrollbar { width: 10px; height: 10px; }
-html.m7-dark ::-webkit-scrollbar-track { background: var(--m7-black); }
-html.m7-dark ::-webkit-scrollbar-thumb {
-  background: var(--m7-overlay);
+html.dx-dark ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.dx-dark ::-webkit-scrollbar-track { background: var(--dx-black); }
+html.dx-dark ::-webkit-scrollbar-thumb {
+  background: var(--dx-overlay);
   border-radius: 5px;
-  border: 2px solid var(--m7-black);
+  border: 2px solid var(--dx-black);
 }
-html.m7-dark ::-webkit-scrollbar-thumb:hover { background: var(--m7-border-hover); }
+html.dx-dark ::-webkit-scrollbar-thumb:hover { background: var(--dx-border-hover); }
 
 /* one consistent focus ring */
 .markdown-section :focus-visible,
 .sidebar :focus-visible {
-  outline: 2px solid var(--m7-green) !important;
+  outline: 2px solid var(--dx-green) !important;
   outline-offset: 2px;
 }
 
 /* sidebar: active rail + breadcrumb eyebrow under the logo */
-.sidebar-nav > ul > li > a { position: relative; transition: color var(--m7-ease); }
+.sidebar-nav > ul > li > a { position: relative; transition: color var(--dx-ease); }
 .sidebar-nav > ul > li.active > a,
 .sidebar-nav > ul > li > a.active {
-  color: var(--m7-fg) !important;
+  color: var(--dx-fg) !important;
 }
 .sidebar-nav li.active > a::after,
 .sidebar-nav li > a.active::after {
@@ -985,47 +985,47 @@ html.m7-dark ::-webkit-scrollbar-thumb:hover { background: var(--m7-border-hover
   top: 10%;
   height: 80%;
   width: 2px;
-  background: var(--m7-green);
+  background: var(--dx-green);
 }
 .app-name::after {
-  content: 'DEVX WORKSHOP';                 /* fallback; per-module text set by the html.m7-mod* rules below */
+  content: 'DEVX WORKSHOP';                 /* fallback; per-module text set by the html.dx-mod* rules below */
   display: block;
-  font-family: var(--m7-mono);
+  font-family: var(--dx-mono);
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.22em;
-  color: var(--m7-green);
+  color: var(--dx-green);
   margin-top: 4px;
   opacity: 0.9;
 }
-/* Per-module breadcrumb — driven by the html.m7-mod<N> class on each module's index.html.
+/* Per-module breadcrumb — driven by the html.dx-mod<N> class on each module's index.html.
    This is the shared design system, so the module number is parameterized here. */
-html.m7-mod1 .app-name::after { content: 'DEVX WORKSHOP / MODULE 01'; }
-html.m7-mod2 .app-name::after { content: 'DEVX WORKSHOP / MODULE 02'; }
-html.m7-mod3 .app-name::after { content: 'DEVX WORKSHOP / MODULE 03'; }
-html.m7-mod4 .app-name::after { content: 'DEVX WORKSHOP / MODULE 04'; }
-html.m7-mod5 .app-name::after { content: 'DEVX WORKSHOP / MODULE 05'; }
-html.m7-mod6 .app-name::after { content: 'DEVX WORKSHOP / MODULE 06'; }
-html.m7-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
+html.dx-mod1 .app-name::after { content: 'DEVX WORKSHOP / MODULE 01'; }
+html.dx-mod2 .app-name::after { content: 'DEVX WORKSHOP / MODULE 02'; }
+html.dx-mod3 .app-name::after { content: 'DEVX WORKSHOP / MODULE 03'; }
+html.dx-mod4 .app-name::after { content: 'DEVX WORKSHOP / MODULE 04'; }
+html.dx-mod5 .app-name::after { content: 'DEVX WORKSHOP / MODULE 05'; }
+html.dx-mod6 .app-name::after { content: 'DEVX WORKSHOP / MODULE 06'; }
+html.dx-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
 
 /* sidebar search goes terminal */
-.sidebar .search { border-bottom: 1px solid var(--m7-border) !important; }
-/* The whole .input-wrap is the bordered m7 field, so the (icon-less) input AND the
+.sidebar .search { border-bottom: 1px solid var(--dx-border) !important; }
+/* The whole .input-wrap is the bordered dx field, so the (icon-less) input AND the
    clear button live inside ONE box — matching the reset icon beside it. The input
    is transparent and fills the box; the × is pinned at the right, inside it. This
    replaces the old "border on the input + sibling × nudged left over it" approach
    that caused the overlap. */
 .sidebar .search .input-wrap {
-  background: var(--m7-raised) !important;
-  border: 1px solid var(--m7-border) !important;
-  border-radius: var(--m7-radius) !important;
+  background: var(--dx-raised) !important;
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius) !important;
   height: 32px !important;          /* pin the field height so it ALWAYS equals the 32px reset icon (and can't be resized by focus) */
   box-sizing: border-box !important;
   padding: 0 !important;            /* custom.css :focus-within adds padding on focus; zero it so nothing shifts inside the fixed box */
-  transition: border-color var(--m7-ease);
+  transition: border-color var(--dx-ease);
 }
-.sidebar .search .input-wrap:hover { border-color: var(--m7-border-hover) !important; }
-.sidebar .search .input-wrap:focus-within { border-color: var(--m7-green) !important; border-width: 1px !important; padding: 0 !important; }
+.sidebar .search .input-wrap:hover { border-color: var(--dx-border-hover) !important; }
+.sidebar .search .input-wrap:focus-within { border-color: var(--dx-green) !important; border-width: 1px !important; padding: 0 !important; }
 .sidebar .search .input-wrap::before { display: none !important; }   /* drop the broken magnifier slot */
 .sidebar .search input {
   flex: 1 1 auto !important;        /* fill the field */
@@ -1034,22 +1034,22 @@ html.m7-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: var(--m7-fg) !important;
-  font-family: var(--m7-mono) !important;
+  color: var(--dx-fg) !important;
+  font-family: var(--dx-mono) !important;
   font-size: 0.78rem !important;
 }
 .sidebar .search input:focus { outline: none !important; }
-.sidebar .search input::placeholder { color: var(--m7-fg-mute) !important; opacity: 1; }
+.sidebar .search input::placeholder { color: var(--dx-fg-mute) !important; opacity: 1; }
 /* clear (×): undo custom.css's leftward shift (position:relative + right) that put it
    over the input; keep it static at the right inside the field, and recolor the circle */
 .sidebar .search .clear-button { position: static !important; right: auto !important; top: auto !important; flex: 0 0 auto; margin: 0 4px 0 0; }
-.sidebar .search .clear-button svg circle { fill: var(--m7-overlay) !important; }
-.sidebar .search .results-panel { background: var(--m7-black) !important; }   /* black to match the sidebar/theme, not raised grey */
-.sidebar .search .matching-post { border-bottom: 1px solid var(--m7-border) !important; }
-.sidebar .search .matching-post:hover { background: var(--m7-overlay) !important; }   /* subtle m7 hover instead of the base theme's brand color */
-.sidebar .search .matching-post h2 { color: var(--m7-fg) !important; }
-.sidebar .search .matching-post p { color: var(--m7-fg-mute) !important; }
-.sidebar .search .search-keyword { color: var(--m7-green) !important; }
+.sidebar .search .clear-button svg circle { fill: var(--dx-overlay) !important; }
+.sidebar .search .results-panel { background: var(--dx-black) !important; }   /* black to match the sidebar/theme, not raised grey */
+.sidebar .search .matching-post { border-bottom: 1px solid var(--dx-border) !important; }
+.sidebar .search .matching-post:hover { background: var(--dx-overlay) !important; }   /* subtle dx hover instead of the base theme's brand color */
+.sidebar .search .matching-post h2 { color: var(--dx-fg) !important; }
+.sidebar .search .matching-post p { color: var(--dx-fg-mute) !important; }
+.sidebar .search .search-keyword { color: var(--dx-green) !important; }
 
 /* Sidebar controls row: lay the search bar and the reset icon on one line.
    (.search is the first child of <aside class="sidebar"> — confirmed from the
@@ -1082,7 +1082,7 @@ html.m7-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
    is pinned to the SAME 32px, so the two match by construction. align-self:stretch
    was tried but overshoots the flex line height here, so both use an explicit height.
    To resize the pair, change BOTH this height and .input-wrap's height together. */
-.m7-reset {
+.dx-reset {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -1092,21 +1092,21 @@ html.m7-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
   box-sizing: border-box;
   padding: 0;
   margin: 0;               /* right inset is handled by .search padding now */
-  background: var(--m7-raised);
-  border: 1px solid var(--m7-border);
-  border-radius: var(--m7-radius);
-  color: var(--m7-fg-mute);
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-mute);
   cursor: pointer;
-  transition: border-color var(--m7-ease), color var(--m7-ease);
+  transition: border-color var(--dx-ease), color var(--dx-ease);
 }
-.m7-reset:hover { border-color: var(--m7-green); color: var(--m7-green); }
-.m7-reset:focus-visible { outline: 2px solid var(--m7-green); outline-offset: 2px; }
-.m7-reset .m7-reset-icon { font-size: 0.95rem; line-height: 1; }
+.dx-reset:hover { border-color: var(--dx-green); color: var(--dx-green); }
+.dx-reset:focus-visible { outline: 2px solid var(--dx-green); outline-offset: 2px; }
+.dx-reset .dx-reset-icon { font-size: 0.95rem; line-height: 1; }
 
 /* route-change transition: content rises in (class set by module7.js) */
 @media (prefers-reduced-motion: no-preference) {
-  .markdown-section.m7-page-in { animation: m7-pagein 0.45s ease-out both; }
-  @keyframes m7-pagein {
+  .markdown-section.dx-page-in { animation: dx-pagein 0.45s ease-out both; }
+  @keyframes dx-pagein {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: none; }
   }
@@ -1114,48 +1114,48 @@ html.m7-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
 
 /* kinetic hero: eyebrow, title, sub, meta stagger up on render */
 @media (prefers-reduced-motion: no-preference) {
-  .m7-hero .m7-eyebrow,
-  .m7-hero h1,
-  .m7-hero .m7-sub,
-  .m7-hero .m7-meta {
-    animation: m7-rise 0.55s ease-out both;
+  .dx-hero .dx-eyebrow,
+  .dx-hero h1,
+  .dx-hero .dx-sub,
+  .dx-hero .dx-meta {
+    animation: dx-rise 0.55s ease-out both;
   }
-  .m7-hero h1 { animation-delay: 0.09s; }
-  .m7-hero .m7-sub { animation-delay: 0.18s; }
-  .m7-hero .m7-meta { animation-delay: 0.27s; }
-  @keyframes m7-rise {
+  .dx-hero h1 { animation-delay: 0.09s; }
+  .dx-hero .dx-sub { animation-delay: 0.18s; }
+  .dx-hero .dx-meta { animation-delay: 0.27s; }
+  @keyframes dx-rise {
     from { opacity: 0; transform: translateY(14px); }
     to { opacity: 1; transform: none; }
   }
   /* the dot grid drifts, barely — the page feels alive */
-  .m7-hero::before { animation: m7-drift 80s linear infinite; }
-  @keyframes m7-drift {
+  .dx-hero::before { animation: dx-drift 80s linear infinite; }
+  @keyframes dx-drift {
     from { background-position: 0 0; }
     to { background-position: 480px 240px; }
   }
 }
 
 /* phosphor: green terminal lines glow faintly, like a real CRT */
-.m7-term-line[data-kind="tool"],
-.m7-term-line[data-kind="prompt"]::before {
+.dx-term-line[data-kind="tool"],
+.dx-term-line[data-kind="prompt"]::before {
   text-shadow: 0 0 8px rgba(118, 185, 0, 0.45);
 }
-.m7-term .m7-typing::after { text-shadow: 0 0 8px rgba(118, 185, 0, 0.8); }
+.dx-term .dx-typing::after { text-shadow: 0 0 8px rgba(118, 185, 0, 0.8); }
 
 /* quiz: the correct answer lands with a green pulse */
 @media (prefers-reduced-motion: no-preference) {
-  .m7-quiz .m7-quiz-opt[data-state="right"] { animation: m7-pulse 0.6s ease-out 1; }
-  @keyframes m7-pulse {
+  .dx-quiz .dx-quiz-opt[data-state="right"] { animation: dx-pulse 0.6s ease-out 1; }
+  @keyframes dx-pulse {
     0% { box-shadow: 0 0 0 0 rgba(118, 185, 0, 0.55); }
     100% { box-shadow: 0 0 0 14px rgba(118, 185, 0, 0); }
   }
 }
 
 /* gauges: lit ring gets a faint halo */
-.m7-gauge.is-on .m7-gauge-ring { box-shadow: 0 0 24px rgba(118, 185, 0, 0.12); }
+.dx-gauge.is-on .dx-gauge-ring { box-shadow: 0 0 24px rgba(118, 185, 0, 0.12); }
 
-/* module progress beam: fixed 2px bar fed by module7.js (--m7-progress 0..1) */
-#m7-progress {
+/* module progress beam: fixed 2px bar fed by module7.js (--dx-progress 0..1) */
+#dx-progress {
   position: fixed;
   top: 0;
   left: 0;
@@ -1165,136 +1165,136 @@ html.m7-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
   background: transparent;
   pointer-events: none;
 }
-#m7-progress::before {
+#dx-progress::before {
   content: '';
   display: block;
   height: 100%;
-  width: calc(var(--m7-progress, 0) * 100%);
-  background: linear-gradient(90deg, #3d6600, var(--m7-green));
+  width: calc(var(--dx-progress, 0) * 100%);
+  background: linear-gradient(90deg, #3d6600, var(--dx-green));
   box-shadow: 0 0 10px rgba(118, 185, 0, 0.5);
   transition: width 0.35s ease-out;
 }
 
 /* image-zoom overlay: stock plugin opens images on WHITE — keep it dark */
-html.m7-dark .medium-zoom-overlay { background: rgba(0, 0, 0, 0.92) !important; }
-html.m7-dark img.medium-zoom-image--opened { background: var(--m7-raised) !important; }
+html.dx-dark .medium-zoom-overlay { background: rgba(0, 0, 0, 0.92) !important; }
+html.dx-dark img.medium-zoom-image--opened { background: var(--dx-raised) !important; }
 
 /* hr + footer quietly dark */
-html.m7-dark .markdown-section hr { border-color: var(--m7-border) !important; }
+html.dx-dark .markdown-section hr { border-color: var(--dx-border) !important; }
 
 /* table row hover: engineering datasheet affordance */
-html.m7-dark .markdown-section tbody tr { transition: background var(--m7-ease); }
-html.m7-dark .markdown-section tbody tr:hover td { background: var(--m7-overlay); }
+html.dx-dark .markdown-section tbody tr { transition: background var(--dx-ease); }
+html.dx-dark .markdown-section tbody tr:hover td { background: var(--dx-overlay); }
 
 /* progressive-unfold nav: plugin hard-codes white inline styles — reclaim them */
 .progressive-unfold-nav button {
-  background: var(--m7-overlay) !important;
-  color: var(--m7-fg-dim) !important;
-  border: 1px solid var(--m7-border) !important;
-  border-radius: var(--m7-radius) !important;
-  font-family: var(--m7-mono) !important;
+  background: var(--dx-overlay) !important;
+  color: var(--dx-fg-dim) !important;
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius) !important;
+  font-family: var(--dx-mono) !important;
   font-size: 0.74rem !important;
   letter-spacing: 0.06em;
   padding: 0.5em 1.2em !important;
-  transition: border-color var(--m7-ease), color var(--m7-ease) !important;
+  transition: border-color var(--dx-ease), color var(--dx-ease) !important;
   animation: none !important;
 }
 .progressive-unfold-nav button:hover:not(:disabled) {
-  border-color: var(--m7-green) !important;
-  color: var(--m7-fg) !important;
-  background: var(--m7-overlay) !important;
+  border-color: var(--dx-green) !important;
+  color: var(--dx-fg) !important;
+  background: var(--dx-overlay) !important;
 }
 .progressive-unfold-nav button:disabled { opacity: 0.35 !important; }
 .progressive-unfold-nav .section-indicator {
-  font-family: var(--m7-mono) !important;
+  font-family: var(--dx-mono) !important;
   font-size: 0.68rem !important;
   letter-spacing: 0.1em;
-  background: var(--m7-green) !important;
+  background: var(--dx-green) !important;
   color: #000 !important;
   border: none !important;
-  border-radius: var(--m7-radius) !important;
+  border-radius: var(--dx-radius) !important;
 }
 
 /* ==========================================================================
-   16. FULL-DARK MODE — add class "m7-dark" to <html> to switch the whole
+   16. FULL-DARK MODE — add class "dx-dark" to <html> to switch the whole
    reading surface to the build.nvidia.com look. Remove the class to return
    to the hybrid (light reading surface). Everything below is scoped.
    ========================================================================== */
 
-html.m7-dark body,
-html.m7-dark main,
-html.m7-dark .content,
-html.m7-dark section.content,
-html.m7-dark .markdown-section {
-  background: var(--m7-black) !important;
+html.dx-dark body,
+html.dx-dark main,
+html.dx-dark .content,
+html.dx-dark section.content,
+html.dx-dark .markdown-section {
+  background: var(--dx-black) !important;
 }
 
 /* prose */
-html.m7-dark .markdown-section,
-html.m7-dark .markdown-section p,
-html.m7-dark .markdown-section li {
-  color: var(--m7-fg-dim) !important;
+html.dx-dark .markdown-section,
+html.dx-dark .markdown-section p,
+html.dx-dark .markdown-section li {
+  color: var(--dx-fg-dim) !important;
 }
-html.m7-dark .markdown-section h1,
-html.m7-dark .markdown-section h2,
-html.m7-dark .markdown-section h3,
-html.m7-dark .markdown-section h4,
-html.m7-dark .markdown-section strong {
-  color: var(--m7-fg) !important;
+html.dx-dark .markdown-section h1,
+html.dx-dark .markdown-section h2,
+html.dx-dark .markdown-section h3,
+html.dx-dark .markdown-section h4,
+html.dx-dark .markdown-section strong {
+  color: var(--dx-fg) !important;
 }
 
 /* on black, green text passes AA — links get to be green again */
-html.m7-dark .markdown-section a:not(.m7-cta) {
+html.dx-dark .markdown-section a:not(.dx-cta) {
   color: #8fcb2b !important;
   text-decoration-color: rgba(143, 203, 43, 0.5);
 }
-html.m7-dark .markdown-section a:not(.m7-cta):hover { color: var(--m7-green) !important; }
+html.dx-dark .markdown-section a:not(.dx-cta):hover { color: var(--dx-green) !important; }
 
 /* hero blends into the page instead of sitting as a card */
-html.m7-dark .m7-hero { border-color: var(--m7-border); }
+html.dx-dark .dx-hero { border-color: var(--dx-border); }
 
 /* inline code */
-html.m7-dark .markdown-section code:not([class*="lang-"]) {
-  background: var(--m7-raised);
-  border-color: var(--m7-border);
+html.dx-dark .markdown-section code:not([class*="lang-"]) {
+  background: var(--dx-raised);
+  border-color: var(--dx-border);
   color: #d8d8d8;
 }
 
 /* tables */
-html.m7-dark .markdown-section table { border-color: var(--m7-border); }
-html.m7-dark .markdown-section td { border-color: var(--m7-border); background: var(--m7-sunken); color: var(--m7-fg-dim); }
-html.m7-dark .markdown-section tr:nth-child(2n),
-html.m7-dark .markdown-section tr:nth-child(2n) td { background: var(--m7-raised); }
+html.dx-dark .markdown-section table { border-color: var(--dx-border); }
+html.dx-dark .markdown-section td { border-color: var(--dx-border); background: var(--dx-sunken); color: var(--dx-fg-dim); }
+html.dx-dark .markdown-section tr:nth-child(2n),
+html.dx-dark .markdown-section tr:nth-child(2n) td { background: var(--dx-raised); }
 
 /* blockquote asides */
-html.m7-dark .markdown-section blockquote {
-  background: var(--m7-raised) !important;
-  border-left-color: var(--m7-green) !important;
-  color: var(--m7-fg-dim) !important;
+html.dx-dark .markdown-section blockquote {
+  background: var(--dx-raised) !important;
+  border-left-color: var(--dx-green) !important;
+  color: var(--dx-fg-dim) !important;
 }
-html.m7-dark .markdown-section blockquote p { color: var(--m7-fg-dim) !important; }
+html.dx-dark .markdown-section blockquote p { color: var(--dx-fg-dim) !important; }
 
 /* hint/solution details on the reading surface */
-html.m7-dark .markdown-section summary { color: var(--m7-fg); }
+html.dx-dark .markdown-section summary { color: var(--dx-fg); }
 
 /* islands stand off the pure-black page with their raised surface + a hair more border */
-html.m7-dark .m7-island,
-html.m7-dark .m7-skillcard,
-html.m7-dark .m7-bento .m7-cell { border-color: #3a3a3a; }
+html.dx-dark .dx-island,
+html.dx-dark .dx-skillcard,
+html.dx-dark .dx-bento .dx-cell { border-color: #3a3a3a; }
 
 /* mascots: tone down so illustrations don't glare on black */
-html.m7-dark .markdown-section img[src*="robots"] { opacity: 0.92; border-radius: var(--m7-radius); }
+html.dx-dark .markdown-section img[src*="robots"] { opacity: 0.92; border-radius: var(--dx-radius); }
 
 /* pagination + footer */
-html.m7-dark .pagination-item-title { color: var(--m7-fg) !important; }
-html.m7-dark .docsify-pagination-container { border-top: 1px solid var(--m7-border) !important; }
-html.m7-dark footer p { color: var(--m7-fg-mute); }
+html.dx-dark .pagination-item-title { color: var(--dx-fg) !important; }
+html.dx-dark .docsify-pagination-container { border-top: 1px solid var(--dx-border) !important; }
+html.dx-dark footer p { color: var(--dx-fg-mute); }
 
 /* mermaid edge labels sit on the page background — lighten them */
-html.m7-dark .markdown-section .mermaid .edgeLabel,
-html.m7-dark .markdown-section .mermaid .messageText,
-html.m7-dark .markdown-section .mermaid text {
+html.dx-dark .markdown-section .mermaid .edgeLabel,
+html.dx-dark .markdown-section .mermaid .messageText,
+html.dx-dark .markdown-section .mermaid text {
   fill: #c6c6c6 !important;
   color: #c6c6c6 !important;
 }
-html.m7-dark .markdown-section .mermaid .edgeLabel { background-color: var(--m7-black) !important; }
+html.dx-dark .markdown-section .mermaid .edgeLabel { background-color: var(--dx-black) !important; }

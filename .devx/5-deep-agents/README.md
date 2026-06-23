@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 05 / DEEP AGENTS" data-title="Deep Agents Workshop"></div>
+<div class="dx-hero" data-eyebrow="MODULE 05 / DEEP AGENTS" data-title="Deep Agents Workshop"></div>
 
 <img src="_static/robots/magician.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 

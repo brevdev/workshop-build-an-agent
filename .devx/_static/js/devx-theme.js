@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Module 7 — widget runtime.
+   DevX Workshop — shared widget runtime.
    One docsify plugin; all widgets initialize in doneEach with an explicit
    teardown registry so SPA navigation never leaks observers or timers.
    Markdown carries only attribute-driven HTML — no inline <script>.
@@ -25,7 +25,7 @@
 
   /* ---- 1. hero band ------------------------------------------------------- */
   function initHero(root) {
-    root.querySelectorAll('.m7-hero[data-title]').forEach(function (el) {
+    root.querySelectorAll('.dx-hero[data-title]').forEach(function (el) {
       if (el.dataset.built) return;
       el.dataset.built = '1';
       var meta = (el.dataset.meta || '')
@@ -37,16 +37,16 @@
         })
         .join('');
       el.innerHTML =
-        '<p class="m7-eyebrow">' + (el.dataset.eyebrow || 'MODULE 07') + '</p>' +
+        '<p class="dx-eyebrow">' + (el.dataset.eyebrow || 'MODULE 07') + '</p>' +
         '<h1>' + el.dataset.title + '</h1>' +
-        (el.dataset.sub ? '<p class="m7-sub">' + el.dataset.sub + '</p>' : '') +
-        (meta ? '<div class="m7-meta">' + meta + '</div>' : '');
+        (el.dataset.sub ? '<p class="dx-sub">' + el.dataset.sub + '</p>' : '') +
+        (meta ? '<div class="dx-meta">' + meta + '</div>' : '');
     });
   }
 
   /* ---- 2. reveal on scroll ------------------------------------------------- */
   function initReveals(root) {
-    var els = Array.prototype.slice.call(root.querySelectorAll('.m7-reveal'));
+    var els = Array.prototype.slice.call(root.querySelectorAll('.dx-reveal'));
     if (!els.length) return;
     if (REDUCED) { els.forEach(function (el) { el.classList.add('is-in'); }); return; }
     observe(els, function (entries, io) {
@@ -75,19 +75,19 @@
   }
 
   function initGauges(root) {
-    var gauges = Array.prototype.slice.call(root.querySelectorAll('.m7-gauge'));
+    var gauges = Array.prototype.slice.call(root.querySelectorAll('.dx-gauge'));
     if (!gauges.length) return;
     gauges.forEach(function (g) {
       var pct = parseFloat(g.dataset.pct || '0');
-      var ring = g.querySelector('.m7-gauge-ring');
-      if (ring) ring.style.setProperty('--m7-gauge-to', pct + '%');
+      var ring = g.querySelector('.dx-gauge-ring');
+      if (ring) ring.style.setProperty('--dx-gauge-to', pct + '%');
     });
     observe(gauges, function (entries, io) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
         io.unobserve(en.target);
         en.target.classList.add('is-on');
-        var ring = en.target.querySelector('.m7-gauge-ring');
+        var ring = en.target.querySelector('.dx-gauge-ring');
         var pct = parseFloat(en.target.dataset.pct || '0');
         if (ring) countUp(ring, Math.round(pct), '%', 1100);
       });
@@ -96,7 +96,7 @@
 
   /* ---- 4. context tax meter ------------------------------------------------ */
   function initTax(root) {
-    var meters = Array.prototype.slice.call(root.querySelectorAll('.m7-tax'));
+    var meters = Array.prototype.slice.call(root.querySelectorAll('.dx-tax'));
     if (!meters.length) return;
     observe(meters, function (entries, io) {
       entries.forEach(function (en) {
@@ -108,7 +108,7 @@
   /* ---- 5. self-typing terminal ---------------------------------------------- */
   function parseLines(el) {
     // lines authored as child <span data-kind=... data-delay=...>text</span>
-    return Array.prototype.slice.call(el.querySelectorAll('.m7-term-line')).map(function (l) {
+    return Array.prototype.slice.call(el.querySelectorAll('.dx-term-line')).map(function (l) {
       return { el: l, text: l.textContent, kind: l.dataset.kind, delay: parseInt(l.dataset.delay || '0', 10) };
     });
   }
@@ -120,13 +120,13 @@
     onCleanup(clearTimers);
 
     function showAll() {
-      lines.forEach(function (l) { l.el.textContent = l.text; l.el.classList.remove('m7-typing'); });
+      lines.forEach(function (l) { l.el.textContent = l.text; l.el.classList.remove('dx-typing'); });
     }
     if (REDUCED) { showAll(); return { replay: showAll }; }
 
     function run() {
       clearTimers();
-      lines.forEach(function (l) { l.el.textContent = ''; l.el.classList.remove('m7-typing'); });
+      lines.forEach(function (l) { l.el.textContent = ''; l.el.classList.remove('dx-typing'); });
       var t = 250;
       lines.forEach(function (l) {
         t += l.delay;
@@ -135,9 +135,9 @@
           for (var i = 1; i <= l.text.length; i++) {
             (function (i) {
               timers.push(setTimeout(function () {
-                l.el.classList.add('m7-typing');
+                l.el.classList.add('dx-typing');
                 l.el.textContent = l.text.slice(0, i);
-                if (i === l.text.length) l.el.classList.remove('m7-typing');
+                if (i === l.text.length) l.el.classList.remove('dx-typing');
               }, t + i * 18));
             })(i);
           }
@@ -154,7 +154,7 @@
   }
 
   function initTerminals(root) {
-    var terms = Array.prototype.slice.call(root.querySelectorAll('.m7-term'));
+    var terms = Array.prototype.slice.call(root.querySelectorAll('.dx-term'));
     if (!terms.length) return;
     terms.forEach(function (term) {
       if (term.dataset.built) return;
@@ -162,7 +162,7 @@
       var ctl = typeTerminal(term);
       if (!REDUCED) {
         var btn = document.createElement('button');
-        btn.className = 'm7-term-replay';
+        btn.className = 'dx-term-replay';
         btn.type = 'button';
         btn.textContent = '↻ replay';
         btn.setAttribute('aria-label', 'Replay terminal animation');
@@ -178,21 +178,21 @@
   }
 
   /* ---- 6. quiz --------------------------------------------------------------
-     markup: .m7-quiz > .m7-quiz-q + button.m7-quiz-opt[data-right][data-fb] */
+     markup: .dx-quiz > .dx-quiz-q + button.dx-quiz-opt[data-right][data-fb] */
   function initQuizzes(root) {
-    root.querySelectorAll('.m7-quiz').forEach(function (quiz) {
+    root.querySelectorAll('.dx-quiz').forEach(function (quiz) {
       if (quiz.dataset.built) return;
       quiz.dataset.built = '1';
       var fb = document.createElement('div');
-      fb.className = 'm7-quiz-fb';
+      fb.className = 'dx-quiz-fb';
       fb.setAttribute('role', 'status');
       fb.hidden = true;
       quiz.appendChild(fb);
-      quiz.querySelectorAll('.m7-quiz-opt').forEach(function (opt) {
+      quiz.querySelectorAll('.dx-quiz-opt').forEach(function (opt) {
         opt.type = 'button';
         opt.addEventListener('click', function () {
           var right = opt.hasAttribute('data-right');
-          quiz.querySelectorAll('.m7-quiz-opt').forEach(function (o) { o.removeAttribute('data-state'); });
+          quiz.querySelectorAll('.dx-quiz-opt').forEach(function (o) { o.removeAttribute('data-state'); });
           opt.dataset.state = right ? 'right' : 'wrong';
           fb.hidden = false;
           fb.classList.toggle('is-right', right);
@@ -203,20 +203,20 @@
   }
 
   /* ---- 7. predict-before-reveal ---------------------------------------------
-     markup: .m7-bet[data-answer][data-explain] > .m7-bet-opts > button.m7-bet-opt */
+     markup: .dx-bet[data-answer][data-explain] > .dx-bet-opts > button.dx-bet-opt */
   function initBets(root) {
-    root.querySelectorAll('.m7-bet').forEach(function (bet) {
+    root.querySelectorAll('.dx-bet').forEach(function (bet) {
       if (bet.dataset.built) return;
       bet.dataset.built = '1';
       var reveal = document.createElement('p');
-      reveal.className = 'm7-bet-reveal';
+      reveal.className = 'dx-bet-reveal';
       reveal.setAttribute('role', 'status');
       reveal.hidden = true;
       bet.appendChild(reveal);
-      bet.querySelectorAll('.m7-bet-opt').forEach(function (opt) {
+      bet.querySelectorAll('.dx-bet-opt').forEach(function (opt) {
         opt.type = 'button';
         opt.addEventListener('click', function () {
-          bet.querySelectorAll('.m7-bet-opt').forEach(function (o) { o.removeAttribute('data-state'); });
+          bet.querySelectorAll('.dx-bet-opt').forEach(function (o) { o.removeAttribute('data-state'); });
           opt.dataset.state = 'picked';
           reveal.hidden = false;
           reveal.innerHTML = 'Measured answer: <b>' + bet.dataset.answer + '</b> — ' + (bet.dataset.explain || '');
@@ -226,16 +226,16 @@
   }
 
   /* ---- 8. sidebar completion checkmarks -------------------------------------- */
-  /* Per-module identity (shared theme): prefer an html.m7-mod<N> class; else derive
+  /* Per-module identity (shared theme): prefer an html.dx-mod<N> class; else derive
      the module number from the URL path (e.g. /1-build-an-agent/) and inject the
      class so the CSS breadcrumb resolves too. Keeps each module's completion state
      isolated — a reset in one module doesn't clear another's. */
-  var M7_MOD = (document.documentElement.className.match(/m7-mod(\d+)/) || [])[1] || '';
-  if (!M7_MOD) {
-    M7_MOD = (window.location.pathname.match(/\/(\d+)-[a-z0-9]/) || [])[1] || '';
-    if (M7_MOD) { document.documentElement.classList.add('m7-mod' + M7_MOD); }
+  var DX_MOD = (document.documentElement.className.match(/dx-mod(\d+)/) || [])[1] || '';
+  if (!DX_MOD) {
+    DX_MOD = (window.location.pathname.match(/\/(\d+)-[a-z0-9]/) || [])[1] || '';
+    if (DX_MOD) { document.documentElement.classList.add('dx-mod' + DX_MOD); }
   }
-  var DONE_KEY = 'm7-visited' + (M7_MOD ? '-' + M7_MOD : '');
+  var DONE_KEY = 'dx-visited' + (DX_MOD ? '-' + DX_MOD : '');
   function markVisited(route) {
     try {
       var seen = JSON.parse(localStorage.getItem(DONE_KEY) || '[]');
@@ -249,7 +249,7 @@
       var a = li.querySelector('a');
       if (!a) return;
       var href = (a.getAttribute('href') || '').replace(/^#\/?/, '').split('?')[0];
-      li.classList.toggle('m7-done', seen.indexOf(href || 'README') >= 0);
+      li.classList.toggle('dx-done', seen.indexOf(href || 'README') >= 0);
     });
   }
 
@@ -293,7 +293,7 @@
   function ensureResetControl() {
     var search = document.querySelector('.search');   /* docsify inserts .search OUTSIDE .sidebar (sibling before the aside) */
     var inputWrap = search && search.querySelector('.input-wrap');
-    var existing = document.getElementById('m7-reset');
+    var existing = document.getElementById('dx-reset');
     if (existing) {
       if (inputWrap && existing.previousElementSibling !== inputWrap) {
         inputWrap.insertAdjacentElement('afterend', existing);   /* settle into the controls row */
@@ -301,12 +301,12 @@
       return;
     }
     var btn = document.createElement('button');
-    btn.id = 'm7-reset';
+    btn.id = 'dx-reset';
     btn.type = 'button';
-    btn.className = 'm7-reset';
+    btn.className = 'dx-reset';
     btn.title = 'Reset module progress';
     btn.setAttribute('aria-label', 'Reset module progress: clears all completion checkmarks and saved page positions');
-    btn.innerHTML = '<span class="m7-reset-icon" aria-hidden="true">↺</span>';
+    btn.innerHTML = '<span class="dx-reset-icon" aria-hidden="true">↺</span>';
     btn.addEventListener('click', function () {
       if (!window.confirm('Reset module progress? This clears every completion checkmark and your saved position on each page.')) return;
       clearAllProgress();
@@ -325,10 +325,10 @@
 
   /* ---- 9. module progress beam (reads the unfold nav's "Section x of y") ----- */
   function ensureProgressBeam() {
-    var beam = document.getElementById('m7-progress');
+    var beam = document.getElementById('dx-progress');
     if (!beam) {
       beam = document.createElement('div');
-      beam.id = 'm7-progress';
+      beam.id = 'dx-progress';
       beam.setAttribute('aria-hidden', 'true');
       document.body.appendChild(beam);
     }
@@ -346,14 +346,14 @@
     var nav = document.querySelector('.progressive-unfold-nav');
     if (!nav) return;
     nav.querySelectorAll('button').forEach(function (b) {
-      if (b.dataset.m7Relabelled) return;
+      if (b.dataset.dxRelabelled) return;
       var t = (b.textContent || '').toLowerCase();
       if (t.indexOf('prev') >= 0) {
         b.textContent = '▴ Previous section';
-        b.dataset.m7Relabelled = '1';
+        b.dataset.dxRelabelled = '1';
       } else if (t.indexOf('next') >= 0) {
         b.textContent = 'Next section ▾';
-        b.dataset.m7Relabelled = '1';
+        b.dataset.dxRelabelled = '1';
       }
     });
   }
@@ -365,7 +365,7 @@
       relabelUnfoldNav();
       var ind = document.querySelector('.progressive-unfold-nav .section-indicator');
       var m = ind && ind.textContent.match(/(\d+)\s+of\s+(\d+)/i);
-      beam.style.setProperty('--m7-progress', m ? String(parseInt(m[1], 10) / parseInt(m[2], 10)) : '0');
+      beam.style.setProperty('--dx-progress', m ? String(parseInt(m[1], 10) / parseInt(m[2], 10)) : '0');
       /* The sidebar checkmark is earned only when the reader opens the FINAL
          section (current >= total). A page restored from a saved position at
          the last section counts as complete too — they finished it before. */
@@ -387,9 +387,9 @@
       teardown();
       var root = document.querySelector('.markdown-section') || document;
       if (root.classList) {
-        root.classList.remove('m7-page-in');
+        root.classList.remove('dx-page-in');
         void root.offsetWidth;            /* restart the entrance animation */
-        root.classList.add('m7-page-in');
+        root.classList.add('dx-page-in');
       }
       var route = (vm.route.path || '/').replace(/^\//, '') || 'README';
       watchUnfoldProgress(route);

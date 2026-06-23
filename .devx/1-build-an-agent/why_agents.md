@@ -1,4 +1,4 @@
-<div class="m7-hero" data-eyebrow="MODULE 01 / 01 - CONCEPTS" data-title="Why Agents?"></div>
+<div class="dx-hero" data-eyebrow="MODULE 01 / 01 - CONCEPTS" data-title="Why Agents?"></div>
 
 <img src="_static/robots/spyglass.png" alt="Exploring Robot" style="float:right; max-width:300px;margin:25px;" />
 

@@ -1,7 +1,5 @@
 <div class="dx-hero" data-eyebrow="MODULE 01 / 01 - CONCEPTS" data-title="Why Agents?"></div>
 
-<img src="_static/robots/spyglass.png" alt="Exploring Robot" style="float:right; max-width:300px;margin:25px;" />
-
 Before we dive into building agents, let's take a step back. What are agents, really? And why would you use one instead of just calling an LLM directly?
 
 <!-- fold:break -->
@@ -10,7 +8,15 @@ Before we dive into building agents, let's take a step back. What are agents, re
 
 AI applications have evolved through three stages:
 
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>STAGE 1: SINGLE LLM CALL</h4>Send a prompt, get a response. Limited to training data - no live info, no actions.</div>
+  <div class="dx-cell"><h4>STAGE 2: WORKFLOW</h4>Chain fixed steps (e.g. RAG). More capable, but every query takes the same hardcoded path.</div>
+  <div class="dx-cell is-wide"><h4>STAGE 3: AGENT</h4>The model decides what to do - choosing tools and looping until it has the answer. The path adapts to each task.</div>
+</div>
+
 ### Stage 1: Single LLM Calls
+
+<img src="_static/robots/spyglass.png" alt="Exploring Robot" style="float:right; max-width:300px;margin:25px;" />
 
 The simplest approach: send a prompt, get a response.
 
@@ -76,16 +82,15 @@ Agents can break down complex tasks, try different approaches, and recover from 
 
 <!-- fold:break -->
 
-## When Agents Aren't the Answer
-
-Agents aren't always better. They add complexity, latency, and cost. Consider:
-
-- **Simple questions**: If a single LLM call works, use it
-- **Predictable workflows**: If the steps are always the same, a chain is simpler
-- **Latency-critical applications**: Multiple model calls take time
-- **Cost-sensitive deployments**: More calls = more tokens = higher costs
-
-The goal isn't to use agents everywhere - it's to use them where they provide real value.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHEN AGENTS AREN'T THE ANSWER</p>
+  <p>Agents aren't always better. They add complexity, latency, and cost. Consider a simpler approach for:</p>
+  <p><span class="dx-chip">SIMPLE QUESTIONS</span> If a single LLM call works, use it.</p>
+  <p><span class="dx-chip">PREDICTABLE WORKFLOWS</span> If the steps are always the same, a chain is simpler.</p>
+  <p><span class="dx-chip">LATENCY-CRITICAL</span> Multiple model calls take time.</p>
+  <p><span class="dx-chip">COST-SENSITIVE</span> More calls = more tokens = higher costs.</p>
+  <p>The goal isn't to use agents everywhere - it's to use them where they provide real value.</p>
+</div>
 
 <!-- fold:break -->
 
@@ -101,5 +106,14 @@ In this module, you'll build a **Report Generation Agent** - an AI system that c
 - Write a structured report with citations
 
 This is a task that genuinely benefits from an agent's flexibility. Different topics require different research strategies, and the agent adapts accordingly.
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Which of these tasks is the best fit for an agent, rather than a single LLM call or a fixed workflow?</p>
+  <button class="dx-quiz-opt" data-fb="This is one fixed classification with a fixed set of outputs - a single LLM call does it. An agent's reasoning loop only adds latency and cost when the path never changes.">Sort each incoming support ticket into billing, technical, or other</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. The path changes per bug, it pulls from several sources, and each step depends on the last - exactly where letting the model choose its next move pays off.">Investigate a reported bug by searching the docs, checking recent incident reports, and writing up a likely root cause</button>
+  <button class="dx-quiz-opt" data-fb="Input-to-summary is a single fixed path with no decisions to make. That is a workflow (a chain), not an agent.">Condense a customer email into three bullet points</button>
+  <button class="dx-quiz-opt" data-fb="A single deterministic transformation - no tools, no branching, no iteration. Reaching for an agent here is over-engineering.">Translate a fixed block of text from English to Spanish</button>
+</div>
 
 Ready to understand how agents work? Continue to [Introduction to Agents](introduction_to_agents.md)!

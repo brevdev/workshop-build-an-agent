@@ -38,8 +38,10 @@ langgraph dev
 
 If you see any errors while running your agent, they will appear in this terminal window. Carefully read the error messages to see what went wrong and where. Use them to debug your code. If you get stuck, revisit [Building Agentic RAG](agentic_rag.md) for guidance. Your agent will automatically reload as you make changes and save your code.
 
-<details>
-  <summary>See an example error</summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-running-1">See an example error</button>
+<div id="aside-running-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-running-1" popovertargetaction="hide" aria-label="Close">×</button>
 
   The following is a snippet from a log that experienced an AttributeError while starting the agent.
 
@@ -80,7 +82,8 @@ If you see any errors while running your agent, they will appear in this termina
   AttributeError: 'ellipsis' object has no attribute 'split_documents'
   ```
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 

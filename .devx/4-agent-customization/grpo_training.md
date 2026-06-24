@@ -37,8 +37,10 @@ The NeMo Gym server runs these checks and returns reward scores to guide trainin
 
 **Click on each of the following questions to learn more.**
 
-<details>
-<summary><strong>How does GRPO actually work?</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-grpo_training-1">How does GRPO actually work?</button>
+<div id="aside-grpo_training-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-grpo_training-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 GRPO (Group Relative Policy Optimization) is a form of reinforcement learning that learns from *relative* performance within a group of outputs:
 
@@ -59,10 +61,13 @@ Outputs that score above the group average get reinforced; below-average outputs
 
 **Why "Group Relative"?** By comparing within a group rather than to a fixed baseline, GRPO adapts to the model's current ability level. Early in training when all outputs are poor, it still finds the *relatively* better ones to reinforce.
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>SFT vs GRPO: When to use which?</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-grpo_training-2">SFT vs GRPO: When to use which?</button>
+<div id="aside-grpo_training-2" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-grpo_training-2" popovertargetaction="hide" aria-label="Close">×</button>
 
 | Aspect | SFT (Supervised Fine-Tuning) | GRPO (RL-based) |
 |--------|------------------------------|-----------------|
@@ -84,10 +89,13 @@ Outputs that score above the group average get reinforced; below-average outputs
 
 **For CLI agents**: GRPO excels because CLI commands are verifiable (they either parse correctly or don't), and there may be multiple valid ways to express the same command.
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>How do I know training is working?</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-grpo_training-3">How do I know training is working?</button>
+<div id="aside-grpo_training-3" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-grpo_training-3" popovertargetaction="hide" aria-label="Close">×</button>
 
 **Key metrics to monitor during training:**
 
@@ -109,7 +117,8 @@ Outputs that score above the group average get reinforced; below-average outputs
 | **Slow verification** | Training takes forever | Optimize reward code; batch requests to server |
 | **Reward scale issues** | Gradients explode or vanish | Normalize rewards to [0, 1] range |
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -123,8 +132,8 @@ Your reward function is the most important piece of GRPO training. It defines wh
 
 **Click on each of the following principles to learn more.**
 
-<details>
-<summary><strong>1. Verifiable — Check with code, not vibes</strong></summary>
+<details class="dx-peek">
+<summary>1. Verifiable — Check with code, not vibes</summary>
 
 The power of RLVR is that rewards are *objective*. For CLI commands:
 
@@ -148,8 +157,8 @@ LLM judges add latency, cost, and inconsistency. For structured outputs, code ve
 
 </details>
 
-<details>
-<summary><strong>2. Granular — Partial credit beats binary pass/fail</strong></summary>
+<details class="dx-peek">
+<summary>2. Granular — Partial credit beats binary pass/fail</summary>
 
 A binary reward (1.0 or 0.0) provides sparse signal. The model doesn't know *how close* it was.
 
@@ -169,8 +178,8 @@ With granular rewards, a response with correct JSON but wrong command scores 0.2
 
 </details>
 
-<details>
-<summary><strong>3. Aligned — Reward what you actually care about</strong></summary>
+<details class="dx-peek">
+<summary>3. Aligned — Reward what you actually care about</summary>
 
 Models optimize for the reward you give, not the reward you intended. Be careful of:
 
@@ -266,7 +275,7 @@ Implement the reward function by making a call to the `/verify` endpoint.
 
 This is the bridge between GRPO and verifiable rewards: each model completion gets sent to the NeMo Gym server, which returns a composite reward score (JSON format + command correctness + flag accuracy). Implement `resp` by posting a request to `verify_endpoint` with `json` set to `verify_request` and the `timeout` set to 30s.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -284,7 +293,7 @@ Implement some key training configuration parameters.
 
 These three settings control the core training dynamics: `num_generations` is how many candidate outputs GRPO generates per prompt (more = richer comparison signal), `learning_rate` controls the step size for weight updates, and `max_steps` caps the total training iterations. Implement `training_args` with `num_generations=4`, `learning_rate=1e-5`, and `max_steps=50`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -310,7 +319,7 @@ Implement the `trainer` as a `GRPOTrainer` and wire up everything we've defined 
 
 The `GRPOTrainer` orchestrates the full training loop shown above: generate completions, score them via the reward function, and reinforce the best ones. Implement `trainer` with `model`, `processing_class` set to `tokenizer`, `reward_funcs` as a single-item list containing `reward_fn`, `args` set to `training_args`, and the `train_dataset`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -340,8 +349,8 @@ The customized model should appear in this location when completed: `outputs/grp
 
 If you're running into issues, click on any of the following to learn more. 
 
-<details>
-<summary><strong>Rewards not improving</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Rewards not improving</summary>
 
 **Possible causes and fixes:**
 
@@ -365,8 +374,8 @@ If you're running into issues, click on any of the following to learn more.
 
 </details>
 
-<details>
-<summary><strong>Training crashes with OOM (Out of Memory)</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Training crashes with OOM (Out of Memory)</summary>
 
 **Solutions in order of preference:**
 
@@ -381,8 +390,8 @@ If you're running into issues, click on any of the following to learn more.
 
 </details>
 
-<details>
-<summary><strong>Model outputs garbage after training</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Model outputs garbage after training</summary>
 
 **Possible causes:**
 
@@ -402,8 +411,8 @@ If you're running into issues, click on any of the following to learn more.
 
 </details>
 
-<details>
-<summary><strong>Validation reward much lower than training reward</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Validation reward much lower than training reward</summary>
 
 This indicates **overfitting** — the model memorized training examples rather than learning generalizable patterns.
 

@@ -58,8 +58,10 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 
 Crucially, LLMs can suffer from the "Lost in the Middle" phenomenon where relevant information buried in the middle of a context window may be ignored. This is why **ranking** matters: the model should see the right data first. 
 
-<details>
-<summary><strong>How do I calculate this? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-1">How is this calculated?</button>
+<div id="aside-em-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 RAGAS uses an LLM to determine if each retrieved chunk is relevant or irrelevant to answering the question. It then calculates precision at each position (precision@k) in the ranked results and averages them. The formula weighs higher-ranked relevant documents more heavily:
 
@@ -73,10 +75,13 @@ where `relevance_k` is the relevance indicator (0 or 1) for the item at rank `k`
 Precision@k = true positives @ k / (true positives @ k + false positives @k) 
 ```
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>I'm still confused, Click me for a sample calculation!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-2">See a worked example</button>
+<div id="aside-em-2" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-2" popovertargetaction="hide" aria-label="Close">×</button>
 
 Consider a sample RAG query in which we have retrieved 2 relevant chunks from ``K=3`` total retrieved chunks. First, label each of the 3 chunks as either relevant or irrelevant for the query. Let's assume relevant-irrelevant-relevant ordering for this exercise. Then: 
 
@@ -94,10 +99,13 @@ So Context Precision = (1.0 + 0.0 + 0.67) / (1 + 0 + 1) = **0.83**.
 
 Note that this context precision value is not a perfect 1.0 score. Why? Because we can actually improve the precision if the third retrieved chunk were instead ranked second, ahead of the irrelevant chunk. This would represent the most ideal retrieval arrangement, where all relevant chunks are ranked ahead of irrelevant ones for any particular value of K.
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-3">How do I read the score?</button>
+<div id="aside-em-3" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-3" popovertargetaction="hide" aria-label="Close">×</button>
 
 **Score interpretation**:
 
@@ -114,10 +122,13 @@ Note that this context precision value is not a perfect 1.0 score. Why? Because 
 - Add reranking as a second stage
 - Use metadata filtering to narrow search scope
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Want to see another example? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-4">See an example</button>
+<div id="aside-em-4" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-4" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```
 Question: "How do I reset my password?"
@@ -129,7 +140,8 @@ Context Precision would be lower (approximately 0.5) because irrelevant document
 
 Better retrieval: [Password reset guide, Password reset FAQ, Account security, Login procedures] would score higher
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -139,8 +151,10 @@ Better retrieval: [Password reset guide, Password reset FAQ, Account security, L
 
 **Why it matters**: This is your system's "Upper Bound" of knowledge. Low context recall means your agent is missing important information, leading to incomplete or incorrect answers. Even with perfect generation, missing context will result in gaps in the response.
 
-<details>
-<summary><strong>How do I calculate this? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-5">How is this calculated?</button>
+<div id="aside-em-5" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-5" popovertargetaction="hide" aria-label="Close">×</button>
 
 Given a *ground truth* answer, RAGAS uses an LLM to extract claims/statements from that answer, then checks if each claim can be attributed to at least one of the retrieved contexts. The score is:
 
@@ -148,10 +162,13 @@ Given a *ground truth* answer, RAGAS uses an LLM to extract claims/statements fr
 Context Recall = (Number of claims attributable to contexts) / (Total number of claims in ground truth)
 ```
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-6">How do I read the score?</button>
+<div id="aside-em-6" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-6" popovertargetaction="hide" aria-label="Close">×</button>
 
 **Score interpretation**:
 
@@ -167,10 +184,13 @@ Context Recall = (Number of claims attributable to contexts) / (Total number of 
 - Improve query formulation (query expansion, reformulation)
 - Check your chunking strategy (chunks might be too small and losing context)
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Want to see an example? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-7">See an example</button>
+<div id="aside-em-7" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-7" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```
 Question: "What are the steps to request a virtual desktop?"
@@ -181,7 +201,8 @@ If retrieved contexts only mention the form submission, context recall would be 
 
 For high recall, retrieved contexts must cover all three ground truth steps.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -193,8 +214,10 @@ For high recall, retrieved contexts must cover all three ground truth steps.
 
 A faithful answer might be "I don't know" (if the context is empty). An unfaithful answer invents facts. At the end of the day, **an honest "I don't know" is preferable over a confident lie.**
 
-<details>
-<summary><strong>How do I calculate this? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-8">How is this calculated?</button>
+<div id="aside-em-8" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-8" popovertargetaction="hide" aria-label="Close">×</button>
 
 RAGAS uses an LLM to:
 1. Extract individual claims/statements from the *generated answer*
@@ -205,10 +228,13 @@ RAGAS uses an LLM to:
 Faithfulness = (Number of claims supported by context) / (Total number of claims in answer)
 ```
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-9">How do I read the score?</button>
+<div id="aside-em-9" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-9" popovertargetaction="hide" aria-label="Close">×</button>
 
 **Score interpretation**:
 
@@ -225,10 +251,13 @@ Faithfulness = (Number of claims supported by context) / (Total number of claims
 - Add explicit "cite your sources" instructions
 - Implement a validation layer that checks for unsupported claims
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Want to see an example? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-10">See an example</button>
+<div id="aside-em-10" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-10" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```
 Context: "Password resets take 5-10 minutes to propagate across all systems. Use the self-service portal."
@@ -239,7 +268,9 @@ Partially faithful: "Your password reset is instant via the portal." (Faithfulne
 
 Unfaithful answer: "Contact your manager to reset passwords immediately." (Faithfulness = 0.0, contradicts context)
 ```
-</details>
+
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -249,8 +280,10 @@ Unfaithful answer: "Contact your manager to reset passwords immediately." (Faith
 
 **Why it matters**: An agent might generate a factually correct, faithful response that still doesn't answer what the user asked. High relevancy ensures users get actionable answers to their specific questions, improving user satisfaction and reducing follow-up queries.
 
-<details>
-<summary><strong>How do I calculate this? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-11">How is this calculated?</button>
+<div id="aside-em-11" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-11" popovertargetaction="hide" aria-label="Close">×</button>
 
 RAGAS uses an LLM to generate potential questions that the answer would be appropriate for, then measures the semantic similarity between these generated questions and the original question using embeddings:
 
@@ -260,10 +293,13 @@ Answer Relevancy = mean(cosine_similarity(original_question, generated_question_
 
 where `i` indicates the index of a generated question derived from the generated response.
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>How do I know I'm scoring well? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-12">How do I read the score?</button>
+<div id="aside-em-12" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-12" popovertargetaction="hide" aria-label="Close">×</button>
 
 **Score interpretation**:
 
@@ -280,10 +316,13 @@ where `i` indicates the index of a generated question derived from the generated
 - Use instruction-tuned models that follow user intent better
 - Add a reformulation step to ensure question is understood correctly
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Want to see an example? Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-em-13">See an example</button>
+<div id="aside-em-13" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-em-13" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```
 Question: "How do I reset my password?"
@@ -301,7 +340,8 @@ Low relevancy: "Passwords are important for security. Our company requires passw
     Generated questions: "Why are passwords important?", "How often do I need to change my password?"
 ```
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 

@@ -45,8 +45,10 @@ SDG breaks this cycle:
 
 **The key difference**: Data Designer generates outputs *first* (from your schema), then creates matching inputs. LLM prompting generates inputs and hopes the outputs are valid.
 
-<details>
-<summary><strong>Click me to see an example</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-sdg-1">See an example</button>
+<div id="aside-sdg-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-sdg-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```python
 # LLM prompting approach (risky)
@@ -58,7 +60,8 @@ outputs = sample_from_schema(CLIToolCall, n=100)  # Always valid
 inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixed
 ```
 
-</details>
+</div>
+</div>
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
@@ -105,8 +108,8 @@ This is different from just prompting an LLM to "make up examples." Data Designe
 
 Before training, verify your synthetic data meets these criteria. **Click each item to learn more.**
 
-<details>
-<summary><strong>Coverage</strong></summary>
+<details class="dx-peek">
+<summary>Coverage</summary>
 
 - [ ] Does every command type appear? (`new`, `dev`, `up`, `build`, `dockerfile`)
 - [ ] Does every flag appear for each relevant command?
@@ -114,8 +117,8 @@ Before training, verify your synthetic data meets these criteria. **Click each i
 
 </details>
 
-<details>
-<summary><strong>Balance</strong></summary>
+<details class="dx-peek">
+<summary>Balance</summary>
 
 - [ ] Are command types roughly balanced?
 - [ ] No single command should be > 40% of data unless that matches real usage
@@ -131,8 +134,8 @@ print(Counter(commands))
 
 </details>
 
-<details>
-<summary><strong>Diversity</strong></summary>
+<details class="dx-peek">
+<summary>Diversity</summary>
 
 - [ ] Do inputs vary in phrasing, not just slot values?
 - [ ] Mix of formal and casual language?
@@ -148,8 +151,8 @@ print(Counter(commands))
 
 </details>
 
-<details>
-<summary><strong>Validity</strong></summary>
+<details class="dx-peek">
+<summary>Validity</summary>
 
 - [ ] Do all outputs parse as valid JSON?
 - [ ] Do all outputs pass schema validation?
@@ -185,7 +188,7 @@ Open the <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customizati
 
 This schema is what Data Designer samples from to generate valid outputs — every synthetic example is guaranteed to conform to it. Define `CLIToolCall` as a `BaseModel` with `command` (str), `template` (optional str), `path` (optional str), and `port` (optional int) fields. Optional fields should default to `None`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -205,7 +208,7 @@ class CLIToolCall(BaseModel):
 
 Samplers control the distribution of generated outputs — they’re what ensures your dataset covers the full output space rather than clustering around common cases. Add the following to the `values` list in `CategorySamplerParams`: `"react-agent-python"`, `"memory-agent-python"`, `"retrieval-agent-python"`, `"data-enrichment-agent-python"`, `"new-langgraph-project-python"`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -227,7 +230,7 @@ params=CategorySamplerParams(values=[
 
 The validation set is held out during GRPO training and used to detect overfitting — if training reward climbs but validation reward plateaus, the model is memorizing rather than generalizing. Use `train_test_split` to split `dataset_df` with `test_size` set to `0.1` (10% for validation) and `random_state` seed set to `42` (or some other number).
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python

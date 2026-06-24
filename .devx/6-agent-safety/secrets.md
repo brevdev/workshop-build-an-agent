@@ -8,8 +8,8 @@ If you've already set this up in an earlier module, you're good to go — skip s
 
 Use the <button onclick="openVoila('code/secrets_management/secrets_management_6.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set up your API Keys. You can also launch the Secrets Manager directly from the Jupyterlab launcher.
 
-<details>
-<summary><strong>Still need to set up your NVIDIA API Key? Expand for details.</strong></summary>
+<details class="dx-peek is-setup">
+<summary>Still need to set up your NVIDIA API Key? Expand for details.</summary>
 
 ## NVIDIA API Key <span class="dx-chip is-green">REQUIRED</span>
 
@@ -17,13 +17,13 @@ This key powers the LLM judge that evaluates your agent's safety across constrai
 
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>Don't have an account?</summary>
 
 You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>Don't have an API Key?</summary>
 
 Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api-keys).

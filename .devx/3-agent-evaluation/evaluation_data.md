@@ -71,7 +71,7 @@ For this workshop, we'll use **Synthetic Data Generation** with **NVIDIA NeMo Da
   <button onclick="openOrCreateFileInJupyterLab('code/3-agent-evaluation/generate_report_eval_dataset.ipynb');"><i class="fa-solid fa-flask"></i> Report Generation Evaluation Data Notebook</button>
 </div>
 
-<details>
+<details class="dx-peek is-solution">
 <summary>💡 NEED SOME HELP?</summary>
 
 We recommend generating your own datasets using the notebooks above to get hands-on experience with the synthetic data generation process. However, if you're running into issues or want to move ahead quickly, we've provided starter datasets you can use:

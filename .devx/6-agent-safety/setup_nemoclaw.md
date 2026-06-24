@@ -43,8 +43,10 @@ The script will then build the sandbox image (~2.4 GB compressed), upload it to 
 
 <!-- fold:break -->
 
-<details>
-<summary><strong>What does the install script do behind the scenes?</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-setup_nemoclaw-1">What does the install script do behind the scenes?</button>
+<div id="aside-setup_nemoclaw-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-setup_nemoclaw-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 The Workbench project container talks to the host's Docker daemon via a mounted socket, but NemoClaw's gateway listens on the host's network namespace — not the container's. The script bridges this with three small fixes:
 
@@ -54,10 +56,11 @@ The Workbench project container talks to the host's Docker daemon via a mounted 
 
 These are workarounds for NemoClaw v0.0.49 specifically. The script is idempotent — re-running it on an already-installed setup just ensures the tunnel is up. See `code/6-agent-safety/scripts/install-nemoclaw.sh` for the implementation.
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Troubleshooting: install fails or NemoClaw stops responding</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Troubleshooting: install fails or NemoClaw stops responding</summary>
 
 The install script writes detailed logs to two files:
 
@@ -122,8 +125,8 @@ To return to the host shell, type `exit` or press `Ctrl+D`.
 
 Let's make sure everything came up correctly. You will check status from both the host and the monitoring TUI.
 
-<details>
-<summary><strong>Still facing issues? Click me for troubleshooting!</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Still facing issues? Click me for troubleshooting!</summary>
 
 If something didn't work, don't worry -- here are the most common issues and their fixes:
 

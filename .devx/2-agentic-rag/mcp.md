@@ -122,7 +122,7 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 
 The mcp-remote package acts as a bridge, allowing stdio-based clients to connect to remote MCP servers over HTTP.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -145,7 +145,7 @@ This configuration connects to Tavily's hosted MCP server URL. No local server i
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'result = ...');"><i class="fas fa-code"></i> result</button> — Inside `web_search()`, call the Tavily search tool through the MCP client.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -164,7 +164,7 @@ The `session.call_tool()` method invokes the Tavily search tool on the remote MC
 
 In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built. This replaces your earlier definition — we're expanding the agent's toolkit.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘  Need some help?</summary>
 
 ```python

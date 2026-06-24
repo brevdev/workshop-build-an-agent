@@ -40,7 +40,7 @@ The `HuggingFaceLLM` class wraps HuggingFace Transformers to provide the same in
 
 Implement `llm` by instantiating `HuggingFaceLLM` with the `config` object.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -60,7 +60,7 @@ This is a subtle but critical detail: the model was trained with `config.json_sy
 
 > 💡 **Why this matters**: During training, the system prompt was part of every input. The model learned to produce correct outputs *conditioned on that specific prompt*. Changing the prompt at inference time is like studying for one exam and sitting for a different one.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -78,7 +78,7 @@ Even though the trained model is more accurate, the HITL pattern from `bash_agen
 
 Implement the execution block: if the user confirms the command, execute it with `bash.exec_bash_command(command)` and store the result in `tool_result`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python

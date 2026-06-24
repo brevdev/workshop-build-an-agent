@@ -69,15 +69,15 @@ You'll see the **LLM Picker** — a robot in the center with model cards around 
 
 The full demo has four phases. Click on each to learn more.
 
-<details>
-<summary><strong>1. Pick Your Model</strong></summary>
+<details class="dx-peek">
+<summary>1. Pick Your Model</summary>
 
 Click a model card to select it. **Nemotron** (NVIDIA's flagship) is recommended — it handles deepagents' middleware stack reliably. The model's brand color will theme the entire UI.
 
 </details>
 
-<details>
-<summary><strong>2. Build Your Agent</strong></summary>
+<details class="dx-peek">
+<summary>2. Build Your Agent</summary>
 
 After picking a model, you'll see three panels:
 
@@ -96,15 +96,15 @@ After picking a model, you'll see three panels:
 
 </details>
 
-<details>
-<summary><strong>3. Click Build</strong></summary>
+<details class="dx-peek">
+<summary>3. Click Build</summary>
 
 When you've added at least one tool, the **Build** button lights up. Click it to see the build animation — the frontend sends your configuration to the backend, which assembles the deep agent.
 
 </details>
 
-<details>
-<summary><strong>4. Chat with the Agent</strong></summary>
+<details class="dx-peek">
+<summary>4. Chat with the Agent</summary>
 
 Once built, you're in the **chat interface**:
 - Type messages and see real-time streaming responses
@@ -119,8 +119,8 @@ Try these to verify everything works:
 
 </details>
 
-<details>
-<summary><strong>5. (Optional) Docker for Sandbox Mode</strong></summary>
+<details class="dx-peek">
+<summary>5. (Optional) Docker for Sandbox Mode</summary>
 
 In the Deep Agent Client, you can enable **Sandbox Mode** in the Settings panel. This runs the agent's tools inside an isolated Docker container — the agent can't see your host files. 
 

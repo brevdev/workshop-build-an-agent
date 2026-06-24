@@ -41,8 +41,8 @@ These ten risks organize into three clusters. Click on each cluster to learn mor
   <div class="dx-cell"><h4>STATE / COMMS</h4><span class="dx-big">ASI 07, 08, 09</span>What it remembers and how agents interact.</div>
 </div>
 
-<details>
-<summary><strong>1. Goal and Identity Attacks</strong></summary>
+<details class="dx-peek">
+<summary>1. Goal and Identity Attacks</summary>
 
 These threats target *who the agent is* and *what it tries to accomplish*.
 
@@ -54,8 +54,8 @@ These threats target *who the agent is* and *what it tries to accomplish*.
 
 </details>
 
-<details>
-<summary><strong>2. Capability and Tool Attacks</strong></summary>
+<details class="dx-peek">
+<summary>2. Capability and Tool Attacks</summary>
 
 These threats exploit *what the agent can do*.
 
@@ -68,8 +68,8 @@ These threats exploit *what the agent can do*.
 
 </details>
 
-<details>
-<summary><strong>3. State and Communication Attacks</strong></summary>
+<details class="dx-peek">
+<summary>3. State and Communication Attacks</summary>
 
 These threats target *what the agent remembers* and *how agents interact*.
 
@@ -83,8 +83,10 @@ These threats target *what the agent remembers* and *how agents interact*.
 
 No single defense addresses all ten. That's where defense in depth comes in.
 
-<details>
-<summary><strong>How NemoClaw Maps to These Threats</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-1">How NemoClaw Maps to These Threats</button>
+<div id="aside-wn-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 No single tool addresses all ten risks. NemoClaw's four enforcement layers each help mitigate a different subset:
 
@@ -97,7 +99,8 @@ No single tool addresses all ten risks. NemoClaw's four enforcement layers each 
 
 Some risks -- notably ASI08 (inter-agent communication) and ASI10 (human trust exploitation) -- require additional controls beyond what NemoClaw provides. Defense in depth means acknowledging these boundaries.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -119,29 +122,29 @@ Defense in depth is a security principle borrowed from military strategy: arrang
   </div>
 </div>
 
-<details>
-<summary><strong>1. No single layer covers all threats</strong></summary>
+<details class="dx-peek">
+<summary>1. No single layer covers all threats</summary>
 
 Network controls can't prevent memory poisoning. Filesystem restrictions can't stop credential theft from in-process memory. Each layer addresses a different attack vector.
 
 </details>
 
-<details>
-<summary><strong>2. Each layer operates independently</strong></summary>
+<details class="dx-peek">
+<summary>2. Each layer operates independently</summary>
 
 If the network proxy is misconfigured, the filesystem sandbox still holds. If a Landlock rule is too permissive, seccomp still blocks dangerous syscalls. Layers don't depend on each other.
 
 </details>
 
-<details>
-<summary><strong>3. Layers enforce at different levels</strong></summary>
+<details class="dx-peek">
+<summary>3. Layers enforce at different levels</summary>
 
 Application-level controls (SOUL.md rules) can be bypassed by the agent. Container-level controls require a container escape. Kernel-level controls (Landlock, seccomp) are designed to be irrevocable by userspace code.
 
 </details>
 
-<details>
-<summary><strong>4. Failure of one layer should not cascade</strong></summary>
+<details class="dx-peek">
+<summary>4. Failure of one layer should not cascade</summary>
 
 A successful prompt injection might hijack the agent's goal, but if network egress is deny-by-default, there's no path to exfiltrate the data. The attack succeeds at one layer but is contained at the next.
 
@@ -235,29 +238,27 @@ network_policies:
 
 Key details about network enforcement - click each to learn more.
 
-<details>
-<summary><strong>L7 inspection</strong></summary>
+<div class="dx-defs">
+<details class="dx-def">
+<summary>L7 inspection</summary>
 
 For REST endpoints with TLS termination enabled, the proxy decrypts TLS and inspects each HTTP request. A policy with `access: read-only` allows GET requests but blocks POST, PUT, PATCH, and DELETE on the same endpoint.
 
 </details>
-
-<details>
-<summary><strong>Per-binary scoping</strong></summary>
+<details class="dx-def">
+<summary>Per-binary scoping</summary>
 
 Each policy specifies which binaries are authorized. A rule allowing `/usr/bin/curl` to reach `api.github.com` does not grant that access to `/usr/local/bin/python3`. Binary identity is verified via `/proc/pid/exe` and SHA256 hash.
 
 </details>
-
-<details>
-<summary><strong>Hot-reload</strong></summary>
+<details class="dx-def is-wide">
+<summary>Hot-reload</summary>
 
 Network policies can be updated on a running sandbox with `openshell policy set` without restarting the agent. Changes take effect immediately.
 
 </details>
-
-<details>
-<summary><strong>Blocked request output</strong></summary>
+<details class="dx-def is-wide">
+<summary>Blocked request output</summary>
 
 When a connection is denied, the sandbox proxy returns an HTTP 403. Inside the sandbox, the user sees:
 
@@ -266,9 +267,8 @@ curl: (56) Received HTTP code 403 from proxy after CONNECT
 ```
 
 </details>
-
-<details>
-<summary><strong>Audit trail</strong></summary>
+<details class="dx-def is-wide">
+<summary>Audit trail</summary>
 
 Every denied connection produces a structured log entry. Query it from the host with `openshell logs <sandbox> --since 5m`:
 
@@ -277,6 +277,7 @@ action=deny dst_host=api.github.com dst_port=443 binary=/usr/bin/curl deny_reaso
 ```
 
 </details>
+</div>
 
 The NemoClaw baseline policy pre-approves a minimal set of endpoints: NVIDIA inference endpoints, GitHub (for `git` and `gh`), and a few others required for basic operation. Everything else is blocked until the operator explicitly adds a policy.
 
@@ -298,26 +299,26 @@ Think of Landlock like a one-way turnstile -- once you walk through, there's no 
 
 OpenShell uses **Landlock** -- a Linux Security Module available since kernel 5.13 -- to enforce filesystem restrictions at the kernel level. Landlock has three properties that make it uniquely suited for agent containment - click each to learn more.
 
-<details>
-<summary><strong>Unprivileged</strong></summary>
+<div class="dx-defs">
+<details class="dx-def">
+<summary>Unprivileged</summary>
 
 Unlike AppArmor or SELinux, Landlock does not require root. The sandbox process applies its own restrictions at startup.
 
 </details>
-
-<details>
-<summary><strong>Stackable</strong></summary>
+<details class="dx-def">
+<summary>Stackable</summary>
 
 Landlock works alongside seccomp BPF and AppArmor. Each layer adds restrictions; none can remove restrictions applied by another.
 
 </details>
-
-<details>
-<summary><strong>Irrevocable by design</strong></summary>
+<details class="dx-def is-wide">
+<summary>Irrevocable by design</summary>
 
 Once `landlock_restrict_self()` is called, the process is designed to be unable to lift the restrictions. Not by spawning children, not by calling other syscalls, not by any mechanism available to userspace code.
 
 </details>
+</div>
 
 The technical mechanism is three syscalls:
 
@@ -325,8 +326,10 @@ The technical mechanism is three syscalls:
 2. **`landlock_add_rule()`** -- Adds per-path rules to the ruleset (e.g., read-only on `/usr`, read-write on `/sandbox`)
 3. **`landlock_restrict_self()`** -- Applies the ruleset to the current process. This call is designed to be irreversible by the kernel.
 
-<details>
-<summary><strong>See a filesystem access example - click here!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-2">See a filesystem access example</button>
+<div id="aside-wn-2" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-2" popovertargetaction="hide" aria-label="Close">×</button>
 
 The NemoClaw baseline filesystem policy (from `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`) maps to these Landlock rules:
 
@@ -336,7 +339,8 @@ The NemoClaw baseline filesystem policy (from `nemoclaw-blueprint/policies/openc
 | `/usr`, `/lib`, `/proc`, `/dev/urandom`, `/app`, `/etc`, `/var/log` | Read-only |
 | Everything else | Denied |
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -356,47 +360,44 @@ Think of it like a building where certain floors are off-limits and certain acti
 
 OpenShell applies multiple overlapping process restrictions - click each to learn more.
 
-<details>
-<summary><strong>Non-root execution</strong></summary>
+<div class="dx-defs">
+<details class="dx-def">
+<summary>Non-root execution</summary>
 
 The sandbox process runs as a dedicated `sandbox` user and group, never as root. The policy YAML explicitly declares `user: sandbox` and `group: sandbox`, and OpenShell rejects policies that specify root.
 
 </details>
-
-<details>
-<summary><strong>Dropped capabilities</strong></summary>
+<details class="dx-def">
+<summary>Dropped capabilities</summary>
 
 Linux capabilities including `CAP_NET_RAW`, `CAP_DAC_OVERRIDE`, `CAP_SYS_CHROOT`, `CAP_FSETID`, `CAP_SETFCAP`, `CAP_MKNOD`, `CAP_AUDIT_WRITE`, and `CAP_NET_BIND_SERVICE` are dropped at sandbox creation. The agent process is designed to be unable to regain them.
 
 </details>
-
-<details>
-<summary><strong>Kernel flags</strong></summary>
+<details class="dx-def">
+<summary>Kernel flags</summary>
 
 The `PR_SET_NO_NEW_PRIVS` kernel flag is set at startup, which helps prevent the process from gaining new privileges through `execve()`. A compromised binary cannot escalate by executing a setuid program.
 
 </details>
-
-<details>
-<summary><strong>seccomp BPF</strong></summary>
+<details class="dx-def">
+<summary>seccomp BPF</summary>
 
 A syscall filter blocks dangerous operations like `mount()`, `reboot()`, `ptrace()`, and `kexec_load()`. The filter is applied at sandbox creation and is designed to be irrevocable.
 
 </details>
-
-<details>
-<summary><strong>Process limits</strong></summary>
+<details class="dx-def is-wide">
+<summary>Process limits</summary>
 
 `ulimit -u 512` caps the number of processes the sandbox can spawn, which helps limit fork bombs and runaway process trees.
 
 </details>
-
-<details>
-<summary><strong>Toolchain removal</strong></summary>
+<details class="dx-def is-wide">
+<summary>Toolchain removal</summary>
 
 The sandbox image removes development tools (`gcc`, `g++`, `make`, `netcat`) that an attacker could use to compile exploits or establish reverse shells.
 
 </details>
+</div>
 
 Together, these restrictions mean that even if an attacker achieves code execution inside the sandbox, the code runs as an unprivileged user with dropped capabilities, restricted syscall access, and no development tools to escalate further. The blast radius is significantly reduced.
 
@@ -416,8 +417,10 @@ This principle directly addresses ASI01 (Goal Hijack -- even if hijacked, no cre
 
 This layer has two complementary functions: **credential isolation** and **privacy routing**. Both operate through the same `inference.local` gateway.
 
-<details>
-<summary><strong>Credential Isolation</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-3">Credential Isolation</button>
+<div id="aside-wn-3" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-3" popovertargetaction="hide" aria-label="Close">×</button>
 
 It's like a valet service -- you hand your car keys to the valet (the gateway), and the valet drives on your behalf. The passenger (the agent) is not meant to touch the keys.
 
@@ -446,10 +449,13 @@ openshell provider create --name my-nvidia --type generic --from-existing
 openshell sandbox create --provider my-nvidia --provider my-github -- claude
 ```
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Operator-Controlled Routing</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-4">Operator-Controlled Routing</button>
+<div id="aside-wn-4" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-4" popovertargetaction="hide" aria-label="Close">×</button>
 
 Think of a PBX phone system: the operator chooses which trunk all outbound calls go through. The switchboard doesn't listen to the conversation -- it routes every call to whichever trunk is currently configured. To shift from a public trunk to a private one, the operator flips a setting, not the caller.
 
@@ -470,7 +476,8 @@ openshell inference set --provider my-local-ollama --model nemotron-nano
 
 This lets the operator switch between cloud and local inference at any time without modifying the agent or restarting the sandbox. Per-request, content-aware routing -- *"if this query contains PII, route to local; otherwise, route to cloud"* -- is a pattern you build in your application layer in front of `inference.local`. The gateway provides the routing primitive; your classifier provides the decision. You'll build that classifier in Exercise 5 on the [Working with NemoClaw](using_nemoclaw) page.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -480,8 +487,10 @@ Now that you understand what the layers do and why they matter, let's look at ho
 
 Every OpenShell sandbox is governed by a single policy YAML file. The NemoClaw blueprint ships a default at `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`. Here is the full structure with annotations. 
 
-<details>
-<summary><strong>Click to view full file</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-5">Click to view full file</button>
+<div id="aside-wn-5" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-5" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```yaml
 # Policy schema version (required, must be 1)
@@ -554,7 +563,8 @@ network_policies:
       - { path: /usr/bin/gh }
 ```
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 

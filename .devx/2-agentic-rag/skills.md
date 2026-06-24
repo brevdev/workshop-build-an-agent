@@ -184,7 +184,7 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def get_skill');"><i class="fas fa-code"></i> get_skill return</button> — Return the loaded skill content.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -199,7 +199,7 @@ return load_skill(skill_name)
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def list_available_skills');"><i class="fas fa-code"></i> list_available_skills return</button> — Return the list of skills.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -214,7 +214,7 @@ return list_skills()
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT = ');"><i class="fas fa-code"></i> AGENT</button> — Update the `AGENT` definition one last time to wire up all four tools. This is the final version!
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python

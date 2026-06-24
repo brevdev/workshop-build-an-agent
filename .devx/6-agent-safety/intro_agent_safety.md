@@ -14,36 +14,36 @@ The question isn't whether your agent can do the work. It's whether your agent c
 
 Traditional application security assumes a clear trust boundary: the server trusts its own code, and external inputs are validated at the edge. Agents break this model in fundamental ways. Five properties make agent security a distinct discipline. Click on each to learn more. 
 
-<details>
-<summary><strong>1. Blurred trust boundaries</strong></summary>
+<details class="dx-peek">
+<summary>1. Blurred trust boundaries</summary>
 
 A web server has a clear inside and outside. An agent doesn't. It consumes untrusted content (user messages, tool outputs, RAG retrieval results, RSS feeds) and produces outputs that may themselves become inputs to other agents or tools. The agent is simultaneously client, server, and user -- and every boundary is a potential injection point.
 
 </details>
 
-<details>
-<summary><strong>2. The confused deputy</strong></summary>
+<details class="dx-peek is-solution">
+<summary>2. The confused deputy</summary>
 
 An agent acts on your behalf, wielding your credentials and authority. But it can be deceived. Think of a diplomat who carries your seal of office -- if an adversary slips a forged instruction into the diplomat's briefing materials, the diplomat may unknowingly execute the adversary's will using your authority. A prompt injection exploits exactly this dynamic.
 
 </details>
 
-<details>
-<summary><strong>3. Tool use as attack surface</strong></summary>
+<details class="dx-peek">
+<summary>3. Tool use as attack surface</summary>
 
 Every tool an agent can invoke is a potential privilege escalation vector. A file-writing tool can overwrite configuration. A web-browsing tool can exfiltrate data. A code-execution tool can install malware. More tools means a larger attack surface -- and agents are designed to use many tools.
 
 </details>
 
-<details>
-<summary><strong>4. Persistent memory</strong></summary>
+<details class="dx-peek">
+<summary>4. Persistent memory</summary>
 
 Unlike a stateless API call, agents carry context across sessions. MEMORY.md, diary entries, and learned preferences accumulate over time. A subtle poisoning of memory in week one can influence the agent's behavior in week ten. Compromises can be long-lived and difficult to detect.
 
 </details>
 
-<details>
-<summary><strong>5. Amplification through reasoning</strong></summary>
+<details class="dx-peek">
+<summary>5. Amplification through reasoning</summary>
 
 Agents don't just execute single commands -- they plan, reason, and chain multiple steps together. A small manipulation in an early reasoning step can compound through the chain into a large, unintended action. What starts as a benign-looking data fetch can escalate into an unauthorized deployment.
 
@@ -67,8 +67,10 @@ To see where we stand so far, here's a quick recap of the capabilities and safet
 
 > Need a refresher? Click on the following for a quick recap. 
 
-<details>
-<summary><strong>Application-Level Safety Patterns (Module 4)</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-intro_agent_safety-1">Application-Level Safety Patterns (Module 4)</button>
+<div id="aside-intro_agent_safety-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-intro_agent_safety-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 In Module 4, you built a bash agent with explicit command filtering:
 
@@ -78,10 +80,13 @@ In Module 4, you built a bash agent with explicit command filtering:
 
 These controls live in Python. They check every command *before* it reaches the shell.
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Sandbox Container Isolation (Module 5)</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-intro_agent_safety-2">Sandbox Container Isolation (Module 5)</button>
+<div id="aside-intro_agent_safety-2" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-intro_agent_safety-2" popovertargetaction="hide" aria-label="Close">×</button>
 
 As you learned in Module 5, Docker sandboxing added OS-level boundaries:
 
@@ -92,7 +97,8 @@ As you learned in Module 5, Docker sandboxing added OS-level boundaries:
 
 These controls live at the container runtime level. They enforce boundaries regardless of what the agent does inside.
 
-</details>
+</div>
+</div>
 
 Each module gave you stronger capabilities and stronger controls. But there are gaps — and those gaps become critical when the agent runs autonomously.
 
@@ -153,8 +159,10 @@ These gaps map to different enforcement layers. Each layer adds protection that 
 | **Human dependency** | High (HITL) | Low (set-and-forget) | None (policy is self-enforcing) |
 | **Drift resilience** | Low — static allowlists | Medium — container config is fixed | High — kernel policy survives agent evolution |
 
-<details>
-<summary><strong>Thought Exercise: The 2 AM Prompt Injection</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-intro_agent_safety-3">Thought Exercise: The 2 AM Prompt Injection</button>
+<div id="aside-intro_agent_safety-3" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-intro_agent_safety-3" popovertargetaction="hide" aria-label="Close">×</button>
 
 Your OpenClaw agent processes a customer support queue overnight. At 2 AM, a prompt injection arrives disguised as a customer ticket:
 
@@ -176,7 +184,8 @@ The safety eval suite would catch this in its next scheduled run — the red-tea
 
 No single layer is perfect. But all four layers failing simultaneously is the scenario an attacker must achieve.
 
-</details>
+</div>
+</div>
 
 The progression is clear: from trusting the model, to trusting the container, to trusting the kernel.
 

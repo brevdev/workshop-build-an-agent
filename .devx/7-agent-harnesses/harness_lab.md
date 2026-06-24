@@ -26,8 +26,8 @@ Complete the agent loop in <button onclick="goToLineAndSelect('code/7-agent-harn
 
 Then run the same task in two very different harnesses. For the full, batteries-included end we'll use **Hermes** — NousResearch's open harness, branded *"the agent that grows with you,"* the one NVIDIA ships a [NemoClaw blueprint for](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent), and the one you'll lean on again in Exercises 3 and 5.
 
-<details>
-<summary><strong>Set up Hermes (one-time, ~2 min)</strong></summary>
+<details class="dx-peek">
+<summary>Set up Hermes (one-time, ~2 min)</summary>
 
 Install it and point it at the same Nemotron endpoint your minimal harness uses:
 
@@ -62,7 +62,7 @@ Now run the identical task in each:
 
 Both complete the task. Feel how different they are — verbosity, persistence, initiative, how much each one says before it acts. Same model. Different car.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 The loop pattern is: call the model with the message history → if the response contains tool calls, execute each and append a `ToolMessage` → repeat until the model answers without tool calls.
@@ -107,7 +107,7 @@ Maximal harness:  8,212 tokens/turn        (9.7× tax)
   </div>
 </div>
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 Use `tiktoken` to count tokens, and remember the tax has two parts — the prompt *and* the tool schemas the harness registers:
@@ -142,7 +142,7 @@ Then start `hermes` and ask it to profile the same CSV. It follows the identical
 
 One file. Two harnesses. Zero changes. *That* is the open skills spec doing its job.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 The `description` line is what triggers skill loading — make it match the task vocabulary ("profile, summarize, or explore an unfamiliar CSV or DataFrame"), not the implementation. A good body gives the agent a numbered procedure (shape → dtypes → nulls → numeric distributions → cardinality → 3 surprising facts) and an output format to follow.
@@ -169,7 +169,7 @@ python harness_lab.py --exercise 4
 
 Your minimal harness — armed with the verified skill — gets asked to aggregate a large dataset. Watch the model choose `cudf.pandas`, and watch your GPU light up in `nvidia-smi`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 If GPU utilization stays at zero: check the dataset actually crossed the 100K-row size gate the skill teaches (the generator script makes 1M rows by default), and confirm cuDF imported GPU-side with `python -c "import cudf; print(cudf.__version__)"`. No GPU on your machine? The exercise prints a clear skip message and the answers notebook shows expected output.
@@ -190,7 +190,7 @@ Run the same task twice (`--exercise 5`). The second run starts with the skill t
 
 > This is exactly the bet Hermes makes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 Prompt the model with its own transcript and the skill format spec, asking for *only* the SKILL.md content. Validate the frontmatter parses before saving — a malformed skill that breaks your loader on the next run is exactly the kind of self-evolution failure Module 6 warned about. (Production note: this is why NemoClaw treats the skills directory as a write-policied path.)

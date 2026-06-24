@@ -11,13 +11,13 @@ You can also launch the Secrets Manager directly from the Jupyterlab launcher.
 
 NVIDIA API Key provides access to NVIDIA's AI services and models. For this customization module, we will need an API Key to access and customize NVIDIA models.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an account?</summary>
 
 You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api-keys).
@@ -28,20 +28,20 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 If you had set these previously, they should persist in the Secrets Manager! These keys are not required for this module. 
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Still Want to Set These? Expand Me!</summary>
 
 ## Tavily API Key <span class="dx-chip">OPTIONAL</span>
 
 Tavily is a search API designed for AI agents. It provides real-time web search capabilities that help agents gather up-to-date information from the internet.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an account?</summary>
 
 You can get free access to Tavily with a [Tavily Developer Account](https://tavily.com/).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
@@ -52,13 +52,13 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 LangSmith is LangChain's platform for testing, evaluating, and monitoring LLM applications. It provides tracing and debugging capabilities for your AI agents.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an account?</summary>
 
 You can get free access to LangSmith with a [LangSmith Account](https://smith.langchain.com/).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).

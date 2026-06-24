@@ -131,6 +131,65 @@ Wrap the existing nested `<details>` decision flow in `<div class="dx-choose"> .
 (keep blank lines so inner markdown renders). Recommendation blockquotes inside get the
 green card styling automatically.
 
+## Reveal widgets (replace bare `<details>` accordions)
+
+Pick by the content's *reading model*: inline when the reader follows along, an overlay when it's a tangent, a grid for scannable term lists. All native + attribute-driven (no `<script>`). Leave `.dx-choose` decision-trees (above) as-is.
+
+**`dx-peek` — inline reveal tile.** Native `<details>`; expands in place, so the reading thread stays put. Use for sequential lab steps, hint/solution reveals, and conditional setup notes.
+
+```html
+<details class="dx-peek">
+<summary>Step 1 — Observe the deny</summary>
+
+Body markdown (blank line above). Prose and code render at 15px.
+
+</details>
+```
+
+- Modifiers: `is-solution` (amber accent — for 🆘 hint/answer reveals), `is-setup` (compact + muted — for tiny "⚠️ Don't have a key?" fallbacks).
+- Nesting is fine — a step may contain a nested `dx-peek`; each `<details>` is styled by its own summary.
+- Headings inside keep their normal size; only body + code drop to 15px.
+
+**`dx-aside` — popover overlay.** Opens in the browser top layer over the page (no reflow), so the reader never loses their place. Use for "how does X work?", optional examples, and long file dumps.
+
+```html
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-PAGE-1">How is this calculated?</button>
+<div id="aside-PAGE-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-PAGE-1" popovertargetaction="hide" aria-label="Close">×</button>
+
+Body markdown (blank line above).
+
+</div>
+</div>
+```
+
+- The `id` must be UNIQUE across the whole workshop — convention `aside-<page>-<n>`. The trigger, the panel, and the × button all reference the same id.
+- Native Popover API (no JS): Esc / click-outside / × all dismiss; re-clicking the trigger toggles. The panel scrolls internally, so long code is fine.
+- NOT for sequential steps — showing one at a time hides the thread.
+
+**`dx-defs` — glossary grid.** A 4-column bento grid (matches `.dx-bento`) of term → definition tiles that expand in place. Use for scannable term lists.
+
+```html
+<div class="dx-defs">
+<details class="dx-def">
+<summary>seccomp BPF</summary>
+
+A syscall filter that blocks dangerous operations like mount() and ptrace().
+
+</details>
+<details class="dx-def is-wide">
+<summary>Audit trail</summary>
+
+Definition text. Give any code-bearing tile is-wide so the code fits.
+
+</details>
+</div>
+```
+
+- `is-wide` (span 2) / `is-full` (span the whole row) pack tiles so each row fills with no dead space; give any code-bearing tile `is-wide`. Re-balance the spans if you add or remove tiles.
+- Keep a whole grid inside ONE fold section — never split it across a `<!-- fold:break -->`.
+
 ## Reveal-on-scroll
 
 Add `class="dx-reveal"` (optionally `style="--i:1"`, `--i:2`... for stagger) to islands,
@@ -146,3 +205,4 @@ bento cells, and skill cards. Never to text paragraphs.
 6. Mascot images: keep ONE per page, max-width 240px, never in the hero — place beside a later prose section.
 7. Keep every link, code fence, and the instructional text intact unless the text directly describes a replaced visual.
 8. ASCII only in attribute values (data-title etc.) — emoji fine in visible text.
+9. Reveal widgets replace bare `<details>`: `dx-peek` (inline), `dx-aside` (popover), `dx-defs` (glossary grid). A class-less `<details>` should appear ONLY inside a `.dx-choose` block.

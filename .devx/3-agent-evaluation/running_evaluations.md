@@ -48,8 +48,8 @@ The quality of an agent evaluation pipeline depends not only on your test data, 
 
 **Click to expand each design principle to learn more.**
 
-<details>
-<summary><strong>1. Be Specific About Criteria</strong></summary>
+<details class="dx-peek">
+<summary>1. Be Specific About Criteria</summary>
 
 Clear and specific prompts result in precise and objective responses from LLMs. When possible, ask for empirical and quantifiable scores. 
 
@@ -71,8 +71,8 @@ Evaluate this answer on the following criteria:
 
 </details>
 
-<details>
-<summary><strong>2. Provide Context</strong></summary>
+<details class="dx-peek">
+<summary>2. Provide Context</summary>
 
 Include all relevant information the judge needs:
 - The original question or task
@@ -82,8 +82,8 @@ Include all relevant information the judge needs:
 
 </details>
 
-<details>
-<summary><strong>3. Request Structured Output</strong></summary>
+<details class="dx-peek">
+<summary>3. Request Structured Output</summary>
 
 LLMs tend to provide better, more actionable output when prompted to generate responses in a structured format like JSON.
 
@@ -101,8 +101,8 @@ Format your response as JSON:
 
 </details>
 
-<details>
-<summary><strong>4. Include Examples</strong></summary>
+<details class="dx-peek">
+<summary>4. Include Examples</summary>
 
 Few-shot examples can help the judge understand your standards:
 
@@ -130,7 +130,7 @@ Let’s take a look at some example evaluation prompt templates in <button oncli
 
 Your task is to complete the prompt by briefly defining each “faithfulness” score level, giving the judge model clearer guidance on when to assign each score. 
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```

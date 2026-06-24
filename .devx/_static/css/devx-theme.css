@@ -35,6 +35,10 @@
   --dx-green-hover: #549a00;
   --dx-green-dim: rgba(118, 185, 0, 0.14);
 
+  /* Amber = a "reveal the answer" accent (dx-peek.is-solution only) */
+  --dx-amber: #e8a33d;
+  --dx-amber-dim: rgba(232, 163, 61, 0.14);
+
   /* Text on dark */
   --dx-fg: #f2f2f2;
   --dx-fg-dim: #c6c6c6;
@@ -1307,3 +1311,251 @@ html.dx-dark .markdown-section .mermaid text {
   color: #c6c6c6 !important;
 }
 html.dx-dark .markdown-section .mermaid .edgeLabel { background-color: var(--dx-black) !important; }
+
+/* ==========================================================================
+   12. REVEAL WIDGETS — dx-peek (inline) · dx-aside (popover) · dx-defs (grid)
+   Replacements for bare <details> accordions. The reveal mechanism follows the
+   reading model: INLINE for linear / compare-against-your-work content, an
+   OVERLAY for optional tangents (no page reflow), a GRID for glossaries.
+   All native + attribute-driven (no page <script>). Never group blocks across
+   a <!-- fold:break --> — the progressive-unfold plugin counts top-level nodes.
+   ========================================================================== */
+
+/* ---- 12a. dx-peek — inline reveal tile (steps / solutions / setup) -------- */
+.markdown-section details.dx-peek {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-left: 3px solid var(--dx-green);     /* the clickability cue */
+  border-radius: var(--dx-radius);
+  margin: 0.7rem 0;
+  overflow: hidden;
+  transition: border-color var(--dx-ease), transform var(--dx-ease);
+}
+.markdown-section details.dx-peek:hover { transform: translateY(-1px); }
+.markdown-section details.dx-peek[open] { border-color: var(--dx-border-hover); }
+.markdown-section details.dx-peek > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--dx-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--dx-fg);
+  padding: 0.78rem 1.05rem;
+  transition: background var(--dx-ease);
+}
+.markdown-section details.dx-peek > summary::-webkit-details-marker { display: none; }
+.markdown-section details.dx-peek > summary::before {
+  content: '+';
+  flex: none;
+  width: 1.1em;
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  color: var(--dx-green);
+}
+.markdown-section details.dx-peek[open] > summary::before { content: '\2212'; }  /* minus */
+.markdown-section details.dx-peek > summary:hover { background: var(--dx-overlay); }
+.markdown-section details.dx-peek > *:not(summary) {
+  padding-left: 1.05rem;
+  padding-right: 1.05rem;
+}
+/* 15px body (a touch under the 16px base); leave headings at their normal size */
+.markdown-section details.dx-peek > *:not(summary):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
+  font-size: 0.9375rem;
+}
+/* code matches the step's body size (rem, not the fragile 0.83em-of-pre chain) */
+.markdown-section details.dx-peek pre > code { font-size: 0.9375rem; line-height: 1.5; }
+.markdown-section details.dx-peek > *:last-child { padding-bottom: 0.7rem; }
+
+/* modifier: is-solution — amber accent signals "answer / spoiler ahead" */
+.markdown-section details.dx-peek.is-solution { border-left-color: var(--dx-amber); }
+.markdown-section details.dx-peek.is-solution > summary::before { color: var(--dx-amber); }
+/* modifier: is-setup — compact + muted, for tiny conditional fallbacks */
+.markdown-section details.dx-peek.is-setup { border-left-width: 2px; }
+.markdown-section details.dx-peek.is-setup > summary { font-size: 0.86rem; font-weight: 500; padding: 0.6rem 0.95rem; color: var(--dx-fg-dim); }
+
+/* ---- 12b. dx-aside — popover overlay (explanatory / optional asides) ------ */
+.markdown-section .dx-aside { margin: 0.7rem 0; }
+.markdown-section .dx-aside-btn {
+  display: flex;                    /* full-width, mirrors a dx-peek summary */
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: left;
+  font-family: var(--dx-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--dx-fg);
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-left: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+  padding: 0.78rem 1.05rem;
+  cursor: pointer;
+  transition: border-color var(--dx-ease), background var(--dx-ease), transform var(--dx-ease);
+}
+.markdown-section .dx-aside-btn::before {
+  content: '\2922';                 /* diagonal arrows = opens an overlay */
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  color: var(--dx-green);
+}
+.markdown-section .dx-aside-btn:hover { background: var(--dx-overlay); border-color: var(--dx-border-hover); transform: translateY(-1px); }
+
+/* the panel renders in the browser top layer when open — zero page reflow */
+.dx-aside-panel {
+  max-width: min(680px, 92vw);
+  max-height: 82vh;
+  overflow: auto;
+  margin: auto;                     /* UA centers popovers via inset:0 + margin:auto */
+  background: var(--dx-raised);
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border-hover);
+  border-top: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+  padding: 1.3rem 1.5rem 1.5rem;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+}
+.dx-aside-panel > *:first-child { margin-top: 0; }
+.dx-aside-panel::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.dx-aside-x {
+  float: right;
+  position: sticky;
+  top: 0;
+  margin: -0.5rem -0.7rem 0.3rem 0.7rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  line-height: 1;
+  font-size: 1.25rem;
+  color: var(--dx-fg-mute);
+  background: var(--dx-overlay);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  cursor: pointer;
+  transition: color var(--dx-ease), border-color var(--dx-ease);
+}
+.dx-aside-x:hover { color: var(--dx-fg); border-color: var(--dx-green); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .dx-aside-panel { transition: opacity 0.2s ease-out, transform 0.2s ease-out; }
+  @starting-style { .dx-aside-panel:popover-open { opacity: 0; transform: translateY(8px); } }
+}
+
+/* ---- 12c. dx-defs — glossary term/definition grid ------------------------- */
+.markdown-section .dx-defs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);   /* fixed 4-col bento (matches .dx-bento) */
+  gap: 10px;
+  align-items: start;               /* expanding one tile won't stretch its row */
+  margin: 1.3rem 0;
+}
+/* span modifiers — smart packing fills each row, no dead space */
+.markdown-section .dx-defs > .dx-def.is-wide { grid-column: span 2; }
+.markdown-section .dx-defs > .dx-def.is-full { grid-column: 1 / -1; }
+@media (max-width: 720px) {
+  .markdown-section .dx-defs { grid-template-columns: repeat(2, 1fr); }
+  .markdown-section .dx-defs > .dx-def.is-wide,
+  .markdown-section .dx-defs > .dx-def.is-full { grid-column: 1 / -1; }
+}
+.markdown-section details.dx-def {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  overflow: hidden;
+  transition: border-color var(--dx-ease), transform var(--dx-ease);
+}
+.markdown-section details.dx-def:hover { border-color: var(--dx-green); transform: translateY(-2px); }
+.markdown-section details.dx-def[open] { border-color: var(--dx-green); }
+.markdown-section details.dx-def > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--dx-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dx-green);
+  padding: 0.75rem 0.9rem;
+}
+.markdown-section details.dx-def > summary::-webkit-details-marker { display: none; }
+.markdown-section details.dx-def > summary::after {
+  content: '+';
+  flex: none;
+  color: var(--dx-fg-mute);
+}
+.markdown-section details.dx-def[open] > summary::after { content: '\2212'; color: var(--dx-green); }
+.markdown-section details.dx-def > *:not(summary) {
+  padding: 0.1rem 0.9rem 0.8rem;
+  font-family: var(--dx-sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--dx-fg-dim);
+}
+
+/* code blocks inside reveal widgets — inset to match prose, and scroll (never clip).
+   .markdown-section pre carries padding:...!important, so we inset the panel with
+   margin rather than padding. dx-def tiles are grid items: min-width:0 lets a long
+   line scroll inside the tile instead of forcing the track wider / being clipped by
+   the tile's overflow:hidden. */
+.markdown-section details.dx-peek > pre {
+  margin-left: 1.05rem;
+  margin-right: 1.05rem;
+  overflow-x: auto;
+}
+/* nested reveal tiles inside a dx-peek: inset the whole BOX with margin — padding would
+   only inset their inner content and leave the bordered box flush to the parent's edge */
+.markdown-section details.dx-peek > details,
+.markdown-section details.dx-peek > .dx-aside,
+.markdown-section details.dx-peek > .dx-defs {
+  margin-left: 1.05rem;
+  margin-right: 1.05rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* lists inside reveal tiles: the content-padding rule sets a small left padding that
+   crowds bullets/numbers against the edge — give them a comfortable marker indent */
+.markdown-section details.dx-peek > ul,
+.markdown-section details.dx-peek > ol,
+.markdown-section details.dx-def > ul,
+.markdown-section details.dx-def > ol {
+  padding-left: 2.3rem;
+}
+/* blockquotes inside reveal tiles: match the tile's text size (the inner <p> isn't a
+   direct child, so it misses the content-size rule) and inset the spine with margin so
+   the bordered box aligns with the prose instead of sitting flush to the edge */
+.markdown-section details.dx-peek blockquote,
+.markdown-section details.dx-peek blockquote p { font-size: 0.9375rem; }
+.markdown-section details.dx-peek > blockquote { margin-left: 1.05rem; margin-right: 1.05rem; }
+.markdown-section details.dx-def blockquote,
+.markdown-section details.dx-def blockquote p { font-size: 0.85rem; }
+.markdown-section details.dx-def > blockquote { margin-left: 0.9rem; margin-right: 0.9rem; }
+.markdown-section .dx-defs > details.dx-def { min-width: 0; }
+.markdown-section details.dx-def > pre {
+  margin-left: 0.9rem;
+  margin-right: 0.9rem;
+  overflow-x: auto;
+}
+/* smaller code only inside bento tiles, so long lines fit a double-width tile */
+.markdown-section details.dx-def pre > code { font-size: 0.72em; line-height: 1.5; }
+
+/* shared: animated inline reveal for dx-peek + dx-def (matches .dx-choose) */
+@media (prefers-reduced-motion: no-preference) {
+  .markdown-section details.dx-peek::details-content,
+  .markdown-section details.dx-def::details-content {
+    opacity: 0;
+    transition: opacity 0.25s ease-out, content-visibility 0.25s allow-discrete;
+  }
+  .markdown-section details.dx-peek[open]::details-content,
+  .markdown-section details.dx-def[open]::details-content { opacity: 1; }
+}

@@ -27,8 +27,8 @@ This systematic approach ensures that improvements are data-driven and measurabl
 
 **Click to expand each improvement strategy to learn more.** 
 
-<details>
-<summary><strong>1. Prompt Engineering</strong></summary>
+<details class="dx-peek">
+<summary>1. Prompt Engineering</summary>
 
 Often the fastest way to improve agent performance is refining prompts.
 
@@ -57,8 +57,8 @@ system_prompt = """You are an IT help desk assistant.
 
 </details>
 
-<details>
-<summary><strong>2. Retrieval Optimization</strong></summary>
+<details class="dx-peek">
+<summary>2. Retrieval Optimization</summary>
 
 For RAG agents, improving retrieval quality often has the biggest impact.
 
@@ -106,8 +106,8 @@ retriever = vectordb.as_retriever(
 
 </details>
 
-<details>
-<summary><strong>3. Model Selection</strong></summary>
+<details class="dx-peek">
+<summary>3. Model Selection</summary>
 
 ### Strategy 3: Model Selection
 
@@ -145,8 +145,8 @@ for model_name in llm_options:
 
 </details>
 
-<details>
-<summary><strong>4. Architecture Changes</strong></summary>
+<details class="dx-peek">
+<summary>4. Architecture Changes</summary>
 
 Sometimes you need to modify the agent's structure.
 
@@ -192,8 +192,8 @@ def self_review(state):
 
 </details>
 
-<details>
-<summary><strong>5. Data Enhancement</strong></summary>
+<details class="dx-peek">
+<summary>5. Data Enhancement</summary>
 
 Improve the knowledge base or training data.
 

@@ -42,7 +42,7 @@ Document splitting is controlled by two things: chunk size and chunk overlap. We
 
 Define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'splitter = ');"><i class="fas fa-code"></i> splitter</button> using these values and LangGraph's [`RecursiveCharacterTextSplitter`](https://python.langchain.com/docs/how_to/recursive_text_splitter/).
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -63,7 +63,7 @@ These chunks need to be embedded into vectors for the database. This is done wit
 
 Use the [NVIDIAEmbeddings](https://build.nvidia.com/nvidia/llama-nemotron-embed-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'embeddings = ');"><i class="fas fa-code"></i> embeddings</button>. The API Key has already been configured, it does not need to be specified. Set truncate to `END`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -103,7 +103,7 @@ LangChain allows us to easily create a basic retrieval chain from our Vector Dat
 
 NVIDIA offers a Reranker model to improve the relevance and order of retrieved documents. Use the [NVIDIARerank](https://build.nvidia.com/nvidia/llama-nemotron-rerank-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'reranker = ');"><i class="fas fa-code"></i> reranker</button>.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -147,7 +147,7 @@ With our vector database and retriever chain in place, we're ready to construct 
 
 Every agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Super model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -176,7 +176,7 @@ Because the ReAct architecture is so common, LangGraph provides a function that 
 
 > **Note:** We'll update the `AGENT` definition as we add more capabilities in later sections. Each section builds on the last — by the end of this module, your agent will have multiple tools.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```

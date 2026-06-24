@@ -11,13 +11,13 @@ You can also launch the Secrets Manager from the launcher.
 
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Dont have an account?</summary>
 
 You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api-keys).
@@ -28,13 +28,13 @@ Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api
 
 Tavily is a search API designed for AI agents. Later in this module, you'll use it to add web search capabilities via MCP. If you already set this up in Module 1, it should persist here.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an account?</summary>
 
 You can get free access to Tavily with a [Tavily Developer Account](https://tavily.com/).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
@@ -45,13 +45,13 @@ Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 LangSmith provides tracing and monitoring for your agent. You'll use it in the [Running Your Agent](running.md) section to inspect your agent's behavior.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an account?</summary>
 
 You can get free access to LangSmith with a [LangSmith Account](https://smith.langchain.com/).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).

@@ -129,7 +129,7 @@ Let's build out our baseline bash agent. Open <button onclick="openOrCreateFileI
 
 This is the HITL pattern from above, implemented as a wrapper around the `Bash` tool. If the user confirms via `self._confirm_execution(cmd)`, return `self.bash.exec_bash_command(cmd)`. Otherwise, return a dictionary with `"error"` set to `"User declined."` so the agent knows the command was rejected.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -149,7 +149,7 @@ LangGraph's `create_react_agent` wires together the Reason-Act-Observe loop from
 
 > 💡 We pass `ExecOnConfirm(bash).exec_bash_command` as the tool — not `bash.exec_bash_command` directly — so every command goes through human approval.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -174,7 +174,7 @@ agent = create_react_agent(
 
 `agent.invoke()` kicks off the full ReAct cycle — reason, propose a tool call, wait for HITL approval, observe the result, and repeat. Implement `result` by invoking the agent with a single message where `"role"` is `"user"` and `"content"` is the `user` input variable.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python

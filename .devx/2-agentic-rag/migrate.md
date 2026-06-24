@@ -88,9 +88,10 @@ As the NIM container is starting, the log allows you to observe that it is:
 
 You'll know the NIM is ready for inference when it says `Application startup complete`, runs a built-in smoke test, then starts logging metrics.
 
-<details>
-
-<summary>📜 If you're curious, it looks like this.</summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-migrate-1">📜 If you're curious, it looks like this.</button>
+<div id="aside-migrate-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-migrate-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```
 INFO 2025-09-10 16:31:52.7 on.py:48] Waiting for application startup.
@@ -150,7 +151,8 @@ curl -X 'POST' \
 INFO 2025-09-10 16:32:05.957 metrics.py:386] Avg prompt throughput: 0.2 tokens/s, Avg generation throughput: 1.1 tokens/s, Running: 0 reqs, Swapped: 0 reqs, Pending: 0 reqs, GPU KV cache usage: 0.0%, CPU KV cache usage: 0.0%.
 ```
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -184,7 +186,7 @@ In your agent code, you previously created the `llm` object with the <button onc
 
 Refer to the [official LangChain documentation](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#working-with-nvidia-nims) for more details.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python

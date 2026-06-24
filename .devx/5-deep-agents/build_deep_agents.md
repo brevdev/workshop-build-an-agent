@@ -35,7 +35,7 @@ Fill in `_get_model()` to create a ChatNVIDIA instance.
 Use `MODEL_MAP` to look up the `model_id`, and `os.getenv("NVIDIA_API_KEY")` for the `api_key`.
 Set temperature to 0.3.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -63,7 +63,7 @@ Deep agents come with built-in tools (filesystem, planning, etc.), but we can ad
 
 Fill in `_build_extra_tools()` to add a `TavilySearchResults` tool when `"websearch"` is in the skill list. Use ``os.getenv("TAVILY_API_KEY")`` for the ``api_key``, and ``max_results=3``.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -97,7 +97,7 @@ The prompt should tell the agent:
 - `hitl_note`: instructions for HITL if added
 - `skill_section`: instructions for skills if added
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -138,7 +138,7 @@ Fill in ``_build_backend()`` to return the right backend:
 * If "execute" is in ``skill_ids`` → ``LocalShellBackend`` (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to True)
 * Otherwise → ``FilesystemBackend`` (with root_dir as workspace)
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -174,7 +174,7 @@ Fill in ``create_agent()`` to:
 3. If ``hitl_enabled``, add interrupt_on=INTERRUPT_TOOLS
 4. Call ``create_deep_agent`` on **agent_kwargs and return the result
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python

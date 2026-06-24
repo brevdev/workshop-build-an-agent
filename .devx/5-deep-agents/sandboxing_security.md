@@ -125,8 +125,6 @@ Ask these questions:
 3. **Does the agent execute code?** Any code execution — even "just" shell commands — requires at minimum container-level isolation.
 4. **What are the consequences of a breach?** A leaked API key is bad. A deleted production database is catastrophic. Match isolation to impact.
 
-</details>
-
 <!-- fold:break -->
 
 ## Patterns for Agent Sandboxing
@@ -212,8 +210,8 @@ There are several approaches to sandboxing, each with different tradeoffs:
 
 Learn more about a few options by clicking each of the examples below. 
 
-<details>
-<summary><strong>1. Docker Containers</strong></summary>
+<details class="dx-peek">
+<summary>1. Docker Containers</summary>
 
 Docker is a common approach for agent sandboxing in development. It provides:
 
@@ -228,8 +226,8 @@ Docker is a common approach for agent sandboxing in development. It provides:
 
 </details>
 
-<details>
-<summary><strong>2. Firecracker MicroVMs</strong></summary>
+<details class="dx-peek">
+<summary>2. Firecracker MicroVMs</summary>
 
 Full hardware virtualization with ~150ms startup time. **E2B** is a leading agent sandboxing platform built on Firecracker.
 
@@ -242,8 +240,8 @@ Full hardware virtualization with ~150ms startup time. **E2B** is a leading agen
 
 </details>
 
-<details>
-<summary><strong>3. OS-Level Sandboxing</strong></summary>
+<details class="dx-peek">
+<summary>3. OS-Level Sandboxing</summary>
 
 Lightweight sandboxing built into the operating system:
 
@@ -277,8 +275,10 @@ Here are the layers, from closest to the user to closest to the hardware:
 
 The key principle: assume any single layer can fail. HITL can be bypassed by batch operations. Permission systems can have gaps. Containers can have escape vulnerabilities. But all six failing simultaneously is extraordinarily unlikely.
 
-<details>
-<summary><strong>Show me an example of a layered defense. Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-sandboxing_security-1">Show me an example of a layered defense.</button>
+<div id="aside-sandboxing_security-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-sandboxing_security-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 Consider a deep research agent deployed in production:
 
@@ -291,7 +291,8 @@ Consider a deep research agent deployed in production:
 
 If the agent is tricked by a prompt injection attack into trying to exfiltrate data, it would need to bypass the application file path restriction, escape the container's filesystem boundary, evade network egress controls, and avoid detection in the audit logs — all simultaneously.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -301,8 +302,8 @@ If the agent is tricked by a prompt injection attack into trying to exfiltrate d
 
 Beyond sandboxing, here are the fundamental security principles for production agents. Click on each of them to learn more: 
 
-<details>
-<summary><strong>1. Trust the Sandbox, Not the Model</strong></summary>
+<details class="dx-peek">
+<summary>1. Trust the Sandbox, Not the Model</summary>
 
 From the [deepagents security docs](https://github.com/langchain-ai/deepagents):
 
@@ -312,43 +313,43 @@ Never rely on the model to avoid dangerous actions. It *will* hallucinate. Enfor
 
 </details>
 
-<details>
-<summary><strong>2. Principle of Least Privilege</strong></summary>
+<details class="dx-peek">
+<summary>2. Principle of Least Privilege</summary>
 
 Give the agent only the tools it needs. If it doesn't need shell access, don't enable it. If it doesn't need file write, use read-only mode.
 
 </details>
 
-<details>
-<summary><strong>3. Credential Isolation</strong></summary>
+<details class="dx-peek">
+<summary>3. Credential Isolation</summary>
 
 API keys, database passwords, and tokens should **never** be accessible to the agent. Use environment variables outside the sandbox, and don't mount credential files into containers.
 
 </details>
 
-<details>
-<summary><strong>4. Audit Everything</strong></summary>
+<details class="dx-peek">
+<summary>4. Audit Everything</summary>
 
 Every tool call, every file write, every command execution should be logged. LangSmith provides tracing and monitoring for this — you can review every action the agent took after the fact.
 
 </details>
 
-<details>
-<summary><strong>5. Rate Limiting</strong></summary>
+<details class="dx-peek">
+<summary>5. Rate Limiting</summary>
 
 Prevent runaway agents from making thousands of API calls or running infinite loops. Set recursion limits on the graph and timeouts on tool execution.
 
 </details>
 
-<details>
-<summary><strong>6. Adversarial Testing</strong></summary>
+<details class="dx-peek">
+<summary>6. Adversarial Testing</summary>
 
 Before deploying, probe your agent with inputs designed to trigger unsafe behavior — prompt injection, harmful instructions, and edge cases. If you haven't tried to break it, you don't know it's safe.
 
 </details>
 
-<details>
-<summary><strong>7. Environment Separation</strong></summary> 
+<details class="dx-peek">
+<summary>7. Environment Separation</summary>
 
 Use distinct configurations for development, staging, and production. Never test with production credentials or data.
 

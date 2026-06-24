@@ -54,8 +54,10 @@ These capabilities cover a wide range of real-world tasks. For focused problems 
   <p>These four gaps map directly onto the four pillars of deep agents - exactly what the next page covers.</p>
 </div>
 
-<details>
-<summary><strong>A concrete example of shallow agent breakdown</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-intro_deep_agents-1">A concrete example of shallow agent breakdown</button>
+<div id="aside-intro_deep_agents-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-intro_deep_agents-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 Consider asking your Module 1 report generation agent: "Research the competitive landscape of AI agent frameworks, comparing at least 10 frameworks across architecture, pricing, ecosystem, and adoption. Produce a detailed report with citations."
 
@@ -69,7 +71,8 @@ Here's what would likely happen:
 
 A human researcher would take notes, organize by subtopic, and check their work against their outline. The shallow agent can't do any of this.
 
-</details>
+</div>
+</div>
 
 > Think about how a human handles complex tasks. You don't try to hold everything in your head. You:
 > - Write down a plan and check items off as you go

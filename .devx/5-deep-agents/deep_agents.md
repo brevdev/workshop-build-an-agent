@@ -37,8 +37,10 @@ This seemingly simple change has profound effects:
 
 Think of it this way: a shallow agent is like someone solving a problem in their head. A deep agent is like someone working from a written project plan — they can lose their train of thought and pick right back up.
 
-<details>
-<summary><strong>What a plan document looks like in practice</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-deep_agents-1">What a plan document looks like in practice</button>
+<div id="aside-deep_agents-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-deep_agents-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 A deep agent's plan might look like this:
 
@@ -58,7 +60,8 @@ A deep agent's plan might look like this:
 
 The agent updates this plan after every step. If "Research AutoGen" fails because the search returns irrelevant results, the agent can note the failure and try a different search strategy — rather than blindly retrying the same query in a loop.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -79,8 +82,10 @@ This pattern solves two problems at once:
 
 Think of it like a project manager coordinating a team. The manager doesn't write every line of code, conduct every interview, and draft every document. They break the project into work streams, assign specialists, and integrate the results.
 
-<details>
-<summary><strong>How delegation prevents context overflow</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-deep_agents-2">How delegation prevents context overflow</button>
+<div id="aside-deep_agents-2" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-deep_agents-2" popovertargetaction="hide" aria-label="Close">×</button>
 
 Imagine a research task that requires analyzing 20 sources. With a shallow agent, all 20 source summaries pile up in one context window. With hierarchical delegation:
 
@@ -91,7 +96,8 @@ Imagine a research task that requires analyzing 20 sources. With a shallow agent
 
 The total information processed is the same, but no single context window is overwhelmed.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -127,8 +133,10 @@ The system prompts you've written so far — "You are a helpful assistant that..
 
 If you worked through Module 4's **Superpowers** skills framework, you've already seen a taste of this. Deep agent skills take it further — they're detailed operating procedures that guide the agent's behavior across complex, multi-step workflows.
 
-<details>
-<summary><strong>Example: A deep research agent's skill excerpt</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-deep_agents-3">Example: A deep research agent's skill excerpt</button>
+<div id="aside-deep_agents-3" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-deep_agents-3" popovertargetaction="hide" aria-label="Close">×</button>
 
 A deep research agent might have skill instructions like:
 
@@ -136,7 +144,8 @@ A deep research agent might have skill instructions like:
 
 This level of detail is what separates a deep agent from a shallow one using the same model. The model's capabilities are identical — the difference is in the instructions.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -156,8 +165,10 @@ Here's a comprehensive comparison of the two architectures:
 
 The key insight: deep agents don't replace shallow agents. They **extend** them. A deep agent's sub-agents are themselves shallow agents — focused, single-loop executors. The deep agent architecture adds the coordination layer that lets them work together on larger problems.
 
-<details>
-<summary><strong>Where do the agents you built fit?</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-deep_agents-4">Where do the agents you built fit?</button>
+<div id="aside-deep_agents-4" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-deep_agents-4" popovertargetaction="hide" aria-label="Close">×</button>
 
 Looking back at the workshop:
 
@@ -167,7 +178,8 @@ Looking back at the workshop:
 
 A deep agent could **orchestrate** all of these as sub-agents: use the RAG agent for document retrieval, the report agent for writing, and the customized agent for domain-specific analysis — all coordinated by a planner.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -177,8 +189,8 @@ A deep agent could **orchestrate** all of these as sub-agents: use the RAG agent
 
 Deep agent patterns have moved rapidly from research to production. Let's look at where they're making the biggest impact. Click on each use case to learn more. 
 
-<details>
-<summary><strong>1. Deep Research</strong></summary>
+<details class="dx-peek">
+<summary>1. Deep Research</summary>
 
 Deep research is a flagship application of deep agents — and the category where all major AI providers (OpenAI, Google, Perplexity, Anthropic) have converged on remarkably similar architectures. 
 
@@ -194,8 +206,8 @@ Despite different implementations, the common architecture follows a consistent 
 
 </details>
 
-<details>
-<summary><strong>2. Coding Assistants</strong></summary>
+<details class="dx-peek">
+<summary>2. Coding Assistants</summary>
 
 Software development is the most battle-tested use case for deep agents. Tools like **Claude Code** and **Cursor** all leverage deep agent patterns:
 
@@ -214,8 +226,8 @@ These agents don't just autocomplete code — they reason about architecture, tr
 
 Like any architectural decision, deep agents come with both benefits and costs. Click on each of the following to learn more: 
 
-<details>
-<summary><strong>1. Benefits of Deep Agent Architecture</strong></summary>
+<details class="dx-peek">
+<summary>1. Benefits of Deep Agent Architecture</summary>
 
 | Benefit | Description |
 |---------|-------------|
@@ -235,8 +247,8 @@ Like any architectural decision, deep agents come with both benefits and costs. 
   <p><span class="dx-chip">COORDINATION</span> Multi-agent writing can produce disjointed output without careful orchestration.</p>
 </div>
 
-<details>
-<summary><strong>2. So Why are Deep Agents Practical Now?</strong></summary>
+<details class="dx-peek">
+<summary>2. So Why are Deep Agents Practical Now?</summary>
 
 Recent advances in LLM and agent capabilities have made these patterns practical for production use:
 
@@ -263,8 +275,10 @@ Not every task needs a deep agent. Here's a decision framework:
 | Autonomous operation is acceptable | Real-time response is required |
 | The task benefits from planning and delegation | The path is straightforward |
 
-<details>
-<summary><strong>Show me some examples!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-deep_agents-5">Show me some examples</button>
+<div id="aside-deep_agents-5" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-deep_agents-5" popovertargetaction="hide" aria-label="Close">×</button>
 
 | Task | Agent Type | Why |
 |------|-----------|-----|
@@ -274,7 +288,8 @@ Not every task needs a deep agent. Here's a decision framework:
 | "Refactor this codebase to use a new API" | Deep | Multi-file, needs progress tracking |
 | "Generate a quarterly compliance report from 50 documents" | Deep | Long-running, delegation needed |
 
-</details>
+</div>
+</div>
 
 > **A practical rule of thumb** - Ask yourself: "Could a single person complete this in one sitting without taking notes?" If yes, a shallow agent is probably fine. If the answer is "no — you'd need to break it into subtasks, keep a to-do list, and coordinate with specialists," that's a deep agent problem.
 

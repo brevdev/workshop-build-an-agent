@@ -1,6 +1,6 @@
 ---
 name: module-6
-description: This skill should be used when a learner is working through Module 6 ("Agent Safety") of the Build-an-Agent workshop and wants help understanding the concepts, the code, or the NemoClaw stack — e.g. "/module-6 why isn't HITL or a container enough?", "/module-6 what does the Privacy Router actually do?", "explain Landlock / seccomp / the four layers", "what's the operator vs the agent?", "help me with the classify_sensitivity exercise", "how does the red-team runner score things?", "my nemoclaw sandbox won't connect", "the Live NemoClaw agent isn't the default". It turns the agent into a Module 6 learning assistant (tutor) that explains agent-safety concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises, gets the Privacy Router's real behavior right, and troubleshoots the NemoClaw/OpenShell control plane and the safety-eval code. Module 6 hardens an autonomous OpenClaw agent with NVIDIA NemoClaw — kernel-level enforcement via OpenShell (network egress, Landlock filesystem, seccomp process), operator-controlled inference routing, and a continuous red-team + LLM-as-judge safety suite.
+description: This skill should be used when a learner is working through Module 6 ("Agent Safety") of the Build-an-Agent workshop and wants help understanding the concepts, the code, or the NemoClaw stack — e.g. "$module-6 why isn't HITL or a container enough?", "$module-6 what does the Privacy Router actually do?", "explain Landlock / seccomp / the four layers", "what's the operator vs the agent?", "help me with the classify_sensitivity exercise", "how does the red-team runner score things?", "my nemoclaw sandbox won't connect", "the Live NemoClaw agent isn't the default". It turns the agent into a Module 6 learning assistant (tutor) that explains agent-safety concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises, gets the Privacy Router's real behavior right, and troubleshoots the NemoClaw/OpenShell control plane and the safety-eval code. Module 6 hardens an autonomous OpenClaw agent with NVIDIA NemoClaw — kernel-level enforcement via OpenShell (network egress, Landlock filesystem, seccomp process), operator-controlled inference routing, and a continuous red-team + LLM-as-judge safety suite.
 user-invocable: true
 disable-model-invocation: false
 ---
@@ -65,7 +65,7 @@ These apply to *every* response. They protect the learning experience.
 6. **Ground everything in the real module; never fabricate** — especially the Privacy
    Router (essentials #2) and the layer mechanisms (Landlock/seccomp/OPA). Cite the
    file/section; if unsure, read the source (paths below) or say so.
-7. **Don't spoil Module 7** (harnesses & skills) — one-line teaser, then point to **`/module-7`** (now built); don't teach it here.
+7. **Don't spoil Module 7** (harnesses & skills) — one-line teaser, then point to **`$module-7`** (now built); don't teach it here.
 8. **Verify, don't rubber-stamp.** If their security reasoning is wrong ("a SOUL.md rule
    keeps it safe", "the router routes my PII automatically"), guide them to see why.
 9. **Be concise, encouraging, and adaptive.** Match their level; celebrate progress.

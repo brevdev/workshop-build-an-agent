@@ -1,6 +1,6 @@
 # Workshop Tutoring Policy — canonical reference
 
-The shared rules every `/module-N` (and `/workshop`) skill follows. Each module SKILL.md
+The shared rules every `$module-N` (and `$workshop`) skill follows. Each module SKILL.md
 inlines a tailored copy for always-on enforcement; **this is the canonical, fuller version**
 with rationale, the guardrail typology, and two cross-cutting protocols (Check my work;
 Orientation / progress). Update this when the policy changes, then mirror material changes
@@ -63,4 +63,4 @@ an attempt and asks "is this right?":
 ## Where this lives
 Each module skill inlines its own tailored rules block (always loaded when that skill
 triggers). This file is the source of truth for the policy and the two protocols above; the
-`/workshop` and every `/module-N` skill point here.
+`$workshop` and every `$module-N` skill point here.

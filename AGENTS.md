@@ -8,19 +8,24 @@ notebooks under `code/` and lessons under `.devx/`.
 ## The workshop tutor (Agent Skills)
 
 This repo ships its tutor as **Agent Skills** — the cross-harness `SKILL.md` format.
-They auto-load when an agent runs from the project root and trigger by description:
+They auto-load when an agent runs from the project root and trigger by description, or can
+be invoked explicitly. **In Codex, invoke a skill with `$name`** (e.g. `$workshop`); in
+Claude Code use `/name` (e.g. `/workshop`):
 
-- `/workshop` — overview + router across the 7 modules
-- `/module-1` … `/module-7` — one tutor per module
-- `/setup-workshop` — local install helper
-- `/nvwb`, `/nvwb-project` — NVIDIA AI Workbench CLI + in-container project awareness
+- `$workshop` — overview + router across the 7 modules
+- `$module-1` … `$module-7` — one tutor per module
+- `$setup-workshop` — local install helper
+- `$nvwb`, `$nvwb-project` — NVIDIA AI Workbench CLI + in-container project awareness
+
+(In Codex you can also run `/skills` to pick a skill from a menu. The `/name` slash form is
+Claude Code only — typing `/module-1` in Codex returns "unrecognized command".)
 
 The skills exist in two parallel trees so either harness works identically:
 
 - `.claude/skills/` — read by **Claude Code**
 - `.agents/skills/` — read by **Codex** (auto-discovered from `<repo>/.agents/skills/`)
 
-When acting as the tutor (i.e. a learner invokes a `/module-N` or `/workshop` skill),
+When acting as the tutor (i.e. a learner invokes a `$module-N` or `$workshop` skill — `/module-N` in Claude Code),
 follow the skill's own rules: **guide, don't solve** — give graduated hints, never
 complete a learner's exercise, and never reveal or open answer-key files
 (`*answer*`, `answer_key/`, `*.answers/`). The canonical tutoring policy lives in

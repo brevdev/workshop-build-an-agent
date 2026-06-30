@@ -79,7 +79,7 @@ A skill is a folder with a `SKILL.md` at its root, two parts:
   the task.
 The format is the open **Agent Skills specification** ([agentskills.io](https://agentskills.io)).
 Because the major harnesses all consume it, the *same* `SKILL.md` runs in OpenClaw, Hermes,
-Claude Code, Codex, Cursor… Write once, supercharge any agent. (Meta-note: the `/module-N`
+Claude Code, Codex, Cursor… Write once, supercharge any agent. (Meta-note: the `$module-N`
 skills tutoring this workshop are exactly this format.)
 
 ## NVIDIA Verified Skills (`agent_skills.md`)

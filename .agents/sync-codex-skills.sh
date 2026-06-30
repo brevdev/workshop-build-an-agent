@@ -67,7 +67,9 @@ apply_subs() {
     -e 's#Inner Claude#Inner agent#g' \
     -e 's#Outer Claude#Outer agent#g' \
     -e 's#when Claude is working inside#when Codex is working inside#g' \
-    -e 's#references/claude-in-container\.md#references/codex-in-container.md#g'
+    -e 's#references/claude-in-container\.md#references/codex-in-container.md#g' \
+    -e 's#for a specific module; setup is in#for a specific module (or run `/skills` to pick one from a menu); setup is in#' \
+    -e 's#(^|[`" (,])/(nvwb-project|nvwb|setup-workshop|workshop|module-[0-9N]+)([`" .,)]|$)#\1$\2\3#g'
 }
 
 mode="${1:-write}"

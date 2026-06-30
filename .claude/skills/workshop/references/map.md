@@ -41,11 +41,12 @@ Teaching narrative for module N is in `.devx/<N>-<slug>/`; code in `code/<N>-<sl
 - **Code:** `agent_safety.py` / `.ipynb`, `safety_eval_framework.py`, the NemoClaw wrappers, `policies/*.yaml`, `scripts/`.
 - **Prereq:** M4 (HITL) + M5 (sandboxing) concepts; extends M3's eval framework.  **Time:** 2–2.5 h.  **Hardware:** Docker + Linux kernel ≥ 5.13 for the live stack; no GPU on the main path (the Python eval sidekicks run on the mock agent even if the live control plane is down).
 
-## Module 7 — Agent Harnesses & Skills  (*pending — not yet built*)
-- **Build (planned):** a minimal pi-style harness from scratch, a context-tax measurement suite, and a portable Agent Skill that runs unchanged across harnesses; a GPU-accelerated NVIDIA Verified Skill.
-- **Concepts (planned):** harness vs LLM separation, the context tax + lazy skill loading, the open Agent Skills spec, NVIDIA Verified Skills.
-- **Note:** the `/module-7` skill is not built yet — say so and point to the module's `.devx/7-agent-harnesses/` content if asked.
+## Module 7 — Agent Harnesses & Skills  (`/module-7`, `7-agent-harnesses`)
+- **Build:** a minimal pi-style harness (4 tools + a loop) around Nemotron, a context-tax meter, a hand-authored portable Agent Skill, a GPU-accelerated NVIDIA Verified Skill (cuDF), and a self-evolving harness.
+- **Concepts:** harness vs LLM (engine/car), the five harness responsibilities, the context tax + lazy skill loading, the seven-harness landscape, the open Agent Skills spec, NVIDIA Verified Skills, GPU skills.
+- **Code:** `harness_lab.py` / `.ipynb` (5 exercises — `build_bare_agent`, `harness_overhead`, `load_skills_lazily`, `self_evolve_skill`, + author a `SKILL.md`) (+ `.answers.*`); `scripts/install_nvidia_skill.sh`.
+- **Prereq:** M1–M6 concepts — the **capstone**; it names the harness layer used in every prior module.  **Time:** 2–3 h.  **Hardware:** none for the main path (hosted Nemotron + `tiktoken`, CPU); **Exercise 4's GPU speedup needs an NVIDIA GPU** (cuDF) — clean fallback + skip message without one.
 
 ## Routing shorthand
 RAG → M2 · evaluation/metrics → M3 · training/GRPO/GPU → M4 · deep agents/planning/sandbox → M5 ·
-safety/NemoClaw/kernel → M6 · install/launch → setup-workshop · overview/order/connections → this skill.
+safety/NemoClaw/kernel → M6 · harnesses/skills/context-tax/Verified-Skills → M7 · install/launch → setup-workshop · overview/order/connections → this skill.

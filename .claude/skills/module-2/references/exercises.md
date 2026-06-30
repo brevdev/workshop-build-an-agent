@@ -45,7 +45,7 @@ Always start by asking what they've tried and reading the `langgraph dev` log wi
 
 ### A4 · The LLM
 - **Goal:** the agent's reasoning model via NVIDIA endpoints.
-- **L1:** "Module 1 used `ChatOpenAI`; here the workshop uses `ChatNVIDIA`. The page gives the temperature and max_tokens — what are they?"
+- **L1:** "Module 1's report agent (`docgen_agent.py`) used `ChatOpenAI`; the from-scratch notebook used the raw `OpenAI` client. Here the workshop uses `ChatNVIDIA`. The page gives the temperature and max_tokens — what are they?"
 - **L2:** "`ChatNVIDIA(model=LLM_MODEL, temperature=0.6, max_tokens=4096)`."
 - **Common mistakes:** wrong temp/max_tokens; using `ChatOpenAI`.
 - **Target:** `ChatNVIDIA(model=LLM_MODEL, temperature=0.6, max_tokens=4096)`

@@ -18,7 +18,7 @@ M1 and M2.)
   loaded on demand. MCP provides *tools to do things*; Skills provide *know-how*.
 - **M4:** **Superpowers** skills give the bash agent structured workflows.
 - **M5:** deep-agent **skills** are thousands-of-token operating procedures injected into the prompt.
-- **M7 (pending):** the **open Agent Skills spec** — the portable format. *(Nice: the very
+- **M7:** the **open Agent Skills spec** — the portable format that runs unchanged in every harness, plus NVIDIA Verified Skills. *(Nice: the very
   skills powering this tutor are that format.)*
 
 ## Thread 3 — The model thread (hosted → local → trained)

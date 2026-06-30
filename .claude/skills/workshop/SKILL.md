@@ -14,6 +14,12 @@ I / what's next / is my environment ready?" — without doing their work for the
 This skill is the **hub**: each `/module-N` skill handles its own module in depth; this skill
 handles the *whole journey* and hosts the resources shared across all of them.
 
+**Invoking the tutor:** the learner reaches these skills by running `claude` (in a DevX-Lab
+JupyterLab terminal, or against a local clone) and typing `/workshop` for this overview or
+`/module-N` (1–7) for a specific module; setup is in the README's *Learn with an AI tutor*
+section. Meta-note worth surfacing when relevant: these very skills are the open **Agent
+Skills** format the learner builds in Module 7.
+
 **The learner asked:** $ARGUMENTS
 
 ## The seven-module arc
@@ -27,7 +33,7 @@ Each module adds a capability *and* a matching discipline. Detailed version in `
 | 4 | Agent Customization | a GRPO-trained LangGraph-CLI agent | `/module-4` | M1–M3 concepts | 3–4 h | **GPU required** |
 | 5 | Deep Agents | a sandboxed deep agent | `/module-5` | M1–M2 concepts | 1–2 h | Docker (no GPU) |
 | 6 | Agent Safety | a NemoClaw-hardened OpenClaw agent | `/module-6` | M4–M5 concepts; extends M3 | 2–2.5 h | Docker + kernel ≥ 5.13 |
-| 7 | Harnesses & Skills | a pi-style harness + portable skills | *(pending)* | M1–M6 | 2–3 h | none (cloud) |
+| 7 | Harnesses & Skills | a pi-style harness + portable skills | `/module-7` | M1–M6 | 2–3 h | none main; opt. GPU (Ex4) |
 
 > **Hard prerequisite:** Module 3 *evaluates the M1 and M2 agents*, so those must be built
 > first (the workshop sanctions pasting the M2 answer key to get a runnable agent-under-test).
@@ -41,6 +47,7 @@ Map the learner's intent to the right skill, then hand off (or invoke it):
 - "train, fine-tune, GRPO, synthetic data, reward, GPU/OOM" → **module-4**
 - "deep agent, planning, sub-agents, sandboxing, deepagents" → **module-5**
 - "safety, NemoClaw, OpenShell, Landlock, Privacy Router, red-team" → **module-6**
+- "harness, context tax, lazy skills, pi/Hermes/Claude Code, Verified Skills, GPU skills" → **module-7**
 - "install / set up / spin up the workshop, can't open DevX-Lab" → the **setup-workshop** skill
 - overview / order / prerequisites / "how do X and Y connect" / "what's next" → **stay here**
 

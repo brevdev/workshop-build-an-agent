@@ -20,8 +20,10 @@ where to learn more. Be precise about what is NVIDIA vs not — learners conflat
 - **LangChain** (`create_agent`) — builds the ReAct agent in `docgen_agent.py`. A
   framework; LangGraph (its stateful-graph layer) runs under the hood.
 - **Tavily** — the web-search API behind the `search_tavily` tool (`TAVILY_API_KEY`).
-- **OpenAI Python SDK** (`openai`, `ChatOpenAI`) — used in the from-scratch notebook only
-  as the *client* to talk to NVIDIA's OpenAI-compatible endpoint.
+- **OpenAI Python SDK / LangChain `ChatOpenAI`** — the from-scratch notebook
+  (`intro_to_agents.ipynb`) uses the raw `OpenAI` client (`from openai import OpenAI`); the
+  report agent (`docgen_agent.py`) uses LangChain's `ChatOpenAI`. Both are only the *client*
+  talking to NVIDIA's OpenAI-compatible endpoint — neither uses an OpenAI model.
 
 > Frequent confusion: seeing `ChatOpenAI`/`from openai import OpenAI`, learners think
 > "this uses OpenAI's models." Clarify: it's the OpenAI-compatible *client/SDK*; the

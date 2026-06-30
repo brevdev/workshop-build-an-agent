@@ -61,6 +61,14 @@ where it's central; for depth, see that module's `concepts.md`.
 - **Defense in depth** — multiple independent layers so an attacker must defeat all of them.
 - **Red-team probe** — an adversarial input crafted to trigger unsafe behavior.
 
+## Harnesses & skills (M7)
+- **Harness** — the layer *around* the LLM: memory, tool execution, planning, the loop, the token budget. The model is stateless; the harness is everything else. Every M1–M6 agent ran in one (named retroactively in M7).
+- **Context tax** — the recurring per-turn token overhead (system prompt + tool schemas + skill descriptions) paid on *every* model call; the axis that sorts harnesses (minimal <1k → maximal 7–10k).
+- **Lazy skill loading** — keeping each skill as a one-line `name: description` until invoked, loading the full body only on demand (pi's design; the main context-tax cut).
+- **Agent Skills spec** — the open format ([agentskills.io](https://agentskills.io)): one `SKILL.md` that runs unchanged across harnesses (OpenClaw, Hermes, Claude Code, Codex, Cursor…). See also **Agent Skill** (M2).
+- **NVIDIA Verified Skills** — signed, security-scanned skills (`github.com/NVIDIA/skills`) teaching agents to use NVIDIA software (cuDF, cuOpt, NeMo…); capability governance via SkillSpector, skill cards, and OpenSSF Model Signing.
+- **The harness landscape** — pi (minimal) · OpenCode · LangChain Deep Agents · Hermes (curated, the M7 lab harness) · OpenClaw (maximal, M6) · Claude Code / Codex (subscription, maximal).
+
 ## NVIDIA platform (all modules)
 - **NIM (NVIDIA Inference Microservices)** — the serving layer; hosted at `integrate.api.nvidia.com`, or run locally as a container.
 - **NGC (NVIDIA GPU Cloud)** — registry + where API keys live.

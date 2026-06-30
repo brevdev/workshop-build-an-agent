@@ -68,9 +68,10 @@ This is where most learners want help. **Explain the concept; guide them to the
 conclusion about their own data — don't state it.**
 
 ### Reading scores
-- All RAGAS scores are **0–1**; bands: Poor `<0.5`, Fair `0.5–0.69`, Good `0.7–0.89`,
-  Excellent `0.9–1.0`. Ask: "Which band is your score in? What does that band imply
-  about readiness?" — let them place it.
+- All RAGAS scores are **0–1**, but bands differ by metric type (per `evaluation_metrics.md`):
+  **retrieval** (precision/recall) — Poor `<0.50` / Fair `0.50–0.69` / Good `0.70–0.89` / Excellent `0.90+`;
+  **generation** (faithfulness/relevancy) is stricter — Poor `<0.60` / Fair `0.60–0.74` / Good `0.75–0.89` / Excellent `0.90+`.
+  Ask: "Which band is your score in for *that* metric, and what does it imply about readiness?" — let them place it.
 
 ### Diagnosing a low metric
 - First localize: "Is this a **retrieval** metric (context precision/recall) or a

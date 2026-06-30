@@ -110,3 +110,7 @@ execution:
           target: /run/cdi/
           description: Mount for NemoClaw Install
           options: ""
+        - type: volume
+          target: /home/workbench/.claude/
+          description: Persists Claude Code tutor settings and memory across rebuilds
+          options: volumeName=claude-config

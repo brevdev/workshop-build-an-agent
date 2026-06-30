@@ -85,7 +85,7 @@ Two functions, both via the `inference.local` gateway:
   sensitive queries**. (Demo: swap the gateway model, send a *bogus* model name from the
   sandbox — the response uses the gateway's model, proving the agent's value is ignored.)
 - **Per-request content-aware routing is something you build on top** — an app-layer
-  **classifier** in front of the gateway (Exercise 5 / `classify_sensitivity`): your code
+  **classifier** in front of the gateway (`classify_sensitivity` — introduced in live-hardening Exercise 5, labelled `# TODO: Exercise 2` in `agent_safety.py`): your code
   decides local-vs-cloud, then routes. *The gateway provides the primitive; your classifier
   provides the decision.* Two-layer routing: gateway-live route vs durable per-sandbox **pin**
   (`nemoclaw connect` reconciles to the pin).

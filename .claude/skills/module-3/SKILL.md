@@ -87,8 +87,10 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **Process vs outcome; localize before you fix.** A wrong RAG answer is either **bad
   retrieval** or **bad generation** — measure them separately.
 - **RAGAS 2×2 (all score 0–1):** **Context Precision** + **Context Recall** = retrieval;
-  **Faithfulness** + **Answer Relevancy** = generation. Bands: Poor <0.5, Fair
-  0.5–0.69, Good 0.7–0.89, Excellent 0.9–1.0.
+  **Faithfulness** + **Answer Relevancy** = generation. **Bands differ by metric type** (per
+  `evaluation_metrics.md`): retrieval — Poor <0.50 / Fair 0.50–0.69 / Good 0.70–0.89 / Excellent 0.90+;
+  generation is stricter — Poor <0.60 / Fair 0.60–0.74 / Good 0.75–0.89 / Excellent 0.90+ (so a 0.72
+  faithfulness is *Fair*, not Good — never flatten one band table across all four).
 - **The faithful-but-irrelevant trap:** an answer can be fully grounded (high
   faithfulness) yet not answer the question (low relevancy) — they measure different
   things.

@@ -47,11 +47,17 @@ that's environment, route to the module's `troubleshooting.md`).
 - The Python eval runs against the **mock agent + `test_data/` fixtures even if the live stack is down** — so concept/code progress isn't blocked by a broken control plane.
 - Docker: `docker ps`; kernel: `uname -r` (≥ 5.13 for Landlock).
 
+### Module 7
+- Remaining blanks: `grep -nE 'NotImplementedError\("Complete Exercise' code/7-agent-harnesses/harness_lab.py` — any hits → that exercise's blank is still a stub (`build_bare_agent` 1a/1b, `harness_overhead` 2a, `load_skills_lazily` 2b, `self_evolve_skill` 5).
+- Authored skill (Ex3): `ls code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`. Verified skill (Ex4): `ls code/7-agent-harnesses/skills/accelerated-computing-cudf/SKILL.md` (run `scripts/install_nvidia_skill.sh` first).
+- GPU (Ex4 speedup only): `nvidia-smi` — absent is fine (the exercise falls back to pandas + prints a skip message). "Done" = `python harness_lab.py --exercise N` runs for each completed exercise.
+
 ## Readiness gates (for "am I ready for module N?")
 - **→ M3:** M1 + M2 agents built (or paste the M2 answer key — sanctioned).
 - **→ M4:** a capable NVIDIA GPU (else do SDG + concepts only; the training run needs the GPU).
 - **→ M5:** Docker (for sandbox mode).
 - **→ M6:** Docker + Linux kernel ≥ 5.13 for the live hardening (the eval code works without).
+- **→ M7:** M1–M6 concepts (the capstone — it names the harness layer used throughout). NVIDIA key only; a GPU helps *only* for Exercise 4's cuDF speedup (skips cleanly without). No successor module.
 
 ## Reminder
 Read-only only. If a blank is unfilled → it's an *exercise* (guide, don't fill it). If it's

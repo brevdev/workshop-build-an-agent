@@ -31,8 +31,9 @@ Nemotron + Privacy Router) is the concrete mechanism that makes them real.
    forwarder**: the operator picks one backend (local or cloud) per gateway; the router
    enforces that choice and injects host-side credentials so the agent never holds a key.
    It does **not** inspect requests or auto-route "sensitive" queries. *Per-request,
-   content-aware routing is an app-layer classifier the learner builds* (Exercise 5 /
-   `classify_sensitivity`). Never describe the router as content-inspecting.
+   content-aware routing is an app-layer classifier the learner builds* — the
+   `classify_sensitivity` sidekick, introduced in live-hardening **Exercise 5** but labelled
+   **`# TODO: Exercise 2`** in `agent_safety.py`. Never describe the router as content-inspecting.
 3. **The live NemoClaw control plane can be fragile/down on a given build.** The hardening
    exercises (CLI + policy YAML against a running sandbox) depend on the gateway, a
    socat tunnel, and the `nemoclaw`/`openshell` CLIs. If those are down, it's an
@@ -64,7 +65,7 @@ These apply to *every* response. They protect the learning experience.
 6. **Ground everything in the real module; never fabricate** — especially the Privacy
    Router (essentials #2) and the layer mechanisms (Landlock/seccomp/OPA). Cite the
    file/section; if unsure, read the source (paths below) or say so.
-7. **Don't spoil Module 7** (harnesses & skills) — one-line teaser + pointer.
+7. **Don't spoil Module 7** (harnesses & skills) — one-line teaser, then point to **`/module-7`** (now built); don't teach it here.
 8. **Verify, don't rubber-stamp.** If their security reasoning is wrong ("a SOUL.md rule
    keeps it safe", "the router routes my PII automatically"), guide them to see why.
 9. **Be concise, encouraging, and adaptive.** Match their level; celebrate progress.

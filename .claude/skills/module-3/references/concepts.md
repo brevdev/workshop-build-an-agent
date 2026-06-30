@@ -26,8 +26,13 @@ Four RAGAS metrics, all scored **0–1**, split cleanly across retrieval vs gene
 | **Faithfulness** | generation | Is every claim grounded in the context (no hallucination)? |
 | **Answer Relevancy** | generation | Does the answer actually address the question? |
 
-**Score bands (apply to all):** Poor `<0.50` (urgent), Fair `0.50–0.69` (needs work),
-Good `0.70–0.89` (acceptable), Excellent `0.90–1.00` (production-ready).
+**Score bands — they differ by metric type** (per `evaluation_metrics.md`). The two
+**retrieval** metrics (Context Precision/Recall): Poor `<0.50` (urgent), Fair `0.50–0.69` (needs
+work), Good `0.70–0.89` (acceptable), Excellent `0.90–1.00` (production-ready). The two
+**generation** metrics (Faithfulness, Answer Relevancy) are **stricter**: Poor `<0.60`, Fair
+`0.60–0.74`, Good `0.75–0.89`, Excellent `0.90–1.00`. So a 0.72 faithfulness is *Fair* (needs
+work), not Good — never flatten one band table across all four; for a specific metric, defer to
+the teaching page's per-metric table.
 
 Per-metric detail (use to explain, not to grade the learner's data):
 - **Context Precision** — signal-to-noise *with ranking*. Matters because of

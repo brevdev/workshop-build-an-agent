@@ -23,6 +23,21 @@ At the end of this workshop, you will take home:
 
 The entire workshop can take anywhere from 14 to 21 hours to complete, depending on depth of exploration.
 
+## 🤖 Learn with an AI tutor (optional)
+
+This repo ships a set of **Claude Code skills** (in `.claude/skills/`) that turn Claude into a hands-on workshop tutor. It explains each module's concepts in the workshop's own framing, gives **graduated hints — without ever completing your exercises or revealing answer keys** — interprets agent behavior, and troubleshoots the environment. It's an optional companion to the notebooks; you stay in the driver's seat.
+
+**Available skills:** `/workshop` (overview + router), `/module-1` … `/module-7` (one per module), and `/setup-workshop` (local install helper).
+
+**Two ways to use it — pick whichever fits how you're running the workshop:**
+
+1. **Inside DevX-Lab (nothing to install).** Claude Code is preinstalled in the workshop container. Open a **Terminal** in JupyterLab — or, on desktop AI Workbench, the bundled **VS Code** app — run `claude`, and on first launch paste an **Anthropic API key** (this is separate from your NVIDIA key; get one at <https://console.anthropic.com>). Then type `/workshop` to get oriented, or e.g. `/module-3` for help on a specific module. The skills load automatically because you're running inside the project. *(If `claude` isn't found — e.g. an older build — run `sudo npm install -g @anthropic-ai/claude-code` once.)*
+2. **In Claude Code against a local clone.** Prefer your own machine/editor? Install Claude Code (`npm install -g @anthropic-ai/claude-code`), clone this repo, and run `claude` from the repo root — the same `.claude/skills/` load automatically.
+
+> **What the tutor will and won't do:** it's *guide-only* by design — it won't run GPU training, drive the live agent/sandbox/red-team, or fill in exercise blanks for you. Genuine setup/environment problems (keys, Docker, a broken control plane, OOM) it *will* help you fix directly.
+>
+> *Persistence:* the container persists Claude's settings and memory across rebuilds, but not its credentials, so you'll re-enter the Anthropic API key after a rebuild.
+
 ## Workshop Modules
 
 ### Module 1: Build an Agent (1-2 hours)

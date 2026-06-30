@@ -32,6 +32,7 @@ Naming the shape is how the guardrails scale — when building a new module skil
 - **M3** — handing the learner the *interpretation/conclusion* about their results.
 - **M4** — spending the learner's *GPU / wall-clock* (a ~1.5 h training run).
 - **M5 / M6** — *modeling insecure behavior* (disabling the sandbox / HITL).
+- **M7** — opening `harness_lab.answers.*` / `skills/.examples/`, **or authoring the learner's `SKILL.md`** (Exercises 3 and 5 are *authoring* exercises — coach the shape, don't write the file).
 
 ## Protocol — "Check my work" (the learner submitted an attempt)
 Distinct from hint-mode (hasn't attempted) and do-it-for-me (refuse). When the learner shows

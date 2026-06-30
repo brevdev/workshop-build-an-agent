@@ -1,0 +1,27 @@
+# OPTIONAL systemd unit — auto-start DevX-Lab on boot (Brev-parity persistence).
+# Install steps and placeholder substitution are in references/persistence.md.
+# Replace every __PLACEHOLDER__ before writing to
+#   /etc/systemd/system/nvwb-workshop.service
+#
+#   __INSTALL_USER__   e.g. output of `whoami`
+#   __INSTALL_GROUP__  e.g. output of `id -gn`
+#   __INSTALL_HOME__   e.g. output of `echo $HOME`
+#   __START_SCRIPT__   absolute path to a COPY of start-app.sh on a stable path
+#                      (copy it out of the skill, e.g. ~/.local/bin/workshop-start.sh)
+
+[Unit]
+Description=Build-an-Agent Workshop (NVIDIA AI Workbench)
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=__INSTALL_USER__
+Group=__INSTALL_GROUP__
+Environment=HOME=__INSTALL_HOME__
+WorkingDirectory=__INSTALL_HOME__
+ExecStart=__START_SCRIPT__
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

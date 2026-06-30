@@ -18,6 +18,14 @@ sudo n stable
 sudo npm install -g @anthropic-ai/claude-code \
   || echo "WARNING: '@anthropic-ai/claude-code' install failed; run 'sudo npm install -g @anthropic-ai/claude-code' manually in a terminal to use the workshop tutor."
 
+# Install OpenAI Codex CLI for full harness parity with Claude Code. The SAME workshop
+# tutor skills ship for Codex in this repo's .agents/skills/ (the Agent Skills format is
+# cross-harness) and load automatically when `codex` is run from /project/. Learners can
+# use whichever harness they prefer — `claude` or `codex` — to reach /workshop and
+# /module-1..7. Also NON-FATAL for the same reason as the Claude install above.
+sudo npm install -g @openai/codex \
+  || echo "WARNING: '@openai/codex' install failed; run 'sudo npm install -g @openai/codex' manually in a terminal to use the workshop tutor with Codex."
+
 # Deep Agent Setup File
 sudo mkdir -p /tmp/deepagent_workspace
 sudo chown workbench:workbench /tmp/deepagent_workspace

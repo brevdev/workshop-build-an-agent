@@ -7,7 +7,7 @@ For this agent to work, we will need to configure a few secrets. Use the <button
 
 You can also launch the Secrets Manager from the launcher.
 
-> 🤖 **Prefer to learn with an AI tutor?** This workshop ships **Claude Code skills** that turn Claude into a per-module guide — it explains concepts, gives graduated hints (never the answer), and helps troubleshoot your environment. Open a **Terminal** in JupyterLab, run `claude`, then type `/workshop` to get oriented or `/module-1` to dive in. (It also works in Claude Code against a local clone.) Setup details are in the project **README → _Learn with an AI tutor_**.
+> 🤖 **Prefer to learn with an AI tutor?** This workshop ships **Agent Skills** that turn a coding agent into a per-module guide — it explains concepts, gives graduated hints (never the answer), and helps troubleshoot your environment. Open a **Terminal** in JupyterLab and run `claude` **or** `codex` (both are preinstalled), then type `/workshop` to get oriented or `/module-1` to dive in. (It also works against a local clone.) Setup details are in the project **README → _Learn with an AI tutor_**.
 
 ## NGC API Key <span class="dx-chip is-green">REQUIRED</span>
 

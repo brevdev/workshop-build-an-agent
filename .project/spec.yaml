@@ -114,3 +114,7 @@ execution:
           target: /home/workbench/.claude/
           description: Persists Claude Code tutor settings and memory across rebuilds
           options: volumeName=claude-config
+        - type: volume
+          target: /home/workbench/.codex/
+          description: Persists Codex CLI tutor settings, auth, and memory across rebuilds
+          options: volumeName=codex-config

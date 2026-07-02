@@ -10,20 +10,7 @@ Here's a question that trips up almost everyone:
 
 ## The Division of Labor
 
-```mermaid
-sequenceDiagram
-    participant U as 👤 You
-    participant H as 🔧 Harness (local)
-    participant M as ☁️ LLM (cloud)
-    participant G as ⚡ Your GPU (local)
-    U->>H: "Aggregate this 10M-row dataset"
-    H->>M: context + cuDF skill description
-    M->>H: "Run this cudf.pandas code"
-    H->>G: executes locally — GPU lights up 🔥
-    G->>H: results in milliseconds
-    H->>M: results
-    M->>U: analysis, GPU-fast
-```
+![The Division of Labor](img/gpu_division_of_labor_dark.svg)
 
 The cloud model never touches your data at GPU scale — it writes a few hundred tokens of code. Your GPU does the heavy compute. This is true in **every** harness: OpenClaw, pi, Claude Code, Codex. The skill is what makes the model reach for the GPU *correctly* — right library, right API, right performance patterns.
 
@@ -91,7 +78,7 @@ Same SKILL.md. Same GPU. Different harness. **That's the open skills layer doing
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
   <p class="dx-quiz-q">You ask Claude Code (cloud model) to aggregate a 10M-row CSV with the cuDF skill installed. Where does the heavy compute run?</p>
-  <button class="dx-quiz-opt" data-fb="The model only writes a few hundred tokens of code - it never touches your data at GPU scale.">In Anthropics datacenter</button>
+  <button class="dx-quiz-opt" data-fb="The model only writes a few hundred tokens of code - it never touches your data at GPU scale.">In Anthropic's datacenter</button>
   <button class="dx-quiz-opt" data-right data-fb="The harness executes the generated cudf code on your machine - watch nvidia-smi.">On your local GPU</button>
   <button class="dx-quiz-opt" data-fb="Tools and skills execute locally by design; that is the whole point of this page.">Nowhere - subscriptions cannot use local hardware</button>
   <button class="dx-quiz-opt" data-fb="There is a clean division: cloud writes code, your GPU runs it.">Split 50/50</button>

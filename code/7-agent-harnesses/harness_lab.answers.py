@@ -20,6 +20,7 @@ import time
 from pathlib import Path
 
 import tiktoken
+from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
@@ -28,8 +29,22 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 LAB_DIR = Path(__file__).parent
 SKILLS_DIR = LAB_DIR / "skills"
 TEST_DATA = LAB_DIR / "test_data" / "sensor_readings.csv"
+REPO_ROOT = LAB_DIR.parents[1]
+
+# The Secrets Manager persists keys to <repo>/secrets.env — load them here so
+# terminal runs and notebook kernels both see NVIDIA_API_KEY.
+load_dotenv(REPO_ROOT / "variables.env")
+load_dotenv(REPO_ROOT / "secrets.env")
+if not os.environ.get("LANGSMITH_API_KEY"):
+    os.environ["LANGSMITH_TRACING"] = "false"  # tracing without a key only 401-spams
 
 MODEL_NAME = "nvidia/nemotron-3-super-120b-a12b"
+
+
+def ensure_test_data():
+    """Exercises 3-5 profile/aggregate this CSV; generate it on first use."""
+    if not TEST_DATA.exists():
+        subprocess.run(["python", str(LAB_DIR / "scripts" / "make_test_data.py")], check=True)
 
 # ---------------------------------------------------------------------------
 # The minimal harness, pi-style: a short prompt and four tools.
@@ -85,8 +100,15 @@ CORE_TOOLS = [read_file, write_file, edit_file, run_bash]
 TOOL_REGISTRY = {t.name: t for t in CORE_TOOLS}
 
 
+# The harness, not the model, holds the conversation. invoke_with_retry keeps a
+# reference to the live message list so Exercise 5 can review the transcript.
+LAST_RUN_MESSAGES = []
+
+
 def invoke_with_retry(model, messages, attempts=3):
     """Harnesses own retries (responsibility #4): survive transient API errors."""
+    global LAST_RUN_MESSAGES
+    LAST_RUN_MESSAGES = messages
     for attempt in range(attempts):
         try:
             return model.invoke(messages)
@@ -135,7 +157,9 @@ def count_tokens(text: str) -> int:
 
 def harness_overhead(system_prompt: str, tools) -> int:
     """Tokens a harness pays on EVERY call: prompt + registered tool schemas."""
-    schemas = [convert_to_openai_tool(t) if callable(t) else t for t in tools]
+    # convert_to_openai_tool() accepts both tool objects and already-converted
+    # dict schemas (LangChain tool objects are NOT callable, so don't callable()-check).
+    schemas = [convert_to_openai_tool(t) for t in tools]
     return count_tokens(system_prompt) + count_tokens(json.dumps(schemas))
 
 
@@ -227,13 +251,16 @@ def run_gpu_task() -> str:
     """
     if not (SKILLS_DIR / "accelerated-computing-cudf" / "SKILL.md").exists():
         return "Skill not installed — run scripts/install_nvidia_skill.sh first."
-    if not TEST_DATA.exists():
-        subprocess.run(["python", str(LAB_DIR / "scripts" / "make_test_data.py")], check=True)
+    ensure_test_data()
 
     has_gpu = subprocess.run("nvidia-smi", shell=True, capture_output=True).returncode == 0
+    has_cudf = subprocess.run(["python", "-c", "import cudf"], capture_output=True).returncode == 0
     if not has_gpu:
         print("⚠️  No GPU detected — the agent will fall back to pandas. "
               "On a GPU machine, watch `nvidia-smi` light up instead.")
+    elif not has_cudf:
+        print("⚠️  cuDF isn't importable — run `pip install cudf-cu12`, "
+              "or the agent will fall back to pandas.")
 
     return run_with_skills(
         f"Load {TEST_DATA} (about 1M rows) and compute the mean, max, and count "
@@ -264,6 +291,26 @@ TRANSCRIPT:
 {transcript}"""
 
 
+def format_transcript(messages) -> str:
+    """Flatten a run's message list into the TASK/TOOL/RESULT/ANSWER transcript."""
+    lines = []
+    for msg in messages:
+        if isinstance(msg, SystemMessage):
+            continue
+        if isinstance(msg, HumanMessage):
+            lines.append(f"TASK: {msg.content}")
+        elif isinstance(msg, ToolMessage):
+            lines.append(f"RESULT: {str(msg.content)[:300]}")
+        elif getattr(msg, "tool_calls", None):
+            lines.extend(
+                f"TOOL: {call['name']}({json.dumps(call['args'])[:300]})"
+                for call in msg.tool_calls
+            )
+        elif getattr(msg, "content", None):
+            lines.append(f"ANSWER: {msg.content}")
+    return "\n".join(lines)
+
+
 def self_evolve_skill(transcript: str, skills_dir: Path = SKILLS_DIR) -> Path:
     """Exercise 5: the agent writes a new skill from its own transcript."""
     model = ChatNVIDIA(model=MODEL_NAME, temperature=0.2)
@@ -283,16 +330,15 @@ def run_self_evolution_demo():
         f"Check whether the CSV at {TEST_DATA} has any nulls or duplicate "
         "rows, and report the verdict in one sentence."
     )
-    if not TEST_DATA.exists():
-        subprocess.run(["python", str(LAB_DIR / "scripts" / "make_test_data.py")], check=True)
+    ensure_test_data()
 
-    transcript_log = []
     run = build_bare_agent()
 
     print("=== Run 1 (no skill) ===")
-    answer = run(task)
-    transcript_log.append(f"TASK: {task}\nFINAL ANSWER: {answer}")
-    self_evolve_skill("\n".join(transcript_log))
+    print(run(task))
+    # The agent reviews the REAL transcript of run 1 — every tool call and
+    # result the harness recorded — and distills the reusable procedure.
+    self_evolve_skill(format_transcript(LAST_RUN_MESSAGES))
 
     print("\n=== Run 2 (with the skill the agent just wrote) ===")
     print(run_with_skills(task))
@@ -315,6 +361,7 @@ def main():
         measure_context_tax()
         load_skills_lazily()
     elif args.exercise == 3:
+        ensure_test_data()
         print(run_with_skills(
             f"Profile the dataset at {TEST_DATA} and report your findings."
         ))

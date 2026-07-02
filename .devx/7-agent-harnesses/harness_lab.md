@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 07 / 05 - HANDS ON" data-title="Build the harness. Measure the tax. Drive the GPU." data-sub="Five exercises that take you from a minimal loop you write yourself to an agent that evolves its own skills." data-meta="EXERCISES::5|FORMAT::notebook or .py|ANSWERS::included"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 05 - HANDS ON" data-title="Build the harness. Measure the tax. Drive the GPU." data-sub="Five exercises that take you from a minimal loop you write yourself to an agent that evolves its own skills." data-meta="TIME::90 min|EXERCISES::5|FORMAT::notebook or .py|ANSWERS::included"></div>
 
 Five exercises. You'll build a minimal harness from scratch, measure the context tax, author a portable skill, put your GPU to work through a verified NVIDIA skill, and finish with an agent that writes its own skills.
 
@@ -68,15 +68,16 @@ Both complete the task. Feel how different they are — verbosity, persistence, 
 The loop pattern is: call the model with the message history → if the response contains tool calls, execute each and append a `ToolMessage` → repeat until the model answers without tool calls.
 
 ```python
-while True:
-    response = model_with_tools.invoke(messages)
-    messages.append(response)
-    if not response.tool_calls:
-        return response.content
-    for call in response.tool_calls:
-        result = TOOL_REGISTRY[call["name"]](**call["args"])
-        messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))
+response = invoke_with_retry(model, messages)
+messages.append(response)
+if not response.tool_calls:
+    return response.content
+for call in response.tool_calls:
+    result = registry[call["name"]].invoke(call["args"])
+    messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))
 ```
+
+Two details that matter: use the loop's local `registry` (not the module-level `TOOL_REGISTRY`) so extra tools like `load_skill` stay callable in later exercises, and execute tools with `.invoke(call["args"])` — LangChain tool objects are not plain functions you can call directly.
 
 </details>
 
@@ -88,16 +89,18 @@ The landscape page showed estimated overhead bars. Now produce real numbers from
 
 Complete <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'def measure_context_tax');"><i class="fas fa-code"></i> measure_context_tax( ... )</button> to count the tokens of (a) your minimal system prompt + 4 tool schemas, and (b) the bundled maximal configuration (a Claude Code-style system prompt + 15 tool schemas).
 
-Then implement <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'def load_skills_lazily');"><i class="fas fa-code"></i> load_skills_lazily( ... )</button> — give the agent every skill in the `skills/` directory at a cost of *one line each*, expanding to the full body only on demand.
+Then implement <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'def load_skills_lazily');"><i class="fas fa-code"></i> load_skills_lazily( ... )</button> — give the agent every skill in the `skills/` directory at a cost of *one line each*, expanding to the full body only on demand. Two skills (`code_review`, `technical_writing`) come pre-installed so you have something to measure.
 
-Your output will look something like:
+A correct implementation prints exactly this:
 
 ```text
-Minimal harness:    847 tokens/turn
-Maximal harness:  8,212 tokens/turn        (9.7× tax)
-10 eager skills: +14,920 tokens/turn
-10 lazy skills:     +236 tokens/turn       (63× savings)
+Minimal harness:     365 tokens/turn
+Maximal harness:   3,922 tokens/turn   (10.7x tax)
+2 eager skills: +516 tokens/turn
+2 lazy skills:  +41 tokens/turn   (13x savings)
 ```
+
+The savings scale with the catalog: at 30 installed skills, eager loading costs ~45,000 tokens per turn while the lazy index stays a few hundred. Rerun this after Exercises 3–5 and watch the skill lines grow.
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">YOUR TARGETS</p>
@@ -138,7 +141,7 @@ Save it to `code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`, then prove
 cp -r code/7-agent-harnesses/skills/dataset_profiler ~/.hermes/skills/
 ```
 
-Then start `hermes` and ask it to profile the same CSV. It follows the identical procedure you wrote. (For a skill that already lives in a repo or at a URL, Hermes can pull it directly — e.g. `hermes skills install NVIDIA/skills/accelerated-computing-cudf`, which you'll use in Exercise 4.)
+Then start `hermes` and ask it to profile the same CSV. It follows the identical procedure you wrote. (For a skill that already lives in a repo or at a URL, Hermes can pull it directly — e.g. `hermes skills install nvidia/skills/accelerated-computing-cudf`, which you'll use in Exercise 4.)
 
 One file. Two harnesses. Zero changes. *That* is the open skills spec doing its job.
 
@@ -172,7 +175,7 @@ Your minimal harness — armed with the verified skill — gets asked to aggrega
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
-If GPU utilization stays at zero: check the dataset actually crossed the 100K-row size gate the skill teaches (the generator script makes 1M rows by default), and confirm cuDF imported GPU-side with `python -c "import cudf; print(cudf.__version__)"`. No GPU on your machine? The exercise prints a clear skip message and the answers notebook shows expected output.
+If GPU utilization stays at zero: check the dataset actually crossed the 100K-row size gate the skill teaches (the generator script makes 1M rows by default), and confirm cuDF imported GPU-side with `python -c "import cudf; print(cudf.__version__)"` — if that fails, `pip install cudf-cu12`. No GPU on your machine? The exercise warns you up front and the agent falls back to pandas; the same aggregation still completes, just CPU-slow.
 
 </details>
 

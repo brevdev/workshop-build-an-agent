@@ -24,8 +24,8 @@ SECTION_BLURBS = {
     2: "Count what your harness pays per turn — prompt plus tool schemas — "
        "against a maximal configuration, then implement lazy skill loading.",
     3: "Write `skills/dataset_profiler/SKILL.md` (format: `skills/code_review/SKILL.md` "
-       "at the repo root), then run it through the lazy loader. The same file also "
-       "installs unchanged into OpenClaw — one skill, two harnesses.",
+       "at the repo root), then run it through the lazy loader. The same folder also "
+       "drops unchanged into Hermes's `~/.hermes/skills/` — one skill, two harnesses.",
     4: "Install and signature-verify the NVIDIA `accelerated-computing-cudf` skill, "
        "then watch your GPU light up in `nvidia-smi` while the agent works:\n\n"
        "```bash\nbash scripts/install_nvidia_skill.sh accelerated-computing-cudf\n```",
@@ -36,7 +36,7 @@ SECTION_BLURBS = {
 RUN_CELLS = {
     1: 'run = build_bare_agent()\nprint(run(\n    "Create a file named harness_hello.txt containing the words "\n    "\'minimal harness\', then read it back and confirm its contents."\n))',
     2: "measure_context_tax()\n_ = load_skills_lazily()",
-    3: 'print(run_with_skills(\n    f"Profile the dataset at {TEST_DATA} and report your findings."\n))',
+    3: 'ensure_test_data()\nprint(run_with_skills(\n    f"Profile the dataset at {TEST_DATA} and report your findings."\n))',
     4: "print(run_gpu_task())",
     5: "run_self_evolution_demo()",
 }
@@ -55,14 +55,15 @@ def cells_from_py(py_path: Path):
     cells = [md(f"# {title}{' (Answers)' if answers else ''}\n\n"
                "Complete the exercises in order. Docs: open the **7. Agent Harnesses** "
                "launcher for the guided walkthrough.\n\n"
-               "> Requires `NVIDIA_API_KEY` — use the Secrets Manager if you haven't.")]
+               "> Needs `NVIDIA_API_KEY` — set it once with the Secrets Manager; "
+               "the setup cell below loads it from `secrets.env`.")]
 
     chunks = banner.split(source)
     # chunks[0] = header+imports+tools+ex1, then alternating (banner_text, body)
     setup, *rest = chunks
     setup_code, ex1_code = setup.split("def build_bare_agent", 1)
     setup_code = re.sub(r'^""".*?"""\n*', "", setup_code, flags=re.DOTALL)
-    cells.append(md("## Setup — the four pi-style core tools"))
+    cells.append(md("## Setup — secrets, test data, and the four pi-style core tools"))
     cells.append(code(setup_code.strip()))
     cells.append(md(f"## {SECTION_TITLES[1]}\n\n{SECTION_BLURBS[1]}"))
     cells.append(code(("def build_bare_agent" + ex1_code).strip()))

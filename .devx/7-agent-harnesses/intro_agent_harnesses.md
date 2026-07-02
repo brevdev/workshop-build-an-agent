@@ -2,7 +2,24 @@
 
 Here's an uncomfortable truth about every agent you've built in this workshop: the LLM never remembered anything, never called a tool, and never planned a single step.
 
-The model is a stateless function. Tokens in, tokens out. Everything that made your agents feel like *agents* — the memory, the tool execution, the planning loops, the self-evolving SOUL.md files from Module 6 — lived in a layer you've been using all along without naming it: the **harness**.
+The model is a stateless function. Tokens in, tokens out. Everything that made your agents feel like *agents* — the memory, the tool execution, the planning loops, the self-evolving IDENTITY.md and MEMORY.md files from Module 6 — lived in a layer you've been using all along without naming it: the **harness**.
+
+<!-- fold:break -->
+
+## The Story So Far
+
+Every module so far handed you an agent. Seen through this module's lens, it also handed you a harness — six of them, and you've already driven them all:
+
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>A hand-rolled ReAct loop</div>
+  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>LangGraph + MCP tools</div>
+  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Judging what the loop produced</div>
+  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>Training + Superpowers skills</div>
+  <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>deepagents + Docker sandboxing</div>
+  <div class="dx-cell is-wide"><h4>MODULE 6</h4><span class="dx-big">Hardened OpenClaw</span>An always-on agent under kernel enforcement</div>
+</div>
+
+This module names the pattern those six have in common — and takes it apart.
 
 <!-- fold:break -->
 
@@ -10,26 +27,7 @@ The model is a stateless function. Tokens in, tokens out. Everything that made y
 
 A useful analogy: the LLM is the **engine**, and the harness is **the rest of the car** — chassis, transmission, fuel system, steering. An engine on a stand is impressive but goes nowhere. A car without an engine is furniture.
 
-```mermaid
-flowchart TB
-    subgraph HARNESS["🔧 THE HARNESS"]
-        direction TB
-        MEM["📁 Memory<br/><i>persistence across sessions</i>"]
-        SKILLS["📚 Skills<br/><i>on-demand knowledge</i>"]
-        TOOLS["🛠️ Tool Calling<br/><i>execution, sandboxing, permissions</i>"]
-        EVOLVE["🌱 Self-Evolution<br/><i>agent improves its own scaffolding</i>"]
-        TOKENS["⚡ Token Efficiency<br/><i>context budget management</i>"]
-        subgraph LOOP["The Agentic Loop"]
-            LLM(("🧠 LLM<br/>stateless<br/>tokens in → tokens out"))
-        end
-        MEM --> LOOP
-        SKILLS --> LOOP
-        TOOLS --> LOOP
-        LOOP --> EVOLVE
-        TOKENS -.budgets.- LOOP
-    end
-    USER(("👤 User")) <--> HARNESS
-```
+![Harness Anatomy](img/harness_anatomy_dark.svg)
 
 Here's what one turn of that agentic loop looks like from the harness's side — the model only ever sees tokens, while the harness does all the reading, running, and budgeting:
 
@@ -62,7 +60,7 @@ Every harness — from a 50-line loop to Claude Code — owns the same five resp
 | # | Responsibility | What it means | Where you've seen it |
 |---|---|---|---|
 | 1 | **Memory** | What persists across sessions; what gets written, indexed, and recalled into context | OpenClaw's `MEMORY.md` and `USER.md` (Module 6); `MemorySaver` in deepagents (Module 5) |
-| 2 | **Self-evolution** | The agent improving its own scaffolding: writing its own memories, skills, and config | Your OpenClaw agent rewriting `IDENTITY.md` after every heartbeat (Module 6) |
+| 2 | **Self-evolution** | The agent improving its own scaffolding: writing its own memories, skills, and config | Your OpenClaw agent rewriting its `IDENTITY.md` and `MEMORY.md` as it learns (Module 6) |
 | 3 | **Skills** | Packaged procedural knowledge, loaded into context only when relevant | The Superpowers skills in Module 4; skill toggles in the Module 5 client |
 | 4 | **Tool calling** | Tool schemas, execution, sandboxing, permissions, retries | MCP servers (Module 2); Docker sandboxing and HITL approval (Module 5) |
 | 5 | **Token efficiency** | The context window is the scarce resource — compaction, lazy loading, sub-agent isolation | Sub-agent delegation in Module 5 keeping the main context clean |

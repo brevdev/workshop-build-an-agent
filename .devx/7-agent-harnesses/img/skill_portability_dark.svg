@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 268" width="620" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark "one skill, every harness" diagram for the DevX dark theme.
+       Mirrors img/skill_portability.mmd; colors match index.html mermaid themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <!-- SKILL.md node -->
+  <rect x="255" y="24" width="230" height="84" rx="6" fill="#161616" stroke="#76b900" stroke-width="1.5"/>
+  <text x="370" y="48" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">&#128196; SKILL.md</text>
+  <text x="370" y="70" fill="#a3a3a3" font-size="11" font-style="italic" text-anchor="middle" dominant-baseline="central">one portable skill</text>
+  <text x="370" y="88" fill="#a3a3a3" font-size="11" text-anchor="middle" dominant-baseline="central">(open Agent Skills spec)</text>
+
+  <!-- fan-out edges -->
+  <line x1="306" y1="108" x2="92" y2="185" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="338" y1="108" x2="231" y2="185" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="370" y1="108" x2="370" y2="185" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="402" y1="108" x2="509" y2="185" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="434" y1="108" x2="648" y2="185" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- harness nodes -->
+  <rect x="26" y="188" width="128" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="90" y="214" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#129438; OpenClaw</text>
+
+  <rect x="166" y="188" width="128" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="230" y="214" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#128220; Hermes</text>
+
+  <rect x="306" y="188" width="128" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="370" y="214" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#129302; Claude Code</text>
+
+  <rect x="446" y="188" width="128" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="510" y="214" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#128752;&#65039; Codex</text>
+
+  <rect x="586" y="188" width="128" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="650" y="214" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#9000;&#65039; Cursor</text>
+</svg>

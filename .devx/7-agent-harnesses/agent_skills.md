@@ -51,15 +51,7 @@ This is pi's signature design generalized — and it's now how every serious har
 
 The format above isn't proprietary to any harness. It's the open **Agent Skills specification** ([agentskills.io](https://agentskills.io)) — and because the major harnesses all consume it, the *same SKILL.md* runs in OpenClaw, Hermes, Claude Code, Codex, Cursor, and more.
 
-```mermaid
-flowchart TB
-    SKILL["📄 SKILL.md<br/><i>one portable skill</i><br/>(open Agent Skills spec)"]
-    SKILL --> OC["🦞 OpenClaw"]
-    SKILL --> HM["📜 Hermes"]
-    SKILL --> CC["🤖 Claude Code"]
-    SKILL --> CX["🛰️ Codex"]
-    SKILL --> CU["⌨️ Cursor"]
-```
+![One Skill, Every Harness](img/skill_portability_dark.svg)
 
 Stop and appreciate how unusual this is. The harness market is fiercely competitive — open vs. closed, maximal vs. minimal — yet capability packaged as a skill is **portable across all of it**. Write once, supercharge any agent.
 
@@ -89,7 +81,7 @@ Hermes goes one better — `NVIDIA/skills` is a built-in tap, so its own CLI ins
 
 ## Verified, Not Just Published
 
-Remember Module 6's lesson: an autonomous agent will eventually encounter adversarial content. A skill is *instructions you inject into your agent* — which makes an unvetted skill a prompt-injection delivery vehicle. NVIDIA's answer is capability governance: every skill passes an eight-step pipeline (review → security scan → evaluation → skill card → cryptographic signing → catalog → sync) before publication.
+Remember Module 6's lesson: an autonomous agent will eventually encounter adversarial content. A skill is *instructions you inject into your agent* — which makes an unvetted skill a prompt-injection delivery vehicle. NVIDIA's answer is capability governance: every skill passes a verification pipeline (review → security scan → evaluation → skill card → cryptographic signing → catalog → sync) before publication.
 
 Here's what a verified skill looks like in the catalog:
 

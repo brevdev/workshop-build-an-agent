@@ -24,9 +24,10 @@ When someone asks you "which harness should we use?", you now have a real answer
 
 - **Need model flexibility, on-prem, or Nemotron?** → open source.
 - **Always-on assistant with community momentum?** → OpenClaw; curated defaults → Hermes.
-- **Embedding an agent in a product you must fully control?** → OpenCode or LangChain Deep Agents.
+- **Task-shaped workflow, or an agent embedded in your product?** → LangChain Deep Agents.
+- **An open, any-model coding agent in your terminal?** → OpenCode.
 - **Every token is precious, or you bet on the model?** → pi.
-- **Maximum out-of-box capability, cost secondary?** → Claude Code; computer-use heavy → Codex.
+- **Maximum out-of-box capability, cost secondary?** → Claude Code; on OpenAI models with cloud-delegated runs → Codex.
 
 And in every single case: **install the NVIDIA skills for the libraries you use.** The harness may change; the skills come with you, and your GPU works either way.
 
@@ -46,6 +47,20 @@ Open, portable, verifiable. Capability that travels.
 
 <!-- fold:break -->
 
+## The Full Workshop Arc
+
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>Tool selection and scoping</div>
+  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>Data access boundaries</div>
+  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Adversarial test cases</div>
+  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>HITL + command allowlists</div>
+  <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
+  <div class="dx-cell"><h4>MODULE 6</h4><span class="dx-big">Hardened agent</span>Kernel enforcement + continuous evaluation</div>
+  <div class="dx-cell is-wide"><h4>MODULE 7 - YOU ARE HERE</h4><span class="dx-big">The harness layer</span>Context tax + portable, verified skills in any harness</div>
+</div>
+
+<!-- fold:break -->
+
 ## More Resources
 
 - 📦 [NVIDIA Agent Skills repo](https://github.com/NVIDIA/skills) — the verified catalog; new skills sync daily
@@ -58,4 +73,4 @@ Open, portable, verifiable. Capability that travels.
 - ⚡ [RAPIDS cuDF docs](https://docs.rapids.ai/api/cudf/stable/) — the library behind your Exercise 4 speedup
 - 🚀 Keep an eye on [build.nvidia.com](https://build.nvidia.com) — agent demos built on these skills (including cuOpt) are landing soon
 
-Congratulations — you've completed the Agentic AI Learning Path's harness module. Your agents have engines, cars, *and* a garage full of verified parts.
+> **Congratulations!** You've completed the Build-an-Agent workshop — all seven modules, from your first ReAct loop to the harness layer that runs it all. Your agents have engines, cars, *and* a garage full of verified parts. Go build.

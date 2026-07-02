@@ -200,7 +200,7 @@ bento cells, and skill cards. Never to text paragraphs.
 1. Keep ALL `<button onclick="...">` jupyter-link buttons exactly as they are (class-less, onclick intact).
 2. Keep ALL `<!-- fold:break -->` comments in place.
 3. Keep docsify-tabs syntax (`<!-- tabs:start -->` ... `#### **Tab**`) — tabs are restyled by CSS automatically.
-4. Keep mermaid code fences — theme comes from index.html. REMOVE any `style ... fill:#hex` lines inside mermaid blocks (the theme handles color now).
+4. NO live ```mermaid fences — the progressive-unfold plugin hides later fold sections before mermaid measures them, producing zero-size renders that never retry (mermaid marks nodes `data-processed` before rendering). Diagrams ship as pre-rendered dark SVGs: `![Title](img/<name>_dark.svg)` with the mermaid source kept beside it as `img/<name>.mmd` (same convention as modules 1-6; dx palette #161616 fill / #3a3a3a stroke / #f2f2f2 text / #76b900 cluster accents).
 5. No `<style>` blocks, no `style=""` except `--dx-w`/`--i` custom properties and the existing mascot float pattern (`style="float:right;max-width:240px;margin:20px;"`).
 6. Mascot images: keep ONE per page, max-width 240px, never in the hero — place beside a later prose section.
 7. Keep every link, code fence, and the instructional text intact unless the text directly describes a replaced visual.

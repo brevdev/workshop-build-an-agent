@@ -73,15 +73,15 @@ The largest open harness community. Agents are defined by markdown (`SOUL.md`, `
 
 #### **🔧 OpenCode**
 
-### OpenCode <span class="dx-chip">OPEN SOURCE</span> · complete custom builder
+### OpenCode <span class="dx-chip">OPEN SOURCE</span> · the open coding agent
 
-> **Philosophy:** Own every layer. The harness is your codebase.
+> **Philosophy:** Claude Code-class capability, fully open — any provider, any model, every layer inspectable and configurable.
 
-OpenCode is for teams that want to build the harness itself: bring your own loop, your own memory backend, your own permission model. Maximum control, maximum responsibility.
+OpenCode is a complete, batteries-included coding agent you run in your terminal: the open ecosystem's answer to the closed subscription harnesses. It speaks to dozens of providers (including OpenAI-compatible endpoints, so Nemotron drops right in), and its config surface — custom agents, modes, permissions — lets you decide how much harness you carry on each turn.
 
-**Choose it when:** you're embedding an agent inside a product and need to control every behavior, or your compliance story requires owning the whole stack.
+**Choose it when:** you want the closed-harness coding experience — rich tools, TUI, deep configurability — but open source, self-hostable, and on the model of your choice.
 
-**Watch for:** you inherit all five harness responsibilities yourself — including the ones that are hard to get right (sandboxing, token efficiency).
+**Watch for:** "you decide" cuts both ways — the context tax is in your hands, and a fully loaded config approaches the maximal harnesses it competes with.
 
 #### **🕸️ LangChain Deep Agents**
 
@@ -123,13 +123,13 @@ Anthropic's subscription harness: rich tool suite, sub-agents, plan modes, hooks
 
 #### **🛰️ Codex**
 
-### Codex <span class="dx-chip">SUBSCRIPTION</span> · best computer use
+### Codex <span class="dx-chip">SUBSCRIPTION</span> · OpenAI's agentic coder
 
-> **Philosophy:** Maximal harness optimized for driving full computer environments.
+> **Philosophy:** Maximal harness around OpenAI's frontier models — a local CLI plus cloud sandboxes for delegated, parallel runs.
 
-OpenAI's subscription harness, strongest at **computer-use (CUA)** tasks — driving desktops, browsers, and long-horizon execution environments. Also expensive, also closed.
+OpenAI's subscription harness for software engineering. Its signature move is **cloud task delegation**: hand long-horizon jobs to sandboxed cloud environments and fan several out at once while you keep working. Also expensive, also closed.
 
-**Choose it when:** the agent's job is to operate software the way a human would — full desktop and browser automation.
+**Choose it when:** you're standardized on OpenAI's models, or your workflow leans on delegating batches of long-running tasks to cloud sandboxes.
 
 **Worth knowing:** like Claude Code, Codex consumes the open skills format. The same NVIDIA skill you install for Claude Code installs for Codex with one flag change.
 
@@ -147,7 +147,7 @@ Work through the questions. Your path ends at a recommendation card.
 <summary><b>❓ Question 1 — Do you need to choose your own model (open weights, on-prem, Nemotron)?</b></summary>
 
 <details>
-<summary><b>✅ Yes, model flexibility is required → Question 2: Is the agent always-on, or task-shaped?</b></summary>
+<summary><b>✅ Yes, model flexibility is required → Question 2: What shape is the work?</b></summary>
 
 <details>
 <summary><b>🔄 Always-on assistant (heartbeats, evolving memory)</b></summary>
@@ -158,10 +158,18 @@ Work through the questions. Your path ends at a recommendation card.
 </details>
 
 <details>
-<summary><b>📋 Task-shaped workflow (research, reports, pipelines)</b></summary>
+<summary><b>📋 Task-shaped workflow, or an agent embedded in your product (research, reports, pipelines)</b></summary>
 
 > ### 🕸️ → **LangChain Deep Agents**
-> Planning, delegation, and memory pre-built around a describable workflow — exactly what you used in Module 5.
+> Planning, delegation, and memory pre-built around a describable workflow — exactly what you used in Module 5, and the natural fit when the agent lives inside your codebase.
+
+</details>
+
+<details>
+<summary><b>💻 Interactive coding in your terminal</b></summary>
+
+> ### 🔧 → **OpenCode**
+> The open, provider-flexible coding agent: the closed-harness experience with Nemotron — or anything else — as the engine.
 
 </details>
 
@@ -176,18 +184,10 @@ Work through the questions. Your path ends at a recommendation card.
 </details>
 
 <details>
-<summary><b>🏗️ No model required, but I need to own every layer (product embedding, compliance)</b></summary>
-
-> ### 🔧 → **OpenCode**
-> Build the harness you need and nothing else. All five responsibilities are yours — budget for them.
-
-</details>
+<summary><b>💳 No — maximum out-of-box capability, cost is secondary → Question 3: Whose frontier models?</b></summary>
 
 <details>
-<summary><b>💳 No — maximum out-of-box capability, cost is secondary → Question 3: What's the job?</b></summary>
-
-<details>
-<summary><b>💻 Software engineering and general agentic work</b></summary>
+<summary><b>🤖 Anthropic's — strongest out-of-box agentic performance</b></summary>
 
 > ### 🤖 → **Claude Code**
 > Highest performing harness available today. And your GPU still gets to work — install NVIDIA skills into it (next two pages).
@@ -195,10 +195,10 @@ Work through the questions. Your path ends at a recommendation card.
 </details>
 
 <details>
-<summary><b>🖱️ Driving desktops and browsers like a human</b></summary>
+<summary><b>🛰️ OpenAI's — with cloud sandboxes for delegated, parallel runs</b></summary>
 
 > ### 🛰️ → **Codex**
-> The strongest computer-use agent. Same story: open skills install right in.
+> OpenAI's agentic coder, built for handing long jobs to cloud sandboxes. Same story: open skills install right in.
 
 </details>
 
@@ -226,7 +226,7 @@ NVIDIA isn't picking a harness winner. The harness layer is where the industry i
   <button class="dx-quiz-opt" data-fb="Closed source means no on-prem model choice.">Claude Code</button>
   <button class="dx-quiz-opt" data-fb="Minimal and model-flexible but the smallest batteries-included assistant story.">pi</button>
   <button class="dx-quiz-opt" data-right data-fb="Open source + any model + the biggest always-on community - and NemoClaw hardens it.">OpenClaw</button>
-  <button class="dx-quiz-opt" data-fb="You could build it but you inherit all five responsibilities.">OpenCode</button>
+  <button class="dx-quiz-opt" data-fb="A capable open coding agent, but it is built for interactive terminal sessions, not always-on operation.">OpenCode</button>
 </div>
 
 > That portable skills layer is the key that unlocks everything else. Head to [Agent Skills](agent_skills) to take it apart.

@@ -74,6 +74,11 @@ def run_test():
         fail("Ex1 write_file tool did not actually write the file")
     print("✅ Ex1: agent loop wires tools and terminates (2 tool turns + answer)")
 
+    transcript = answers.format_transcript(answers.LAST_RUN_MESSAGES)
+    if "TASK:" not in transcript or "TOOL: write_file" not in transcript:
+        fail(f"Ex1 harness-side transcript incomplete (Ex5 depends on it): {transcript[:200]!r}")
+    print("✅ Ex1: harness recorded the run transcript (TASK/TOOL/RESULT lines)")
+
     # ---- Ex2: context tax + lazy loading -----------------------------------
     tax = answers.measure_context_tax()
     if not (0 < tax["minimal"] < 1500 and tax["maximal"] > tax["minimal"] * 4):

@@ -1,0 +1,18 @@
+flowchart TB
+    subgraph HARNESS["🔧 THE HARNESS"]
+        direction TB
+        MEM["📁 Memory<br/><i>persistence across sessions</i>"]
+        SKILLS["📚 Skills<br/><i>on-demand knowledge</i>"]
+        TOOLS["🛠️ Tool Calling<br/><i>execution, sandboxing, permissions</i>"]
+        EVOLVE["🌱 Self-Evolution<br/><i>agent improves its own scaffolding</i>"]
+        TOKENS["⚡ Token Efficiency<br/><i>context budget management</i>"]
+        subgraph LOOP["The Agentic Loop"]
+            LLM(("🧠 LLM<br/>stateless<br/>tokens in → tokens out"))
+        end
+        MEM --> LOOP
+        SKILLS --> LOOP
+        TOOLS --> LOOP
+        LOOP --> EVOLVE
+        TOKENS -.budgets.- LOOP
+    end
+    USER(("👤 User")) <--> HARNESS

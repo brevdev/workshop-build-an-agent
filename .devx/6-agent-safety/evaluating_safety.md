@@ -457,6 +457,7 @@ When the suite fails, the component scores tell you *where*:
   <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>HITL + command allowlists</div>
   <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
   <div class="dx-cell is-wide"><h4>MODULE 6 - YOU ARE HERE</h4><span class="dx-big">Hardened agent</span>Kernel enforcement + Privacy Router + continuous evaluation</div>
+  <div class="dx-cell is-wide"><h4>MODULE 07: AGENT HARNESSES</h4><span class="dx-chip is-green">NEXT UP</span><span class="dx-big">The harness layer</span>Same model, different harness - the layer that has been running every agent above</div>
 </div>
 
 Each level of capability demanded a matching level of discipline. Module 6 closes the loop: your autonomous agent is not just contained — it is **evaluated, tested, and continuously verified**.
@@ -477,3 +478,5 @@ Agent safety is the discipline — NemoClaw is one implementation. The tools and
 </div>
 
 > **Congratulations!** You've completed Module 6: Agent Safety with NemoClaw. You now have an end-to-end toolkit — from building your first agent to deploying autonomous agents with kernel-level enforcement, data-aware routing, and continuous safety verification. Go ship something safely.
+>
+> One layer remains unnamed: the thing that has been running every one of these agents. Head over to **Module 7: Agent Harnesses & Skills** to take it apart — measure what it costs per turn, and carry your GPU into any harness on the market.

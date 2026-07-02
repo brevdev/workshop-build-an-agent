@@ -79,6 +79,18 @@ def run_test():
         fail(f"Ex1 harness-side transcript incomplete (Ex5 depends on it): {transcript[:200]!r}")
     print("✅ Ex1: harness recorded the run transcript (TASK/TOOL/RESULT lines)")
 
+    # ---- Ex1 resilience: malformed tool call becomes an error, not a crash ---
+    bad_script = [
+        [{"name": "write_file", "args": {"content": "no path arg"}, "id": "b1"}],
+        "recovered",
+    ]
+    with patch.object(answers, "ChatNVIDIA", lambda **kw: MockModel(bad_script)):
+        run = answers.build_bare_agent()
+        out = run("trigger a malformed tool call")
+    if out != "recovered":
+        fail(f"Ex1 loop did not survive a malformed tool call: {out!r}")
+    print("✅ Ex1: malformed tool call fed back as ERROR result; loop survived")
+
     # ---- Ex2: context tax + lazy loading -----------------------------------
     tax = answers.measure_context_tax()
     if not (0 < tax["minimal"] < 1500 and tax["maximal"] > tax["minimal"] * 4):

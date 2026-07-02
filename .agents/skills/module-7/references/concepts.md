@@ -40,7 +40,7 @@ excerpts, environment state. This recurring overhead is the **context tax**.
   worth the overhead; *minimal* = most of that machinery is documentation the model could
   load on demand, so strip the core and bet on the model.
 - In the lab the learner **measures their own** numbers with `tiktoken` (Exercise 2). The
-  in-page targets (minimal ≈ 365, maximal ≈ 3,922 tokens/32K) are illustrative.
+  in-page targets (minimal ≈ 400, maximal ≈ 3,922 tokens/32K) are illustrative.
 
 ## Lazy skill loading (`agent_skills.md`)
 The single most effective tax cut. A harness with 30 installed skills does **not** pay for 30

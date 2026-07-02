@@ -89,8 +89,11 @@ def code(text):
 
 
 def build(py_name, ipynb_name):
+    cells = cells_from_py(LAB_DIR / py_name)
+    for i, cell in enumerate(cells):
+        cell["id"] = f"cell-{i:02d}"  # nbformat 4.5 requires stable cell ids
     nb = {
-        "cells": cells_from_py(LAB_DIR / py_name),
+        "cells": cells,
         "metadata": {
             "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
             "language_info": {"name": "python", "version": "3.12"},

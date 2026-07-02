@@ -1,6 +1,5 @@
 .nvidia-skills-cache/
-test_data/sensor_readings.csv
-test_data/aggregates.csv
+test_data/
 skills/accelerated-computing-cudf/
 harness_hello.txt
 .venv/

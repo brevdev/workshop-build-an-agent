@@ -55,7 +55,7 @@ means, the takeaway, and common confusions. Figures live in the teaching pages u
 
 ## Supporting widgets
 - **Gauges** (`intro`, `landscape`, `harness_lab` "YOUR TARGETS") — the same tax expressed as a
-  fraction of a 32K budget (e.g. minimal ~365, maximal ~3,922 tokens). They visualize Exercise
+  fraction of a 32K budget (e.g. minimal ~400, maximal ~3,922 tokens). They visualize Exercise
   2's targets; treat them as illustrative, not exact.
 - **The verified skill card** (`agent_skills.md`) — `accelerated-computing-cudf` with
   `NVIDIA VERIFIED ✓`, SkillSpector checks (prompt injection / tool poisoning / dangerous

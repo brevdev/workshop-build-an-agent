@@ -26,7 +26,9 @@ from langchain_core.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
-LAB_DIR = Path(__file__).parent
+# __file__ exists for `python harness_lab.answers.py`; the notebook falls back
+# to its own directory (Jupyter kernels start in the notebook's folder).
+LAB_DIR = Path(__file__).parent if "__file__" in globals() else Path.cwd()
 SKILLS_DIR = LAB_DIR / "skills"
 TEST_DATA = LAB_DIR / "test_data" / "sensor_readings.csv"
 REPO_ROOT = LAB_DIR.parents[1]
@@ -52,6 +54,9 @@ def ensure_test_data():
 
 MINIMAL_SYSTEM_PROMPT = """You are a capable agent operating a computer through four tools:
 read_file, write_file, edit_file, and run_bash.
+
+Environment: run Python as `python` (3.12, pandas/numpy preinstalled) — the
+bare `python3` is a different interpreter without those packages.
 
 Work step by step. Use tools to inspect before you act. When writing code,
 run it to confirm it works. When the task is complete, reply with a short
@@ -108,7 +113,8 @@ LAST_RUN_MESSAGES = []
 def invoke_with_retry(model, messages, attempts=3):
     """Harnesses own retries (responsibility #4): survive transient API errors."""
     global LAST_RUN_MESSAGES
-    LAST_RUN_MESSAGES = messages
+    if isinstance(messages, list):
+        LAST_RUN_MESSAGES = messages
     for attempt in range(attempts):
         try:
             return model.invoke(messages)
@@ -126,7 +132,12 @@ def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
     """
     tools = CORE_TOOLS + list(extra_tools or [])
     registry = {t.name: t for t in tools}
-    model = ChatNVIDIA(model=MODEL_NAME, temperature=0.2).bind_tools(tools)
+    # Two defaults that bite: max_completion_tokens=1024 truncates long
+    # write_file calls mid-JSON, and timeout=60s is too tight for a 120B
+    # model on long generations.
+    model = ChatNVIDIA(
+        model=MODEL_NAME, temperature=0.2, max_completion_tokens=4096, timeout=180
+    ).bind_tools(tools)
 
     def run(task: str, max_turns: int = 20) -> str:
         messages = [SystemMessage(content=system_prompt), HumanMessage(content=task)]
@@ -137,7 +148,12 @@ def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
                 return response.content
             for call in response.tool_calls:
                 print(f"  🛠️  {call['name']}({json.dumps(call['args'])[:120]})")
-                result = registry[call["name"]].invoke(call["args"])
+                try:
+                    result = registry[call["name"]].invoke(call["args"])
+                except Exception as exc:
+                    # Harness resilience: a bad tool call becomes an error the
+                    # model can read and correct — the loop never dies on it.
+                    result = f"ERROR: {type(exc).__name__}: {str(exc)[:500]}"
                 messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))
         return "ERROR: max turns exceeded"
 
@@ -313,8 +329,11 @@ def format_transcript(messages) -> str:
 
 def self_evolve_skill(transcript: str, skills_dir: Path = SKILLS_DIR) -> Path:
     """Exercise 5: the agent writes a new skill from its own transcript."""
-    model = ChatNVIDIA(model=MODEL_NAME, temperature=0.2)
-    skill_md = model.invoke(SKILL_AUTHOR_PROMPT.format(transcript=transcript)).content
+    model = ChatNVIDIA(
+        model=MODEL_NAME, temperature=0.2, max_completion_tokens=4096, timeout=180
+    )
+    prompt = SKILL_AUTHOR_PROMPT.format(transcript=transcript)
+    skill_md = invoke_with_retry(model, prompt).content
     skill_md = skill_md.strip().removeprefix("```markdown").removeprefix("```").removesuffix("```").strip()
 
     meta = parse_frontmatter(skill_md)  # validate BEFORE saving — a malformed

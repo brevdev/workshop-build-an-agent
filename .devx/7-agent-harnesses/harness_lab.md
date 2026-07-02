@@ -73,11 +73,14 @@ messages.append(response)
 if not response.tool_calls:
     return response.content
 for call in response.tool_calls:
-    result = registry[call["name"]].invoke(call["args"])
+    try:
+        result = registry[call["name"]].invoke(call["args"])
+    except Exception as exc:
+        result = f"ERROR: {type(exc).__name__}: {str(exc)[:500]}"
     messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))
 ```
 
-Two details that matter: use the loop's local `registry` (not the module-level `TOOL_REGISTRY`) so extra tools like `load_skill` stay callable in later exercises, and execute tools with `.invoke(call["args"])` — LangChain tool objects are not plain functions you can call directly.
+Three details that matter: use the loop's local `registry` (not the module-level `TOOL_REGISTRY`) so extra tools like `load_skill` stay callable in later exercises; execute tools with `.invoke(call["args"])` — LangChain tool objects are not plain functions you can call directly; and feed tool errors back as the `ToolMessage` instead of letting them crash the loop — models occasionally emit a malformed call, and reading its own error is what lets the agent self-correct (that's tool-calling resilience, harness responsibility #4).
 
 </details>
 
@@ -94,8 +97,8 @@ Then implement <button onclick="goToLineAndSelect('code/7-agent-harnesses/harnes
 A correct implementation prints exactly this:
 
 ```text
-Minimal harness:     365 tokens/turn
-Maximal harness:   3,922 tokens/turn   (10.7x tax)
+Minimal harness:     400 tokens/turn
+Maximal harness:   3,922 tokens/turn   (9.8x tax)
 2 eager skills: +516 tokens/turn
 2 lazy skills:  +41 tokens/turn   (13x savings)
 ```
@@ -105,7 +108,7 @@ The savings scale with the catalog: at 30 installed skills, eager loading costs 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">YOUR TARGETS</p>
   <div class="dx-gauges">
-    <div class="dx-gauge" data-pct="1"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>minimal</b><br>365 tokens / 32K</p></div>
+    <div class="dx-gauge" data-pct="1"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>minimal</b><br>400 tokens / 32K</p></div>
     <div class="dx-gauge" data-pct="12"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>maximal</b><br>3,922 tokens / 32K</p></div>
   </div>
 </div>

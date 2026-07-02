@@ -10,7 +10,7 @@ Let's start with that picture, then meet each one.
 
 Approximate **permanent per-turn overhead** (system prompt + always-loaded tool schemas) for each design philosophy:
 
-<div class="dx-island dx-bet" data-answer="3,922 tokens" data-explain="measured with tiktoken in Exercise 2; the minimal harness pays just 365.">
+<div class="dx-island dx-bet" data-answer="3,922 tokens" data-explain="measured with tiktoken in Exercise 2; the minimal harness pays just 400.">
   <p class="dx-island-title">PLACE YOUR BET</p>
   <p class="dx-quiz-q">Before you scroll: how many tokens does the bundled maximal config inject per turn?</p>
   <div class="dx-bet-opts">

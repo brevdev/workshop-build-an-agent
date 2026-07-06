@@ -2,13 +2,9 @@
 
 Five exercises. You'll build a minimal harness from scratch, measure the context tax, author a portable skill, put your GPU to work through a verified NVIDIA skill, and finish with an agent that writes its own skills.
 
-This page follows <button onclick="openOrCreateFileInJupyterLab('code/7-agent-harnesses/harness_lab.py');"><i class="fa-brands fa-python"></i> harness_lab.py</button>. Each exercise has one or more blanks marked `# TODO: Exercise …` in that file — the sub-exercise labels below (**1a**, **1b**, **2a**, **2b**…) match those markers exactly, and each blank gets its own instructions and its own `🆘` solution on this page. Fill the blanks, then run one exercise at a time from a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button>:
+This page follows <button onclick="openOrCreateFileInJupyterLab('code/7-agent-harnesses/harness_lab.py');"><i class="fa-brands fa-python"></i> harness_lab.py</button>. Each exercise has one or more blanks marked `# TODO: Exercise …` in that file — the sub-exercise labels below (**1a**, **1b**, **2a**, **2b**…) match those markers exactly, and each blank gets its own instructions and its own `🆘` solution on this page. Fill the blanks, then look for the exercise's **Run it** line — all five exercises have one, in the same shape: a terminal button plus the exact command to copy.
 
-```bash
-cd code/7-agent-harnesses && python harness_lab.py --exercise 1   # …through 5
-```
-
-> **Prefer notebooks?** The same lab, cell for cell, lives in <button onclick="openOrCreateFileInJupyterLab('code/7-agent-harnesses/harness_lab.ipynb');"><i class="fa-solid fa-flask"></i> harness_lab.ipynb</button> — identical `TODO` blanks, one runnable cell per exercise, and a collapsible **💡 NEED SOME HELP?** solution built in under each blank. If you go that route, work the notebook top to bottom and skip the `python harness_lab.py` commands on this page; everything else here — the concepts, the sub-exercise guidance, the Hermes detour — applies unchanged. (Full answer keys for either track: `harness_lab.answers.py` / `harness_lab.answers.ipynb`.)
+> **Prefer notebooks?** The same lab, cell for cell, lives in <button onclick="openOrCreateFileInJupyterLab('code/7-agent-harnesses/harness_lab.ipynb');"><i class="fa-solid fa-flask"></i> harness_lab.ipynb</button> — identical `TODO` blanks, one runnable cell per exercise, and a collapsible **💡 NEED SOME HELP?** solution built in under each blank. If you go that route, work the notebook top to bottom and skip the **Run it** terminal commands on this page; everything else here — the concepts, the sub-exercise guidance, the Hermes detour — applies unchanged. (Full answer keys for either track: `harness_lab.answers.py` / `harness_lab.answers.ipynb`.)
 
 <!-- fold:break -->
 
@@ -75,7 +71,13 @@ Three details that matter: use the loop's local `registry` (not the module-level
 
 ### Run it — then feel the difference
 
-Run the same task in two very different harnesses. For the full, batteries-included end we'll use **Hermes** — NousResearch's open harness, branded *"the agent that grows with you,"* the one NVIDIA ships a [NemoClaw blueprint for](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent), and the one you'll lean on again in Exercises 3 and 5.
+**Run it:** open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run:
+
+```bash
+cd code/7-agent-harnesses && python harness_lab.py --exercise 1
+```
+
+Then run the same task in a second, very different harness. For the full, batteries-included end we'll use **Hermes** — NousResearch's open harness, branded *"the agent that grows with you,"* the one NVIDIA ships a [NemoClaw blueprint for](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent), and the one you'll lean on again in Exercises 3 and 5.
 
 <details class="dx-peek">
 <summary>Set up Hermes (one-time, ~2 min)</summary>
@@ -106,12 +108,7 @@ model:
 
 </details>
 
-Now run the identical task in each:
-
-1. **Your minimal harness:** `python harness_lab.py --exercise 1`
-2. **Hermes:** run `hermes` and type the same request.
-
-Both complete the task. Feel how different they are — verbosity, persistence, initiative, how much each one says before it acts. Same model. Different car.
+Now run `hermes` and type the identical request. Both harnesses complete the task. Feel how different they are — verbosity, persistence, initiative, how much each one says before it acts. Same model. Different car.
 
 <!-- fold:break -->
 
@@ -172,7 +169,13 @@ return bodies.get(name, f"ERROR: no skill named {name!r}")
 
 </details>
 
-Run `python harness_lab.py --exercise 2`. A correct implementation prints exactly this:
+**Run it:** open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run:
+
+```bash
+cd code/7-agent-harnesses && python harness_lab.py --exercise 2
+```
+
+A correct implementation prints exactly this:
 
 ```text
 Minimal harness:     400 tokens/turn
@@ -199,21 +202,10 @@ The savings scale with the catalog: at 30 installed skills, eager loading costs 
 
 No `TODO` in the Python this time — the blank is a whole new file. Write your own `SKILL.md`: a **dataset profiler** skill that teaches an agent a systematic procedure for summarizing an unfamiliar CSV. Follow the format of <button onclick="openOrCreateFileInJupyterLab('skills/code_review/SKILL.md');"><i class="fa-solid fa-book"></i> skills/code_review/SKILL.md</button>: frontmatter with `name` and a trigger-worthy `description`, then the procedure.
 
-Save it to `code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`, then prove portability:
-
-1. **Your harness:** load it through your Exercise 2 lazy loader — `python harness_lab.py --exercise 3` asks the agent to profile `test_data/sensor_readings.csv`. Watch it follow *your* procedure.
-2. **Hermes:** drop the very same folder into Hermes's skills directory — Hermes auto-discovers everything in `~/.hermes/skills/` and is [agentskills.io](https://agentskills.io)-compatible, so there are zero changes to make:
-
-```bash
-cp -r code/7-agent-harnesses/skills/dataset_profiler ~/.hermes/skills/
-```
-
-Then start `hermes` and ask it to profile the same CSV. It follows the identical procedure you wrote. (For a skill that already lives in a repo or at a URL, Hermes can pull it directly — e.g. `hermes skills install nvidia/skills/accelerated-computing-cudf`, which you'll use in Exercise 4.)
-
-One file. Two harnesses. Zero changes. *That* is the open skills spec doing its job.
+Save it to `code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`, then prove portability — first in your harness, then in Hermes.
 
 <details class="dx-peek is-solution">
-<summary>🆘 Need some help?</summary>
+<summary>🆘  Need some help?</summary>
 
 The `description` line is what triggers skill loading — make it match the task vocabulary ("profile, summarize, or explore an unfamiliar CSV or DataFrame"), not the implementation. A good body gives the agent a numbered procedure and an output format to follow:
 
@@ -243,6 +235,24 @@ A fully worked version lives at `code/7-agent-harnesses/skills/.examples/dataset
 
 </details>
 
+**Run it:** open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run:
+
+```bash
+cd code/7-agent-harnesses && python harness_lab.py --exercise 3
+```
+
+Your Exercise 2 lazy loader picks up the new skill, and the agent is asked to profile `test_data/sensor_readings.csv`. Watch it follow *your* procedure.
+
+**Then Hermes:** drop the very same folder into Hermes's skills directory — Hermes auto-discovers everything in `~/.hermes/skills/` and is [agentskills.io](https://agentskills.io)-compatible, so there are zero changes to make:
+
+```bash
+cp -r code/7-agent-harnesses/skills/dataset_profiler ~/.hermes/skills/
+```
+
+Then start `hermes` and ask it to profile the same CSV. It follows the identical procedure you wrote. (For a skill that already lives in a repo or at a URL, Hermes can pull it directly — e.g. `hermes skills install nvidia/skills/accelerated-computing-cudf`, which you'll use in Exercise 4.)
+
+One file. Two harnesses. Zero changes. *That* is the open skills spec doing its job.
+
 <!-- fold:break -->
 
 ## Exercise 4 — Verified NVIDIA Skill, Real GPU
@@ -255,10 +265,16 @@ First, fetch and **verify** the `accelerated-computing-cudf` skill before trusti
 bash code/7-agent-harnesses/scripts/install_nvidia_skill.sh accelerated-computing-cudf
 ```
 
-The script clones [NVIDIA/skills](https://github.com/NVIDIA/skills), checks the skill's `skill.oms.sig` signature, shows you the skill card, and installs it into your lab `skills/` directory. *Then* open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button>, start `watch -n 0.5 nvidia-smi`, and run:
+The script clones [NVIDIA/skills](https://github.com/NVIDIA/skills), checks the skill's `skill.oms.sig` signature, shows you the skill card, and installs it into your lab `skills/` directory. Then open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and start the GPU watch:
 
 ```bash
-python harness_lab.py --exercise 4
+watch -n 0.5 nvidia-smi
+```
+
+**Run it:** keep the watch visible and, in a second <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button>, run:
+
+```bash
+cd code/7-agent-harnesses && python harness_lab.py --exercise 4
 ```
 
 Your minimal harness — armed with the verified skill — gets asked to aggregate a large dataset. Watch the model choose `cudf.pandas`, and watch your GPU light up in `nvidia-smi`.
@@ -283,12 +299,8 @@ The pi finale: an agent that improves its own scaffolding. One blank, four steps
 3. **Validates** the result with `parse_frontmatter()` *before* saving — a malformed skill breaks your lazy loader on the next run (the Module 6 lesson)
 4. Saves it to `skills_dir / <name> / "SKILL.md"` and returns the path — where your lazy loader picks it up on the very next run
 
-Run the same task twice (`--exercise 5`). The second run starts with the skill the agent wrote for itself the first time — fewer steps, fewer tokens, same result. That's **memory**, **skills**, **self-evolution**, and **token efficiency** — four of the five harness responsibilities — collapsing into a single loop.
-
-> This is exactly the bet Hermes makes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
-
 <details class="dx-peek is-solution">
-<summary>🆘 Need some help?</summary>
+<summary>🆘  Need some help?</summary>
 
 ````python
 prompt = SKILL_AUTHOR_PROMPT.format(transcript=transcript)
@@ -299,12 +311,23 @@ meta = parse_frontmatter(skill_md)  # validate BEFORE saving
 target = skills_dir / meta["name"] / "SKILL.md"
 target.parent.mkdir(parents=True, exist_ok=True)
 target.write_text(skill_md)
-print(f"🌱 Agent wrote itself a new skill: {target}")
+print(f"🌱  Agent wrote itself a new skill: {target}")
 return target
 ````
 
 The `parse_frontmatter()` call is the line to internalize: validate *before* anything lands in the skills directory, not after the loader crashes on the next run — that's exactly the kind of self-evolution failure Module 6 warned about. (Production note: this is why NemoClaw treats the skills directory as a write-policied path.)
 
 </details>
+
+**Run it:** open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run the exercise **twice**:
+
+```bash
+cd code/7-agent-harnesses && python harness_lab.py --exercise 5   # run 1 — the agent writes itself a skill
+python harness_lab.py --exercise 5                                # run 2 — starts with that skill
+```
+
+The second run starts with the skill the agent wrote for itself the first time — fewer steps, fewer tokens, same result. That's **memory**, **skills**, **self-evolution**, and **token efficiency** — four of the five harness responsibilities — collapsing into a single loop.
+
+> This is exactly the bet Hermes makes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
 
 > All five exercises done? Head to [Wrapping Up](evaluating_harnesses) to connect the lab back to the production ecosystem.

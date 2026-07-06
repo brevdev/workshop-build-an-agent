@@ -57,7 +57,7 @@ is *tempting* but wrong, and how to go deeper.
   - *Split 50/50* → it's a clean division: cloud writes code, your GPU runs it.
 - **Principle:** the division of labor — a subscription buys the brain; the muscles (your GPU)
   are yours. The skill makes the model reach for the GPU correctly.
-- **Go deeper:** in Exercise 4 they watch this happen with `watch -n 1 nvidia-smi`; the GPU spike
+- **Go deeper:** in Exercise 4 they watch this happen with `watch -n 0.5 nvidia-smi`; the GPU spike
   *is* the proof.
 
 > No in-page quiz on `harness_lab.md` / `evaluating_harnesses.md` — those are the hands-on lab

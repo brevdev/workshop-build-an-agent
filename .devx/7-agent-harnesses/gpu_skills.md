@@ -38,7 +38,7 @@ One installed skill turns "an agent that writes pandas" into "an agent that driv
 In the lab, you'll prove the GPU is working with the bluntest possible instrument. Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run:
 
 ```bash
-watch -n 1 nvidia-smi
+watch -n 0.5 nvidia-smi
 ```
 
 Keep it visible while your agent runs the cuDF exercise. When the agent hits the aggregation step, you'll see GPU utilization and memory jump — your subscription-or-otherwise agent, doing real work on your silicon.
@@ -59,7 +59,7 @@ npx skills add nvidia/skills --skill accelerated-computing-cudf --agent claude-c
 
 Then, inside Claude Code, with `watch nvidia-smi` running:
 
-> *Load test_data/sensor_readings.csv with cuDF and compute per-device aggregates on the GPU.*
+> *Load test_data/sensor_readings.csv with cuDF and compute per-device aggregates on the GPU. Repeat the full load-and-aggregate 10 times in a loop — don't hoist the CSV read out of the loop — so the GPU stays visibly busy in nvidia-smi.*
 
 #### **Codex**
 
@@ -69,7 +69,7 @@ npx skills add nvidia/skills --skill accelerated-computing-cudf --agent codex
 
 Then, inside Codex, with `watch nvidia-smi` running:
 
-> *Load test_data/sensor_readings.csv with cuDF and compute per-device aggregates on the GPU.*
+> *Load test_data/sensor_readings.csv with cuDF and compute per-device aggregates on the GPU. Repeat the full load-and-aggregate 10 times in a loop — don't hoist the CSV read out of the loop — so the GPU stays visibly busy in nvidia-smi.*
 
 <!-- tabs:end -->
 

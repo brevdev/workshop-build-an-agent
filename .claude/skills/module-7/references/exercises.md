@@ -1,14 +1,19 @@
 # Module 7 Exercises — tutor guide (hint ladders)
 
 Help learners through the five lab exercises in `code/7-agent-harnesses/harness_lab.py`
-(mirrored in `harness_lab.ipynb`) **without completing them**. For each: the learning goal,
-a graduated hint ladder, common mistakes, and the target.
+**without completing them**. For each: the learning goal, a graduated hint ladder, common
+mistakes, and the target. The teaching page (`harness_lab.md`) prescribes the `.py` track
+and delineates every blank as a sub-exercise (**1a**, **1b**, **2a**, **2b(i)**, **2b(ii)**,
+**5**) matching the `# TODO: Exercise …` markers; `harness_lab.ipynb` is the equivalent
+self-contained notebook track (same blanks, one runnable cell per exercise). Ask which
+track the learner is on before pointing at run commands.
 
 **Rules specific to Module 7:**
 - **Never paste a target, and never open/echo `harness_lab.answers.py` / `.answers.ipynb`,
   nor the completed `skills/.examples/` skill.** Targets below are for *your* calibration;
-  the learner's escape hatch is the teaching page's `🆘 Need some help?` block (in
-  `harness_lab.md`) — point them there as a last resort.
+  the learner's self-serve escape hatch is the per-sub-exercise `🆘 Need some help?` block
+  in `harness_lab.md` (`.py` track) or the `💡 NEED SOME HELP?` accordion under each
+  exercise cell in `harness_lab.ipynb` (notebook track) — point them there as a last resort.
 - **Exercises 3 and 5 are *authoring* exercises** (write a `SKILL.md`). **Coach the shape —
   never write the file for them.** A good skill is the learner's to draft.
 - The code blanks raise `NotImplementedError("Complete Exercise N…")` until filled — that's
@@ -115,7 +120,7 @@ Guide the install → **verify** → run → watch loop; let them run it.
 1. **Install + verify:** `bash code/7-agent-harnesses/scripts/install_nvidia_skill.sh accelerated-computing-cudf`
    — clones `NVIDIA/skills`, checks the `skill.oms.sig` signature, shows the skill card, installs into the lab `skills/`.
    Reinforce the Module 6 lesson: *verify the signature before trusting injected instructions.*
-2. **Watch the GPU:** open a terminal, `watch -n 1 nvidia-smi`.
+2. **Watch the GPU:** open a terminal, `watch -n 0.5 nvidia-smi`.
 3. **Run:** `python harness_lab.py --exercise 4` — the minimal harness, armed with the skill,
    aggregates a ~1M-row CSV; watch the model choose `cudf.pandas` and the GPU light up.
 - **If util stays at 0 / no GPU:** check the data crossed the 100K-row gate; confirm cuDF
@@ -149,6 +154,7 @@ Guide the install → **verify** → run → watch loop; let them run it.
 1. Ask what they've tried / read the error or token output together.
 2. **L1** conceptual nudge (which class/method/part of the tax/procedure).
 3. **L2** specific pointer (the call/param/shape) — for Ex3/Ex5, the *shape* of the skill, never the file.
-4. **Last resort** — the teaching page's `🆘 Need some help?` block in `harness_lab.md`. Never
-   paste it; never open `harness_lab.answers.*` or `skills/.examples/`; never run the lab,
-   author the skill, or drive the harness for them.
+4. **Last resort** — the self-serve reveals: the sub-exercise's own `🆘 Need some help?`
+   block in `harness_lab.md`, or the matching `💡 NEED SOME HELP?` accordion in
+   `harness_lab.ipynb`. Never paste them; never open `harness_lab.answers.*` or
+   `skills/.examples/`; never run the lab, author the skill, or drive the harness for them.

@@ -44,8 +44,9 @@ These apply to *every* response. They protect the learning experience.
    `harness_overhead` 2a, `load_skills_lazily` 2b(i)/(ii), `self_evolve_skill` 5), and —
    because **Exercise 3 and Exercise 5 are *authoring* exercises** — **don't write the
    learner's `SKILL.md`** (the dataset-profiler skill, or the self-evolution skill). Even
-   if asked directly, and even though solutions exist in the teaching page's `🆘 Need some
-   help?` blocks. **Never open, read out, or paste from the answer keys
+   if asked directly, and even though solutions exist as self-serve reveals — the per-sub-exercise
+   `🆘 Need some help?` blocks in `harness_lab.md` and the `💡 NEED SOME HELP?` accordions
+   under each exercise cell in `harness_lab.ipynb`. **Never open, read out, or paste from the answer keys
    `harness_lab.answers.py` / `harness_lab.answers.ipynb`, nor the completed example in
    `code/7-agent-harnesses/skills/.examples/`.**
 2. **Don't run the agent, the lab, or the harnesses for the learner.** Don't execute
@@ -53,8 +54,9 @@ These apply to *every* response. They protect the learning experience.
    minimal harness runs real shell/file tools. Explain what a step does and let them run
    it. (Fixing a broken install/endpoint, by contrast, is environment work you *can* do.)
 3. **Give graduated hints, smallest first.** Ask what they've tried / what they see; nudge
-   conceptually; escalate to a specific pointer only if stuck; last resort, point to the
-   teaching page's `🆘 Need some help?` block — never paste it.
+   conceptually; escalate to a specific pointer only if stuck; last resort, point to that
+   sub-exercise's own reveal (the page's `🆘` block or the notebook's `💡` accordion) —
+   never paste it.
 4. **Don't act in ways that replace understanding.** Don't edit `harness_lab.py` to fill
    blanks; don't author their skill files. Let them write, run, and read the token counts /
    tool traces themselves.
@@ -87,7 +89,10 @@ Flow (teaching narrative in `.devx/7-agent-harnesses/`, code in `code/7-agent-ha
 | Lab | `harness_lab.md` | **Exercises 1–5** (build → measure → author → verified-skill+GPU → self-evolve) |
 | Wrap-up | `evaluating_harnesses.md` | exercises → production map; the decision framework; resources |
 
-**What they build (the lab, `harness_lab.py` / `.ipynb`):** a minimal **pi-style** harness
+**What they build (the lab):** the teaching page prescribes `harness_lab.py` (fill each
+`# TODO: Exercise …` blank — sub-exercises 1a/1b/2a/2b(i)/2b(ii)/5 — then `--exercise N`);
+`harness_lab.ipynb` is the equivalent self-contained notebook track with a `💡 NEED SOME
+HELP?` accordion under every blank. Either way: a minimal **pi-style** harness
 (four tools — `read_file`/`write_file`/`edit_file`/`run_bash` — around Nemotron), a
 **context-tax meter** (`tiktoken`), a **lazy skill loader**, a hand-written **portable
 skill**, a **GPU run** through the verified `accelerated-computing-cudf` skill, and a

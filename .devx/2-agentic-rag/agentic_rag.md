@@ -4,7 +4,7 @@
 
 Let's build an IT Help Desk agent that can answer basic user queries by querying the Knowledge Base. A knowledge base has been provided at `./data/it-knowledge-base`. This directory contains markdown files documenting procedures for **Company LLC**.
 
-<button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/2-agentic-rag/rag_agent.py</button> is an initial layout for our agent's code. We will be using LangGraph's built-in classes to connect NVIDIA models and create our agent.
+<button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/2-agentic-rag/rag_agent.py</button> is an initial layout for our agent's code. We will be using LangChain's built-in classes to connect NVIDIA models, and LangGraph to orchestrate them into our agent.
 
 <!-- fold:break -->
 
@@ -40,7 +40,7 @@ To ingest the documents, we will **Chunk** the documents, **Embed** those chunks
 
 Document splitting is controlled by two things: chunk size and chunk overlap. We already defined these as `CHUNK_SIZE` and `CHUNK_OVERLAP`. The exact size and overlap should be tuned for production, but we are starting with good values.
 
-Define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'splitter = ');"><i class="fas fa-code"></i> splitter</button> using these values and LangGraph's [`RecursiveCharacterTextSplitter`](https://python.langchain.com/docs/how_to/recursive_text_splitter/).
+Define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'splitter = ');"><i class="fas fa-code"></i> splitter</button> using these values and LangChain's [`RecursiveCharacterTextSplitter`](https://python.langchain.com/docs/how_to/recursive_text_splitter/).
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -124,7 +124,7 @@ LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.p
 
 </center>
 
-We expose this enhanced retrieval pipeline as a tool for the agent using LangGraph’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= create_retriever_tool');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` fields help the agent decide when to use this tool during multi-step reasoning.
+We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect(‘code/2-agentic-rag/rag_agent.py’, ‘= create_retriever_tool’);"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` fields help the agent decide when to use this tool during multi-step reasoning.
 
 <!-- fold:break -->
 

@@ -203,7 +203,7 @@ curl https://example.com
 
 This request should be **blocked** with a 403 Unauthorized error -- the sandbox cannot reach arbitrary external hosts. Now try an endpoint that the policy explicitly allows (your configured inference endpoint). The connection should succeed.
 
-This confirms the kernel-level network enforcement is active.
+This confirms the network egress policy is active — enforced by OpenShell's proxy, which returned the 403.
 
 <!-- fold:break -->
 

@@ -115,7 +115,7 @@ Outputs that score above the group average get reinforced; below-average outputs
 | **Inconsistent rewards** | Same output gets different scores | Ensure reward function is deterministic |
 | **High Learning Rate** | Rewards spike and then crash | Learning rate too high; reduce by 2-5x |
 | **Slow verification** | Training takes forever | Optimize reward code; batch requests to server |
-| **Reward scale issues** | Gradients explode or vanish | Normalize rewards to [0, 1] range |
+| **Reward scale issues** | Gradients explode or vanish | Keep rewards in a consistent bounded range (ours clips to [-1, 1]) |
 
 </div>
 </div>
@@ -160,21 +160,17 @@ LLM judges add latency, cost, and inconsistency. For structured outputs, code ve
 <details class="dx-peek">
 <summary>2. Granular — Partial credit beats binary pass/fail</summary>
 
-A binary reward (1.0 or 0.0) provides sparse signal. The model doesn't know *how close* it was.
+A purely binary reward (1.0 or 0.0) provides sparse signal. The model doesn't know *how close* it was.
 
 ```python
 # Binary (sparse signal)
 reward = 1.0 if perfect_match else 0.0
 
-# Granular (rich signal)
-reward = (
-    0.2 * json_is_valid +      # Got the format right
-    0.3 * command_is_valid +    # Picked a real command
-    0.5 * flags_are_correct     # Parameters match
-)
+# Granular (rich signal) — once the command is right, grade how many flags matched
+reward = (correct_flags - wrong_flags - extra_flags) / total_flags
 ```
 
-With granular rewards, a response with correct JSON but wrong command scores 0.2 instead of 0.0. This gradient helps the model learn incrementally.
+Granularity pays off where there are many possible values to get *almost* right — the flags. Some choices, though, are better treated as all-or-nothing: picking the **wrong command** is a categorically wrong tool, not a near-miss, so our reward gives it no partial credit (see *Anatomy* below). The learning gradient comes from the flags.
 
 </details>
 
@@ -207,18 +203,20 @@ Always test your reward function on edge cases before training.
 
 ### Anatomy of Our Reward Function
 
-The NeMo Gym verifier computes a **composite reward** with multiple components:
+The <button onclick="goToLineAndSelect('code/4-agent-customization/nemo_gym_resources/langgraph_cli/app.py', 'def score_cli_output');"><i class="fas fa-code"></i> NeMo Gym verifier</button> scores each output as a **gate-then-grade** reward in the range `[-1, 1]`. The output must clear two hard gates; only then is it graded on its flags.
 
 <div class="dx-island dx-reveal">
-  <p class="dx-island-title">COMPOSITE REWARD - WHERE THE POINTS COME FROM</p>
+  <p class="dx-island-title">GATE, THEN GRADE - HOW A SCORE IS BUILT</p>
   <div class="dx-tax">
-    <div class="dx-tax-row" style="--dx-w:20"><span class="dx-tax-name">json_format</span><div class="dx-tax-track"><div class="dx-tax-fill">0.2</div></div><span class="dx-tax-note">is it valid JSON?</span></div>
-    <div class="dx-tax-row" style="--dx-w:30"><span class="dx-tax-name">command</span><div class="dx-tax-track"><div class="dx-tax-fill">0.3</div></div><span class="dx-tax-note">a real CLI command?</span></div>
-    <div class="dx-tax-row" style="--dx-w:50"><span class="dx-tax-name">flag_accuracy</span><div class="dx-tax-track"><div class="dx-tax-fill">0.5</div></div><span class="dx-tax-note">flags correct for that command?</span></div>
+    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">valid JSON?</span><div class="dx-tax-track"><div class="dx-tax-fill">gate</div></div><span class="dx-tax-note">no → -1.0, no partial credit</span></div>
+    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">right command?</span><div class="dx-tax-track"><div class="dx-tax-fill">gate</div></div><span class="dx-tax-note">no → -1.0, no partial credit</span></div>
+    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">flag accuracy</span><div class="dx-tax-track"><div class="dx-tax-fill">grade</div></div><span class="dx-tax-note">(correct − wrong − extra) / total</span></div>
   </div>
 </div>
 
-**Why these weights?** Flags carry the most information (many possible values), so they get the highest weight. JSON format is easiest, so it gets the lowest. Commands are intermediate.
+An output that parses **and** picks the right command earns a graded score from its flags: `+1` for each correct flag, `-1` for each wrong value or hallucinated extra, divided by the number of expected flags (then clipped to `[-1, 1]`). A perfect call scores `1.0`; a correct command with one of two flags wrong scores `0.0`.
+
+**Why gates instead of a weighted sum?** Because invalid JSON and the wrong command are *categorical* failures, not near-misses. If we handed out `0.2` just for emitting valid JSON, an empty `{}` would farm free reward — the exact reward-hacking trap from the previous section. Gating those to `-1.0` keeps the signal aligned with the real goal: a correct, well-formed CLI call.
 
 <!-- fold:break -->
 
@@ -241,12 +239,12 @@ To make this concrete, here's what happens in a single training step. The model 
 
 <div class="dx-term dx-reveal">
   <span class="dx-term-title">grpo-step</span>
-  <span class="dx-term-line" data-kind="prompt">Create a new project with the react template</span>
+  <span class="dx-term-line" data-kind="prompt">Create a new react-agent project in ./myapp</span>
   <span class="dx-term-line" data-kind="think" data-delay="300">Generate 4 candidates, score each with the NeMo Gym verifier, reinforce the best.</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="250">[1] {command: new, template: react-agent-python, path: ./myapp}   reward 0.95</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="200">[2] {command: new, template: wrong-template}   reward 0.50</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="200">[3] {command: create, template: react}   reward 0.20</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="200">[4] not valid json   reward 0.00</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[1] {command: new, template: react-agent-python, path: ./myapp}   reward 1.00</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[2] {command: new, template: react-agent-python}   reward 0.50</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[3] {command: new, template: nextjs, path: ./myapp}   reward 0.00</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[4] not valid json   reward -1.00</span>
   <span class="dx-term-line" data-kind="think" data-delay="350">Candidate 1 is above the group average -> reinforce; candidate 4 far below -> suppress.</span>
   <span class="dx-term-line" data-kind="answer" data-delay="400">Over 50+ steps the model converges on candidate-1-style outputs.</span>
 </div>
@@ -273,7 +271,7 @@ Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab(
 
 Implement the reward function by making a call to the `/verify` endpoint. 
 
-This is the bridge between GRPO and verifiable rewards: each model completion gets sent to the NeMo Gym server, which returns a composite reward score (JSON format + command correctness + flag accuracy). Implement `resp` by posting a request to `verify_endpoint` with `json` set to `verify_request` and the `timeout` set to 30s.
+This is the bridge between GRPO and verifiable rewards: each model completion gets sent to the NeMo Gym server, which returns a reward score based on JSON validity, command correctness, and flag accuracy. Implement `resp` by posting a request to `verify_endpoint` with `json` set to `verify_request` and the `timeout` set to 30s.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>

@@ -26,7 +26,7 @@ A prebuilt tool called <button onclick="goToLineAndSelect('code/1-build-an-agent
 
 Similar to our last exercise, this is just a Python function. This function calls the Tavily API and then formats the results for the model.
 
-Because we are using LangGraph, we can use the `@tool` decorator to automatically create the tool JSON definition.
+Because we are using LangChain, we can use the `@tool` decorator to automatically create the tool JSON definition.
 
 <!-- fold:break -->
 

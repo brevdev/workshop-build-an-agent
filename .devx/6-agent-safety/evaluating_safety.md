@@ -187,7 +187,7 @@ The workshop ships three agents so you can see what each layer of safety adds:
 
 1. **Vanilla (leaky mock)** — no defenses. Baseline we're trying to beat.
 2. **Host OpenClaw** — real agent with prompt-level safety training, running *unsandboxed*. Refusals come from the model itself.
-3. **NemoClaw (sandboxed)** — same agent inside OpenShell's kernel-level sandbox (Landlock filesystem, seccomp, network policy).
+3. **NemoClaw (sandboxed)** — same agent inside OpenShell's sandbox: kernel-level Landlock filesystem and seccomp syscall filtering, plus a proxy-enforced network policy.
 
 ```bash
 cd /project/code/6-agent-safety

@@ -136,9 +136,9 @@ Retrieved contexts:
     [Password reset guide, VPN setup, Password reset FAQ, Printer setup]
 ```
 
-Context Precision would be lower (approximately 0.5) because irrelevant documents (VPN, Printer) are mixed with relevant ones
+Here the relevant chunks are at ranks 1 and 3, with an irrelevant "VPN setup" wedged in at rank 2. Applying the formula above — Precision@1 = 1.0 and Precision@3 = 2/3 — Context Precision = (1.0 + 0.67) / 2 = **0.83**. It falls short of a perfect 1.0 because a relevant chunk was ranked *behind* an irrelevant one — not simply because irrelevant documents appear (context precision is rank-aware).
 
-Better retrieval: [Password reset guide, Password reset FAQ, Account security, Login procedures] would score higher
+Better retrieval: [Password reset guide, Password reset FAQ, Account security, Login procedures] ranks both relevant chunks ahead of any noise and scores a perfect **1.0**.
 
 </div>
 </div>

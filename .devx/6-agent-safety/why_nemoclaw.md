@@ -117,7 +117,7 @@ Defense in depth is a security principle borrowed from military strategy: arrang
     <div class="dx-tax-row" style="--dx-w:55"><span class="dx-tax-name">Docker</span><div class="dx-tax-track"><div class="dx-tax-fill">container</div></div><span class="dx-tax-note">M5 - namespace + limits</span></div>
     <div class="dx-tax-row" style="--dx-w:72"><span class="dx-tax-name">Landlock LSM</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - per-file</span></div>
     <div class="dx-tax-row" style="--dx-w:82"><span class="dx-tax-name">seccomp BPF</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - syscall filter</span></div>
-    <div class="dx-tax-row" style="--dx-w:92"><span class="dx-tax-name">Network proxy</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - per-endpoint</span></div>
+    <div class="dx-tax-row" style="--dx-w:92"><span class="dx-tax-name">Network proxy</span><div class="dx-tax-track"><div class="dx-tax-fill">proxy</div></div><span class="dx-tax-note">M6 - per-endpoint</span></div>
     <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">Privacy Router</span><div class="dx-tax-track"><div class="dx-tax-fill">gateway</div></div><span class="dx-tax-note">M6 - operator routing</span></div>
   </div>
 </div>

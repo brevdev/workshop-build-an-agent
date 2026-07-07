@@ -109,36 +109,23 @@ like `rm`, `mv`, `rmdir`, `sudo`, etc. If the user asks you to do so, politely r
 
     @property
     def json_system_prompt(self) -> str:
-        """System prompt for JSON-structured tool calling (matches training format).
-        
-        This prompt is used after customization training when the model has learned
-        to output structured JSON for LangGraph CLI commands.
+        """The EXACT system prompt the model was trained with during GRPO.
+
+        The customized model learned to emit structured LangGraph CLI JSON
+        *conditioned on this specific prompt* (see 02_grpo_training.ipynb and the
+        lesson in run_customized.md), so inference must use the same text. We
+        return the single canonical copy in ``prompts.JSON_SYSTEM_PROMPT`` rather
+        than duplicating it here, so the training prompt and the inference prompt
+        cannot silently drift apart.
         """
-        return """You are an expert CLI assistant that can run bash commands AND LangGraph Platform CLI commands.
-
-Translate user requests into structured JSON tool calls.
-
-## LangGraph CLI Commands:
-- new: Create project (flags: template, path)
-- dev: Start dev server (flags: port, no_browser)  
-- up: Launch container (flags: port, watch)
-- build: Build image (flags: tag)
-- dockerfile: Generate Dockerfile (flags: output_path)
-
-LangGraph example: {"command": "new", "template": "react-agent-python", "path": "./myproject"}
-
-## Bash Commands:
-For regular bash operations (cd, ls, find, cat, grep, pwd, mkdir, etc), use:
-{"command": "bash", "cmd": "<the bash command>"}
-
-Bash examples:
-- {"command": "bash", "cmd": "ls -la"}
-- {"command": "bash", "cmd": "cd test-project"}
-- {"command": "bash", "cmd": "cat README.md"}
-- {"command": "bash", "cmd": "find . -name '*.py'"}
-
-Respond with ONLY a JSON object. Set unused flags to null for LangGraph commands.
-"""
+        # config.py is imported both as a package (`from .config import Config`,
+        # e.g. main_hf.py) and directly (`from config import Config` after adding
+        # bash_agent/ to sys.path, e.g. 03_run_agent.ipynb). Support both.
+        try:
+            from .prompts import JSON_SYSTEM_PROMPT
+        except ImportError:
+            from prompts import JSON_SYSTEM_PROMPT
+        return JSON_SYSTEM_PROMPT
 
     def enable_langgraph_cli(self):
         """Enable LangGraph CLI commands after customization training."""

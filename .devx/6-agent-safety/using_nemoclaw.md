@@ -247,7 +247,7 @@ ln -s /etc/passwd /sandbox/fake_passwd && echo "oops" > /sandbox/fake_passwd
 bash -c "echo oops > /etc/passwd"
 ```
 
-Both fail. Landlock resolves paths at the kernel before the syscall, so symlinks don't trick it. Subprocesses inherit the restriction because `PR_SET_NO_NEW_PRIVS` is set.
+Both fail. Landlock resolves paths at the kernel before the syscall, so symlinks don't trick it. Subprocesses inherit the restriction because a Landlock domain applies to the whole process tree and cannot be lifted — a child can't escape a sandbox its parent already entered.
 
 > This is what *"irrevocable by design"* means. A compromised agent cannot ask politely to be let out — the kernel enforces, not userspace.
 

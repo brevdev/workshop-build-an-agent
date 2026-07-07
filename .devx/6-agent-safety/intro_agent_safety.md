@@ -177,7 +177,7 @@ The agent's command allowlist blocks `cat /etc/environment`. But the injection d
 Docker prevents the agent from accessing `/etc/environment` on the host. But inside the container, the agent may have access to its own environment variables (API keys injected for tool use). The container doesn't prevent the agent from *saying* what it knows.
 
 **Kernel enforcement + data routing (M6):**
-OpenShell's Landlock policy restricts `/etc/environment` to read-only for the agent process, and the network policy blocks outbound connections except to the approved LLM endpoint. Even if the injection succeeds at the prompt level, the agent faces significantly higher barriers to exfiltrating data because the kernel blocks the network path. And because the Privacy Router routes inference through `inference.local` with credentials injected at the gateway, the API key is never in the agent's environment in the first place — there is nothing for the injection to print.
+OpenShell's Landlock policy restricts `/etc/environment` to read-only for the agent process, and the network policy blocks outbound connections except to the approved LLM endpoint. Even if the injection succeeds at the prompt level, the agent faces significantly higher barriers to exfiltrating data because OpenShell's egress proxy blocks the network path. And because the Privacy Router routes inference through `inference.local` with credentials injected at the gateway, the API key is never in the agent's environment in the first place — there is nothing for the injection to print.
 
 **Continuous verification:**
 The safety eval suite would catch this in its next scheduled run — the red-team probe for prompt injection would detect that the agent attempted to comply with the override instruction.

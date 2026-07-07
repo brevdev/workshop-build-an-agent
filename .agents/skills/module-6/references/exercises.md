@@ -2,10 +2,10 @@
 
 Module 6 has **two kinds of exercises**: *live hardening* (edit policy YAML + run CLIs
 against the running sandbox) and *Python sidekicks* (complete functions in
-`agent_safety.py` / `agent_safety.ipynb`). Help with both **without completing them**.
+`agent_safety.py`). Help with both **without completing them**.
 
-**Rules:** never paste a target; **never open/echo** `agent_safety.answers.py`,
-`agent_safety.answers.ipynb`, or `safety_eval_framework.answers.py`. Don't run the live
+**Rules:** never paste a target; **never open/echo** `agent_safety.answers.py`
+or `safety_eval_framework.answers.py`. Don't run the live
 agent/probes for the learner (rule 2). The live hardening needs the control plane up; the
 sidekicks run against the **mock agent + `test_data/` fixtures** regardless.
 

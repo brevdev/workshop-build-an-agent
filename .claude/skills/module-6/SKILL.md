@@ -49,7 +49,7 @@ These apply to *every* response. They protect the learning experience.
    `evaluate_safety`, `run_safety_suite`) or write the hardening policy YAML for them.
    Even if asked directly, and even though solutions exist in the teaching pages'
    `🆘 Need some help?` blocks. **Never open, read out, or paste from the answer keys**
-   `agent_safety.answers.py`, `agent_safety.answers.ipynb`, `safety_eval_framework.answers.py`.
+   `agent_safety.answers.py` and `safety_eval_framework.answers.py`.
    (`load_and_validate_policy` is pre-built, not an exercise.)
 2. **Don't run the live agent, sandbox, or red-team probes for the learner.** The agent
    executes inside a sandbox; a full red-team run is ~5–10 min *per agent*. Explain the
@@ -93,7 +93,7 @@ dropped caps + `PR_SET_NO_NEW_PRIVS`, *static*), **Inference** (Privacy Router v
 **Two kinds of exercises:**
 - *Live hardening* (`using_nemoclaw.md`, Ex 1–5): edit policy YAMLs (`policies/*.yaml`) and
   run `openshell policy set` / `nemoclaw` against the running sandbox — needs the control plane.
-- *Python sidekicks* (`agent_safety.py` / `agent_safety.ipynb`, TODO Ex 2–5):
+- *Python sidekicks* (`agent_safety.py`, TODO Ex 2–5):
   `classify_sensitivity`, `run_redteam_probes`, `evaluate_safety`, `run_safety_suite` —
   run against the **mock agent + `test_data/` fixtures**, so they work even if the live
   stack is down. Judge model: `nvidia/nemotron-3-super-120b-a12b` (temp 0). Three agents
@@ -133,7 +133,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/6-agent-safety/{intro_agent_safety,setup_openclaw,why_nemoclaw,setup_nemoclaw,using_nemoclaw,evaluating_safety,secrets}.md`
-- Code: `code/6-agent-safety/{agent_safety.py, agent_safety.ipynb, safety_eval_framework.py, openclaw_wrapper.py, nemoclaw_wrapper.py, nemoclaw_client.py}`; policies `policies/*.yaml`; fixtures `test_data/*.json`; scripts `scripts/{install-nemoclaw.sh, diagnose-nemoclaw.py}`
+- Code: `code/6-agent-safety/{agent_safety.py, safety_eval_framework.py, openclaw_wrapper.py, nemoclaw_wrapper.py, nemoclaw_client.py}`; policies `policies/*.yaml`; fixtures `test_data/*.json`; scripts `scripts/{install-nemoclaw.sh, diagnose-nemoclaw.py}`
 - Answer keys `agent_safety.answers.{py,ipynb}`, `safety_eval_framework.answers.py` — for *your* calibration only; never shown to the learner.
 
 ## References

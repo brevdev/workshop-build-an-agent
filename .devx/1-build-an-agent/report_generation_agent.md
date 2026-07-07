@@ -60,7 +60,7 @@ Take a moment to read through the system prompt in `docgen_agent.py`. Notice how
 
 1. **Defines the role**: "You are ReportWriter, a research-and-writing agent"
 2. **Sets quality standards**: "Never invent sources, quotes, statistics, or events"
-3. **Guides tool usage**: "If the topic requires up-to-date facts... you MUST use tavily_search"
+3. **Guides tool usage**: "If the topic requires up-to-date facts... you MUST use search_tavily"
 4. **Specifies output format**: The expected report structure with sections and citations
 
 This prompt shapes everything the agent does. If you wanted a more casual tone, stricter fact-checking, or a different report format, you'd change this prompt - not the code.
@@ -87,10 +87,10 @@ Here's a typical run - watch it search, refine, then write:
   <span class="dx-term-title">ReportWriter</span>
   <span class="dx-term-line" data-kind="prompt">Write a report on renewable energy adoption worldwide in 2025 for a policy audience.</span>
   <span class="dx-term-line" data-kind="think" data-delay="350">This needs current numbers and dates - I must search before writing. Start broad.</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="250">[action] tavily_search(queries=[global renewable energy adoption 2025], topic=news)</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[action] search_tavily(queries=[global renewable energy adoption 2025], topic=news)</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[observation] 2 sources: IEA Renewables 2025, IRENA capacity report</span>
   <span class="dx-term-line" data-kind="think" data-delay="300">Good baseline. Now refine for hard statistics and growth rates.</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="250">[action] tavily_search(queries=[renewable capacity statistics 2025, solar wind growth rate 2025])</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[action] search_tavily(queries=[renewable capacity statistics 2025, solar wind growth rate 2025])</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[observation] 3 sources gathered - that is >= 3 authoritative, enough to write</span>
   <span class="dx-term-line" data-kind="tokens">context: 6,240 / 128,000 tokens</span>
   <span class="dx-term-line" data-kind="answer" data-delay="400"># Renewable Energy Adoption 2025 - Executive summary: global capacity grew ~15% year-over-year [1]; solar led new additions [2]... (full report with a Sources section)</span>

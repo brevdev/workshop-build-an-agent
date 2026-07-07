@@ -1,75 +1,150 @@
 [
   {
     "question": "How do I reset my password?",
-    "ground_truth": "To reset your password, visit the self-service portal at portal.company.com/reset. Enter your employee ID and follow the prompts. You'll receive a verification code via email or SMS. The reset process takes 5-10 minutes to propagate across all systems.",
-    "context_key_words": ["self-service portal", "password reset", "verification"],
+    "ground_truth": "Go to the company login portal and click the Forgot Password link below the sign-in fields. Enter your company email address and submit. You will receive an email titled 'Password Reset Instructions' (check your Spam or Junk folder if it does not arrive within a few minutes). Click the link in the email and create a new password that meets the policy: at least 12 characters including an uppercase letter, a lowercase letter, a number, and a special character. If you do not receive the reset email within 15 minutes, contact the IT Help Desk. IT staff will never ask for your password, and passwords expire every 90 days.",
+    "context_key_words": [
+      "login portal",
+      "Forgot Password",
+      "company email",
+      "Password Reset Instructions",
+      "12 characters",
+      "90 days"
+    ],
     "category": "password_management"
   },
   {
-    "question": "What should I do if I forgot my employee ID?",
-    "ground_truth": "If you forgot your employee ID, contact the IT help desk at helpdesk@company.com or call extension 5555. Have your full name, department, and manager's name ready for verification. The help desk can look up your employee ID and send it to your registered email address.",
-    "context_key_words": ["help desk", "employee ID", "verification"],
-    "category": "account_access"
+    "question": "How do I get IT support or reach the help desk?",
+    "ground_truth": "The IT department offers several support channels. For non-urgent issues, submit a ticket through the IT Service Portal at itservices.company.com, which is available 24/7. For urgent problems, call the IT Help Desk at (555) 123-4357 or extension 4357, Monday through Friday, 7:00 AM to 7:00 PM EST. For after-hours critical issues or security incidents, use the Emergency IT Hotline at 1-800-IT-URGENT, available 24/7. You can also help yourself through the Knowledge Base at kb.company.com or reset a password at password.company.com.",
+    "context_key_words": [
+      "IT Service Portal",
+      "IT Help Desk",
+      "4357",
+      "Emergency IT Hotline",
+      "itservices.company.com"
+    ],
+    "category": "it_support"
   },
   {
     "question": "How do I connect to the company VPN?",
-    "ground_truth": "To connect to the VPN: 1) Install the Cisco AnyConnect client from the software portal, 2) Launch the client and enter vpn.company.com as the server, 3) Use your employee ID and password to authenticate, 4) Approve the MFA prompt on your registered device. For troubleshooting, ensure your client is updated to the latest version.",
-    "context_key_words": ["VPN", "Cisco AnyConnect", "MFA", "authentication"],
+    "ground_truth": "To connect to the company VPN: 1) Launch the Company VPN Client from the Start Menu, Applications folder, or system tray (on mobile, open the Company VPN App). 2) Set the server address to vpn.company.com and select the Corporate VPN profile. 3) Enter your company username and password. 4) Complete Multi-Factor Authentication (MFA) if prompted. Once authenticated, you will see a Connected status. If you do not have the client installed, download it from the IT Service Portal under Downloads, VPN Client. Idle sessions disconnect automatically after 8 hours of inactivity.",
+    "context_key_words": [
+      "Company VPN Client",
+      "vpn.company.com",
+      "Corporate VPN",
+      "MFA",
+      "IT Service Portal"
+    ],
     "category": "remote_access"
   },
   {
     "question": "Can I install software on my work laptop?",
-    "ground_truth": "Standard users cannot install software directly. To request software installation: 1) Check if the software is available in the Self-Service Software Center, 2) If not available, submit a request through the IT portal specifying the software name, version, and business justification, 3) Your manager must approve the request, 4) IT will review for security and licensing compliance before installation.",
-    "context_key_words": ["software installation", "Self-Service", "approval", "IT portal"],
+    "ground_truth": "Standard business applications such as Microsoft Office, Adobe Reader, web browsers, Slack, Teams, Zoom, and approved developer tools can be installed without extra approval. To install approved software, open the IT Service Portal at itservices.company.com, go to the Software Catalog, find the software, and click Install; it usually completes in 5 to 10 minutes. If the software is not in the catalog, submit a Software Request under Service Requests, Software, New Software Request, including the name, version, business justification, and manager approval. IT Security reviews the request within 3 to 5 business days, and approved installations are scheduled within 2 business days.",
+    "context_key_words": [
+      "Software Catalog",
+      "IT Service Portal",
+      "Software Request",
+      "manager approval",
+      "3-5 business days"
+    ],
     "category": "software_management"
   },
   {
     "question": "How do I report a security incident?",
-    "ground_truth": "To report a security incident: 1) Immediately disconnect from the network if you suspect compromise, 2) Contact the Security Operations Center (SOC) at security@company.com or call the emergency hotline at extension 9999, 3) Do not delete any files or clear browser history, 4) Document what happened including time, what you clicked, and any suspicious messages. The SOC operates 24/7 and will respond within 15 minutes.",
-    "context_key_words": ["security incident", "SOC", "emergency", "disconnect"],
+    "ground_truth": "Report security incidents within 1 hour of discovery. First secure the situation: disconnect affected devices from the network if it is safe to do so, do not try to fix the issue yourself, and document what happened including the time, date, and circumstances. Then report immediately by calling the Security Hotline at 1-800-SEC-HELP (available 24/7), emailing security-incidents@company.com, or using internal extension 911 for immediate threats. Within 2 hours, submit a formal report at security.company.com/incident-report. Do not investigate on your own, delete or modify evidence, or share details with unauthorized people.",
+    "context_key_words": [
+      "security incident",
+      "1-800-SEC-HELP",
+      "security-incidents@company.com",
+      "disconnect",
+      "within 1 hour"
+    ],
     "category": "security"
   },
   {
     "question": "Where can I find the email distribution lists?",
-    "ground_truth": "Email distribution lists are managed through the company directory. To find lists: 1) Open Outlook and go to the Global Address List, 2) Search for lists by department or function (e.g., 'engineering-all', 'hr-team'), 3) To request access to a restricted list, contact the list owner shown in the directory, 4) To create a new distribution list, submit a request through the IT portal with business justification and initial member list.",
-    "context_key_words": ["distribution list", "Outlook", "Global Address List", "IT portal"],
+    "ground_truth": "Email distribution lists are managed centrally through the company's email system. You can view and manage the lists you own using the self-service portal at groups.company.com, signing in with your company credentials. To request a new distribution list, use the IT Service Portal at itservices.company.com under Service Requests, Email Services, Distribution List Request, and provide the list name (following naming conventions such as dept-, project-, or role-), a business justification, the primary and secondary owners, an initial membership list, and manager approval.",
+    "context_key_words": [
+      "distribution list",
+      "groups.company.com",
+      "IT Service Portal",
+      "Distribution List Request",
+      "owner"
+    ],
     "category": "email_communication"
   },
   {
     "question": "How do I request a hardware refresh for my old laptop?",
-    "ground_truth": "Hardware refresh requests are processed quarterly. To request a refresh: 1) Ensure your current device is at least 3 years old (check asset tag date), 2) Submit a request through the IT portal under 'Hardware Refresh', 3) Your manager must approve the request, 4) IT will schedule the refresh based on priority and budget availability. Standard refresh includes laptop, docking station, and peripherals. You'll receive 2 weeks notice before the refresh date.",
-    "context_key_words": ["hardware refresh", "laptop", "3 years", "IT portal", "approval"],
+    "ground_truth": "You may be eligible for a hardware refresh if your device is older than 3 years, no longer meets performance requirements, is damaged, or has been flagged by IT for replacement. To request one, back up your files first, then go to the IT Service Portal under Service Requests, Hardware, Request Hardware Refresh, and provide your current asset tag number, a justification such as age, performance, or damage, and your preferred device type. IT reviews the request within 3 to 5 business days and notifies you of the available replacement options. You must return your old device within 10 business days of receiving the new one. Standard refresh cycles are every 3 years for laptops and every 4 years for desktops.",
+    "context_key_words": [
+      "hardware refresh",
+      "3 years",
+      "asset tag",
+      "IT Service Portal",
+      "10 business days"
+    ],
     "category": "hardware_management"
   },
   {
     "question": "What are the WiFi network names and passwords?",
-    "ground_truth": "Company WiFi networks: 1) 'CompanySecure' - Primary network for employees, uses your employee credentials (no separate password needed), 2) 'CompanyGuest' - For visitors, password changes monthly and is posted at reception, 3) 'CompanyIoT' - For company-owned IoT devices only, requires MAC address registration through IT portal. For connectivity issues, forget the network and reconnect, or contact IT help desk.",
-    "context_key_words": ["WiFi", "CompanySecure", "CompanyGuest", "employee credentials"],
+    "ground_truth": "The company provides four wireless networks. COMPANY-SECURE is the primary network for company-managed devices, using WPA3-Enterprise with certificate-based authentication and your company username and password. COMPANY-BYOD is for authorized personal devices after you register them at devicereg.company.com, using your username, password, and an MFA token. COMPANY-GUEST provides internet-only access for visitors with a daily rotating password provided by your host, valid for 24 hours. COMPANY-CONFERENCE provides event access with an event-specific password. There is no single published password; access depends on the network and your credentials.",
+    "context_key_words": [
+      "COMPANY-SECURE",
+      "COMPANY-BYOD",
+      "COMPANY-GUEST",
+      "WPA3-Enterprise",
+      "company credentials"
+    ],
     "category": "network_access"
   },
   {
     "question": "How do I access the HPC cluster for my research?",
-    "ground_truth": "To access the HPC cluster: 1) Submit an access request through the Research Computing portal at research.company.com, 2) Your PI or department head must approve the request, 3) Complete the mandatory HPC training module (2 hours online), 4) IT will create your cluster account and send SSH credentials, 5) Connect via SSH to hpc.company.com using your cluster credentials. Storage quota is 1TB per user by default; request increases through the portal.",
-    "context_key_words": ["HPC cluster", "research computing", "SSH", "training", "access request"],
+    "ground_truth": "To request HPC cluster access, go to the HPC Portal at hpc.company.com, click Request Access, and submit a New Project Request with your project details, technical requirements (compute, memory, storage, and software), team members, budget or funding source, and your manager or Principal Investigator's approval. Technical review takes 3 to 5 business days, followed by allocation-committee review and provisioning. Once approved, set up an SSH key (authentication is SSH-key-based, not password), connect to the login node at login.hpc.company.com, and complete the mandatory 2-hour HPC Basics Workshop. Each user receives a 100 GB home directory by default, with project storage available from 1 to 50 TB, and jobs are submitted through the Slurm scheduler.",
+    "context_key_words": [
+      "HPC Portal",
+      "hpc.company.com",
+      "SSH key",
+      "login.hpc.company.com",
+      "Slurm",
+      "PI approval"
+    ],
     "category": "research_computing"
   },
   {
     "question": "How do I update my personal information in the system?",
-    "ground_truth": "To update personal information: 1) Log into the Employee Self-Service portal at ess.company.com, 2) Navigate to 'My Profile', 3) You can directly update: phone number, emergency contact, mailing address, 4) For changes to legal name, email address, or banking information, submit a request to HR through the portal with supporting documentation, 5) Changes are effective within 24 hours for self-service updates, 3-5 business days for HR-processed changes.",
-    "context_key_words": ["personal information", "Employee Self-Service", "profile", "HR"],
+    "ground_truth": "To update your personal information, log in to the HR Self-Service Portal at hr.company.com with your company username and password, select My Profile, then Personal Information. Click Edit next to the field you want to change (home address, phone number, emergency contacts, preferred name, or personal email), enter the new information, and click Save. Legal name changes require supporting documentation uploaded under Documents, Upload, and may need HR approval before taking effect. Direct-deposit and banking updates are made under Payroll, Payment Settings. It is recommended to review your emergency contacts at least once a year.",
+    "context_key_words": [
+      "HR Self-Service Portal",
+      "hr.company.com",
+      "My Profile",
+      "Personal Information",
+      "legal name"
+    ],
     "category": "employee_services"
   },
   {
     "question": "What's the process for getting access to the source control system?",
-    "ground_truth": "To get source control access: 1) Your manager must submit an access request through the IT portal, 2) Specify which repositories you need access to and your role (read, write, or admin), 3) Complete the mandatory Git training course (1 hour online), 4) IT will create your account and send credentials within 1 business day, 5) Set up SSH keys following the guide at git.company.com/setup. Default access is read-only; write access requires additional approval.",
-    "context_key_words": ["source control", "Git", "repository access", "SSH keys", "training"],
+    "ground_truth": "The primary source control system is Git, hosted on GitLab Enterprise at git.company.com. To get access, submit a GitLab Access Request through the IT Service Portal under Development Services, specifying the project or team you need, the role you require (Developer, Maintainer, or Owner), and your manager's approval. Account provisioning takes 2 to 3 business days. After your account is created, generate an SSH key with 'ssh-keygen -t ed25519', add the public key under User Settings, SSH Keys in GitLab, and test the connection with 'ssh -T git@git.company.com'. Access is role-based, and the main branch is protected, so changes are merged through reviewed pull requests.",
+    "context_key_words": [
+      "Git",
+      "GitLab",
+      "git.company.com",
+      "GitLab Access Request",
+      "SSH key",
+      "Developer"
+    ],
     "category": "development_tools"
   },
   {
-    "question": "Can I use my personal device to access company email?",
-    "ground_truth": "Personal device access to company email requires enrollment in the Mobile Device Management (MDM) program: 1) Install the Company Portal app from your device's app store, 2) Enroll your device following the in-app instructions, 3) Accept the MDM policy (allows IT to enforce security settings and remote wipe if device is lost), 4) Add your company email account through the approved email app. Note: MDM only manages the work profile/apps, not your personal data. Alternatively, use webmail at mail.company.com without MDM enrollment.",
-    "context_key_words": ["personal device", "MDM", "Mobile Device Management", "Company Portal", "email"],
-    "category": "mobile_access"
+    "question": "How do I request a virtual desktop (VDI)?",
+    "ground_truth": "To request a virtual desktop, go to the IT Service Portal under Service Requests, Infrastructure, Virtual Desktop Request, and provide a business justification, the desktop type you need (Standard with 2 vCPU and 4 GB RAM, Performance with 4 vCPU and 8 GB RAM, High-Performance with 8 vCPU and 16 GB RAM, or a Specialized custom configuration), the access duration, and your software requirements. Your manager approves the request within 3 business days, then IT reviews and provisions it over about 3 to 5 business days. Once ready, install the VMware Horizon Client or Citrix Workspace App from the IT Service Portal Downloads and connect to vdi.company.com with your company username and password plus an MFA token. Prerequisites include manager approval, MFA enrollment, and VPN access when connecting from external networks.",
+    "context_key_words": [
+      "virtual desktop",
+      "VDI",
+      "Virtual Desktop Request",
+      "vdi.company.com",
+      "VMware Horizon",
+      "manager approval"
+    ],
+    "category": "virtual_desktop"
   }
 ]
-

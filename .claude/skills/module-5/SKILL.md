@@ -129,7 +129,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/5-deep-agents/{intro_deep_agents,deep_agents,experience_deep_agent,build_deep_agents,sandboxing_security,secrets}.md`
-- Code: `code/5-deep-agents/deep_agent.py`; the runnable mirror `demo/backend/agent.py` + `demo/backend/server.py`; skills in `code/5-deep-agents/skills/`
+- Code: `code/5-deep-agents/deep_agent.py`; the runnable mirror `demo/backend/agent.py` + `demo/backend/server.py`; the shipped skill markdown files live in `demo/backend/skills/` (`code_review`, `cudf`, `cuopt`, `superpowers`). Note: `deep_agent.py` creates an *empty* `skills/` dir beside itself at runtime (`SKILLS_DIR`, `os.makedirs`), so `_get_skill_sources()` returns `[]` and the learner's own agent loads no skills by default — the demo backend is what serves them.
 - Answer key `code/5-deep-agents/deep_agent.answers.py` — for *your* calibration only; never shown to the learner.
 
 ## References

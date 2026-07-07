@@ -12,6 +12,18 @@ Your NemoClaw sandbox is running. The agent lives inside four enforcement layers
 
 > Each exercise follows a simple pattern: **recall** the vanilla behavior, **observe** it against the sandbox, **harden** with a policy, and **validate** the outcome. Exercise 5 ends with an optional Python sidekick — a short TODO in <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> agent_safety.py</button> — that wires a content classifier in front of the inference router. Once you've finished this page, head to [Evaluating Agent Safety](evaluating_safety) for the red-team + continuous-evaluation capstone.
 
+### Before you begin — is your live sandbox up?
+
+Exercises 1–4 drive the **running** NemoClaw sandbox (`nemoclaw connect`, `openshell policy set`, …). If a command hangs, or a step fails with *"sandbox not found"* or *"Cannot find module"*, your control plane is down. Check all four layers — tunnel, gateway, CLI, and sandbox — with one read-only command:
+
+```bash
+bash code/6-agent-safety/scripts/nemoclaw-health.sh
+```
+
+It reports which layer is down and prints the single command that brings the stack back: <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> → `bash code/6-agent-safety/scripts/install-nemoclaw.sh`. That installer is **idempotent** — if parts are already healthy it just restores the socat tunnel; if the install is corrupt or the sandbox is missing it reinstalls and re-onboards. Re-run the health check afterward; you're ready when it prints **READY**.
+
+> **Can't restore the live sandbox right now? You are not blocked.** Exercise 5's content classifier and the entire [Evaluating Agent Safety](evaluating_safety) capstone — the red-team runner, the LLM judge, and the full safety suite — run **offline against a built-in mock agent**. Only Exercises 1–4 on this page need the live sandbox; read them for the concepts and come back when the stack is up.
+
 <!-- fold:break -->
 
 ## Section 1 — Layer 1: Network (Egress Policy)

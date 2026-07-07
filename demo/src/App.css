@@ -140,6 +140,15 @@
   box-shadow: 0 0 10px var(--accent-glow);
 }
 
+/* Requested a sandbox but Docker was unavailable — fell back to LOCAL
+   execution. Amber (not the deliberate red "off") flags that the isolation
+   you asked for isn't there. */
+.sandbox-mode-badge.failed {
+  background: rgba(255, 152, 0, 0.15);
+  border: 1px solid #ff9800;
+  color: #ffb300;
+}
+
 /* Sandbox info modal */
 .sandbox-backdrop {
   position: fixed;

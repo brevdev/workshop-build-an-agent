@@ -11,13 +11,19 @@ CLIs, and a **socat tunnel** bridging the Workbench container to the host gatewa
 builds these are degraded ("Live NemoClaw agent isn't the default", `nemoclaw connect` hangs,
 `openshell` can't reach the gateway). This is an **environment problem, not the learner's
 code.** Steps:
-1. **Diagnose:** `python3 code/6-agent-safety/scripts/diagnose-nemoclaw.py` — reports what the
-   detection logic actually sees (CLIs present? gateway reachable? sandbox running?).
-2. **Re-run the installer (idempotent):** `bash code/6-agent-safety/scripts/install-nemoclaw.sh`
+1. **Health check (read-only, start here):** `bash code/6-agent-safety/scripts/nemoclaw-health.sh`
+   — probes all four layers (socat tunnel, gateway, `nemoclaw` CLI integrity, sandbox `Phase: Ready`)
+   using the *same* readiness signal the workshop code uses, and prints the one recovery command.
+   It explicitly flags a **corrupt/partial `nemoclaw` install** (`Cannot find module '.../dist/lib/agent/runtime'`),
+   the most common failure — repaired by re-running the installer below. The `.devx` pages
+   (`using_nemoclaw.md`, `evaluating_safety.md`, `setup_nemoclaw.md`) now surface this same script.
+2. **Deeper detection (NemoClaw Client):** `python3 code/6-agent-safety/scripts/diagnose-nemoclaw.py`
+   — reports what the Streamlit client's detection logic sees (why "Live NemoClaw Agent" isn't the default).
+3. **Re-run the installer (idempotent):** `bash code/6-agent-safety/scripts/install-nemoclaw.sh`
    — if already installed + healthy it just restarts the **socat tunnel** (`127.0.0.1:8080` →
    the Docker-bridge gateway) and exits; if a prior attempt half-failed it cleans up + retries.
    Logs: `/tmp/nemoclaw-tunnel.log`.
-3. **Full reset:** `docker rm -f nemoclaw-openshell-gateway` then re-run `install-nemoclaw.sh`.
+4. **Full reset:** `docker rm -f nemoclaw-openshell-gateway` then re-run `install-nemoclaw.sh`.
 - The tunnel/gateway plumbing is a workaround for **NemoClaw v0.0.49** specifically (its
   preflight wants :8080 free in the container but its readiness wants to *reach* the gateway).
 - **Key reassurance for the learner:** even with the live stack down, the **Python safety-eval

@@ -29,6 +29,10 @@ function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sandboxMap, setSandboxMap] = useState<Record<string, boolean>>({});
   const [sandboxMode, setSandboxMode] = useState(false);
+  // Actual sandbox state reported by the backend at build time (null until a
+  // session is built). Drives the header badge so it never claims isolation
+  // that failed to start.
+  const [sandboxStatus, setSandboxStatus] = useState<{ requested: boolean; active: boolean } | null>(null);
   const [showSandboxInfo, setShowSandboxInfo] = useState(false);
   const [showSandboxWarning, setShowSandboxWarning] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
@@ -174,13 +178,17 @@ function App() {
       try {
         const skillIds = addedSkills.map(s => s.id);
         console.log('[App] Creating agent session:', selectedModel.id, skillIds, 'sandboxMap:', sandboxMap);
-        const id = await createAgentSession(selectedModel.id, skillIds, true, sandboxMap);
-        console.log('[App] Session created:', id);
-        setSessionId(id);
+        const info = await createAgentSession(selectedModel.id, skillIds, true, sandboxMap);
+        console.log('[App] Session created:', info.sessionId, 'sandbox:', info);
+        setSessionId(info.sessionId);
+        setSandboxStatus({ requested: info.sandboxRequested, active: info.sandboxActive });
         if (hasRAG) ragInitializedRef.current = true;
         setSessionReady(true);
       } catch (err) {
         console.error('[App] Failed to create agent session:', err);
+        // Build failed → no working sandbox. Record it honestly so the badge
+        // reflects the intent-vs-reality gap rather than claiming isolation.
+        setSandboxStatus({ requested: Object.values(sandboxMap).some(Boolean), active: false });
         setSessionReady(true); // Let animation finish even on error
       }
     }
@@ -198,6 +206,7 @@ function App() {
     setAddedSkills([]);
     setSandboxMap({});
     setSandboxMode(false);
+    setSandboxStatus(null);
     setPhase('soul');
     setSelectedModel(null);
     prevBlockySkillsRef.current = '';
@@ -213,6 +222,7 @@ function App() {
     setAddedSkills([]);
     setSandboxMap({});
     setSandboxMode(false);
+    setSandboxStatus(null);
     setPhase('soul');
     setSelectedModel(null);
     prevBlockySkillsRef.current = '';
@@ -264,12 +274,19 @@ function App() {
                 <span>{blocky.connected ? 'Blocks Connected' : 'Waiting for Blocks...'}</span>
               </div>
             )}
-            {/* Sandbox indicator in header — show on chat only */}
-            {phase === 'chat' && (
-              <span className={`sandbox-mode-badge ${sandboxMode ? 'on' : 'off'}`}>
-                {sandboxMode ? '🔒 Sandboxed' : '⚠️ No Sandbox'}
-              </span>
-            )}
+            {/* Sandbox indicator in header — show on chat only. Reflects the
+                ACTUAL backend state (sandboxStatus), not the toggle intent, so a
+                requested-but-unavailable sandbox reads "unavailable", never
+                "Sandboxed". Falls back to intent only before a session exists. */}
+            {phase === 'chat' && (() => {
+              const active = sandboxStatus?.active ?? false;
+              const requested = sandboxStatus?.requested ?? sandboxMode;
+              const cls = active ? 'on' : (requested ? 'failed' : 'off');
+              const label = active
+                ? '🔒 Sandboxed'
+                : (requested ? '⚠️ Sandbox unavailable' : '⚠️ No Sandbox');
+              return <span className={`sandbox-mode-badge ${cls}`}>{label}</span>;
+            })()}
             <div className="header-badge" style={selectedModel ? { borderColor: selectedModel.primaryColor, color: selectedModel.primaryColor, background: selectedModel.subtleColor } : undefined}>
               {selectedModel ? `${selectedModel.name} · Build an Agent Workshop` : 'Build an Agent Workshop'}
             </div>

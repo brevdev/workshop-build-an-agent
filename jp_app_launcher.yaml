@@ -119,7 +119,7 @@
   args:
     - bash
     - -c
-    - npm run build && npm run preview -- --port $PORT
+    - bash /project/demo/start_client.sh $PORT
   icon: /project/.devx/_static/img/chatbot.svg
   catalog: NVIDIA DevX Learning Path
 

@@ -181,11 +181,12 @@ Fill in ``create_agent()`` to:
 ...
 model = _get_model(model_id)
 extra_tools = _build_extra_tools(skill_ids)
-any_sandboxed = any(sandbox_map.get(sid, False) for sid in skill_ids)
-system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, any_sandboxed)
 skill_sources = _get_skill_sources()
 
+# Build the backend first so the prompt reflects the ACTUAL sandbox state.
 backend, sandbox = _build_backend(skill_ids, sandbox_map)
+sandbox_active = sandbox is not None
+system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, sandbox_active)
 
 agent_kwargs: dict = {
     "model": model,

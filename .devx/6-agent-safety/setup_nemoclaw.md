@@ -62,6 +62,12 @@ These are workarounds for NemoClaw v0.0.49 specifically. The script is idempoten
 <details class="dx-peek is-solution">
 <summary>Troubleshooting: install fails or NemoClaw stops responding</summary>
 
+**First, see which layer is down.** Run the read-only health check — it probes the tunnel, gateway, CLI, and sandbox and prints the exact recovery command:
+
+```bash
+bash code/6-agent-safety/scripts/nemoclaw-health.sh
+```
+
 The install script writes detailed logs to two files:
 
 | File | What's in it |
@@ -133,6 +139,7 @@ If something didn't work, don't worry -- here are the most common issues and the
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `nemoclaw: command not found` | Shell PATH not updated after install | Run `source ~/.bashrc` or `export PATH="$HOME/.npm-global/bin:$PATH"` |
+| `Error: Cannot find module '.../dist/lib/agent/runtime'` | Partial/corrupt NemoClaw install — the CLI is on PATH but its files are incomplete | Reinstall to repair: `bash code/6-agent-safety/scripts/install-nemoclaw.sh` |
 | Docker permission denied | User not in the docker group | `sudo usermod -aG docker $USER` then log out and back in |
 | Sandbox creation fails (exit 137 / OOM) | Insufficient RAM for image push (~2.4 GB compressed) | Close other containers and add swap: `sudo dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
 | Cannot connect to sandbox | Sandbox not running or gateway stopped | Check `nemoclaw my-assistant status`, then `openshell sandbox list`. Restart gateway: `openshell gateway start --name nemoclaw` |

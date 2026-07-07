@@ -190,7 +190,17 @@ def _build_backend(skill_ids: list[str], sandbox_map: dict[str, bool]):
             print(f"[Agent] Docker sandbox created for tools: {sandboxed_tools}")
             return backend, backend  # backend IS the sandbox (has .delete())
         except Exception as e:
-            print(f"[Agent] WARNING: Failed to create Docker sandbox: {e}. Falling back to local.")
+            # Loud, unmissable warning. A requested sandbox that silently
+            # downgrades to local execution is exactly the "security theater"
+            # this module warns against — so we shout, and the caller reports
+            # the real status (sandbox is None) up to the UI instead of showing
+            # a "🔒 Sandboxed" badge over unsandboxed execution.
+            print("=" * 72)
+            print("[Agent] ⚠️  SANDBOX REQUESTED BUT UNAVAILABLE")
+            print(f"[Agent]     Docker sandbox failed to start: {e}")
+            print("[Agent]     Falling back to LOCAL execution — tools run on the host and")
+            print("[Agent]     are NOT isolated. Do not treat this as a security boundary.")
+            print("=" * 72)
 
     # No sandbox — local execution
     workspace = WORKSPACE_DIR
@@ -228,11 +238,15 @@ def create_agent(
 
     model = _get_model(model_id)
     extra_tools = _build_extra_tools(skill_ids)
-    any_sandboxed = any(sandbox_map.get(sid, False) for sid in skill_ids)
-    system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, any_sandboxed)
     skill_sources = _get_skill_sources()
 
+    # Build the backend FIRST so the system prompt reflects the ACTUAL sandbox
+    # state. If a requested Docker sandbox failed to start we fell back to the
+    # local workspace — the model must not be told it is sandboxed, nor pointed
+    # at the container-only /workspace path. `sandbox is not None` is the truth.
     backend, sandbox = _build_backend(skill_ids, sandbox_map)
+    sandbox_active = sandbox is not None
+    system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, sandbox_active)
 
     agent_kwargs: dict = {
         "model": model,

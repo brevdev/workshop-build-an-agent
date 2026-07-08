@@ -387,19 +387,37 @@ cd /project/code/6-agent-safety
 python agent_safety.py
 ```
 
-Sample output (using the permissive policy + leaky mock agent):
+`python agent_safety.py` runs **two** suites back-to-back so you see both the policy *gate* and the full pipeline.
+
+**Run 1 — permissive policy (`baseline_permissive.yaml`).** The validator finds critical violations (root user + a world-writable `/`), so the suite *gates*: it refuses to test an agent behind a policy that is already unsafe, and never runs the probes.
 
 ```text
-==================================================
-Safety Suite: FAILED
-  Aggregate Score:  40.63%
-  Policy Valid:     False
-  Red-Team Pass:    37.50%
-  LLM Evaluations:  10
-==================================================
+============================================================
+  Run 1 — Permissive policy (gate fires)
+============================================================
+  Safety suite FAILED: policy has 2 critical violation(s) — fix policy before testing agent
+    Aggregate Score:  0.00%
+    Policy Valid:     False
+    Red-Team Pass:    0.00%
+    Classifications:  0
+    LLM Evaluations:  0
 ```
 
-In run #2, we swap `policy_path` to `research_assistant.yaml` + use the live hardened agent and the evaluation score we built should now climb into the 0.7-0.9 range.
+**Run 2 — hardened policy (`research_assistant.yaml`).** The policy is valid, so the full pipeline runs: 16 red-team probes, sensitivity classification of the test corpus, and the LLM judge on the handful of probes that slip through the mock agent.
+
+```text
+============================================================
+  Run 2 — Hardened policy (full pipeline)
+============================================================
+  Safety suite PASSED: score=92.50%
+    Aggregate Score:  92.50%
+    Policy Valid:     True
+    Red-Team Pass:    81.25%
+    Classifications:  16
+    LLM Evaluations:  3
+```
+
+The jump from a gated 0% to 92.5% is the point: a valid policy is the precondition for everything else. (Run 2 uses the built-in mock agent so it runs offline; swap in the live sandboxed agent and the numbers shift with the model's actual behavior.)
 
 </details>
 
@@ -471,7 +489,7 @@ Agent safety is the discipline — NemoClaw is one implementation. The tools and
 <div class="dx-bento dx-reveal">
   <div class="dx-cell is-wide"><h4>EXPLORE NEXT</h4><p><span class="dx-chip is-green">START HERE</span> <a href="https://github.com/NVIDIA/NemoClaw">NVIDIA NemoClaw</a> - the full reference stack in one deployable package.</p></div>
   <div class="dx-cell"><h4>OPENSHELL</h4><p><a href="https://github.com/NVIDIA/OpenShell">Kernel-level runtime</a> - Landlock, seccomp, and the inference gateway.</p></div>
-  <div class="dx-cell"><h4>POLICY SCHEMA</h4><p><a href="https://docs.nvidia.com/openshell/latest/reference/policy-schema.html">Complete YAML reference</a> for OpenShell policies.</p></div>
+  <div class="dx-cell"><h4>POLICY SCHEMA</h4><p><a href="https://docs.nvidia.com/openshell/latest/reference/policy-schema">Complete YAML reference</a> for OpenShell policies.</p></div>
   <div class="dx-cell"><h4>OPENCLAW</h4><p><a href="https://docs.openclaw.ai/">Config-first agent framework</a> documentation.</p></div>
   <div class="dx-cell"><h4>NEMO GUARDRAILS</h4><p><a href="https://github.com/NVIDIA/NeMo-Guardrails">Input/output filtering</a> for LLM interactions.</p></div>
   <div class="dx-cell"><h4>OWASP AGENTIC</h4><p><a href="https://genai.owasp.org/">Top 10 taxonomy</a> of agent threats.</p></div>

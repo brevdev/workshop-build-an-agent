@@ -100,7 +100,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
   validity that ad-hoc "ask an LLM for examples" can't guarantee.
 - **RLVR + reward engineering:** rewards should be **verifiable** (code, not vibes),
   **granular** (partial credit, not binary), and **aligned** (beware *reward hacking* —
-  e.g. empty `{}` scoring high). Composite reward ≈ JSON-format + command + flag-accuracy.
+  e.g. empty `{}` scoring high). Gate-then-grade reward (NOT a weighted sum): invalid JSON or wrong command → −1; else `(correct − wrong − extra)/total_flags`, exact match = 1.0.
 - **HITL:** the bash agent never executes directly — it proposes and waits for approval
   (`ExecOnConfirm`). Failing safely > succeeding quickly.
 

@@ -255,7 +255,10 @@ class DockerSandboxBackend(SandboxBackendProtocol):
         code, output = self._exec(cmd)
         if not output:
             return []
-        # Return raw grep output as list of GrepMatch-like dicts
+        # Return raw grep output as GrepMatch dicts. The deepagents backend
+        # protocol (GrepMatch TypedDict) expects the keys `path`, `line`, `text`;
+        # the formatter (build_grep_results_dict) reads m["line"]/m["text"], so
+        # these names must match exactly or grep errors on every match.
         results = []
         for line in output.strip().split("\n"):
             if ":" in line:
@@ -263,8 +266,8 @@ class DockerSandboxBackend(SandboxBackendProtocol):
                 if len(parts) >= 3:
                     results.append({
                         "path": parts[0],
-                        "line_number": int(parts[1]) if parts[1].isdigit() else 0,
-                        "content": parts[2],
+                        "line": int(parts[1]) if parts[1].isdigit() else 0,
+                        "text": parts[2],
                     })
         return results
 

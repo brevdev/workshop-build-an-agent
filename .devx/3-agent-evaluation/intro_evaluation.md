@@ -69,7 +69,7 @@ If an agent writes a poem or summarizes a document, how do you write a unit test
 We generally rely on three approaches: 
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide"><h4>LLM-AS-A-JUDGE</h4><span class="dx-chip is-green">PRIMARY METHOD</span> A specialized NVIDIA Nemotron model grades outputs against a rubric. Scalable and handles subjective qualities - but adds cost and latency, and can inherit the judge model's biases.</div>
+  <div class="dx-cell is-wide"><h4>LLM-AS-A-JUDGE</h4><span class="dx-chip is-green">PRIMARY METHOD</span> An NVIDIA Nemotron model grades outputs against a rubric. Scalable and handles subjective qualities - but adds cost and latency, and can inherit the judge model's biases.</div>
   <div class="dx-cell"><h4>HUMAN EVALUATION</h4>The gold standard for subjective quality - most accurate, but slow, expensive, and not scalable. Used sparingly to grade the grader.</div>
   <div class="dx-cell"><h4>DETERMINISTIC CHECKS</h4>Code-based pass/fail (did the JSON parse? is the keyword present?). Objective and cheap, but misses nuance and valid alternatives.</div>
 </div>
@@ -87,6 +87,7 @@ We generally rely on three approaches:
     <li>If alignment is poor, refine the evaluation prompt or add examples.</li>
   </ol>
   <p>Even a quick spot-check on 5 samples can reveal a judge that is too lenient, too harsh, or misreads your criteria. We'll practice this in the hands-on notebooks.</p>
+  <p><b>Watch for self-enhancement bias.</b> In this module the judge is the <i>same</i> Nemotron model that powers the agent under test — and LLM judges tend to favor outputs in their own style. That's a real reason to calibrate against humans, and to try a different judge model when a score looks suspiciously generous.</p>
 </div>
 
 <!-- fold:break -->

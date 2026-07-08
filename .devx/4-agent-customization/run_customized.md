@@ -147,9 +147,9 @@ This closes the loop with Module 3: the same evaluation mindset applies, but now
 
 If the trained model still makes mistakes, apply the iterative improvement cycle from Module 3:
 
-1. **Analyze failure patterns** — Which commands or flags fail most? Use the reward function's component scores (JSON format, command correctness, flag accuracy) to pinpoint weak spots.
-2. **Generate targeted data** — SDG can oversample weak areas. If `dockerfile` commands have low accuracy, generate more examples with diverse `output_path` values.
-3. **Adjust reward weights** — If the model gets commands right but flags wrong, increase the `flag_accuracy_reward` weight to focus training attention there.
+1. **Analyze failure patterns** — Which commands or flags fail most? The `/verify` response breaks out `command_correct` and `flag_accuracy` (and whether the output parsed as valid JSON at all), so you can pinpoint weak spots.
+2. **Generate targeted data** — SDG can oversample weak areas. If `dockerfile` commands have low accuracy, generate more examples with diverse `output_path` values so the reward signal on that command is denser.
+3. **Refine the reward signal** — the reward is *gate-then-grade* (invalid JSON or wrong command → −1; otherwise `(correct − wrong − extra) / total_flags`), so there are no weights to tune. If the model gets commands right but flags wrong, extend `score_cli_output`'s flag normalization (e.g. treat equivalent flag spellings as matches) or add more of those flag combinations to the training data.
 4. **Train longer** — 50 steps is a starting point. Extending to 100-200 steps often improves edge case handling.
 
 The pattern is always: **measure → diagnose → fix → retrain → re-measure**.

@@ -40,7 +40,7 @@ To ingest the documents, we will **Chunk** the documents, **Embed** those chunks
 
 Document splitting is controlled by two things: chunk size and chunk overlap. We already defined these as `CHUNK_SIZE` and `CHUNK_OVERLAP`. The exact size and overlap should be tuned for production, but we are starting with good values.
 
-Define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'splitter = ');"><i class="fas fa-code"></i> splitter</button> using these values and LangChain's [`RecursiveCharacterTextSplitter`](https://python.langchain.com/docs/how_to/recursive_text_splitter/).
+Define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'splitter = ');"><i class="fas fa-code"></i> splitter</button> using these values and LangChain's [`RecursiveCharacterTextSplitter`](https://reference.langchain.com/python/langchain-text-splitters).
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -124,7 +124,7 @@ LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.p
 
 </center>
 
-We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect(‘code/2-agentic-rag/rag_agent.py’, ‘= create_retriever_tool’);"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` fields help the agent decide when to use this tool during multi-step reasoning.
+We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= create_retriever_tool');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` fields help the agent decide when to use this tool during multi-step reasoning.
 
 <!-- fold:break -->
 
@@ -172,7 +172,7 @@ A system prompt has been defined in the code. Feel free to review it at <button 
 
 ### Create the Graph
 
-Because the ReAct architecture is so common, LangGraph provides a function that will create ReAct agent graphs. Plug `llm`, `RETRIEVER_TOOL`, and `SYSTEM_PROMPT` into LangGraph's [`create_react_agent`](https://langchain-ai.github.io/langgraph/agents/agents/#2-create-an-agent). Assign the resulting value to <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button>.
+Because the ReAct architecture is so common, LangGraph provides a function that will create ReAct agent graphs. Plug `llm`, `RETRIEVER_TOOL`, and `SYSTEM_PROMPT` into LangGraph's [`create_react_agent`](https://langchain-ai.github.io/langgraph/reference/prebuilt/). Assign the resulting value to <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button>.
 
 > **Note:** We'll update the `AGENT` definition as we add more capabilities in later sections. Each section builds on the last — by the end of this module, your agent will have multiple tools.
 

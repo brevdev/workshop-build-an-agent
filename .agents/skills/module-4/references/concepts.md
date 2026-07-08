@@ -66,13 +66,16 @@ gap (knows bash, not the LangGraph CLI) is **measurable**, and it's real-world.
   an LLM judge** — objective, fast (ms), scalable. CLI commands are right or wrong.
 - **The reward server (NeMo Gym):** `nemo_gym_resources/langgraph_cli/app.py`, a FastAPI
   service exposing `/verify`; given a predicted vs reference CLI JSON it returns a
-  **reward in [-1, 1]** (flag-accuracy based: `(correct − wrong − extra)/total`, exact
-  match = 1.0). Conceptually a **composite**: JSON-format (≈0.2) + command (≈0.3) +
-  flag-accuracy (≈0.5) — flags weigh most (most information), format least (easiest).
-- **Reward-engineering principles:** **verifiable** (code), **granular** (partial credit
-  beats binary — a correct-JSON-wrong-command should score above zero), **aligned**
-  (reward what you want; beware **reward hacking** — e.g. rewarding *any* valid JSON lets
-  empty `{}` score perfectly). Always test the reward on edge cases first.
+  **reward in [-1, 1]**. It is **gate-then-grade**, NOT a weighted sum: invalid JSON → −1;
+  wrong command → −1; otherwise `(correct − wrong − extra) / total_flags` (clipped to
+  [-1, 1]), exact match = 1.0. (There are no JSON/command/flag weights — do NOT invent
+  0.2/0.3/0.5 composite weights; `grpo_training.md` explains *why gates instead of a
+  weighted sum*.)
+- **Reward-engineering principles:** **verifiable** (code), **granular on flags** (partial
+  credit for getting *some* flags right) but the **JSON and command are hard gates** — a
+  wrong command scores −1, not partial credit, precisely to avoid **reward hacking**;
+  **aligned** (reward what you want — e.g. rewarding *any* valid JSON would let an empty
+  `{}` score perfectly). Always test the reward on edge cases first.
 
 ## GRPO (`grpo_training.md`)
 **Group Relative Policy Optimization** — for each prompt: ① generate several candidates

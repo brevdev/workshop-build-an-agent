@@ -400,9 +400,9 @@ While this module focused on RAGAS and custom LLM-as-a-judge pipelines, the eval
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell is-wide is-tall"><h4>NVIDIA NeMo Agent Toolkit</h4>Open-source, framework-agnostic library for connecting, evaluating, and profiling agents - built-in RAG evaluators, agent trajectory evaluation, and custom evaluator support. Works with LangChain, LlamaIndex, CrewAI, and more. <a href="https://github.com/NVIDIA/NeMo-Agent-Toolkit">github.com/NVIDIA/NeMo-Agent-Toolkit</a></div>
-  <div class="dx-cell"><h4>NVIDIA NeMo Evaluator</h4>Enterprise microservice - 100+ benchmarks, LLM-as-a-judge scoring, RAG metrics, agent eval, built for CI/CD. <a href="https://developer.nvidia.com/nemo-evaluator">developer.nvidia.com/nemo-evaluator</a></div>
+  <div class="dx-cell"><h4>NVIDIA NeMo Evaluator</h4>Enterprise microservice - 100+ benchmarks, LLM-as-a-judge scoring, RAG metrics, agent eval, built for CI/CD. <a href="https://docs.nvidia.com/nemo/microservices/latest/evaluate/index.html">docs.nvidia.com/nemo/microservices</a></div>
   <div class="dx-cell"><h4>LangSmith</h4>LangChain's platform for tracing, dataset management, and evaluation, tightly integrated with LangChain agents. <a href="https://smith.langchain.com/">smith.langchain.com</a></div>
-  <div class="dx-cell"><h4>Arize Phoenix</h4>Open-source LLM observability - tracing, evaluation, and debugging of retrieval and generation quality. <a href="https://phoenix.arize.com/">phoenix.arize.com</a></div>
+  <div class="dx-cell"><h4>Arize Phoenix</h4>Open-source LLM observability - tracing, evaluation, and debugging of retrieval and generation quality. <a href="https://arize.com/phoenix/">arize.com/phoenix</a></div>
   <div class="dx-cell"><h4>DeepEval</h4>Open-source eval framework with pre-built metrics (hallucination, relevancy, toxicity) and CI/CD integration. <a href="https://docs.confident-ai.com/">docs.confident-ai.com</a></div>
 </div>
 

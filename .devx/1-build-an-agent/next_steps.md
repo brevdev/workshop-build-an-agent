@@ -49,7 +49,7 @@ This module gave you the conceptual foundation. The following modules build on t
 
 Want to go deeper? Here are some useful references:
 
-- [LangChain Agent Documentation](https://python.langchain.com/docs/concepts/agents/) - Framework details and advanced patterns
+- [LangChain Agent Documentation](https://docs.langchain.com/oss/python/langchain/agents) - Framework details and advanced patterns
 - [ReAct Paper](https://arxiv.org/abs/2210.03629) - The original research behind the ReAct pattern
 - [NVIDIA NIM Documentation](https://docs.nvidia.com/nim/) - Learn more about the models powering your agents
 

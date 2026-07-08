@@ -93,8 +93,9 @@ The Report Generation Agent maps the four components onto real code:
 - **Routing:** `create_agent(model, tools, system_prompt)` builds a ReAct agent — no manual loop.
 
 Terminology note the workshop calls out: it uses both "LangChain" and "LangGraph."
-LangGraph is built on LangChain for stateful, multi-step apps; `create_agent` is a
-LangChain utility that uses LangGraph under the hood.
+LangGraph is a low-level orchestration framework from the LangChain team (usable on its
+own) for stateful, multi-step apps; `create_agent` is a LangChain utility that is *built
+on* LangGraph under the hood — not the other way around.
 
 ## Source map
 - Concepts → `why_agents.md`, `introduction_to_agents.md`

@@ -39,13 +39,14 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 </div>
 
 <div class="dx-island dx-reveal">
-  <p class="dx-island-title">READING THE SCORES - EVERY RAGAS METRIC RUNS 0 TO 1</p>
+  <p class="dx-island-title">READING THE SCORES - RAGAS METRICS RUN 0 TO 1</p>
   <div class="dx-tax">
     <div class="dx-tax-row" style="--dx-w:30"><span class="dx-tax-name">Poor</span><div class="dx-tax-track"><div class="dx-tax-fill">&lt; 0.50</div></div><span class="dx-tax-note">urgent - not production-ready</span></div>
     <div class="dx-tax-row" style="--dx-w:55"><span class="dx-tax-name">Fair</span><div class="dx-tax-track"><div class="dx-tax-fill">0.50 - 0.69</div></div><span class="dx-tax-note">needs improvement</span></div>
     <div class="dx-tax-row" style="--dx-w:80"><span class="dx-tax-name">Good</span><div class="dx-tax-track"><div class="dx-tax-fill">0.70 - 0.89</div></div><span class="dx-tax-note">acceptable for many uses</span></div>
     <div class="dx-tax-row" style="--dx-w:97"><span class="dx-tax-name">Excellent</span><div class="dx-tax-track"><div class="dx-tax-fill">0.90 - 1.00</div></div><span class="dx-tax-note">production-ready</span></div>
   </div>
+  <p>These are the general bands, and exactly how the two <b>retrieval</b> metrics (context precision &amp; recall) are read. The two <b>generation</b> metrics — <b>faithfulness</b> and <b>answer relevancy</b> — hold to a slightly stricter bar (Fair 0.60-0.74, Good 0.75-0.89), because a wrong grounded-fact matters more than a slightly noisy retrieval. Each metric's section below shows its exact bands.</p>
 </div>
 
 <!-- fold:break -->

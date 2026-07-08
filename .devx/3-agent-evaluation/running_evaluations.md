@@ -242,7 +242,7 @@ Let's dig into the evaluation results to understand how well your RAG agent is p
 
 First, let's review the mean scores across all test cases. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Analyze Results');"><i class="fas fa-code"></i> Analyze Results </button> to view a nicely formatted overview of the evaluation results.
 
-Check the overall results. These scores range from 0-1, where 1 represents "perfect" performance. A score of 0.8+ is generally considered "good". How well did your agent perform in each category?
+Check the overall results. These scores range from 0-1, where 1 represents "perfect" performance. As a rule of thumb, "good" starts around 0.75 for generation metrics (faithfulness, answer relevancy) and 0.70 for retrieval metrics (context precision, recall) — see the exact score bands in [Evaluation Metrics](evaluation_metrics.md). How well did your agent perform in each category?
 
 Next, check the statistical distribution to understand:
 - How consistent is the agent's performance?

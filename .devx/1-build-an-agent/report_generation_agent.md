@@ -92,7 +92,7 @@ Here's a typical run - watch it search, refine, then write:
   <span class="dx-term-line" data-kind="think" data-delay="300">Good baseline. Now refine for hard statistics and growth rates.</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[action] search_tavily(queries=[renewable capacity statistics 2025, solar wind growth rate 2025])</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[observation] 3 sources gathered - that is >= 3 authoritative, enough to write</span>
-  <span class="dx-term-line" data-kind="tokens">context: 6,240 / 128,000 tokens</span>
+  <span class="dx-term-line" data-kind="tokens">context: 6,240 / 1,000,000 tokens</span>
   <span class="dx-term-line" data-kind="answer" data-delay="400"># Renewable Energy Adoption 2025 - Executive summary: global capacity grew ~15% year-over-year [1]; solar led new additions [2]... (full report with a Sources section)</span>
 </div>
 
@@ -127,6 +127,6 @@ Try printing `state["messages"]` to see the complete trace of your agent's work.
 
 In this exercise, you were introduced to production-ready agent code with LangChain and wrote the client code that invokes that agent. This code is simpler than our first agent, but it's doing the same steps under the hood!
 
-> **Note on Terminology**: This workshop uses both "LangChain" and "LangGraph" - they're related. LangGraph is built on top of LangChain and provides tools specifically for building stateful, multi-step applications like agents. When we use `create_agent`, we're using LangChain utilities that leverage LangGraph under the hood.
+> **Note on Terminology**: This workshop uses both "LangChain" and "LangGraph" - they're related. LangGraph is a low-level orchestration framework from the LangChain team - usable on its own - for building stateful, multi-step applications like agents. When we use `create_agent`, we're using a LangChain utility that's built on LangGraph under the hood.
 
 Continue to [Next Steps](next_steps.md) to review what you've learned and see what's coming in the next modules!

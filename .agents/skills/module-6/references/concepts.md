@@ -42,11 +42,14 @@ CLI = sandbox/policy/inference management. **NemoClaw enhances OpenClaw; it does
 it** — vanilla OpenClaw enforces 0 layers (soft SOUL.md rules); NemoClaw adds 4.
 
 ## OWASP Top-10 Agentic risks (`why_nemoclaw.md`)
-Three clusters: **Goal/Identity** (ASI01 goal hijack, ASI04 identity abuse, ASI10 human-
-trust exploitation), **Capability/Tool** (ASI02 tool misuse, ASI03 privilege abuse, ASI05
-supply chain, ASI06 unexpected code execution), **State/Comms** (ASI07 memory poisoning,
-ASI08 insecure inter-agent comms, ASI09 cascading failures). No single layer covers all;
-hence defense in depth. (ASI08/ASI10 need controls beyond NemoClaw.)
+Three clusters (the module's own grouping of the official OWASP list): **Goal/Identity**
+(ASI01 goal hijack, ASI03 identity & privilege abuse, ASI09 human-agent trust exploitation,
+ASI10 rogue agents), **Capability/Tool** (ASI02 tool misuse, ASI04 agentic supply chain,
+ASI05 unexpected code execution), **State/Comms** (ASI06 context & memory poisoning, ASI07
+insecure inter-agent comms, ASI08 cascading failures). No single layer covers all; hence
+defense in depth. (ASI07/ASI09/ASI10 need controls beyond NemoClaw's four layers.) NOTE: the
+official OWASP list merges Identity+Privilege into one entry (ASI03) and ends with ASI10
+Rogue Agents — don't cite the old shifted numbering.
 
 ## OpenShell: out-of-process enforcement
 Containers give namespace isolation but not *fine-grained policy*. OpenShell's key idea:

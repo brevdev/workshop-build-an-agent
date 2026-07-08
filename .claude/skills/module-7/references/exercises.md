@@ -64,14 +64,16 @@ Always start by asking what they've tried / reading the error or token output wi
 ### 2a · `harness_overhead` — what every call costs
 - **Goal:** the tax = system prompt **plus** the registered tool schemas, in tokens.
 - **L1:** "Two parts, both billed every turn: the prompt text and the JSON of the tool
-  schemas. You have `count_tokens(...)`. How do you turn a callable tool into its schema —
-  and what about items that are *already* schema dicts (the maximal set is loaded from JSON)?"
+  schemas. You have `count_tokens(...)`. `convert_to_openai_tool(t)` turns a tool into its
+  schema — and it also passes an *already*-converted dict schema straight through, so you
+  can call it on every item uniformly (the maximal set is loaded from JSON as dicts)."
 - **L2:** "Return `count_tokens(system_prompt) + count_tokens(json.dumps([...]))` where the
-  list converts callables with `convert_to_openai_tool(t)` and lets dicts pass through."
+  list is `[convert_to_openai_tool(t) for t in tools]` — call it on every item; no type check."
 - **Common mistakes:** counting only the prompt (forgetting the schemas — that's the whole
-  point); calling `convert_to_openai_tool` on the maximal dicts (they're already dicts);
-  forgetting `json.dumps`.
-- **Target:** `count_tokens(system_prompt) + count_tokens(json.dumps([convert_to_openai_tool(t) if callable(t) else t for t in tools]))`
+  point); **`callable()`-gating the conversion** — LangChain tool objects are NOT callable,
+  so `... if callable(t) else t` skips converting them and `json.dumps` then fails with
+  "Object of type StructuredTool is not JSON serializable"; forgetting `json.dumps`.
+- **Target:** `count_tokens(system_prompt) + count_tokens(json.dumps([convert_to_openai_tool(t) for t in tools]))`
 
 ### 2b(i) · `load_skills_lazily` — build the one-line index
 - **Goal:** each skill costs *one line* of context; full bodies stay out until needed.

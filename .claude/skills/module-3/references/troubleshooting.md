@@ -23,8 +23,18 @@ judge `nemotron-3-super-120b-a12b`, the embeddings, and both agents) and **`TAVI
 ## RAGAS
 - The RAG notebook guards the import: if `ragas`/`datasets` aren't importable it sets
   `RAGAS_AVAILABLE = False` and **continues with LLM-as-judge metrics only** — so a
-  missing RAGAS isn't fatal, just narrower. To get RAGAS metrics, ensure `ragas~=0.2.0`
-  and `datasets` are installed (they're in `requirements.txt`); restart the kernel.
+  missing RAGAS isn't fatal, just narrower. `ragas` and `datasets` ship in
+  `requirements.txt`, so RAGAS is installed.
+- **Compat shim (important):** every current `ragas` (through 0.4.x) hard-imports
+  `langchain_community.chat_models.vertexai`, a path that was **removed** when
+  langchain-community split into standalone packages (0.4+, which the workshop's
+  langchain 1.x stack requires). Without a fix, `import ragas` raises
+  `ModuleNotFoundError: No module named 'langchain_community.chat_models.vertexai'`
+  even though ragas is installed. The RAGAS cell registers a lightweight `sys.modules`
+  stub for that unused path **before** importing ragas — that's the shim at the top of
+  the cell; it must run before `from ragas import evaluate`. The workshop never uses
+  VertexAI, so the stub is safe. If a learner sees the vertexai ModuleNotFoundError,
+  they deleted/skipped the shim — restore it, don't "pip install ragas".
 - RAGAS needs each row to have **question, answer, contexts, and ground_truth** — if
   context_recall/precision error, a field is missing/empty (often empty
   `retrieved_contexts` because the agent didn't actually retrieve).

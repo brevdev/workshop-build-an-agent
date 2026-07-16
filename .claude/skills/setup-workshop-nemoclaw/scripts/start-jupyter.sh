@@ -69,14 +69,24 @@ nohup "$VENV/bin/jupyter" lab \
   > /tmp/jupyterlab.log 2>&1 &
 SERVER_PID=$!
 
-# Wait for readiness and capture the token URL.
-URL=""
-for i in $(seq 1 30); do
+# READINESS: probe HTTP with the token we already hold instead of scraping
+# `jupyter lab list` — the server answers requests before its server-info file
+# lands, and a cold first launch can exceed 30s (which used to FATAL here,
+# skip the URL write, and leave a healthy server unreported). 200 = token
+# accepted; bail out early if the server process dies.
+URL="http://127.0.0.1:$PORT/lab?token=$TOKEN"
+ready=""
+for i in $(seq 1 120); do
   sleep 1
-  URL="$("$VENV/bin/jupyter" lab list 2>/dev/null | grep -oE "http://127.0.0.1:$PORT/lab\?token=[a-f0-9]+" | head -1 || true)"
-  [ -n "$URL" ] && break
+  code="$(curl -s -m 2 -o /dev/null -w '%{http_code}' "$URL" || true)"
+  if [ "$code" = "200" ]; then ready=1; break; fi
+  kill -0 "$SERVER_PID" 2>/dev/null || break
 done
-[ -z "${URL:-}" ] && { echo "FATAL: server did not come up; see /tmp/jupyterlab.log"; tail -20 /tmp/jupyterlab.log; exit 1; }
+if [ -z "$ready" ]; then
+  echo "FATAL: no HTTP 200 from 127.0.0.1:$PORT after ${i}s (last code ${code:-none}); see /tmp/jupyterlab.log"
+  tail -20 /tmp/jupyterlab.log
+  exit 1
+fi
 
 # VERIFY the serving process actually carries the shim (a stale survivor
 # would not). This exact gap cost hours once.

@@ -44,8 +44,11 @@ fi
 # Compose the file content and pipe it straight into the container.
 {
   printf 'NVIDIA_API_KEY=%s\n' "$KEY"
-  [ -n "$TAVILY" ]    && printf 'TAVILY_API_KEY=%s\n' "$TAVILY"
-  [ -n "$LANGSMITH" ] && printf 'LANGSMITH_API_KEY=%s\n' "$LANGSMITH"
+  # if/fi, not `[ … ] && printf`: with the optional keys absent, a false guard
+  # as the group's last command fails the whole pipeline under pipefail and
+  # set -e kills the script right after the write — no verify, no message.
+  if [ -n "$TAVILY" ];    then printf 'TAVILY_API_KEY=%s\n' "$TAVILY"; fi
+  if [ -n "$LANGSMITH" ]; then printf 'LANGSMITH_API_KEY=%s\n' "$LANGSMITH"; fi
 } | docker exec -i "$C" sh -c "umask 077; cat > $DEST && chown sandbox:sandbox $DEST"
 
 # Verify without reading contents back.

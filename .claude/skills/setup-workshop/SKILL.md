@@ -1,6 +1,6 @@
 ---
 name: setup-workshop
-description: This skill should be used when the user wants to set up, install, deploy, bootstrap, or "spin up" the Build-an-Agent workshop (a.k.a. the DevX / DevX-Lab workshop) on local hardware, or says things like "run the workshop locally", "get DevX-Lab running in my browser", "install the workshop on my GPU box", "set up the build-an-agent workshop", or "reproduce the Brev workshop deployment locally". It installs NVIDIA AI Workbench (if needed), clones and builds the project, supplies API keys, configures the GPU/host mounts, starts the DevX-Lab JupyterLab app, and hands back a browser URL. For a local Linux NVIDIA GPU machine — not for provisioning Brev cloud instances.
+description: This skill should be used when the user wants to set up, install, deploy, bootstrap, or "spin up" the Build-an-Agent workshop (a.k.a. the DevX / DevX-Lab workshop) on local hardware, or says things like "run the workshop locally", "get DevX-Lab running in my browser", "install the workshop on my GPU box", "set up the build-an-agent workshop", or "reproduce the Brev workshop deployment locally". It installs NVIDIA AI Workbench (if needed), clones and builds the project, supplies API keys, configures the GPU/host mounts, starts the DevX-Lab JupyterLab app, and hands back a browser URL. For a local Linux NVIDIA GPU machine — not for provisioning Brev cloud instances, and NOT for locked-down OpenShell/NemoClaw sandboxes (no sudo/Docker/GPU there — use setup-workshop-nemoclaw inside the sandbox, or setup-workshop-nemoclaw-operator on its host).
 disable-model-invocation: false
 user-invocable: true
 ---
@@ -28,6 +28,12 @@ on requests to set up / install / deploy / spin up / run the workshop or
 DevX-Lab locally. Do **not** use this to provision a Brev cloud instance — that
 is the `brev-cli` / `nvwb` Brev path; this skill is the local analog of the Brev
 startup script.
+
+**Running in an OpenShell/NemoClaw sandbox?** This installer needs sudo,
+Docker, and the Workbench download host — all unavailable there; it fails by
+design, not by bug. Use the sandbox-native pair instead:
+`setup-workshop-nemoclaw` (agent inside the sandbox) +
+`setup-workshop-nemoclaw-operator` (host side: policy, secrets, port-forward).
 
 ## Required input
 

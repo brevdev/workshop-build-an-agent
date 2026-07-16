@@ -1,0 +1,140 @@
+# ref: https://jupyter-app-launcher.readthedocs.io/en/stable/usage.html
+
+- title: "1. Introduction to Agents"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/sandbox/workshop-build-an-agent/.devx/1-build-an-agent"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "2. Agentic RAG"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/sandbox/workshop-build-an-agent/.devx/2-agentic-rag"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "3. Agent Evaluation"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/sandbox/workshop-build-an-agent/.devx/3-agent-evaluation"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "4. Agent Customization"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/sandbox/workshop-build-an-agent/.devx/4-agent-customization"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "5. Deep Agents"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/sandbox/workshop-build-an-agent/.devx/5-deep-agents"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "6. Agent Safety"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/sandbox/workshop-build-an-agent/.devx/6-agent-safety"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "7. Agent Harnesses"
+  description: ""
+  source: http://localhost:$PORT/
+  cwd: "/sandbox/workshop-build-an-agent/.devx/7-agent-harnesses"
+  type: local-server
+  args:
+    - "python3"
+    - "-m"
+    - "http.server"
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/nvidia-icon.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "Secrets Manager"
+  type: jupyterlab-commands
+  source:
+    - label: "Open Secrets Manager"
+      id: docmanager:open
+      args:
+        path: code/secrets_management/secrets_management_master.ipynb
+        factory: Voila Preview
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/key.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "Simple Agents Client"
+  source: http://localhost:$PORT/
+  cwd: /sandbox/workshop-build-an-agent/code/2-agentic-rag
+  type: local-server
+  args:
+    - streamlit
+    - run
+    - simple_client.py
+    - --server.port
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/chatbot.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "Deep Agents Client"
+  source: http://localhost:$PORT/
+  cwd: /sandbox/workshop-build-an-agent/demo
+  type: local-server
+  args:
+    - bash
+    - -c
+    - bash /sandbox/workshop-build-an-agent/demo/start_client.sh $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/chatbot.svg
+  catalog: NVIDIA DevX Learning Path
+
+- title: "NemoClaw Client"
+  source: http://localhost:$PORT/
+  cwd: /sandbox/workshop-build-an-agent/code/6-agent-safety
+  type: local-server
+  args:
+    - streamlit
+    - run
+    - nemoclaw_client.py
+    - --server.port
+    - $PORT
+  icon: /sandbox/workshop-build-an-agent/.devx/_static/img/chatbot.svg
+  catalog: NVIDIA DevX Learning Path

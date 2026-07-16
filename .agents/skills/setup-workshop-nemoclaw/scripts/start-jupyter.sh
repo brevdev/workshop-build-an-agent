@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# start-jupyter.sh — launch the ONE JupyterLab server for the workshop.
+# RUN FROM INSIDE THE SANDBOX. Enforces single-server discipline: stale servers
+# keep the port bound (Jupyter traps SIGTERM), the relaunched shim-carrying
+# server never takes over, and tiles vanish / kernels break "mysteriously".
+set -euo pipefail
+
+REPO="${REPO:-/sandbox/workshop-build-an-agent}"
+PORT="${PORT:-8888}"
+VENV="$REPO/.venv"
+SHIM_SO="${SHIM_SO:-/sandbox/netlink-stub/netlink-stub.so}"
+LAUNCHER_DIR="$REPO/.launcher-config"
+RUNTIME_DIR="${JUPYTER_RUNTIME_DIR:-/tmp/jrt}"
+URL_OUT="${URL_OUT:-/sandbox/workshop-url.txt}"
+
+export SSL_CERT_FILE="${SSL_CERT_FILE:-/etc/openshell-tls/ca-bundle.pem}"
+export PIP_CERT="$SSL_CERT_FILE"
+
+[ -x "$VENV/bin/jupyter" ] || { echo "FATAL: venv missing — run setup.sh first"; exit 1; }
+[ -f "$SHIM_SO" ] || { echo "FATAL: netlink shim missing at $SHIM_SO — run setup.sh first"; exit 1; }
+
+# SINGLE-SERVER DISCIPLINE: kill everything jupyter-ish. SIGTERM is trapped by
+# Jupyter, so use KILL. Also reap orphaned voila/ipykernel/streamlit children
+# from previous servers.
+for pat in "jupyter-lab" "voila" "ipykernel_launcher" "streamlit run"; do
+  for pid in $(pgrep -f "$pat" || true); do
+    kill -9 "$pid" 2>/dev/null || true
+  done
+done
+sleep 1
+if curl -s -m 2 -o /dev/null "http://127.0.0.1:$PORT/"; then
+  echo "FATAL: port $PORT still answering after kill — investigate (ss/pgrep) before relaunch"
+  exit 1
+fi
+
+mkdir -p "$RUNTIME_DIR"
+
+# TOKEN REUSE: keep the previous token if we saved one, so the user's URL (and
+# an operator forward already in place) survive restarts. Fresh random token
+# otherwise — never a fixed string.
+TOKEN=""
+if [ -f "$URL_OUT" ]; then
+  TOKEN="$(grep -oE 'token=[a-f0-9]+' "$URL_OUT" | head -1 | cut -d= -f2 || true)"
+fi
+if [ -z "$TOKEN" ]; then
+  TOKEN="$(openssl rand -hex 24 2>/dev/null || "$VENV/bin/python" -c 'import secrets; print(secrets.token_hex(24))')"
+fi
+
+# Launch env — every one of these is load-bearing (see SKILL.md step 7):
+#  - LD_PRELOAD: netlink shim, scoped to THIS process tree only (server +
+#    kernels + spawned voila/streamlit). The SERVER needs it too, not just
+#    kernels — its ZMQ client sockets also call getifaddrs.
+#  - PATH: venv first so the launcher's Popen(["voila"...]) / streamlit resolve.
+#  - JUPYTER_APP_LAUNCHER_PATH: the rewritten 11-tile config.
+#  - JUPYTER_RUNTIME_DIR: short, writable connection-file dir.
+export LD_PRELOAD="$SHIM_SO"
+export JUPYTER_APP_LAUNCHER_PATH="$LAUNCHER_DIR"
+export JUPYTER_RUNTIME_DIR="$RUNTIME_DIR"
+export PATH="$VENV/bin:$PATH"
+
+# Launch from /sandbox (NOT repo root) as an extra guard against cwd-based
+# duplicate launcher-config discovery. root_dir is set explicitly to the repo.
+cd /sandbox
+nohup "$VENV/bin/jupyter" lab \
+  --ip 127.0.0.1 --port "$PORT" --no-browser \
+  --ServerApp.root_dir="$REPO" \
+  --ServerApp.token="$TOKEN" \
+  --ServerApp.allow_remote_access=False \
+  > /tmp/jupyterlab.log 2>&1 &
+SERVER_PID=$!
+
+# Wait for readiness and capture the token URL.
+URL=""
+for i in $(seq 1 30); do
+  sleep 1
+  URL="$("$VENV/bin/jupyter" lab list 2>/dev/null | grep -oE "http://127.0.0.1:$PORT/lab\?token=[a-f0-9]+" | head -1 || true)"
+  [ -n "$URL" ] && break
+done
+[ -z "${URL:-}" ] && { echo "FATAL: server did not come up; see /tmp/jupyterlab.log"; tail -20 /tmp/jupyterlab.log; exit 1; }
+
+# VERIFY the serving process actually carries the shim (a stale survivor
+# would not). This exact gap cost hours once.
+if ! tr '\0' '\n' < "/proc/$SERVER_PID/environ" 2>/dev/null | grep -q "LD_PRELOAD=$SHIM_SO"; then
+  echo "FATAL: running server (pid $SERVER_PID) lacks LD_PRELOAD — a stale server may have kept the port. Re-run this script."
+  exit 1
+fi
+
+echo "$URL" | tee "$URL_OUT"
+echo "JupyterLab is up on 127.0.0.1:$PORT (pid $SERVER_PID, shim verified). Token URL saved to $URL_OUT"
+echo "Next: operator runs the forward; user opens the URL — see SKILL.md 'Report back to the user'."

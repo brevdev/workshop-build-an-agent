@@ -98,4 +98,29 @@ fi
 say "6. neutralize %pip cells"
 "$VENV/bin/python" "$SKILL_DIR/scripts/neutralize_pip_cells.py" "$REPO"
 
+# ---- 7. propagate workshop skills into the agent's skill library ------------
+say "7. propagate workshop skills into the agent skill library"
+# The NemoClaw/hermes harness only scans its own skill library — repo-local
+# .claude/skills are invisible to it, so a resident agent session denies all
+# knowledge of the workshop unless these are copied in. Real copies (matching
+# how the sandbox image bakes agents/hermes/skills/); re-running refreshes
+# them. Excluded on purpose: setup-workshop-nemoclaw-operator (host-side:
+# needs docker + the openshell CLI) and setup-workshop (bare-metal GPU
+# installer) — both would only mislead an in-sandbox agent.
+AGENT_SKILLS="${AGENT_SKILLS:-/sandbox/.hermes-data/skills}"
+if [ -d "$AGENT_SKILLS" ] && [ -w "$AGENT_SKILLS" ]; then
+  installed=""
+  for d in "$REPO/.claude/skills"/*/; do
+    name="$(basename "$d")"
+    case "$name" in setup-workshop-nemoclaw-operator|setup-workshop) continue ;; esac
+    [ -f "${d}SKILL.md" ] || continue
+    rm -rf "${AGENT_SKILLS:?}/${name:?}"
+    cp -a "$d" "$AGENT_SKILLS/$name"
+    installed="$installed $name"
+  done
+  echo "agent skills refreshed:${installed:- (none found)}"
+else
+  echo "WARN: $AGENT_SKILLS missing or unwritable — skipping skill propagation (not a NemoClaw agent sandbox?)"
+fi
+
 say "SETUP COMPLETE — now run: bash $SKILL_DIR/scripts/start-jupyter.sh"

@@ -162,6 +162,19 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
    `LD_PRELOAD`**. It reuses the previous token when one exists so the user's
    saved URL stays valid across restarts.
 
+8. **Workshop skills → agent skill library** (`setup.sh`, final step). The
+   NemoClaw harness only scans its own library
+   (`/sandbox/.hermes-data/skills/`) — repo-local `.claude/skills` are
+   invisible to it, so without this step a resident agent asked about the
+   workshop denies knowing any workshop skills even after a successful setup.
+   `setup.sh` copies every workshop skill (modules 1–7, `workshop`, `nvwb`,
+   `nvwb-project`, and this skill itself) into the library. They appear in
+   `hermes skills list` as `local`/`enabled` immediately, and new agent
+   sessions pick them up automatically; a session already in flight may need
+   a fresh session to see them. Excluded on purpose:
+   `setup-workshop-nemoclaw-operator` (host-side) and `setup-workshop`
+   (bare-metal GPU installer).
+
 ## Report back to the user (the skill's real output)
 
 The Jupyter token is masked by the gateway's secret redaction, so the URL is
@@ -190,6 +203,8 @@ only inbound path. Details live in the operator skill.
   (auth redirect = alive); with the token appended → `200`.
 - Tile check without a browser: `curl -X POST http://127.0.0.1:8888/jupyterlab-app-launcher?token=… -d '{"method":"init_launcher"}'`
   → 11 tiles. (GET on that route → 405; `/jupyter_app_launcher/get_config` → 404 — both expected.)
+- Skill propagation: `hermes skills list` shows `module-1`…`module-7`,
+  `workshop`, and `setup-workshop-nemoclaw` as `local`/`enabled`.
 - In the browser: 11 tiles, no duplicates; module lesson pages load; the
   Secrets Manager tile and in-lesson secrets buttons open Voila Previews (not
   a "Running…" hang); kernels start; a module-2 rerank call returns 200.

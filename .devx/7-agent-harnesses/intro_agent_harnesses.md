@@ -47,7 +47,7 @@ This separation matters because the two layers are **independent choices**:
 - **Same model, different harness** → a very different agent. Nemotron in a bare completion loop vs. Nemotron inside OpenClaw are night and day.
 - **Same harness, different model** → the capability ceiling moves, but the behavior and UX stay consistent.
 
-And it's why the performance race in agents is increasingly a **harness race**. Models are converging; harnesses are differentiating.
+And it's why understanding the harness matters more than ever. Models are converging. Harnesses are differentiating. To shape the behavior, reliability, and UX of the agent you're driving, you have to engineer its harness.
 
 <!-- fold:break -->
 
@@ -67,9 +67,7 @@ Every harness — from a 50-line loop to Claude Code — owns the same five resp
 
 <!-- fold:break -->
 
-## Token Efficiency: The One That Sorts the Landscape
-
-Four of these responsibilities are table stakes. The fifth — **token efficiency** — is where harness designers genuinely disagree, and it's the cleanest axis for understanding the whole ecosystem.
+## The Context Tax
 
 Every piece of harness machinery has a price, paid in context tokens on **every single model call**:
 
@@ -77,11 +75,11 @@ Every piece of harness machinery has a price, paid in context tokens on **every 
 - Tool schemas for every registered tool
 - Skill descriptions, memory excerpts, environment state
 
-We call this recurring overhead the **context tax**. A maximal harness might spend 7,000–10,000 tokens per turn before the user says a word. A minimal harness can get under 1,000. Neither is wrong — they're different bets:
+We call this recurring overhead the **context tax**. A maximal harness might spend 7,000–10,000 tokens per turn before the user says a word. A minimal harness can get under 1,000. Neither is wrong — they're different approaches:
 
-> **The maximal bet:** rich built-in capability (sub-agents, plan modes, large tool suites) is worth the overhead, because the model uses it to do more per turn.
+> **The maximal approach:** rich built-in capability (sub-agents, plan modes, large tool suites) is worth the overhead, because the model uses it to do more per turn.
 >
-> **The minimal bet:** most of that machinery is documentation the model could load *on demand*. Strip the core, lazy-load the rest, and bet on the model itself.
+> **The minimal approach:** most of that machinery is documentation the model could load *on demand*. Strip the core, lazy-load the rest, and lean on the model itself.
 
 <div class="dx-island">
   <p class="dx-island-title">WHO EATS A 32K-TOKEN TURN?</p>
@@ -98,7 +96,7 @@ In the lab, you'll measure this tax yourself — token by token — and implemen
 
 ## You've Been Using a Harness All Along
 
-One more reframe before the tour. In Module 6 you watched OpenClaw run an always-on assistant from nothing but markdown files. Map it to the five responsibilities:
+Let's map the OpenClaw always-on assistant that ran on markdown files in Module 6 to the five harness responsibilities:
 
 - `MEMORY.md`, `USER.md`, `state/` → **memory**
 - The agent rewriting its own workspace files on every heartbeat → **self-evolution**

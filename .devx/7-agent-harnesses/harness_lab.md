@@ -328,6 +328,6 @@ python harness_lab.py --exercise 5                                # run 2 — st
 
 The second run starts with the skill the agent wrote for itself the first time — fewer steps, fewer tokens, same result. That's **memory**, **skills**, **self-evolution**, and **token efficiency** — four of the five harness responsibilities — collapsing into a single loop.
 
-> This is exactly the bet Hermes makes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
+> This is exactly the approach Hermes takes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
 
 > All five exercises done? Head to [Wrapping Up](evaluating_harnesses) to connect the lab back to the production ecosystem.

@@ -1,8 +1,8 @@
 <div class="dx-hero" data-eyebrow="MODULE 07 / 03 - SKILLS" data-title="Capability that travels." data-sub="One SKILL.md, written once, runs in every harness on the market." data-meta="SPEC::agentskills.io|CATALOG::github.com/NVIDIA/skills"></div>
 
-If harnesses are where agents are won or lost, **skills** are how capability moves between them.
+If harnesses are where agents succeed or fail, **skills** are how capability moves between them.
 
-A skill is a packaged set of instructions — procedural knowledge an agent loads *on demand* when a task calls for it. You've brushed against them twice already: the Superpowers skills in Module 4, and the skill toggles in Module 5's deep agent. Now let's take one apart.
+A skill is a packaged set of procedural knowledge an agent loads *on demand* whenever a task calls for it. You've brushed against them twice already: the Superpowers skills in Module 4, and the skill toggles in Module 5's deep agent. Now, let's take one apart.
 
 <!-- fold:break -->
 
@@ -43,7 +43,7 @@ Per-turn cost, 30 installed skills:
                    (+1 full skill body only when actually used)
 ```
 
-This is pi's signature design generalized — and it's now how every serious harness handles skills. In the lab, you'll implement lazy loading yourself and measure the savings.
+Lazy loading is how most modern harnesses keep skills cheap — a one-line description until the skill is actually invoked. In the lab, you'll implement it yourself and measure the savings.
 
 <!-- fold:break -->
 
@@ -75,13 +75,13 @@ npx skills add nvidia/skills --skill accelerated-computing-cudf \
   --agent kiro-cli
 ```
 
-Hermes goes one better — `NVIDIA/skills` is a built-in tap, so its own CLI installs the verified skill directly: `hermes skills install nvidia/skills/accelerated-computing-cudf`. You'll do exactly this in the lab.
+Hermes goes one step further. `NVIDIA/skills` is built-in. The `hermes` CLI installs the verified skill directly: `hermes skills install nvidia/skills/accelerated-computing-cudf`. You'll do exactly this in the lab.
 
 <!-- fold:break -->
 
 ## Verified, Not Just Published
 
-Remember Module 6's lesson: an autonomous agent will eventually encounter adversarial content. A skill is *instructions you inject into your agent* — which makes an unvetted skill a prompt-injection delivery vehicle. NVIDIA's answer is capability governance: every skill passes a verification pipeline (review → security scan → evaluation → skill card → cryptographic signing → catalog → sync) before publication.
+Remember Module 6's lesson: an autonomous agent will eventually encounter adversarial content. Skills are *instructions you inject directly into your agent*. An unvetted skill, therefore, is a prompt-injection delivery vehicle. NVIDIA's answer is capability governance: every skill passes a verification pipeline (review → security scan → evaluation → skill card → cryptographic signing → catalog → sync) before publication.
 
 Here's what a verified skill looks like in the catalog:
 
@@ -96,7 +96,7 @@ Here's what a verified skill looks like in the catalog:
   </ul>
 </div>
 
-The principle, straight from the program: *trust should come from verifiable integrity and authenticity, not from implied provenance alone.* In the lab, you'll verify that signature yourself before letting the skill anywhere near your agent.
+The principle: *trust should come from verifiable integrity and authenticity, not from implied provenance alone.* In the lab, you'll verify that signature yourself before letting the skill anywhere near your agent.
 
 <div class="dx-island dx-quiz">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>

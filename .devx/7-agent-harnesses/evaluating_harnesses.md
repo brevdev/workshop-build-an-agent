@@ -26,7 +26,7 @@ When someone asks you "which harness should we use?", you now have a real answer
 - **Always-on assistant with community momentum?** → OpenClaw; curated defaults → Hermes.
 - **Task-shaped workflow, or an agent embedded in your product?** → LangChain Deep Agents.
 - **An open, any-model coding agent in your terminal?** → OpenCode.
-- **Every token is precious, or you bet on the model?** → pi.
+- **Every token is precious, or you lean on the model?** → pi.
 - **Maximum out-of-box capability, cost secondary?** → Claude Code; on OpenAI models with cloud-delegated runs → Codex.
 
 And in every single case: **install the NVIDIA skills for the libraries you use.** The harness may change; the skills come with you, and your GPU works either way.

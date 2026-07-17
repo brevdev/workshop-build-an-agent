@@ -11,7 +11,7 @@ Let's start with that picture, then meet each one.
 Approximate **permanent per-turn overhead** (system prompt + always-loaded tool schemas) for each design philosophy:
 
 <div class="dx-island dx-bet" data-answer="3,922 tokens" data-explain="measured with tiktoken in Exercise 2; the minimal harness pays just 400.">
-  <p class="dx-island-title">PLACE YOUR BET</p>
+  <p class="dx-island-title">TAKE A GUESS</p>
   <p class="dx-quiz-q">Before you scroll: how many tokens does the bundled maximal config inject per turn?</p>
   <div class="dx-bet-opts">
     <button class="dx-bet-opt">~500</button>
@@ -35,7 +35,7 @@ Approximate **permanent per-turn overhead** (system prompt + always-loaded tool 
 
 > Figures are order-of-magnitude estimates that shift with every release and configuration — that's exactly why you'll **measure your own** in the lab. The shape of the chart is the lesson: a 10× spread in what different designers consider "necessary."
 
-Remember: this is a *bet*, not a scoreboard. Maximal harnesses spend those tokens on built-in capability. Minimal harnesses bet the model can load capability on demand.
+Maximal harnesses spend tokens to bake in capability from the get-go. Minimal harnesses assume the model can load capability when needed.
 
 <!-- fold:break -->
 
@@ -107,7 +107,7 @@ Its signature move is **self-extension**: ask for a capability, and the agent wr
 
 **Choose it when:** long sessions where context is precious, local/privacy-sensitive deployments, or you simply believe capability belongs in the model.
 
-**Watch for:** fewer batteries included — no built-in sub-agents or plan mode; the bet is you'll add them only if you need them.
+**Watch for:** fewer batteries included — no built-in sub-agents or plan mode; the idea is you'll add them only if you need them.
 
 #### **🤖 Claude Code**
 
@@ -137,9 +137,9 @@ OpenAI's subscription harness for software engineering. Its signature move is **
 
 <!-- fold:break -->
 
-## Which Harness Fits? — A 3-Question Chooser
+## Which Harness Fits?
 
-Work through the questions. Your path ends at a recommendation card.
+Work through the three questions below. Your path ends at a recommendation.
 
 <div class="dx-choose">
 
@@ -212,7 +212,7 @@ Work through the questions. Your path ends at a recommendation card.
 
 ## The NVIDIA Perspective: Driving the Technology Together
 
-Notice something about that chooser: **NVIDIA wins in every branch** — and so do you. That's not an accident; it's the strategy.
+Whichever harness you land on, the NVIDIA pieces come with you:
 
 - **NemoClaw** powers the open harnesses (OpenClaw, Hermes)
 - **Nemotron** runs inside any open harness you pick

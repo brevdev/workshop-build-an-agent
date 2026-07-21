@@ -41,7 +41,10 @@ code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" https://pypi.org/simple/
   || failf "pypi.org from inside: HTTP ${code:-000} — apply the pypi_install policy block (references/policy-blocks.md)"
 code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" https://files.pythonhosted.org/')
 [ "$code" = "200" ] || failf "files.pythonhosted.org from inside: HTTP ${code:-000}"
-code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" https://integrate.api.nvidia.com/v1/models')
+# curl is NOT in the nvidia block's binaries — an exec'd curl probe returns
+# 000 even when the route is open (false negative). Probe with python
+# (allowed in the block) + the proxy CA.
+code=$(sx 'python3 -c "import urllib.request,ssl;print(urllib.request.urlopen(\"https://integrate.api.nvidia.com/v1/models\",context=ssl.create_default_context(cafile=\"/etc/openshell-tls/ca-bundle.pem\"),timeout=15).status)"')
 [ "$code" = "200" ] && pass "integrate.api.nvidia.com from inside: 200" \
   || failf "integrate.api.nvidia.com from inside: HTTP ${code:-000} — NIM routes missing"
 if [ "$(sx 'python3 -c "import os; os.openpty()" >/dev/null 2>&1 && echo ok')" = "ok" ]; then

@@ -172,6 +172,9 @@ Goes under `filesystem_policy` in the same document (NOT `network_policies`):
 
 ```yaml
 filesystem_policy:
+  read_only:
+  # ... existing entries ...
+  - /sys/fs/cgroup   # duckdb (via data-designer, modules 3/4) probes memory.max/cpu.max at connect
   read_write:
   # ... existing entries ...
   - /dev/pts   # PTY master+slaves; /dev/ptmx is a symlink to pts/ptmx

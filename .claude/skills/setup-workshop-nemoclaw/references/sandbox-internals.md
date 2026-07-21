@@ -320,8 +320,18 @@ needed. Verified end-to-end 2026-07-21.
 
 - pip is absent inside the uv venv — use `uv pip …` or `importlib.metadata`
   for package queries, not `pip show`.
-- duckdb's wheel segfaults on import (`Attempted to dereference unique_ptr
-  that is NULL!`) — harmless; nothing under `code/` imports it.
+- duckdb 1.5.4 (and 1.1.3) abort on import in this sandbox
+  (`duckdb::InternalException` → SIGABRT) — and `data_designer.essentials`
+  imports duckdb, so the crash kills every module-3/4 synthetic-data kernel
+  (`nbclient DeadKernelError`). Pin `duckdb==1.3.2` (verified importable);
+  do not bump it without re-testing `import duckdb` in-sandbox.
+- Even with 1.3.2, `duckdb.connect()` probes `/sys/fs/cgroup/{memory,cpu}.max`
+  and raises `IOException: Permission denied` unless the filesystem policy
+  grants `/sys/fs/cgroup` read-only (no config bypass exists — setting
+  `memory_limit` still probes `cpu.max`; verified on 1.2.2/1.3.2). The
+  community example's `policy.yaml` template carries the grant; like all
+  `filesystem_policy` entries it activates at sandbox RECREATE, not live
+  apply. Until then modules 3/4 SDG cells raise that IOException.
 - joblib warns and falls back to serial mode (sandbox blocks semaphores) —
   benign.
 - Background waits are clamped (e.g. 180 s) and sessions have tool-iteration

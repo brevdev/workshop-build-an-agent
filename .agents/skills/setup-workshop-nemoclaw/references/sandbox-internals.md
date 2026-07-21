@@ -74,6 +74,41 @@ seccomp JSON, not the policy schema):
   remove it (setup.sh does). `JUPYTER_RUNTIME_DIR=/tmp/jrt` is kept — short
   socket/connection-file paths, harmless.
 
+## PTY / the Terminal tile — Landlock, not seccomp
+
+Clicking Terminal in the launcher pops "Launcher Error: Unhandled error";
+`POST /api/terminals` returns 500 and the server log traceback ends with
+
+    File ".../pty.py", line 67, in _open_terminal
+        raise OSError('out of pty devices')
+
+That message is a red herring. CPython's `pty.openpty()` first calls
+`os.openpty()` and **swallows its exception**, then falls back to the legacy
+BSD `/dev/ptyXY` names — which don't exist on modern Linux — and raises
+"out of pty devices". Probe the real failure directly:
+
+    python3 -c "import os; os.openpty()"                     # PermissionError: [Errno 13]
+    python3 -c "import os; os.open('/dev/ptmx', os.O_RDWR)"  # PermissionError: '/dev/ptmx'
+
+EACCES (not EPERM) plus `ls /dev/pts` → "Permission denied" = **Landlock
+filesystem denial**. Unlike the netlink block this is NOT compiled-in
+seccomp — there IS an operator knob: the sandbox policy's
+`filesystem_policy.read_write` simply lacks `/dev/pts`. (`/dev/ptmx` is a
+symlink to `pts/ptmx`, so the one grant covers master and slaves.)
+
+Fix (operator side): add `- /dev/pts` to `filesystem_policy.read_write`,
+re-apply the policy, then re-run `start-jupyter.sh`. The restart is
+mandatory: Landlock rulesets attach at process start and cannot be widened
+for a running process — fresh `openshell sandbox exec` probes see the new
+policy immediately while the old Jupyter keeps the old ruleset.
+
+Until granted, `start-jupyter.sh` probes `os.openpty()` and launches with
+`--ServerApp.terminals_enabled=False` so the Terminal tile disappears
+entirely instead of popping the error dialog (verified: installed
+jupyter_server_terminals 0.5.4 honors `ServerApp.terminals_enabled`). No
+LD_PRELOAD shim can help here — a PTY is a kernel object; you cannot stub it
+in userspace the way `getifaddrs` was stubbed.
+
 ## Launcher tiles: paths, duplication, the Secrets-Manager tile type saga
 
 **Paths.** The workshop's `jp_app_launcher.yaml` hardcodes `/project/...`

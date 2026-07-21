@@ -84,6 +84,19 @@ else
   pass "port $PORT free"
 fi
 
+# 6b. PTY allocation (JupyterLab Terminal tile). The Landlock policy must
+# grant rw on /dev/pts. Non-blocking: notebooks/kernels use ZMQ, not PTYs —
+# but without the grant the launcher's Terminal tile pops "Launcher Error:
+# Unhandled error" (server log: "OSError: out of pty devices", CPython's
+# fallback AFTER the real EACCES from os.openpty() was swallowed — see
+# references/sandbox-internals.md). start-jupyter.sh auto-disables the tile.
+if python3 -c 'import os; os.openpty()' >/dev/null 2>&1; then
+  pass "PTY allocation works — Terminal tile will function"
+else
+  warnf "PTY allocation denied (Landlock /dev/pts) — Terminal tile will be disabled; notebooks unaffected"
+  ask  "add /dev/pts to filesystem_policy.read_write in the sandbox policy (full-union re-apply), then tell me to re-run start-jupyter.sh"
+fi
+
 # 7. Disk
 avail_gb=$(df -BG /sandbox 2>/dev/null | awk 'NR==2 {gsub("G","",$4); print $4}')
 [ "${avail_gb:-0}" -ge 5 ] && pass "disk free on /sandbox: ${avail_gb} GB" \

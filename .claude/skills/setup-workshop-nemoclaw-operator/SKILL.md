@@ -81,9 +81,15 @@ exact YAML in `references/policy-blocks.md`:
 | `github_git_clone` | git smart-HTTP on `github.com`, scoped to the one workshop repo, for the git binaries | cloning the repo (skip if already cloned) |
 | `pypi_install` | read-only `GET` to `pypi.org` + `files.pythonhosted.org` | `uv pip install` of the workshop deps |
 | `/v1/ranking` rule | `POST /v1/ranking` on the NIM host(s) | module-2 `NVIDIARerank` (chat/embeddings/models routes are typically allowlisted already) |
+| `/dev/pts` fs grant | rw on the devpts filesystem (PTY allocation) — under `filesystem_policy`, not `network_policies` | JupyterLab's Terminal tile (terminado → `pty.fork`); without it the tile pops "Launcher Error: Unhandled error" |
 
 Not needed: `build.nvidia.com` (notebook prose only — every model call goes to
 `integrate.api.nvidia.com`), torch/conda mirrors, npm.
+
+⚠️ Landlock (filesystem) rules attach at process **spawn** — after adding the
+`/dev/pts` grant, have the sandbox agent re-run `start-jupyter.sh`; the
+running Jupyter keeps its old ruleset even though fresh `sandbox exec`
+probes already see the grant.
 
 Workflow (details + YAML in the reference):
 
@@ -226,3 +232,5 @@ for the exact URL/error and match it against the log.
 - [ ] Sandbox agent reports JupyterLab up; `docker exec "$C" cat /sandbox/workshop-url.txt` → URL.
 - [ ] Forward running; host `curl …:8888/lab` → 302.
 - [ ] Laptop tunnel up; browser shows 11 launcher tiles; a module-2 rerank cell returns 200.
+- [ ] Terminal tile opens a shell (`POST /api/terminals` with token → 200) —
+      needs the `/dev/pts` grant; when absent the tile is auto-hidden.

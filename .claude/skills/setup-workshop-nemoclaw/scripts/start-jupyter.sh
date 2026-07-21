@@ -46,6 +46,21 @@ if [ -z "$TOKEN" ]; then
   TOKEN="$(openssl rand -hex 24 2>/dev/null || "$VENV/bin/python" -c 'import secrets; print(secrets.token_hex(24))')"
 fi
 
+# TERMINALS: terminado needs PTY allocation, which the Landlock policy only
+# permits when /dev/pts is in filesystem_policy.read_write. When denied,
+# launch with terminals disabled so no Terminal tile appears — otherwise
+# clicking it pops "Launcher Error: Unhandled error" (500; the log's "out of
+# pty devices" is CPython's fallback masking the real EACCES). After the
+# operator grants /dev/pts, re-run this script: Landlock rules attach at
+# process start, so only a NEW server picks the grant up.
+if "$VENV/bin/python" -c 'import os; os.openpty()' >/dev/null 2>&1; then
+  TERMINALS_ENABLED=True
+else
+  TERMINALS_ENABLED=False
+  echo "WARN: PTY allocation denied (Landlock /dev/pts) — launching with the Terminal tile disabled."
+  echo "      Operator fix: add /dev/pts to filesystem_policy.read_write, re-apply policy, re-run this script."
+fi
+
 # Launch env — every one of these is load-bearing (see SKILL.md step 7):
 #  - LD_PRELOAD: netlink shim, scoped to THIS process tree only (server +
 #    kernels + spawned voila/streamlit). The SERVER needs it too, not just
@@ -66,6 +81,7 @@ nohup "$VENV/bin/jupyter" lab \
   --ServerApp.root_dir="$REPO" \
   --ServerApp.token="$TOKEN" \
   --ServerApp.allow_remote_access=False \
+  --ServerApp.terminals_enabled="$TERMINALS_ENABLED" \
   > /tmp/jupyterlab.log 2>&1 &
 SERVER_PID=$!
 

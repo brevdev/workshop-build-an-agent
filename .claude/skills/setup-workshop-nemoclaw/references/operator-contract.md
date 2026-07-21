@@ -15,9 +15,11 @@ something is missing. Never guess at policy state — probe, then ask precisely.
 | 2 | NIM routes incl. module-2 reranker (`POST /v1/ranking`) | `curl -sS -m 15 -o /dev/null -w '%{http_code}' https://integrate.api.nvidia.com/v1/models` | `200` |
 | 3 | NVIDIA key staged | `test -s /sandbox/workshop-build-an-agent/secrets.env && grep -q '^NVIDIA_API_KEY=' /sandbox/workshop-build-an-agent/secrets.env` | exit 0 |
 | 4 | (only if repo missing) git smart-HTTP for the scoped repo | `curl -sS -m 20 -o /dev/null -w '%{http_code}' 'https://github.com/brevdev/workshop-build-an-agent.git/info/refs?service=git-upload-pack'` | `200` |
-| 5 | Inbound path (per session, AFTER launch) | n/a — operator runs the forward | HTTP 302 on host `127.0.0.1:8888/lab` |
+| 5 | (optional — Terminal tile) rw `/dev/pts` in `filesystem_policy` | `python3 -c 'import os; os.openpty()'` | exit 0 (`EACCES` = grant missing) |
+| 6 | Inbound path (per session, AFTER launch) | n/a — operator runs the forward | HTTP 302 on host `127.0.0.1:8888/lab` |
 
-`scripts/preflight.sh` runs probes 1–4 and prints the matching asks below.
+`scripts/preflight.sh` runs probes 1–5 (5 is non-blocking: setup proceeds
+with the Terminal tile disabled) and prints the matching asks below.
 Curl inside the sandbox already trusts the proxy CA; only uv/pip need
 `SSL_CERT_FILE=/etc/openshell-tls/ca-bundle.pem` exported.
 
@@ -63,6 +65,17 @@ so name hosts and paths exactly.
 > `…/git-upload-pack` on github.com:443, binaries `/usr/bin/git` +
 > `/usr/lib/git-core/git-remote-http{,s}`), then ping me — I'll run
 > `git clone --branch edwli-dev https://github.com/brevdev/workshop-build-an-agent /sandbox/workshop-build-an-agent`.
+
+**Terminal tile wanted but PTY denied (probe 5 fails):**
+
+> JupyterLab's Terminal needs PTY devices, which the sandbox Landlock policy
+> currently denies. Please add `/dev/pts` to `filesystem_policy.read_write`
+> and re-apply the policy (full-union file, never a fragment; in the NemoClaw
+> community example update `policy.yaml` AND `policy.hermes-direct.yaml`).
+> Then ping me and I'll re-run `start-jupyter.sh` — the running server keeps
+> its old Landlock ruleset (rules attach at process start), so a restart is
+> mandatory. Signal it worked: `python3 -c 'import os; os.openpty()'` exits 0
+> for a fresh process in the sandbox.
 
 **After a failed install / NIM call despite policy supposedly applied:**
 

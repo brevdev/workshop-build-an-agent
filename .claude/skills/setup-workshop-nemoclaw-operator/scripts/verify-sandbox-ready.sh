@@ -44,6 +44,11 @@ code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" https://files.pythonhost
 code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" https://integrate.api.nvidia.com/v1/models')
 [ "$code" = "200" ] && pass "integrate.api.nvidia.com from inside: 200" \
   || failf "integrate.api.nvidia.com from inside: HTTP ${code:-000} — NIM routes missing"
+if [ "$(sx 'python3 -c "import os; os.openpty()" >/dev/null 2>&1 && echo ok')" = "ok" ]; then
+  pass "PTY allocation from inside: ok (Terminal tile will work)"
+else
+  warnf "PTY allocation denied — Terminal tile auto-hidden until /dev/pts is rw in filesystem_policy (references/policy-blocks.md); re-run start-jupyter.sh after granting"
+fi
 
 # 3. Repo + secrets (filesystem peeks — docker exec is fine for these)
 if docker exec "$C" test -d "$REPO_IN_SANDBOX/.git" 2>/dev/null; then

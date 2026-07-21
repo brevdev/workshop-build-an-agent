@@ -107,6 +107,35 @@ Optional (only if the user wants module-1 web search / module-3 tracing) —
 same shape as `pypi_install`, hosts `mcp.tavily.com` /
 `api.smith.langchain.com`, plus the matching keys appended to `secrets.env`.
 
+## Filesystem grant — /dev/pts (JupyterLab Terminal tile)
+
+Goes under `filesystem_policy` in the same document (NOT `network_policies`):
+
+```yaml
+filesystem_policy:
+  read_write:
+  # ... existing entries ...
+  - /dev/pts   # PTY master+slaves; /dev/ptmx is a symlink to pts/ptmx
+```
+
+Why: terminado (`pty.fork` behind the launcher's Terminal tile) opens
+`/dev/ptmx` and the slave under `/dev/pts/`; Landlock denies both without the
+grant. Symptom without it: Terminal tile → "Launcher Error: Unhandled error";
+jupyter log ends `OSError: out of pty devices` — a CPython red herring, the
+real EACCES from `os.openpty()` is swallowed (full story in the sandbox
+skill's `references/sandbox-internals.md`).
+
+Verify (Landlock-real):
+
+```bash
+openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'python3 -c "import os; os.openpty()" && echo PTY-OK'
+```
+
+⚠️ Landlock attaches at process spawn: after applying, the sandbox agent must
+re-run `start-jupyter.sh` (it auto-detects PTY availability and re-enables
+the Terminal tile). The running server keeps the old ruleset; only fresh
+processes see the grant.
+
 ## What NOT to open
 
 - `build.nvidia.com` — not needed; it appears only in notebook prose. All

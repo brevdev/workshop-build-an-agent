@@ -64,6 +64,13 @@ Two things must be true before setup can succeed, and only the operator
    `NVIDIA_API_KEY=...` (notebooks `load_dotenv()` it themselves). Never
    accept the key through chat; the operator writes it via `docker exec`.
 
+Optional third item — **`/dev/pts` read-write in `filesystem_policy`** — is
+needed only for the launcher's Terminal tile (terminado → `pty.fork`).
+Setup does NOT block on it: `start-jupyter.sh` probes `os.openpty()` and
+launches with terminals disabled when denied. After the operator grants it,
+just re-run `start-jupyter.sh` (Landlock attaches at spawn; a live server
+can't pick the grant up).
+
 There is **no operator knob for the netlink/seccomp block** — it is compiled
 into the in-container OpenShell supervisor (Rust seccompiler), not the Docker
 profile. You fix it *inside* the sandbox with the LD_PRELOAD shim below; this
@@ -205,12 +212,21 @@ only inbound path. Details live in the operator skill.
   → 11 tiles. (GET on that route → 405; `/jupyter_app_launcher/get_config` → 404 — both expected.)
 - Skill propagation: `hermes skills list` shows `module-1`…`module-7`,
   `workshop`, and `setup-workshop-nemoclaw` as `local`/`enabled`.
+- Terminal tile (only when `/dev/pts` is granted): POST `/api/terminals`
+  with the token → 200 (spawns a shell; DELETE `/api/terminals/<name>`
+  to clean up).
 - In the browser: 11 tiles, no duplicates; module lesson pages load; the
   Secrets Manager tile and in-lesson secrets buttons open Voila Previews (not
   a "Running…" hang); kernels start; a module-2 rerank call returns 200.
 
 ## Pitfalls
 
+- Terminal tile → "Launcher Error: Unhandled error" (500 on POST
+  `/api/terminals`; log ends `OSError: out of pty devices`) → the real error
+  is a swallowed EACCES from `os.openpty()`: Landlock lacks rw `/dev/pts`.
+  Operator grants it + re-applies policy; then re-run `start-jupyter.sh` —
+  the running server keeps its old Landlock ruleset. Details in
+  `references/sandbox-internals.md`.
 - Wrong CA bundle (`ca-certificates.crt`) → uv TLS failures. Use
   `/etc/openshell-tls/ca-bundle.pem`.
 - Skipping the shim → kernels never start (`Kernel died before replying to

@@ -1,27 +1,36 @@
 #!/usr/bin/env python3
-"""neutralize_pip_cells.py — comment out the blocking `%pip install -r
-../../requirements.txt` cell in every secrets_management_*.ipynb.
+"""neutralize_pip_cells.py — comment out blocking `%pip install` / `!pip install`
+lines in every workshop notebook under code/ (all modules + answer keys).
 
-Why: that cell tries to install torch/cudf/unsloth (GPU deps) at kernel start.
-In the sandbox those installs hang forever, so voila never finishes rendering
-("Running…"). Deps are already pre-installed via uv, so the cell is redundant.
+Why: the uv-created venv has no pip, so those cells print a confusing
+"No module named pip" error; and where pip DOES exist (bare-metal), the
+root requirements.txt pulls torch/cudf/unsloth (GPU deps) which hang the
+sandbox. Everything the notebooks need is pre-installed from
+templates/requirements-sandbox.txt, so the cells are redundant here.
 We preserve everything else in the cell (notably any load_dotenv() calls).
 
-Idempotent: skips cells already neutralized.
+Idempotent: skips lines already neutralized.
 Usage: python neutralize_pip_cells.py /sandbox/workshop-build-an-agent
 """
-import json, sys, glob, os
+import glob
+import json
+import os
+import sys
 
 REPO = sys.argv[1] if len(sys.argv) > 1 else "/sandbox/workshop-build-an-agent"
-MARKER = "# [sandbox] pip install of requirements.txt skipped"
-NOTE = (MARKER +
-        " \u2014 deps pre-installed via uv; installing torch/cudf/unsloth here hangs voila\n")
+MARKER = "# [sandbox] pip install skipped"
+NOTE = MARKER + " — deps pre-installed via uv (requirements-sandbox.txt); pip is absent from this venv\n"
 
-# Only touch the real notebooks, never the .ipynb_checkpoints copies.
-pattern = os.path.join(REPO, "code", "secrets_management", "secrets_management_*.ipynb")
+
+def is_pip_line(line: str) -> bool:
+    s = line.lstrip()
+    return (s.startswith("%pip install") or s.startswith("!pip install")) and "pip install" in s
+
+
+pattern = os.path.join(REPO, "code", "**", "*.ipynb")
 changed = 0
-for path in sorted(glob.glob(pattern)):
-    if ".ipynb_checkpoints" in path:
+for path in sorted(glob.glob(pattern, recursive=True)):
+    if ".ipynb_checkpoints" in path or "/.audit-" in path:
         continue
     with open(path) as f:
         nb = json.load(f)
@@ -31,15 +40,10 @@ for path in sorted(glob.glob(pattern)):
             continue
         src = cell.get("source", [])
         joined = "".join(src)
-        if MARKER in joined:
-            continue  # already neutralized
-        if "%pip install" in joined and "requirements.txt" in joined:
-            new_src = []
-            for line in src:
-                if line.lstrip().startswith("%pip install") and "requirements.txt" in line:
-                    new_src.append(NOTE)
-                else:
-                    new_src.append(line)
+        if MARKER in joined or "pip install" not in joined:
+            continue
+        new_src = [NOTE if is_pip_line(line) else line for line in src]
+        if new_src != src:
             cell["source"] = new_src
             dirty = True
     if dirty:

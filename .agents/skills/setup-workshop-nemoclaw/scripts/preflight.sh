@@ -77,6 +77,43 @@ else
   ask  "stage the key from the host via docker exec (never via chat) — command in references/operator-contract.md"
 fi
 
+# 5b. Workshop integration egress (module coverage; 2026-07-21 audit).
+# Key-authenticated where possible for definitive 200s. All four blocks ship
+# in the community example's policy template — a failure here means policy
+# drift or a missing key, and names exactly which modules degrade.
+if [ -s "$REPO/secrets.env" ]; then
+  set -a; . "$REPO/secrets.env" >/dev/null 2>&1; set +a
+fi
+code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST https://api.tavily.com/search \
+  -H 'Content-Type: application/json' \
+  -d "{\"api_key\":\"${TAVILY_API_KEY:-}\",\"query\":\"ping\",\"max_results\":1}" 2>/dev/null)
+if [ "$code" = "200" ]; then pass "api.tavily.com POST /search: 200 (modules 1/2/5 web search)"; else
+  warnf "api.tavily.com POST /search: HTTP ${code:-000} — module-1 docgen, module-2 web_search, module-5 search degrade to no-search output"
+  ask  "add the tavily_search policy block (POST /search + /extract on api.tavily.com; see operator skill policy-blocks.md) and stage TAVILY_API_KEY in secrets.env"
+fi
+code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' https://api.smith.langchain.com/info \
+  -H "x-api-key: ${LANGSMITH_API_KEY:-}" 2>/dev/null)
+if [ "$code" = "200" ]; then pass "api.smith.langchain.com /info: 200 (tracing + module 3)"; else
+  warnf "api.smith.langchain.com /info: HTTP ${code:-000} — EVERY notebook spams tracing retry errors (variables.env sets LANGSMITH_TRACING=true) and module-3 tracing lessons are dark"
+  ask  "add the langsmith_api policy block (all methods on api.smith.langchain.com) and stage LANGSMITH_API_KEY in secrets.env"
+fi
+code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -r 0-64 \
+  "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken" 2>/dev/null)
+if [ "$code" = "200" ] || [ "$code" = "206" ]; then pass "tiktoken BPE host reachable (module 7)"; else
+  warnf "openaipublic.blob.core.windows.net: HTTP ${code:-000} — module-7 harness_lab dies at tiktoken.get_encoding (log shows the real ProxyError only in the raised chain)"
+  ask  "add the tiktoken_encodings policy block (GET /encodings/** on openaipublic.blob.core.windows.net)"
+fi
+if [ -n "${NVIDIA_API_KEY:-}" ]; then
+  code=$(curl -sS -m 25 -o /dev/null -w '%{http_code}' -X POST \
+    "https://ai.api.nvidia.com/v1/retrieval/nvidia/llama-nemotron-rerank-1b-v2/reranking" \
+    -H "Authorization: Bearer $NVIDIA_API_KEY" -H 'Content-Type: application/json' \
+    -d '{"model":"nvidia/llama-nemotron-rerank-1b-v2","query":{"text":"ping"},"passages":[{"text":"pong"}]}' 2>/dev/null)
+  if [ "$code" = "200" ]; then pass "ai.api.nvidia.com reranking: 200 (modules 2/3 retriever)"; else
+    warnf "ai.api.nvidia.com reranking: HTTP ${code:-000} — NVIDIARerank (modules 2/3) fails. NOTE: the integrate.api.nvidia.com /v1/ranking rule does NOT cover llama-nemotron-rerank-1b-v2"
+    ask  "add the nvidia_retrieval policy block (POST /v1/retrieval/** on ai.api.nvidia.com)"
+  fi
+fi
+
 # 6. Port 8888
 if curl -s -m 3 -o /dev/null "http://127.0.0.1:$PORT/"; then
   warnf "something already answers on 127.0.0.1:$PORT — start-jupyter.sh will enforce single-server"

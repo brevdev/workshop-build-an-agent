@@ -103,9 +103,68 @@ and any mirror host), alongside the chat/completions/embeddings rules:
           path: /v1/ranking
 ```
 
-Optional (only if the user wants module-1 web search / module-3 tracing) —
-same shape as `pypi_install`, hosts `mcp.tavily.com` /
-`api.smith.langchain.com`, plus the matching keys appended to `secrets.env`.
+## Workshop integration blocks (audited 2026-07-21)
+
+Four more routes the module content actually exercises. Full-coverage
+sandboxes should carry all four (they ship in the community example's
+`policy.yaml` template). Binaries: same python/curl set as `pypi_install`
+minus uv.
+
+```yaml
+  # tavily-python REST (module-1 docgen tool, module-2 LOCAL MCP server,
+  # module-5 search). NOT mcp.tavily.com — that is the remote-MCP host, which
+  # also needs npm and is deliberately not opened (see What NOT to open).
+  tavily_search:
+    name: tavily-search
+    endpoints:
+    - host: api.tavily.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow: { method: POST, path: /search }
+      - allow: { method: POST, path: /extract }
+  # variables.env sets LANGSMITH_TRACING=true for every notebook; module-3
+  # eval flows create datasets/experiments/runs/feedback — hence all methods.
+  langsmith_api:
+    name: langsmith-api
+    endpoints:
+    - host: api.smith.langchain.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow: { method: GET, path: /** }
+      - allow: { method: POST, path: /** }
+      - allow: { method: PATCH, path: /** }
+      - allow: { method: PUT, path: /** }
+      - allow: { method: DELETE, path: /** }
+  # ⚠️ NVIDIARerank for nvidia/llama-nemotron-rerank-1b-v2 (modules 2/3) posts
+  # to ai.api.nvidia.com/v1/retrieval/<model>/reranking — the
+  # integrate.api.nvidia.com /v1/ranking rule does NOT cover it.
+  nvidia_retrieval:
+    name: nvidia-retrieval
+    endpoints:
+    - host: ai.api.nvidia.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow: { method: POST, path: /v1/retrieval/** }
+  # tiktoken downloads BPE encodings at first get_encoding() (module 7).
+  tiktoken_encodings:
+    name: tiktoken-encodings
+    endpoints:
+    - host: openaipublic.blob.core.windows.net
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow: { method: GET, path: /encodings/** }
+```
+
+Matching keys (`TAVILY_API_KEY`, `LANGSMITH_API_KEY`) go into the same
+`secrets.env` via `stage-nvidia-key.sh --env-file` or exported env vars.
 
 ## Filesystem grant — /dev/pts (JupyterLab Terminal tile)
 
@@ -141,12 +200,20 @@ exists (`docker restart` = stale-bootstrap-JWT crash loop).
 
 ## What NOT to open
 
-- `build.nvidia.com` — not needed; it appears only in notebook prose. All
-  model calls (`ChatNVIDIA`/`NVIDIAEmbeddings`/`NVIDIARerank`) hit
-  `integrate.api.nvidia.com`.
-- npm registry, conda/pytorch mirrors, `workbench.download.nvidia.com` — the
-  sandbox path needs none of them (the in-sandbox skill ships a prebuilt
-  labextension and compiles its shim with the ziglang wheel).
+- `build.nvidia.com` — not needed; it appears only in notebook prose. Chat/
+  completions/embeddings hit `integrate.api.nvidia.com`; reranking hits
+  `ai.api.nvidia.com` (block above).
+- `registry.npmjs.org` + `mcp.tavily.com` — module-2's shipped remote-MCP
+  `web_search` path (`npx -y mcp-remote …`). Use the module's LOCAL MCP
+  server instead (PART 2B in `rag_agent.py`; deps already pinned) — only
+  `api.tavily.com` is needed, and npm's retry backoff otherwise hangs agent
+  tool calls for minutes.
+- `t.explodinggradients.com` — ragas telemetry; the sandbox skill exports
+  `RAGAS_DO_NOT_TRACK=true` instead.
+- npm registry for tooling, conda/pytorch mirrors,
+  `workbench.download.nvidia.com` — the sandbox path needs none of them (the
+  in-sandbox skill ships a prebuilt labextension and compiles its shim with
+  the ziglang wheel).
 - GitHub push (`git-receive-pack`) — deliberately absent above.
 
 ## Verification (Landlock-real, not docker exec)

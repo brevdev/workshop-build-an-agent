@@ -1,7 +1,8 @@
 jupyterlab==4.6.1
 ipywidgets==8.1.8
 python-dotenv==1.2.2
-pandas==3.0.3
+# pandas 2.x, not 3.x: data-designer (module-3/4 synthetic data) requires <3.
+pandas==2.3.3
 langchain==1.3.13
 langgraph==1.2.9
 langchain-nvidia-ai-endpoints==1.4.3
@@ -22,3 +23,15 @@ jupyterlab-git==0.54.0
 streamlit==1.59.2
 langgraph-sdk==0.4.2
 ziglang==0.16.0
+# Module coverage additions (2026-07-21 audit): CPU-safe, no GPU wheels.
+# data-designer: module-3 generate_* + module-4-01 synthetic data generation.
+data-designer==0.3.8
+# langgraph-cli[inmem]: `langgraph dev` server — module-2 serving path, the
+# Simple Agents Client backend, and three lesson instructions depend on it.
+langgraph-cli[inmem]==0.4.31
+# fastapi: module-4 NeMo Gym verify server + module-5 demo backend.
+fastapi==0.139.2
+# deepagents: module-5 deep_agent.py.
+deepagents==0.6.12
+# model-signing: module-7 install_nvidia_skill.sh signature verification.
+model-signing==1.1.1

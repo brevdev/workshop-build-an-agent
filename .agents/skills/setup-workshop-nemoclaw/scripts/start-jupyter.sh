@@ -73,6 +73,9 @@ export LD_PRELOAD="$SHIM_SO"
 export JUPYTER_APP_LAUNCHER_PATH="$LAUNCHER_DIR"
 export JUPYTER_RUNTIME_DIR="$RUNTIME_DIR"
 export PATH="$VENV/bin:$PATH"
+# ragas phones usage telemetry to t.explodinggradients.com — blocked egress
+# here, and each blocked ping burns retries mid-notebook. Disable at source.
+export RAGAS_DO_NOT_TRACK=true
 
 # Launch from /sandbox (NOT repo root) as an extra guard against cwd-based
 # duplicate launcher-config discovery. root_dir is set explicitly to the repo.

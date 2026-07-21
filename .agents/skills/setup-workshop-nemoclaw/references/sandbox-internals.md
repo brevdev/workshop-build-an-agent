@@ -246,19 +246,75 @@ Teleport troubleshooting: operator skill.
 
 ## Model routing / policy
 
-- All langchain `ChatNVIDIA` / `NVIDIAEmbeddings` / `NVIDIARerank` calls go to
+- `ChatNVIDIA` / `NVIDIAEmbeddings` (chat, completions, embeddings) go to
   `integrate.api.nvidia.com` (allowlisted). `build.nvidia.com` is NOT needed
   (notebook prose only).
-- Module-2 reranker needs `POST /v1/ranking` on that host — operator-staged.
+- ⚠️ **`NVIDIARerank` for `nvidia/llama-nemotron-rerank-1b-v2` (modules 2/3)
+  does NOT use `integrate.api.nvidia.com/v1/ranking`** — it POSTs
+  `ai.api.nvidia.com/v1/retrieval/<model>/reranking`. The old `/v1/ranking`
+  rule only covers earlier rerank models; the `nvidia_retrieval` policy block
+  (POST `/v1/retrieval/**` on `ai.api.nvidia.com`) is what modules 2/3 need.
+  Verified live 2026-07-21 from the SDK's own error URL.
 - Blocked calls are diagnosed on the HOST: `docker logs <container> | grep
   DENIED` names the process path and rule. Ask the operator (see
   operator-contract.md).
 
-## GPU modules (4 & 6)
+## Integration egress (Tavily / LangSmith / tiktoken / ragas)
 
-Modules 4 (fine-tuning, unsloth) and 6 (cudf) need a GPU not present here. Do
-NOT install torch/unsloth/cudf — installs hang and waste egress. Modules 1–3
-(and the clients) are CPU-only and fully functional.
+Four additional routes the workshop content actually exercises (all in the
+community example's policy template as of 2026-07-21; preflight.sh probes
+them):
+
+- `api.tavily.com` `POST /search|/extract` — `tavily-python` REST (module-1
+  docgen tool, module-2 local MCP server, module-5 search). Without it the
+  agents still complete but write no-search reports (silently degraded).
+- `api.smith.langchain.com` (all methods) — `variables.env` sets
+  `LANGSMITH_TRACING=true` which EVERY notebook loads in cell 1, so without
+  this route every LangChain call spams `Failed to multipart ingest runs`
+  retries (700+ denials/90min observed); module-3 tracing lessons are dark.
+  Key: `LANGSMITH_API_KEY` in secrets.env.
+- `openaipublic.blob.core.windows.net` `GET /encodings/**` — tiktoken
+  downloads its BPE file at first `get_encoding()`; module-7 harness_lab dies
+  there otherwise. (CPython chains the real ProxyError under a misleading
+  tiktoken traceback.)
+- `t.explodinggradients.com` — ragas usage telemetry. Do NOT open it;
+  start-jupyter.sh exports `RAGAS_DO_NOT_TRACK=true` instead.
+
+ragas import gotcha: ragas 0.4.x hard-imports
+`langchain_community.chat_models.vertexai`, removed in langchain-community
+1.x, so a bare `import ragas` raises ModuleNotFoundError even though ragas IS
+installed. The module-3 evaluate notebooks ship a stub-module workaround cell
+— run it before importing ragas (verified working).
+
+## Module-2 web_search: remote MCP vs local server
+
+The shipped `rag_agent.py` PART 2A uses Tavily's REMOTE MCP via
+`npx -y mcp-remote https://mcp.tavily.com/mcp/...`. In this sandbox that is a
+dead end twice over: npx must download `mcp-remote` from `registry.npmjs.org`
+(blocked; and npm's retry backoff makes agent tool calls hang for minutes —
+this is what times out module-3's rag eval), and `mcp.tavily.com` is not
+allowlisted. **Use PART 2B (commented out in the same file): the local MCP
+server.** Its deps (`mcp`, `starlette`, `uvicorn`, `tavily`) are all in the
+sandbox pins; run `uvicorn mcp_server:app --port 8000` in module-2's dir and
+swap the `web_search` tool to the SSE config. Only `api.tavily.com` egress is
+needed. Verified end-to-end 2026-07-21.
+
+## Module coverage on this sandbox (audited 2026-07-21)
+
+- **Fully working (CPU + policy template):** module 1 (both notebooks),
+  module 2 (RAG + local-MCP web search; `langgraph dev` serving needs the
+  langgraph-cli pin), module 3 (generate + eval; rag-eval needs the module-2
+  local-MCP swap to avoid npx hangs), module-4 `bash_agent` + `01_synthetic`
+  (data-designer pin), module 6 safety pipeline (92.5% on the hardened
+  policy), module 7 (tiktoken route + pins), secrets manager, all 11 tiles,
+  all three client UIs.
+- **GPU-only by design (do NOT install torch/unsloth/cudf — hangs, wasted
+  egress):** module-4 `02_grpo_training` + `03_run_agent`; module-7's
+  optional cudf exercise degrades gracefully.
+- **Not available in-sandbox:** module-6 NemoClaw/OpenClaw CLI demos (Node
+  CLIs absent; installer needs `www.nvidia.com` + npm egress), module-5
+  Docker sandbox backend + Deep Agents client build (no Docker daemon; npm
+  blocked — the client serves its setup page as designed).
 
 ## Environment quirks
 

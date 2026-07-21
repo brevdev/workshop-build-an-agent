@@ -52,6 +52,22 @@ if [ "$(sx 'python3 -c "import os; os.openpty()" >/dev/null 2>&1 && echo ok')" =
 else
   warnf "PTY allocation denied — Terminal tile auto-hidden; add /dev/pts to the policy TEMPLATE and recreate the sandbox (fs policy is boot-time — a live apply will not activate it; references/policy-blocks.md)"
 fi
+# Workshop integration routes (2026-07-21 audit). Unauthed reachability
+# heuristics: a server 4xx means the route is OPEN (request reached the API);
+# 000/403 usually means the proxy denied it. The in-sandbox preflight.sh has
+# the definitive key-authenticated probes.
+code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{}" https://api.tavily.com/search')
+case "$code" in 200|400|401|422|432) pass "api.tavily.com route open (HTTP $code; modules 1/2/5)";;
+  *) warnf "api.tavily.com POST /search: HTTP ${code:-000} — add tavily_search block (modules 1/2/5 web search)";; esac
+code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" https://api.smith.langchain.com/info')
+[ "$code" = "200" ] && pass "api.smith.langchain.com /info: 200 (tracing + module 3)" \
+  || warnf "api.smith.langchain.com: HTTP ${code:-000} — add langsmith_api block (tracing spam in every module; module 3 dark)"
+code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" -r 0-64 https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken')
+case "$code" in 200|206) pass "tiktoken BPE host reachable (module 7)";;
+  *) warnf "openaipublic.blob.core.windows.net: HTTP ${code:-000} — add tiktoken_encodings block (module 7 harness_lab)";; esac
+code=$(sx 'curl -s -m 15 -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{}" https://ai.api.nvidia.com/v1/retrieval/nvidia/llama-nemotron-rerank-1b-v2/reranking')
+case "$code" in 200|401|422) pass "ai.api.nvidia.com retrieval route open (HTTP $code; modules 2/3 rerank)";;
+  *) warnf "ai.api.nvidia.com: HTTP ${code:-000} — add nvidia_retrieval block; NOTE the integrate.api.nvidia.com /v1/ranking rule does NOT cover llama-nemotron-rerank-1b-v2";; esac
 
 # 3. Repo + secrets (filesystem peeks — docker exec is fine for these)
 if docker exec "$C" test -d "$REPO_IN_SANDBOX/.git" 2>/dev/null; then

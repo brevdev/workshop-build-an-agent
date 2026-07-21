@@ -12,7 +12,9 @@ something is missing. Never guess at policy state — probe, then ask precisely.
 | # | Requirement | In-sandbox probe | Expected |
 |---|---|---|---|
 | 1 | PyPI egress (`GET pypi.org` + `files.pythonhosted.org`) | `curl -sS -m 15 -o /dev/null -w '%{http_code}' https://pypi.org/simple/` | `200` (403/000 = blocked) |
-| 2 | NIM routes incl. module-2 reranker (`POST /v1/ranking`) | `curl -sS -m 15 -o /dev/null -w '%{http_code}' https://integrate.api.nvidia.com/v1/models` | `200` |
+| 2 | NIM chat/embeddings routes | `curl -sS -m 15 -o /dev/null -w '%{http_code}' https://integrate.api.nvidia.com/v1/models` | `200` |
+| 2b | Reranker route (modules 2/3) — `POST /v1/retrieval/**` on `ai.api.nvidia.com` (⚠️ NOT the legacy `/v1/ranking`) | authed rerank POST (see preflight.sh 5b) | `200` |
+| 2c | Integrations: `api.tavily.com` (mods 1/2/5), `api.smith.langchain.com` (mod 3 + tracing), `openaipublic.blob.core.windows.net` (mod 7 tiktoken) | preflight.sh 5b probes | `200` each |
 | 3 | NVIDIA key staged | `test -s /sandbox/workshop-build-an-agent/secrets.env && grep -q '^NVIDIA_API_KEY=' /sandbox/workshop-build-an-agent/secrets.env` | exit 0 |
 | 4 | (only if repo missing) git smart-HTTP for the scoped repo | `curl -sS -m 20 -o /dev/null -w '%{http_code}' 'https://github.com/brevdev/workshop-build-an-agent.git/info/refs?service=git-upload-pack'` | `200` |
 | 5 | (optional — Terminal tile) rw `/dev/pts` in `filesystem_policy` | `python3 -c 'import os; os.openpty()'` | exit 0 (`EACCES` = grant missing) |
@@ -90,13 +92,21 @@ different container/profile was targeted (host check:
 `docker exec <c> ls /sandbox/workshop-build-an-agent/secrets.env`); the policy
 file applied was stale and silently reverted other blocks.
 
-## Optional integrations (only if the user asks)
+## Integrations (Tavily / LangSmith) — standard for full module coverage
 
-Tavily (module-1 web search) and LangSmith (module-3 tracing): the operator
-appends `TAVILY_API_KEY=` / `LANGSMITH_API_KEY=` lines to the same
-`secrets.env` **and** adds policy entries for `mcp.tavily.com` /
-`api.smith.langchain.com` (same shape as the pypi block). Without them those
-features are skipped gracefully; modules 1–3 still work.
+The operator appends `TAVILY_API_KEY=` / `LANGSMITH_API_KEY=` lines to the
+same `secrets.env` **and** ensures the `tavily_search` (`api.tavily.com` —
+NOT `mcp.tavily.com`, which is the remote-MCP host and would also need npm)
+and `langsmith_api` (`api.smith.langchain.com`) policy blocks are live (see
+the operator skill's policy-blocks.md; both ship in the community example's
+template). Without the Tavily key/route, agents still run but silently write
+no-search reports; without the LangSmith route, every notebook spams tracing
+retry errors because `variables.env` enables tracing globally.
+
+Module-2 note: use the module's LOCAL MCP server (`rag_agent.py` PART 2B +
+`uvicorn mcp_server:app --port 8000`) — the shipped PART 2A remote-MCP path
+needs `npx` to download `mcp-remote` from the blocked npm registry, and its
+retry backoff hangs agent tool calls for minutes.
 
 ## What to report when setup completes
 

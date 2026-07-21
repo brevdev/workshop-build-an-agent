@@ -56,10 +56,15 @@ Two things must be true before setup can succeed, and only the operator
 `references/operator-contract.md` and **stop until they confirm**:
 
 1. **Egress policy** allows: `GET pypi.org` + `files.pythonhosted.org`
-   (installs), `POST /v1/ranking` on `integrate.api.nvidia.com` (module-2
-   reranker; chat/embeddings/models routes are typically allowlisted already),
-   and — only if the repo is not yet cloned — git smart-HTTP on `github.com`
-   scoped to the workshop repo.
+   (installs); the NIM chat/embeddings routes on `integrate.api.nvidia.com`;
+   `POST /v1/retrieval/**` on `ai.api.nvidia.com` (modules 2/3 reranker —
+   NOT covered by the legacy `/v1/ranking` rule); `POST /search` on
+   `api.tavily.com` (modules 1/2/5 web search); all methods on
+   `api.smith.langchain.com` (module 3 + workshop-wide tracing);
+   `GET /encodings/**` on `openaipublic.blob.core.windows.net` (module-7
+   tiktoken); and — only if the repo is not yet cloned — git smart-HTTP on
+   `github.com` scoped to the workshop repo. `preflight.sh` probes all of
+   these and prints the exact ask for each gap.
 2. **NVIDIA key staged** at `/sandbox/workshop-build-an-agent/secrets.env` as
    `NVIDIA_API_KEY=...` (notebooks `load_dotenv()` it themselves). Never
    accept the key through chat; the operator writes it via `docker exec`.

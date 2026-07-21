@@ -86,10 +86,12 @@ exact YAML in `references/policy-blocks.md`:
 Not needed: `build.nvidia.com` (notebook prose only — every model call goes to
 `integrate.api.nvidia.com`), torch/conda mirrors, npm.
 
-⚠️ Landlock (filesystem) rules attach at process **spawn** — after adding the
-`/dev/pts` grant, have the sandbox agent re-run `start-jupyter.sh`; the
-running Jupyter keeps its old ruleset even though fresh `sandbox exec`
-probes already see the grant.
+⚠️ The supervisor parses `filesystem_policy` ONCE at container **boot** —
+`openshell policy set` hot-reloads network rules but NOT filesystem grants
+(verified live: after applying a `/dev/pts` grant, new spawns still built
+the old ruleset). The grant must be in the TEMPLATE (`policy.yaml`) and
+takes effect at the next sandbox **recreate**. There is no restart command,
+and raw `docker restart` hits the stale-bootstrap-JWT crash loop.
 
 Workflow (details + YAML in the reference):
 

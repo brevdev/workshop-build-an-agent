@@ -50,9 +50,10 @@ fi
 # permits when /dev/pts is in filesystem_policy.read_write. When denied,
 # launch with terminals disabled so no Terminal tile appears — otherwise
 # clicking it pops "Launcher Error: Unhandled error" (500; the log's "out of
-# pty devices" is CPython's fallback masking the real EACCES). After the
-# operator grants /dev/pts, re-run this script: Landlock rules attach at
-# process start, so only a NEW server picks the grant up.
+# pty devices" is CPython's fallback masking the real EACCES). The grant
+# activates only at sandbox recreate (fs policy is parsed at container boot;
+# a live policy apply won't enable it) — after such a recreate this script
+# auto-enables terminals.
 if "$VENV/bin/python" -c 'import os; os.openpty()' >/dev/null 2>&1; then
   TERMINALS_ENABLED=True
 else

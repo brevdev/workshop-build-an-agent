@@ -70,12 +70,13 @@ so name hosts and paths exactly.
 
 > JupyterLab's Terminal needs PTY devices, which the sandbox Landlock policy
 > currently denies. Please add `/dev/pts` to `filesystem_policy.read_write`
-> and re-apply the policy (full-union file, never a fragment; in the NemoClaw
-> community example update `policy.yaml` AND `policy.hermes-direct.yaml`).
-> Then ping me and I'll re-run `start-jupyter.sh` — the running server keeps
-> its old Landlock ruleset (rules attach at process start), so a restart is
-> mandatory. Signal it worked: `python3 -c 'import os; os.openpty()'` exits 0
-> for a fresh process in the sandbox.
+> in the policy TEMPLATE (in the NemoClaw community example: `policy.yaml`
+> AND `policy.hermes-direct.yaml`). Note it only takes effect at a sandbox
+> **recreate** — filesystem policy is parsed at container boot; a live
+> `policy set` won't activate it even for new processes (network rules
+> hot-reload, fs rules don't). After the recreate I'll re-run setup and
+> terminals come up enabled automatically. Signal it worked:
+> `python3 -c 'import os; os.openpty()'` exits 0 in the new sandbox.
 
 **After a failed install / NIM call despite policy supposedly applied:**
 

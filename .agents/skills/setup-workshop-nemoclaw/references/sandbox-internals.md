@@ -96,11 +96,15 @@ seccomp — there IS an operator knob: the sandbox policy's
 `filesystem_policy.read_write` simply lacks `/dev/pts`. (`/dev/ptmx` is a
 symlink to `pts/ptmx`, so the one grant covers master and slaves.)
 
-Fix (operator side): add `- /dev/pts` to `filesystem_policy.read_write`,
-re-apply the policy, then re-run `start-jupyter.sh`. The restart is
-mandatory: Landlock rulesets attach at process start and cannot be widened
-for a running process — fresh `openshell sandbox exec` probes see the new
-policy immediately while the old Jupyter keeps the old ruleset.
+Fix (operator side): add `- /dev/pts` to `filesystem_policy.read_write` in
+the policy TEMPLATE and **recreate the sandbox**. A live `openshell policy
+set` does NOT activate fs grants: the supervisor parses `filesystem_policy`
+once at container boot and builds every per-spawn Landlock ruleset from that
+boot-time copy (verified: after a live apply added /dev/pts, new spawns
+still requested the old rw set — the supervisor's `Landlock ruleset built`
+log kept showing the old rw count; network rules hot-reload, fs rules
+don't). There is no sandbox restart command, and raw `docker restart` hits
+the stale-bootstrap-JWT crash loop.
 
 Until granted, `start-jupyter.sh` probes `os.openpty()` and launches with
 `--ServerApp.terminals_enabled=False` so the Terminal tile disappears

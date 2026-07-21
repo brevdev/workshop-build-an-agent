@@ -94,7 +94,7 @@ if python3 -c 'import os; os.openpty()' >/dev/null 2>&1; then
   pass "PTY allocation works — Terminal tile will function"
 else
   warnf "PTY allocation denied (Landlock /dev/pts) — Terminal tile will be disabled; notebooks unaffected"
-  ask  "add /dev/pts to filesystem_policy.read_write in the sandbox policy (full-union re-apply), then tell me to re-run start-jupyter.sh"
+  ask  "add /dev/pts to filesystem_policy.read_write in the policy TEMPLATE — it activates at the next sandbox recreate (fs policy is boot-time; a live apply will not enable it)"
 fi
 
 # 7. Disk

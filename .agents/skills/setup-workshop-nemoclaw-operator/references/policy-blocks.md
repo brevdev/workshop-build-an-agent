@@ -131,10 +131,13 @@ Verify (Landlock-real):
 openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'python3 -c "import os; os.openpty()" && echo PTY-OK'
 ```
 
-⚠️ Landlock attaches at process spawn: after applying, the sandbox agent must
-re-run `start-jupyter.sh` (it auto-detects PTY availability and re-enables
-the Terminal tile). The running server keeps the old ruleset; only fresh
-processes see the grant.
+⚠️ `filesystem_policy` is parsed ONCE at container boot — a live `policy set`
+does NOT activate new fs grants, even for freshly spawned processes (network
+blocks DO hot-reload; watch the supervisor's `Landlock ruleset built` log
+lines: the rw count won't change on a live apply). Put `/dev/pts` in the
+TEMPLATE and recreate the sandbox; after the recreate, `start-jupyter.sh`
+auto-detects working PTYs and enables the Terminal tile. No restart shortcut
+exists (`docker restart` = stale-bootstrap-JWT crash loop).
 
 ## What NOT to open
 

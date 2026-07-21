@@ -50,7 +50,7 @@ code=$(sx 'python3 -c "import urllib.request,ssl;print(urllib.request.urlopen(\"
 if [ "$(sx 'python3 -c "import os; os.openpty()" >/dev/null 2>&1 && echo ok')" = "ok" ]; then
   pass "PTY allocation from inside: ok (Terminal tile will work)"
 else
-  warnf "PTY allocation denied — Terminal tile auto-hidden until /dev/pts is rw in filesystem_policy (references/policy-blocks.md); re-run start-jupyter.sh after granting"
+  warnf "PTY allocation denied — Terminal tile auto-hidden; add /dev/pts to the policy TEMPLATE and recreate the sandbox (fs policy is boot-time — a live apply will not activate it; references/policy-blocks.md)"
 fi
 
 # 3. Repo + secrets (filesystem peeks — docker exec is fine for these)

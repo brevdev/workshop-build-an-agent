@@ -67,9 +67,10 @@ Two things must be true before setup can succeed, and only the operator
 Optional third item — **`/dev/pts` read-write in `filesystem_policy`** — is
 needed only for the launcher's Terminal tile (terminado → `pty.fork`).
 Setup does NOT block on it: `start-jupyter.sh` probes `os.openpty()` and
-launches with terminals disabled when denied. After the operator grants it,
-just re-run `start-jupyter.sh` (Landlock attaches at spawn; a live server
-can't pick the grant up).
+launches with terminals disabled when denied. The grant only takes effect at
+a sandbox **recreate** (the supervisor parses filesystem policy at container
+boot; a live policy apply won't activate it, even for new processes) — after
+a recreate that includes it, setup enables terminals automatically.
 
 There is **no operator knob for the netlink/seccomp block** — it is compiled
 into the in-container OpenShell supervisor (Rust seccompiler), not the Docker
@@ -224,8 +225,9 @@ only inbound path. Details live in the operator skill.
 - Terminal tile → "Launcher Error: Unhandled error" (500 on POST
   `/api/terminals`; log ends `OSError: out of pty devices`) → the real error
   is a swallowed EACCES from `os.openpty()`: Landlock lacks rw `/dev/pts`.
-  Operator grants it + re-applies policy; then re-run `start-jupyter.sh` —
-  the running server keeps its old Landlock ruleset. Details in
+  Operator adds it to the policy TEMPLATE; it activates at the next sandbox
+  recreate (fs policy is parsed at container boot — a live apply changes
+  nothing, even for new processes). Details in
   `references/sandbox-internals.md`.
 - Wrong CA bundle (`ca-certificates.crt`) → uv TLS failures. Use
   `/etc/openshell-tls/ca-bundle.pem`.

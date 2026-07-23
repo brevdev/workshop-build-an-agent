@@ -76,6 +76,18 @@ export PATH="$VENV/bin:$PATH"
 # ragas phones usage telemetry to t.explodinggradients.com — blocked egress
 # here, and each blocked ping burns retries mid-notebook. Disable at source.
 export RAGAS_DO_NOT_TRACK=true
+# AI-Workbench parity for KERNELS: the platform injects the project env +
+# configured secrets into the whole Jupyter process, and kernels inherit the
+# SERVER env. Several notebooks read os.environ["NVIDIA_API_KEY"] directly
+# (no load_dotenv) — without this, the first API cell of module 1 KeyErrors
+# and LANGSMITH_TRACING never reaches kernels. Terminals already get these
+# via terminal-bashrc; the server tree needs them too. NOTE: values are
+# captured at launch — after the operator re-stages secrets.env, re-run this
+# script so kernels see the new keys.
+set -a
+[ -f "$REPO/variables.env" ] && . "$REPO/variables.env"
+[ -f "$REPO/secrets.env" ] && . "$REPO/secrets.env"
+set +a
 # npm registry is egress-blocked; a notebook-spawned npx (module-2 PART 2A
 # remote MCP) otherwise burns ~70s/call in retry backoff. Fail fast instead.
 export NPM_CONFIG_FETCH_RETRIES=1

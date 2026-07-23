@@ -25,6 +25,45 @@ REPO = sys.argv[1] if len(sys.argv) > 1 else "/sandbox/workshop-build-an-agent"
 MARKER = "<!-- [sandbox-note] -->"
 
 NOTES = {
+    "1-build-an-agent/secrets.md": (
+        "> **🛡️ SANDBOX NOTE:** The `claude`/`codex` CLIs mentioned in the "
+        "AI-tutor callout below are **not** preinstalled in this sandbox, and "
+        "`npm install -g …` is egress-blocked by policy. The sandbox's "
+        "resident NemoClaw agent carries the same workshop tutor skills "
+        "(`workshop`, `module-1` … `module-7`) — ask it for module guidance "
+        "through its normal messaging channel instead."
+    ),
+    "5-deep-agents/build_deep_agents.md": (
+        "> **🛡️ SANDBOX NOTE:** Skip `source .venv/bin/activate` in the "
+        "commands below — `demo/backend/.venv` does not exist here and the "
+        "workshop venv is already active in every terminal. Run the "
+        "`python`/`uvicorn` commands directly, and pick another port if "
+        "module-2's MCP server holds 8000."
+    ),
+    "6-agent-safety/evaluating_safety.md": (
+        "> **🛡️ SANDBOX NOTE:** The collapsed Step-1/Step-2 memory-poisoning "
+        "walkthrough edits the OpenClaw workspace (`/sandbox/.openclaw/…`) "
+        "created on the earlier setup pages — OpenClaw cannot be installed in "
+        "this sandbox (npm egress), so treat those steps as a read-through. "
+        "The evaluation pipeline below runs fully here: it uses the built-in "
+        "mock agent and skips CLI-backed agents gracefully."
+    ),
+    "7-agent-harnesses/agent_skills.md": (
+        "> **🛡️ SANDBOX NOTE:** `npx skills add …` needs the npm registry, "
+        "which is egress-blocked here (the command fails fast rather than "
+        "hanging). The catalog skill it installs is GPU-oriented (cuDF) — see "
+        "the Harness Lab's note for the policy-gated "
+        "`install_nvidia_skill.sh` alternative, and the repo-shipped "
+        "`skills/` and `code/7-agent-harnesses/skills/` folders for local "
+        "skill examples you can open right now."
+    ),
+    "7-agent-harnesses/gpu_skills.md": (
+        "> **🛡️ SANDBOX NOTE:** This page's proof-of-GPU flow (`nvidia-smi`, "
+        "the cuDF skill) needs a GPU host — not available in this sandbox; "
+        "treat it as a read-through. The skill anatomy and harness-integration "
+        "mechanics it teaches are exercised hands-on (CPU-only) in the "
+        "Harness Lab."
+    ),
     "2-agentic-rag/mcp.md": (
         "> **🛡️ SANDBOX NOTE:** In this OpenShell sandbox the remote-MCP path "
         "(PART 2A — `npx`/`mcp.tavily.com`) is egress-blocked by policy: each "
@@ -125,8 +164,36 @@ for rel, note in sorted(NOTES.items()):
         changed += 1
         print(f"adapted: {rel}" + (f" (+{n} /project path fixes)" if n else ""))
 
+# Deep Agents Client tile setup page (demo/start_client.sh serve_setup_page):
+# written for the AI-Workbench layout (/project paths, python3.12, npm install
+# — all wrong/impossible here). Swap the step list for sandbox guidance.
+# Marker-guarded via the HTML comment; sandbox-copy-local like everything else.
+SC = os.path.join(REPO, "demo", "start_client.sh")
+SC_MARKER = "<!-- [sandbox-note] -->"
+if os.path.exists(SC):
+    text = open(SC).read()
+    start, end = text.find("  <ol>"), text.find("</ol>")
+    if SC_MARKER not in text and start != -1 and end != -1:
+        replacement = (
+            f"  {SC_MARKER}\n"
+            "  <ol>\n"
+            "    <li><strong>This sandbox can't build the demo client:</strong> the frontend needs\n"
+            "      <code>npm install</code>, and the npm registry is egress-blocked here by policy.</li>\n"
+            "    <li><strong>Use the module-5 lesson flow instead</strong> — start the backend per the\n"
+            "      lesson's SANDBOX NOTE (<span class=\"term\">cd " + REPO + "/demo/backend\n"
+            "uvicorn server:app --host 0.0.0.0 --port 8010</span>) and work through\n"
+            "      <code>code/5-deep-agents/deep_agent.py</code>.</li>\n"
+            "    <li><strong>Want the full UI?</strong> Run this demo on a GPU/desktop pathway\n"
+            "      (Brev / AI Workbench), where <code>npm install</code> works.</li>\n"
+            "  " )
+        text = text[:start] + replacement + text[end:]
+        open(SC, "w").write(text)
+        changed += 1
+        print("adapted: demo/start_client.sh (setup page sandbox guidance)")
+
 # /project path fixes in lessons that need no note
-for rel in ("6-agent-safety/evaluating_safety.md", "6-agent-safety/using_nemoclaw.md"):
+# (evaluating_safety.md moved to NOTES above — the NOTES loop also rewrites paths)
+for rel in ("6-agent-safety/using_nemoclaw.md",):
     path = os.path.join(REPO, ".devx", rel)
     if not os.path.exists(path):
         continue

@@ -112,6 +112,12 @@ set +a
 # remote MCP) burns ~70s/call in retry backoff before failing. Fail fast.
 export NPM_CONFIG_FETCH_RETRIES=1
 export NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT=8000
+# AI-Workbench parity: platform terminals open at the project root. Here the
+# server is deliberately launched from /sandbox (launcher-config
+# anti-duplication) and terminado inherits that cwd, so every repo-relative
+# lesson command (\`cd code/2-agentic-rag && langgraph dev\`, …) would fail on
+# first paste. Only rehome terminals that actually spawned at /sandbox.
+[ "\$PWD" = /sandbox ] && cd "$REPO"
 EOF
 
 # ---- 4c. aiohttp proxy trust (async ChatNVIDIA / langgraph dev) --------------

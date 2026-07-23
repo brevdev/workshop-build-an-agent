@@ -209,7 +209,14 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
    --port 8888 --no-browser --ServerApp.allow_remote_access=False`, then
    **verifies the running server's `/proc/<pid>/environ` actually contains
    `LD_PRELOAD`**. It reuses the previous token when one exists so the user's
-   saved URL stays valid across restarts.
+   saved URL stays valid across restarts. It also `set -a`-sources
+   `$REPO/variables.env` + `$REPO/secrets.env` into the server env before
+   launch (AI-Workbench parity for KERNELS): kernels/voila/tiles inherit the
+   server env, and several notebooks read `os.environ["NVIDIA_API_KEY"]`
+   directly with no `load_dotenv` — without this, module 1's first API cell
+   KeyErrors and `LANGSMITH_TRACING` never reaches kernels. Corollary: after
+   the operator re-stages `secrets.env`, RE-RUN this script (token/URL
+   survive) so kernels pick up the new keys.
 
 8. **Workshop skills → agent skill library** (`setup.sh`, final step). The
    NemoClaw harness only scans its own library

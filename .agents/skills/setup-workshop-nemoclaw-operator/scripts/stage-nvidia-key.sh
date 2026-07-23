@@ -54,3 +54,5 @@ fi
 # Verify without reading contents back.
 docker exec "$C" ls -l "$DEST"
 echo "Staged $DEST in $C (mode 600, owner sandbox). Tell the in-sandbox agent to re-run preflight."
+echo "NOTE: if JupyterLab is already running, kernels captured the OLD env at launch —"
+echo "      have the agent re-run start-jupyter.sh (token/URL survive) so kernels see the new keys."

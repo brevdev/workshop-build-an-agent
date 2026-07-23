@@ -2,7 +2,12 @@
 name: setup-workshop-nemoclaw-operator
 description: >-
   Operator/host side of running the NVIDIA "Build an Agent" DevX workshop
-  inside an OpenShell/NemoClaw sandbox. Use this when YOU are on the sandbox
+  inside an OpenShell/NemoClaw sandbox. ⚠️ NOT the default workshop-setup
+  path: for a generic "set up the workshop" request, use the `setup-workshop`
+  skill (the standard bare-metal/Brev/AI-Workbench installer). Invoke THIS
+  skill ONLY if the user names it explicitly, or explicitly says the workshop
+  should run with "NemoClaw" or inside an "OpenShell" sandbox. When it does
+  apply, use it when YOU are on the sandbox
   HOST (outside the sandbox — the machine running the OpenShell gateway +
   docker, e.g. via Claude Code) and the user wants the workshop set up in a
   sandbox: stage/apply the egress policy (PyPI, NIM /v1/ranking, scoped GitHub
@@ -11,8 +16,7 @@ description: >-
   (openshell forward service + SSH/Teleport port-forward) so the user can open
   the JupyterLab token URL. Also covers sandbox lifecycle pitfalls (never
   docker-restart, recreate wipes state) and egress-denial debugging via the
-  OCSF audit log. NOT for working inside the sandbox, and NOT the bare-metal
-  GPU installer (`setup-workshop`).
+  OCSF audit log. NOT for working inside the sandbox.
 disable-model-invocation: false
 user-invocable: true
 ---
@@ -27,6 +31,24 @@ to the resulting JupyterLab. This is one half of a two-skill pair:
 |---|---|---|
 | **this skill** | on the sandbox **host** (outside) | egress policy, secrets staging, kick + unblock the sandbox agent, port-forward, lifecycle |
 | `setup-workshop-nemoclaw` | **inside** the sandbox | venv + deps, netlink shim, launcher/bridge fixes, Jupyter launch, URL hand-off |
+
+## Should this skill run at all?
+
+The workshop's DEFAULT setup path is the **`setup-workshop`** skill — the
+standard installer for the ordinary pathways (bare metal on Brev, local
+install via AI Workbench, GPU hosts). A generic request like "set up the
+build-an-agent workshop" goes there, not here.
+
+Invoke this skill ONLY when at least one of these is true:
+
+1. The user names it explicitly (`setup-workshop-nemoclaw-operator`, or asks
+   for the "nemoclaw operator" setup skill), or
+2. The user explicitly says the workshop should run with **"NemoClaw"** or
+   inside an **"OpenShell"** sandbox.
+
+If neither holds, stop and use `setup-workshop` instead — do not infer the
+sandbox path from circumstantial evidence (e.g. a sandbox merely existing on
+the host).
 
 ## Which side am I on?
 

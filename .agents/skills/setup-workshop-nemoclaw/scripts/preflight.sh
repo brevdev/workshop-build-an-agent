@@ -62,11 +62,15 @@ code=$(curl -sS -m 15 -o /dev/null -w '%{http_code}' https://files.pythonhosted.
   ask "same policy block must include files.pythonhosted.org"; }
 
 # 4. NIM endpoint (chat/embeddings/models; ranking is POST-only and needs auth,
-#    so reaching /v1/models with 200 is the practical probe)
-code=$(curl -sS -m 15 -o /dev/null -w '%{http_code}' https://integrate.api.nvidia.com/v1/models 2>/dev/null)
+#    so reaching /v1/models with 200 is the practical probe).
+# ⚠️ Probe with python3, NOT curl: the community example's `nvidia` policy
+# block allowlists only hermes/python binaries — an exec'd curl is DENIED at
+# NET:OPEN (`binary '/usr/bin/curl' not allowed in policy 'nvidia'`) and
+# returns 000 even when the route is open, wrongly BLOCKING preflight.
+code=$(python3 -c "import urllib.request,ssl;print(urllib.request.urlopen('https://integrate.api.nvidia.com/v1/models',context=ssl.create_default_context(cafile='$CA'),timeout=15).status)" 2>/dev/null)
 if [ "$code" = "200" ]; then pass "integrate.api.nvidia.com reachable (200)"; else
-  failf "integrate.api.nvidia.com blocked (HTTP ${code:-000})"
-  ask  "allow the NIM routes on integrate.api.nvidia.com incl. POST /v1/ranking (module-2 reranker)"
+  failf "integrate.api.nvidia.com blocked (python probe: ${code:-no-response})"
+  ask  "allow the NIM routes on integrate.api.nvidia.com incl. POST /v1/ranking (module-2 reranker) for the python binaries"
 fi
 
 # 5. Secrets staged

@@ -155,11 +155,47 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
    (HTTP 599); a raw `type: url` → `/voila/render/...` iframe carries no auth
    token → 302 → login → hangs at "Running…".
 
+5b. **Terminal rcfile** (`setup.sh` 4b + `start-jupyter.sh`
+   `--ServerApp.terminado_settings`). The Terminal tile otherwise spawns a
+   LOGIN bash: `/etc/profile` resets PATH and the image's read-only
+   `/sandbox/.bashrc` re-prepends only the hermes dirs — the workshop venv
+   (sole home of `langgraph`/`uvicorn`/`streamlit`) drops off PATH and every
+   lesson terminal command dies with "command not found". The rc files cannot
+   be replaced (the supervisor denies creating `.bashrc*`/`.profile*` in
+   /sandbox). Fix: generate `$REPO/.launcher-config/terminal-bashrc` (sources
+   `/sandbox/.bashrc` for the proxy env, prepends the venv, exports
+   SSL_CERT_FILE/PIP_CERT, `set -a`-sources `variables.env` + `secrets.env`
+   for AI-Workbench parity — module-2's `uvicorn mcp_server:app` hard-requires
+   TAVILY_API_KEY, and a terminal-launched `langgraph dev` needs
+   LANGSMITH_TRACING for the observability lesson — and sets npm fail-fast
+   vars) and launch terminals as NON-login `bash --rcfile <that file>`.
+
+5c. **aiohttp proxy trust** (`setup.sh` 4c). All egress rides HTTP(S)_PROXY
+   env vars; httpx/requests honor them, aiohttp needs `trust_env=True`.
+   langchain-nvidia-ai-endpoints' ASYNC path uses aiohttp, so every
+   langgraph-served agent run (`ainvoke` → ChatNVIDIA) died at
+   `Cannot connect to host integrate.api.nvidia.com:443 [Temporary failure in
+   name resolution]` while sync calls worked. Fix: a `.pth`-imported module in
+   the venv site-packages (`zz-workshop-aiohttp-trust-env.pth` →
+   `_workshop_aiohttp_trust_env.py`) defaults `trust_env=True` when proxy env
+   is present. (`sitecustomize.py` is unusable — shadowed by
+   `/usr/local/lib/nemoclaw-patches` on PYTHONPATH.)
+
 6. **Neutralize %pip cells** (`scripts/neutralize_pip_cells.py`). Cell 1 of
    the 8 `code/secrets_management/secrets_management_*.ipynb` notebooks runs
    `%pip install -r ../../requirements.txt` (pulls torch etc. → hangs voila;
    the uv venv has no pip anyway). The script comments out only that line and
    preserves the `load_dotenv` calls. Idempotent.
+
+6b. **Lesson content sandbox notes** (`scripts/sandbox_content_notes.py`).
+   Marker-guarded SANDBOX NOTE admonitions + `/project/` → `$REPO` rewrites
+   inside bash fences, for lessons whose primary flow needs egress/hardware
+   this sandbox deliberately lacks: module-2 `mcp.md` (remote MCP via npx —
+   use the lesson's own PART 2B local server; verified working) and
+   `migrate.md` (local NIM needs Docker+GPU), module-4 GPU lessons, module-5
+   `experience_deep_agent.md` (skip the `python3.12 -m venv` step — deps are
+   pre-installed; `npm`/Docker unavailable by design), module-6 CLI setup
+   pages (Docker/npm), plus `cd /project/...` path fixes in module-6 lessons.
 
 7. **Single-server discipline** (`scripts/start-jupyter.sh`). Keep exactly
    **one** JupyterLab server on 8888. Stale servers steal the port bind — the
@@ -187,6 +223,9 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
    a fresh session to see them. Excluded on purpose:
    `setup-workshop-nemoclaw-operator` (host-side) and `setup-workshop`
    (bare-metal GPU installer).
+   ⚠️ THIS skill itself propagates from the RUNNING copy (`$SKILL_DIR`), never
+   from the repo checkout — re-running setup.sh used to silently revert an
+   operator-staged skill update to the repo's older version.
 
 ## Report back to the user (the skill's real output)
 
@@ -258,4 +297,12 @@ only inbound path. Details live in the operator skill.
 - Switching off branch `edwli-dev` (e.g. `nvwb switch-branch`) → don't.
 - Simple Agents Client renders but needs a separate LangGraph backend (a
   module exercise) to chat; Deep Agents Client intentionally serves a "setup
-  required" page until its demo backend exists. Neither is a setup defect.
+  required" page until its backend + npm-built client exist. Neither is a
+  setup defect.
+- Module-2 `migrate.md` (local NIM: Docker+GPU) is read-through-only here —
+  same category as module-4 `02/03` (GPU), module-5 Docker sandbox/client
+  build, and module-6 CLI installers. `sandbox_content_notes.py` marks all of
+  them in the lesson pages.
+- Heavy notebooks (module-4 SDG generates 250 records) can rate-limit other
+  concurrent LLM work on the same NVIDIA API key (429s) — run heavy modules
+  sequentially.

@@ -67,6 +67,15 @@ community example; adjust the repo slug if the workshop repo differs.
     - path: /usr/lib/git-core/git-remote-https
     - path: /usr/lib/git-core/git-remote-http
     - path: /usr/bin/curl
+  # OPTIONAL module-7 extension: `scripts/install_nvidia_skill.sh` clones the
+  # public NVIDIA/skills catalog to demo signature-verified skill installs.
+  # Without these rules the clone is policy-DENIED and that one exercise is
+  # unavailable (everything else in module 7 works). Append INSIDE the
+  # github_git_clone endpoint's rules if the operator wants it enabled:
+  #   - allow: { method: GET, path: /NVIDIA/skills/info/refs }
+  #   - allow: { method: POST, path: /NVIDIA/skills/git-upload-pack }
+  #   - allow: { method: GET, path: /NVIDIA/skills.git/info/refs }
+  #   - allow: { method: POST, path: /NVIDIA/skills.git/git-upload-pack }
   # Python package index: read-only GET so the agent can uv-install the
   # workshop deps. uv venv pythons are symlinks to /usr/bin/python3.13, so
   # these binaries entries cover venv processes too.

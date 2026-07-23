@@ -76,6 +76,10 @@ export PATH="$VENV/bin:$PATH"
 # ragas phones usage telemetry to t.explodinggradients.com — blocked egress
 # here, and each blocked ping burns retries mid-notebook. Disable at source.
 export RAGAS_DO_NOT_TRACK=true
+# npm registry is egress-blocked; a notebook-spawned npx (module-2 PART 2A
+# remote MCP) otherwise burns ~70s/call in retry backoff. Fail fast instead.
+export NPM_CONFIG_FETCH_RETRIES=1
+export NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT=8000
 
 # Launch from /sandbox (NOT repo root) as an extra guard against cwd-based
 # duplicate launcher-config discovery. root_dir is set explicitly to the repo.
@@ -86,6 +90,7 @@ nohup "$VENV/bin/jupyter" lab \
   --ServerApp.token="$TOKEN" \
   --ServerApp.allow_remote_access=False \
   --ServerApp.terminals_enabled="$TERMINALS_ENABLED" \
+  --ServerApp.terminado_settings="{'shell_command': ['bash', '--rcfile', '$LAUNCHER_DIR/terminal-bashrc']}" \
   > /tmp/jupyterlab.log 2>&1 &
 SERVER_PID=$!
 

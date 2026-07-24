@@ -163,6 +163,14 @@ say "4d. module-3 judge rate limiter"
 # LLM-as-judge loops and ragas without touching any exercise cell.
 "$VENV/bin/python" "$SKILL_DIR/scripts/tune_judge_rate_limit.py" "$REPO"
 
+# ---- 4e. module-5 model map repair -------------------------------------------
+say "4e. module-5 model map"
+# deepseek-r1-0528 is retired from the NIM catalog (404s everywhere) and
+# meta/llama-3.3-70b-instruct currently answers slower than ChatNVIDIA's 60s
+# client timeout, erroring every Deep Agent turn. Remap the sandbox copies
+# (backend + lab files; marker-guarded) to served, fast siblings.
+"$VENV/bin/python" "$SKILL_DIR/scripts/tune_model_map.py" "$REPO"
+
 # ---- 5. remove leftover IPC-transport experiment (superseded by the shim) ---
 say "5. stale jupyter_server_config cleanup"
 JCFG=/sandbox/.jupyter/jupyter_server_config.py

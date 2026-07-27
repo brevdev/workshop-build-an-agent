@@ -27,9 +27,13 @@ MARKER = "<!-- [sandbox-note] -->"
 NOTES = {
     "1-build-an-agent/secrets.md": (
         "> **🛡️ SANDBOX NOTE:** The `claude`/`codex` CLIs mentioned in the "
-        "AI-tutor callout below are **not** preinstalled in this sandbox, and "
-        "`npm install -g …` is egress-blocked by policy. The sandbox's "
-        "resident NemoClaw agent carries the same workshop tutor skills "
+        "AI-tutor callout below are **not** preinstalled in this sandbox and "
+        "cannot be installed here. `registry.npmjs.org` IS reachable (the "
+        "`npm_install` policy block opens it, which is how the module-5 client "
+        "is built), but **scoped** packages like `@anthropic-ai/claude-code` "
+        "are refused: npm requests scoped metadata as `/@scope%2Fname` and the "
+        "L7 proxy rejects request-targets containing an encoded `/`. The "
+        "sandbox's resident NemoClaw agent carries the same workshop tutor skills "
         "(`workshop`, `module-1` … `module-7`) — ask it for module guidance "
         "through its normal messaging channel instead."
     ),
@@ -103,11 +107,15 @@ NOTES = {
         "Keep the default **Llama** model — the streaming backend garbles "
         "Nemotron's reasoning output (same streaming/tool-calling caveat the "
         "module-2 client documents). Model ids are remapped in this sandbox "
-        "(Llama → 3.1-70b, DeepSeek → V4-Flash): `deepseek-r1-0528` is "
-        "retired from the NIM catalog and `llama-3.3-70b` currently answers "
-        "slower than the client's 60s timeout. The client build "
-        "(`npm install`) and Docker sandboxing are unavailable: the Deep "
-        "Agents Client tile serves its setup page, and sandbox-mode falls "
+        "(Llama → 3.1-70b, DeepSeek → V4-Pro): `deepseek-r1-0528` is "
+        "retired from the NIM catalog, `deepseek-v4-flash` is listed but no "
+        "longer answers (every probe times out), and `llama-3.3-70b` answers "
+        "slower than the client's 60s timeout. **The Deep Agents Client tile "
+        "works on first click** — `setup.sh` pre-runs `npm install` + "
+        "`npm run build` in `demo/`, so the tile serves the real Deep Agent "
+        "Builder UI (if that pre-build ever fails, setup.sh logs a WARNING and "
+        "the tile falls back to a 'setup required' page instead of hanging). "
+        "Docker sandboxing is still unavailable: sandbox-mode falls "
         "back to local execution with a loud warning — that warning IS this "
         "module's security lesson."
     ),
@@ -207,6 +215,31 @@ if os.path.exists(SC):
         open(SC, "w").write(text)
         changed += 1
         print(f"adapted: demo/start_client.sh (setup page sandbox guidance, +{n_paths} /project path fixes)")
+
+# Dead in-lesson links. docsify resolves an extension-less target `foo` to
+# `foo.md`; when no such file exists the content pane just goes blank, with no
+# 404 and nothing in the console — so these are easy to ship unnoticed.
+# Verified 2026-07-27 by resolving every markdown link across all 7 .devx
+# modules (docsify-aware): this was the only genuinely dead target.
+LINK_FIXES = {
+    # `setup_agent_builder.md` does not exist and is absent from module 5's
+    # _sidebar.md; the Agent-Builder setup material lives in experience_deep_agent.
+    "5-deep-agents/intro_deep_agents.md": [
+        ("](setup_agent_builder)", "](experience_deep_agent)"),
+    ],
+}
+for rel, pairs in LINK_FIXES.items():
+    path = os.path.join(REPO, ".devx", rel)
+    if not os.path.exists(path):
+        continue
+    text = open(path).read()
+    orig = text
+    for old, new in pairs:
+        text = text.replace(old, new)
+    if text != orig:
+        open(path, "w").write(text)
+        changed += 1
+        print(f"adapted: {rel} (dead link retargeted)")
 
 # /project path fixes in lessons that need no note
 # (evaluating_safety.md moved to NOTES above — the NOTES loop also rewrites paths)

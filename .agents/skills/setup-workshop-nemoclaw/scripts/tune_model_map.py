@@ -6,8 +6,17 @@ Two defective entries ship in `demo/backend/agent.py` and
 integrate.api.nvidia.com/v1/models with a live key):
 
   - "deepseek": deepseek-ai/deepseek-r1-0528 is RETIRED from the catalog —
-    every request 404s on every pathway. Remap to deepseek-ai/deepseek-v4-flash
-    (served; ~27s incl. reasoning, inside client timeouts).
+    every request 404s on every pathway. Remap to deepseek-ai/deepseek-v4-pro.
+    ⚠️ HISTORY: this first pointed at deepseek-ai/deepseek-v4-flash, which was
+    healthy at the 2026-07-24 audit (~27s incl. reasoning). Re-audited
+    2026-07-27: v4-flash is still LISTED but no longer answers — 3/3 probes for
+    an 8-token completion timed out (2x non-stream @120s, 1x stream @120s, plus
+    an earlier 180s). Controls on the same key in the same run:
+    meta/llama-3.1-70b-instruct 0.4s, nvidia/nemotron-3-super-120b-a12b 13.9s.
+    Catalog sweep of the deepseek family: -coder-6.7b-instruct → HTTPError (not
+    a chat endpoint), -v4-flash → timeout, -v4-pro → 19.4s OK (only viable one).
+    Presence in /v1/models does NOT imply the model is served — always
+    latency-probe a remap target before pinning it.
   - "llama"/"claude": meta/llama-3.3-70b-instruct is served but answered in
     ~90s — beyond ChatNVIDIA's 60s default timeout, so both the sync and
     aiohttp paths raise ReadTimeout/SocketTimeoutError and the Deep Agent
@@ -29,10 +38,16 @@ REPLACEMENTS = [
     ('"claude": "meta/llama-3.3-70b-instruct"',
      '"claude": "meta/llama-3.1-70b-instruct"'),
     ('"deepseek": "deepseek-ai/deepseek-r1-0528"',
-     '"deepseek": "deepseek-ai/deepseek-v4-flash"'),
+     '"deepseek": "deepseek-ai/deepseek-v4-pro"'),
+    # v4-flash went dark after the first audit; carry the forward-fix too so
+    # sandboxes tuned by the earlier version of this script get repaired.
+    ('"deepseek": "deepseek-ai/deepseek-v4-flash"',
+     '"deepseek": "deepseek-ai/deepseek-v4-pro"'),
     ('"llama": "Llama 3.3 (Meta)"', '"llama": "Llama 3.1 (Meta)"'),
     ('"deepseek": "DeepSeek R1 (DeepSeek)"',
-     '"deepseek": "DeepSeek V4 Flash (DeepSeek)"'),
+     '"deepseek": "DeepSeek V4 Pro (DeepSeek)"'),
+    ('"deepseek": "DeepSeek V4 Flash (DeepSeek)"',
+     '"deepseek": "DeepSeek V4 Pro (DeepSeek)"'),
 ]
 
 TARGETS = [

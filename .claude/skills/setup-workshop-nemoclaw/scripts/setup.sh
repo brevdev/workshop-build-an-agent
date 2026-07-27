@@ -108,10 +108,24 @@ set -a
 [ -f "$REPO/variables.env" ] && . "$REPO/variables.env"
 [ -f "$REPO/secrets.env" ] && . "$REPO/secrets.env"
 set +a
-# npm registry is egress-blocked; without this a stray npx (module-2 PART 2A
-# remote MCP) burns ~70s/call in retry backoff before failing. Fail fast.
+# Bound npm/npx retry backoff so a failed fetch surfaces in seconds, not ~70s.
+# ⚠️ MINTIMEOUT MUST BE SET ALONGSIDE MAXTIMEOUT: npm's default
+# fetch-retry-mintimeout is 10000, so exporting only maxtimeout=8000 leaves
+# min > max and npm aborts EVERY command with
+#   npm error minTimeout is greater than maxTimeout
+# without opening a socket. That regression was terminal-only (these lines live
+# in this heredoc, so setup.sh's own \`npm install\` never saw them and masked it).
 export NPM_CONFIG_FETCH_RETRIES=1
+export NPM_CONFIG_FETCH_RETRY_MINTIMEOUT=1000
 export NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT=8000
+# Silence third-party telemetry whose hosts are (correctly) not in the egress
+# policy, so students don't read blocked-beacon noise as their own bug —
+# module-2's lesson explicitly tells them to watch this terminal for errors.
+#   langgraph dev  -> POSTs analytics to a supabase host (langgraph_cli/analytics.py)
+#   streamlit      -> GETs checkip.amazonaws.com for its "Network URL" banner
+export LANGGRAPH_CLI_NO_ANALYTICS=1
+export STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+export STREAMLIT_SERVER_HEADLESS=true
 # AI-Workbench parity: platform terminals open at the project root. Here the
 # server is deliberately launched from /sandbox (launcher-config
 # anti-duplication) and terminado inherits that cwd, so every repo-relative

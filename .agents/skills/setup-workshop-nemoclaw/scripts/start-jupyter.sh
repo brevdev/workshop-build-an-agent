@@ -88,10 +88,22 @@ set -a
 [ -f "$REPO/variables.env" ] && . "$REPO/variables.env"
 [ -f "$REPO/secrets.env" ] && . "$REPO/secrets.env"
 set +a
-# npm registry is egress-blocked; a notebook-spawned npx (module-2 PART 2A
-# remote MCP) otherwise burns ~70s/call in retry backoff. Fail fast instead.
+# Bound npm/npx retry backoff so a notebook-spawned npx (module-2 PART 2A
+# remote MCP) fails in seconds instead of ~70s.
+# ⚠️ MINTIMEOUT MUST BE SET ALONGSIDE MAXTIMEOUT: npm's default
+# fetch-retry-mintimeout is 10000, so maxtimeout=8000 alone leaves min > max and
+# npm aborts every command with "minTimeout is greater than maxTimeout" before
+# opening a socket. Kernels inherit this env, so npx from a notebook would break too.
 export NPM_CONFIG_FETCH_RETRIES=1
+export NPM_CONFIG_FETCH_RETRY_MINTIMEOUT=1000
 export NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT=8000
+# Third-party telemetry whose hosts are (correctly) absent from the egress
+# policy. Kernels and launcher-tile processes inherit this env, so silencing it
+# here keeps blocked-beacon noise out of notebooks and tile logs.
+#   langgraph dev -> supabase analytics; streamlit -> checkip.amazonaws.com banner
+export LANGGRAPH_CLI_NO_ANALYTICS=1
+export STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+export STREAMLIT_SERVER_HEADLESS=true
 
 # Launch from /sandbox (NOT repo root) as an extra guard against cwd-based
 # duplicate launcher-config discovery. root_dir is set explicitly to the repo.

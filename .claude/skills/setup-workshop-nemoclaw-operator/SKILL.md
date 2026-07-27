@@ -143,25 +143,50 @@ Workflow (details + YAML in the reference):
    ```
    `scripts/verify-sandbox-ready.sh` runs the full probe set.
 
-## Phase 2 — Stage the NVIDIA key (one-time)
+## Phase 2 — Keys: leave NVIDIA_API_KEY UNSET (default)
 
-The notebooks `load_dotenv()` the repo-root `secrets.env` inside the sandbox.
-Write it without the key ever touching chat, logs, or shell history — use
-`scripts/stage-nvidia-key.sh`, or the one-liner (community example, reusing
-`COMPATIBLE_API_KEY` from the project `.env`; substitute a fresh key from
-build.nvidia.com if preferred):
+**Do nothing here in the normal flow.** The learner sets `NVIDIA_API_KEY` in
+the workshop's own **Secrets Manager** tile, which writes the repo-root
+`secrets.env` that every notebook `load_dotenv()`s. Leaving the variable absent
+at server-launch time is deliberate, not an oversight:
+
+`start-jupyter.sh` `set -a`-sources `secrets.env` into the Jupyter server env at
+launch, and kernels inherit that env. `load_dotenv()` does **not** override
+variables already present in the environment — so anything baked in at launch
+**shadows later edits to the file**. Stage a key before launch and the learner's
+Secrets Manager change is silently ignored until the server restarts; leave it
+unset and `load_dotenv()` stays authoritative, so the key takes effect on the
+next cell run with no restart. This is exactly why the Tavily and LangSmith
+keys never exhibited the problem — they were never injected.
+
+⚠️ **Never fall back to `COMPATIBLE_API_KEY` / `OPENAI_API_KEY`.** Those name
+the NemoClaw *agent's* inference credential — in the community example an
+`sk-…` key for the host TLS proxy (`NEMOCLAW_ENDPOINT_URL`), not a
+build.nvidia.com `nvapi-…` key. The old one-liner did this and produced a
+`secrets.env` that looked correctly populated while every notebook died with
+`AuthenticationError: 401` against `integrate.api.nvidia.com`. Real incident;
+`stage-nvidia-key.sh` now refuses that fallback and warns on any non-`nvapi-`
+key.
+
+Only pre-seed a key when you actually want one baked in (unattended classroom
+image), and pass a real `nvapi-…` key explicitly:
 
 ```bash
-( set -a; . ./.env; printf 'NVIDIA_API_KEY=%s\n' "$COMPATIBLE_API_KEY" | \
-  docker exec -i "$C" \
-  sh -c 'umask 077; cat > /sandbox/workshop-build-an-agent/secrets.env; \
-         chown sandbox:sandbox /sandbox/workshop-build-an-agent/secrets.env' )
+printf '%s' 'nvapi-…' | SANDBOX=<sandbox> bash scripts/stage-nvidia-key.sh
+# or, from a dotenv file that carries a genuine NVIDIA_API_KEY:
+SANDBOX=<sandbox> bash scripts/stage-nvidia-key.sh --env-file ./.env
 ```
 
+The script merges (never truncates) — the Secrets Manager tile rewrites the
+same file wholesale, so a truncating write would destroy keys the learner
+already set. It reports key NAMES only, never values. If you pre-seed while
+JupyterLab is already up, re-run `start-jupyter.sh` (token/URL survive) so
+kernels pick the key up.
+
 Never paste keys through the agent's chat channel (the in-sandbox agent will
-itself refuse them). Optional: Tavily (module-1 search) / LangSmith (module-3
-tracing) — append `TAVILY_API_KEY=` / `LANGSMITH_API_KEY=` lines to the same
-file AND add policy entries for `mcp.tavily.com` / `api.smith.langchain.com`.
+itself refuse them). Tavily (modules 1/2/5 search) and LangSmith (module-3
+tracing) are handled the same way — set them in the Secrets Manager, or pass
+them to the same script; their policy blocks ship in the template.
 
 ## Phase 3 — Kick the in-sandbox agent
 

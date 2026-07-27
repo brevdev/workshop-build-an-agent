@@ -50,9 +50,9 @@ skill instead): `docker ps` shows an `openshell-<sandbox>-…` container and the
 
 ## Operator prerequisites (the handoff contract)
 
-Two things must be true before setup can succeed, and only the operator
-(outside the sandbox) can make them true. Verify them with
-`scripts/preflight.sh`; if missing, send the operator the exact asks from
+One thing must be true before setup can succeed, and only the operator
+(outside the sandbox) can make it true. Verify with `scripts/preflight.sh`;
+if missing, send the operator the exact ask from
 `references/operator-contract.md` and **stop until they confirm**:
 
 1. **Egress policy** allows: `GET pypi.org` + `files.pythonhosted.org`
@@ -69,9 +69,16 @@ Two things must be true before setup can succeed, and only the operator
    if the repo is not yet cloned — git smart-HTTP on `github.com` scoped to the
    workshop repo. `preflight.sh` probes all of these and prints the exact ask
    for each gap.
-2. **NVIDIA key staged** at `/sandbox/workshop-build-an-agent/secrets.env` as
-   `NVIDIA_API_KEY=...` (notebooks `load_dotenv()` it themselves). Never
-   accept the key through chat; the operator writes it via `docker exec`.
+**Not** a prerequisite: `NVIDIA_API_KEY`. It is EXPECTED to be absent — the
+learner sets it in the workshop's **Secrets Manager** tile after launch, and
+preflight only WARNs about it. Leaving it unset is what makes that work:
+`start-jupyter.sh` sources `secrets.env` into the server env at launch and
+kernels inherit it, but `load_dotenv()` never overrides an already-set
+variable — so a key staged before launch would shadow every later Secrets
+Manager edit until a restart. Never accept a key through chat; if the operator
+does want one pre-seeded, they write it from the host with
+`stage-nvidia-key.sh` (a real `nvapi-…` key only — never `COMPATIBLE_API_KEY`,
+which is the agent's own `sk-…` proxy credential and yields a confusing 401).
 
 Optional third item — **`/dev/pts` read-write in `filesystem_policy`** — is
 needed only for the launcher's Terminal tile (terminado → `pty.fork`).
@@ -216,11 +223,21 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
    saved URL stays valid across restarts. It also `set -a`-sources
    `$REPO/variables.env` + `$REPO/secrets.env` into the server env before
    launch (AI-Workbench parity for KERNELS): kernels/voila/tiles inherit the
-   server env, and several notebooks read `os.environ["NVIDIA_API_KEY"]`
-   directly with no `load_dotenv` — without this, module 1's first API cell
-   KeyErrors and `LANGSMITH_TRACING` never reaches kernels. Corollary: after
-   the operator re-stages `secrets.env`, RE-RUN this script (token/URL
-   survive) so kernels pick up the new keys.
+   server env, which is how `LANGSMITH_TRACING` and other `variables.env`
+   settings reach kernels at all.
+   ⚠️ **Sourcing `secrets.env` here is a double-edged sword, and the reason
+   `NVIDIA_API_KEY` is deliberately left unset.** `load_dotenv()` does not
+   override an already-set variable, so any key present at launch SHADOWS
+   later edits to the file — the learner fixes the key in the Secrets Manager,
+   the file on disk is right, and kernels keep sending the stale value until a
+   restart. Verified 2026-07-27: all 13 notebooks that reference
+   `NVIDIA_API_KEY` call `load_dotenv()` first, and none read
+   `os.environ[...]` without it — so an unset key costs nothing and keeps
+   `load_dotenv()` authoritative. (An earlier version of this note claimed
+   "several notebooks read `os.environ` directly with no `load_dotenv`"; that
+   was wrong, and it was the justification for the injection that caused the
+   stale-key bug.) Corollary: if a key IS pre-seeded from the host, RE-RUN
+   this script (token/URL survive) so kernels pick it up.
 
 8. **Workshop skills → agent skill library** (`setup.sh`, final step). The
    NemoClaw harness only scans its own library

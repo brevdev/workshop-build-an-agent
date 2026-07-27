@@ -73,12 +73,17 @@ if [ "$code" = "200" ]; then pass "integrate.api.nvidia.com reachable (200)"; el
   ask  "allow the NIM routes on integrate.api.nvidia.com incl. POST /v1/ranking (module-2 reranker) for the python binaries"
 fi
 
-# 5. Secrets staged
+# 5. Secrets — NON-BLOCKING by design.
+# NVIDIA_API_KEY is EXPECTED to be absent at setup time: the learner sets it in
+# the workshop's Secrets Manager tile. Leaving it unset at launch is what keeps
+# load_dotenv() authoritative — start-jupyter.sh sources secrets.env into the
+# server env, and load_dotenv() will not override an already-set variable, so a
+# key baked in here would shadow every later Secrets Manager edit until a
+# restart. Absent = correct; do NOT block setup on it.
 if [ -s "$REPO/secrets.env" ] && grep -q '^NVIDIA_API_KEY=' "$REPO/secrets.env" 2>/dev/null; then
-  pass "secrets.env staged with NVIDIA_API_KEY (contents not read)"
+  pass "secrets.env carries NVIDIA_API_KEY (contents not read)"
 else
-  failf "no NVIDIA_API_KEY in $REPO/secrets.env"
-  ask  "stage the key from the host via docker exec (never via chat) — command in references/operator-contract.md"
+  warnf "no NVIDIA_API_KEY in $REPO/secrets.env — expected default; the learner sets it in the Secrets Manager tile (no restart needed). Notebook API cells 401 until then."
 fi
 
 # 5b. Workshop integration egress (module coverage; 2026-07-21 audit).

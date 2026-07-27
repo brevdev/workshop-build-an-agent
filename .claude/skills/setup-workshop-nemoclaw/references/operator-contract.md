@@ -15,7 +15,7 @@ something is missing. Never guess at policy state — probe, then ask precisely.
 | 2 | NIM chat/embeddings routes | `curl -sS -m 15 -o /dev/null -w '%{http_code}' https://integrate.api.nvidia.com/v1/models` | `200` |
 | 2b | Reranker route (modules 2/3) — `POST /v1/retrieval/**` on `ai.api.nvidia.com` (⚠️ NOT the legacy `/v1/ranking`) | authed rerank POST (see preflight.sh 5b) | `200` |
 | 2c | Integrations: `api.tavily.com` (mods 1/2/5), `api.smith.langchain.com` (mod 3 + tracing), `openaipublic.blob.core.windows.net` (mod 7 tiktoken) | preflight.sh 5b probes | `200` each |
-| 3 | NVIDIA key staged | `test -s /sandbox/workshop-build-an-agent/secrets.env && grep -q '^NVIDIA_API_KEY=' /sandbox/workshop-build-an-agent/secrets.env` | exit 0 |
+| 3 | ~~NVIDIA key staged~~ — **NOT a prerequisite.** Expected absent; the learner sets it in the Secrets Manager tile after launch (preflight only WARNs) | `grep -q '^NVIDIA_API_KEY=' /sandbox/workshop-build-an-agent/secrets.env` | either result is fine |
 | 4 | (only if repo missing) git smart-HTTP for the scoped repo | `curl -sS -m 20 -o /dev/null -w '%{http_code}' 'https://github.com/brevdev/workshop-build-an-agent.git/info/refs?service=git-upload-pack'` | `200` |
 | 5 | (optional — Terminal tile) rw `/dev/pts` in `filesystem_policy` | `python3 -c 'import os; os.openpty()'` | exit 0 (`EACCES` = grant missing) |
 | 6 | Inbound path (per session, AFTER launch) | n/a — operator runs the forward | HTTP 302 on host `127.0.0.1:8888/lab` |
@@ -46,18 +46,24 @@ so name hosts and paths exactly.
 > Signal it worked: my `curl https://pypi.org/simple/` returns 200. Ping me
 > "try now" and I'll re-verify and continue automatically.
 
-**secrets.env missing (probe 3 fails):**
+**secrets.env has no NVIDIA_API_KEY (probe 3 warns):**
 
-> The notebooks need `NVIDIA_API_KEY` in
-> `/sandbox/workshop-build-an-agent/secrets.env`. Please do NOT paste the key
-> in chat — write it from the host:
-> ```
-> C=$(docker ps --format '{{.Names}}' | grep openshell-<sandbox>)
-> printf 'NVIDIA_API_KEY=%s\n' "<key>" | docker exec -i "$C" \
->   sh -c 'umask 077; cat > /sandbox/workshop-build-an-agent/secrets.env; \
->          chown sandbox:sandbox /sandbox/workshop-build-an-agent/secrets.env'
-> ```
-> Check on the host: `docker exec "$C" ls -l /sandbox/workshop-build-an-agent/secrets.env`.
+Do **not** send an ask for this — it is the expected default. Tell the *user*
+instead: open the **Secrets Manager** tile in the JupyterLab launcher, set
+`NVIDIA API Key` to a `nvapi-…` key from build.nvidia.com, then re-run the
+notebook cells. No JupyterLab restart is needed, because the variable was
+absent from the server env at launch and `load_dotenv()` therefore reads the
+file fresh on every cell run.
+
+Only if the operator explicitly wants a key baked into an unattended image:
+
+> Please pre-seed the key from the host (never through chat) with the operator
+> skill's `stage-nvidia-key.sh` — pass a genuine `nvapi-…` key. ⚠️ Do NOT reuse
+> `COMPATIBLE_API_KEY`/`OPENAI_API_KEY` from the NemoClaw project `.env`: that
+> is the agent's own `sk-…` host-proxy credential, and staging it yields a
+> `secrets.env` that looks populated while every notebook fails with
+> `AuthenticationError: 401` against `integrate.api.nvidia.com`. After
+> pre-seeding, re-run `start-jupyter.sh` so kernels pick it up.
 
 **Repo missing and clone blocked (probe 4 fails):**
 

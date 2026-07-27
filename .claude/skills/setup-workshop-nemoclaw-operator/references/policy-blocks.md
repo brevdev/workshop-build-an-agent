@@ -160,6 +160,50 @@ minus uv.
       enforcement: enforce
       rules:
       - allow: { method: POST, path: /v1/retrieval/** }
+  # npm registry — module-5 "Deep Agents Client" tile. demo/ is a Vite+React
+  # app; without node_modules the tile only ever serves its "setup required"
+  # page. All 333 `resolved` URLs in demo/package-lock.json point at
+  # registry.npmjs.org and NOTHING else (verified from the lockfile), including
+  # the Node binary itself: demo/package.json declares a spurious
+  # `"node": "^25.6.1"` dep whose node-bin-setup postinstall pulls
+  # `node-linux-x64-<ver>.tgz` from the REGISTRY, not from nodejs.org — so this
+  # one host is sufficient. GET-only: npm publish/login (PUT/POST) stay denied.
+  # `npm audit` POSTs /-/npm/v1/security/advisories/bulk and is denied; that is
+  # non-fatal (install still exits 0) — pass --no-audit to silence it.
+  # Binary is the node interpreter: npm and npx are JS scripts run by it.
+  npm_install:
+    name: npm-install
+    endpoints:
+    - host: registry.npmjs.org
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow: { method: GET, path: /** }
+    binaries:
+    - path: /usr/local/bin/node
+  # Tavily REMOTE MCP host — module-2 PART 2A, the shipped default that every
+  # non-sandboxed pathway uses. Needs the npm_install block too (npx fetches the
+  # mcp-remote transport at call time). mcp-remote 0.1.38 speaks MCP
+  # streamable-HTTP: POST for JSON-RPC, GET for the SSE stream and for OAuth
+  # discovery under /.well-known/**, DELETE to end the session. Observed live:
+  #   GET  /mcp/                                       GET /.well-known/oauth-authorization-server
+  #   GET  /.well-known/oauth-protected-resource/mcp   POST /mcp/
+  # ⚠️ Policy alone is NOT sufficient — the MCP stdio transport drops the proxy
+  # env vars, so the in-sandbox skill's tune_remote_mcp_env.py is also required.
+  mcp_tavily:
+    name: mcp-tavily
+    endpoints:
+    - host: mcp.tavily.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow: { method: GET, path: /** }
+      - allow: { method: POST, path: /** }
+      - allow: { method: DELETE, path: /** }
+    binaries:
+    - path: /usr/local/bin/node
   # tiktoken downloads BPE encodings at first get_encoding() (module 7).
   tiktoken_encodings:
     name: tiktoken-encodings
@@ -215,11 +259,10 @@ exists (`docker restart` = stale-bootstrap-JWT crash loop).
 - `build.nvidia.com` — not needed; it appears only in notebook prose. Chat/
   completions/embeddings hit `integrate.api.nvidia.com`; reranking hits
   `ai.api.nvidia.com` (block above).
-- `registry.npmjs.org` + `mcp.tavily.com` — module-2's shipped remote-MCP
-  `web_search` path (`npx -y mcp-remote …`). Use the module's LOCAL MCP
-  server instead (PART 2B in `rag_agent.py`; deps already pinned) — only
-  `api.tavily.com` is needed, and npm's retry backoff otherwise hangs agent
-  tool calls for minutes.
+- (`mcp.tavily.com` used to be listed here. It is now OPENED — see the
+  `mcp_tavily` block above — so module-2 PART 2A has parity with the
+  non-sandboxed pathways. PART 2B still works and remains a valid teaching
+  contrast: the local server exposes 1 tool, the remote MCP exposes 5.)
 - `t.explodinggradients.com` — ragas telemetry; the sandbox skill exports
   `RAGAS_DO_NOT_TRACK=true` instead.
 - npm registry for tooling, conda/pytorch mirrors,

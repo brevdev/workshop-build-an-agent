@@ -107,6 +107,23 @@ if [ "$code" = "200" ] || [ "$code" = "206" ]; then pass "tiktoken BPE host reac
   warnf "openaipublic.blob.core.windows.net: HTTP ${code:-000} — module-7 harness_lab dies at tiktoken.get_encoding (log shows the real ProxyError only in the raised chain)"
   ask  "add the tiktoken_encodings policy block (GET /encodings/** on openaipublic.blob.core.windows.net)"
 fi
+# npm registry — module-5 "Deep Agents Client" tile. Probe with node, NOT curl:
+# the npm_install block scopes egress to /usr/local/bin/node, so a curl probe
+# reports a false negative (denied on the binary, not on the host).
+if command -v node >/dev/null 2>&1; then
+  code=$(node -e 'const h=require("https");const r=h.get("https://registry.npmjs.org/react",x=>{console.log(x.statusCode);x.destroy();});r.on("error",()=>console.log("000"));r.setTimeout(20000,()=>{console.log("000");r.destroy();});' 2>/dev/null | tail -1)
+  if [ "$code" = "200" ]; then pass "registry.npmjs.org reachable via node (module-5 client)"; else
+    warnf "registry.npmjs.org: HTTP ${code:-000} — demo/ cannot npm install, so the Deep Agents Client tile only serves its setup page"
+    ask  "add the npm_install policy block (GET /** on registry.npmjs.org, binary /usr/local/bin/node)"
+  fi
+  # Tavily remote MCP host (module-2 PART 2A). GET /mcp/ answers 405 (the
+  # endpoint wants POST) — 405 proves reachability, which is what we're testing.
+  code=$(node -e 'const h=require("https");const r=h.get("https://mcp.tavily.com/mcp/",x=>{console.log(x.statusCode);x.destroy();});r.on("error",()=>console.log("000"));r.setTimeout(20000,()=>{console.log("000");r.destroy();});' 2>/dev/null | tail -1)
+  if [ "$code" != "000" ] && [ -n "$code" ]; then pass "mcp.tavily.com reachable via node (module-2 PART 2A, HTTP $code)"; else
+    warnf "mcp.tavily.com: unreachable — module-2 PART 2A web_search dies at 'getaddrinfo EAI_AGAIN' after ~70s"
+    ask  "add the mcp_tavily policy block (GET/POST/DELETE on mcp.tavily.com, binary /usr/local/bin/node)"
+  fi
+fi
 if [ -n "${NVIDIA_API_KEY:-}" ]; then
   code=$(curl -sS -m 25 -o /dev/null -w '%{http_code}' -X POST \
     "https://ai.api.nvidia.com/v1/retrieval/nvidia/llama-nemotron-rerank-1b-v2/reranking" \

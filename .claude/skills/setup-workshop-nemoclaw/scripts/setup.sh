@@ -171,6 +171,48 @@ say "4e. module-5 model map"
 # (backend + lab files; marker-guarded) to served, fast siblings.
 "$VENV/bin/python" "$SKILL_DIR/scripts/tune_model_map.py" "$REPO"
 
+# ---- 4e2. module-2 remote-MCP child env (PART 2A parity) ---------------------
+say "4e2. module-2 remote-MCP child env"
+# The MCP stdio transport forwards only HOME/LOGNAME/PATH/SHELL/TERM/USER to
+# the child, so `npx mcp-remote` starts with no proxy config and dies at
+# `getaddrinfo EAI_AGAIN mcp.tavily.com` — with NO OCSF line, since nothing
+# reaches the L7 proxy. Inject SANDBOX_MCP_ENV so PART 2A (the shipped default
+# every non-sandboxed pathway uses) works here too. Needs the operator's
+# npm_install + mcp_tavily policy blocks.
+"$VENV/bin/python" "$SKILL_DIR/scripts/tune_remote_mcp_env.py" "$REPO"
+
+# ---- 4f. module-5 Deep Agents Client frontend --------------------------------
+say "4f. Deep Agents Client frontend (npm install + build)"
+# The launcher's "Deep Agents Client" tile runs demo/start_client.sh, which
+# serves a "setup required" page unless demo/node_modules exists. The operator
+# policy block `npm_install` (GET-only on registry.npmjs.org, binary
+# /usr/local/bin/node) makes that reachable; all 333 locked deps — including
+# the Node binary pulled by the spurious `"node"` dep in demo/package.json —
+# resolve from that one host. Pre-building here means the tile works on first
+# click instead of showing the fallback page.
+# Non-fatal by design: the rest of the sandbox is fully usable without it.
+if [ ! -d "$REPO/demo" ]; then
+  echo "no demo/ directory — skipping"
+elif [ -d "$REPO/demo/node_modules" ] && [ -d "$REPO/demo/dist" ]; then
+  echo "frontend already installed and built — skipping"
+elif ! command -v npm >/dev/null 2>&1; then
+  echo "npm not found — skipping (tile will show its setup page)"
+else
+  # --no-audit: npm audit POSTs /-/npm/v1/security/advisories/bulk, which the
+  # GET-only policy denies. Harmless (install still exits 0) but noisy.
+  if (cd "$REPO/demo" && npm install --no-audit --no-fund >/tmp/demo-npm-install.log 2>&1); then
+    echo "npm install ok ($(ls "$REPO/demo/node_modules" | wc -l) entries in node_modules)"
+    if (cd "$REPO/demo" && npm run build >/tmp/demo-npm-build.log 2>&1); then
+      echo "npm run build ok -> demo/dist"
+    else
+      echo "WARNING: npm run build failed (see /tmp/demo-npm-build.log); tile will show its setup page"
+    fi
+  else
+    echo "WARNING: npm install failed (see /tmp/demo-npm-install.log)."
+    echo "         Is the operator's npm_install policy block applied? Probe: npm ping  # expect PONG"
+  fi
+fi
+
 # ---- 5. remove leftover IPC-transport experiment (superseded by the shim) ---
 say "5. stale jupyter_server_config cleanup"
 JCFG=/sandbox/.jupyter/jupyter_server_config.py

@@ -106,6 +106,8 @@ exact YAML in `references/policy-blocks.md`:
 | `tavily_search` | `POST /search`+`/extract` on `api.tavily.com` | module-1 docgen, module-2 local-MCP web search, module-5 search (key: `TAVILY_API_KEY`) |
 | `langsmith_api` | all methods on `api.smith.langchain.com` | module-3 eval/tracing AND silencing tracing-retry spam in every notebook (`variables.env` turns tracing on globally; key: `LANGSMITH_API_KEY`) |
 | `tiktoken_encodings` | `GET /encodings/**` on `openaipublic.blob.core.windows.net` | module-7 harness_lab (tiktoken BPE download at first use) |
+| `npm_install` | read-only `GET` to `registry.npmjs.org` (binary: `/usr/local/bin/node`) | module-5 "Deep Agents Client" tile — `demo/` needs `npm install` or the tile only serves its "setup required" page; also fetches the `mcp-remote` transport for the block below |
+| `mcp_tavily` | `GET`/`POST`/`DELETE` on `mcp.tavily.com` (binary: `/usr/local/bin/node`) | module-2 PART 2A remote MCP — the shipped default. ⚠️ Policy alone is not enough: the MCP stdio transport drops the proxy env, so the in-sandbox `tune_remote_mcp_env.py` is also required |
 | `/dev/pts` fs grant | rw on the devpts filesystem (PTY allocation) — under `filesystem_policy`, not `network_policies` | JupyterLab's Terminal tile (terminado → `pty.fork`); without it the tile pops "Launcher Error: Unhandled error" |
 
 Not needed: `build.nvidia.com` (notebook prose only — every model call goes to

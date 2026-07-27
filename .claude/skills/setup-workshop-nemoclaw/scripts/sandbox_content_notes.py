@@ -65,12 +65,17 @@ NOTES = {
         "Harness Lab."
     ),
     "2-agentic-rag/mcp.md": (
-        "> **🛡️ SANDBOX NOTE:** In this OpenShell sandbox the remote-MCP path "
-        "(PART 2A — `npx`/`mcp.tavily.com`) is egress-blocked by policy: each "
-        "`web_search` call fails after an npm retry delay. Use the *Optional* "
-        "local-server exercise instead (PART 2B in `rag_agent.py` + "
-        "`uvicorn mcp_server:app --port 8000`) — its dependencies are "
-        "pre-installed and only `api.tavily.com` egress is needed."
+        "> **🛡️ SANDBOX NOTE:** The remote-MCP path (PART 2A — "
+        "`npx`/`mcp.tavily.com`) **works here**, same as the bare-metal and AI "
+        "Workbench pathways: the operator's `npm_install` + `mcp_tavily` policy "
+        "blocks open it, and setup.sh injects `SANDBOX_MCP_ENV` into "
+        "`rag_agent.py`. That last part matters — the MCP stdio transport only "
+        "forwards HOME/LOGNAME/PATH/SHELL/TERM/USER to the child process, so "
+        "without it `npx mcp-remote` starts with no proxy config and dies at "
+        "`getaddrinfo EAI_AGAIN mcp.tavily.com`. Pass `'env': SANDBOX_MCP_ENV` "
+        "in your `MCP_CONFIG`. PART 2B (the local server) still works and is "
+        "worth doing as a contrast: the local server exposes one tool, the "
+        "remote MCP exposes five (search, extract, crawl, map, research)."
     ),
     "2-agentic-rag/migrate.md": (
         "> **🛡️ SANDBOX NOTE:** Local NIM deployment needs Docker and a GPU — "
@@ -168,9 +173,12 @@ for rel, note in sorted(NOTES.items()):
         print(f"adapted: {rel}" + (f" (+{n} /project path fixes)" if n else ""))
 
 # Deep Agents Client tile setup page (demo/start_client.sh serve_setup_page):
-# written for the AI-Workbench layout (/project paths, python3.12, npm install
-# — all wrong/impossible here). Swap the step list for sandbox guidance.
-# Marker-guarded via the HTML comment; sandbox-copy-local like everything else.
+# written for the AI-Workbench layout (/project paths). The npm registry IS
+# reachable in this sandbox now (operator policy block `npm_install`, GET-only
+# on registry.npmjs.org), and setup.sh pre-installs + pre-builds the frontend —
+# so this page should normally never be seen. Keep it as an accurate fallback
+# instead of the old "this sandbox can't build the demo client" text, which is
+# no longer true. Marker-guarded; sandbox-copy-local like everything else.
 SC = os.path.join(REPO, "demo", "start_client.sh")
 SC_MARKER = "<!-- [sandbox-note] -->"
 if os.path.exists(SC):
@@ -180,19 +188,25 @@ if os.path.exists(SC):
         replacement = (
             f"  {SC_MARKER}\n"
             "  <ol>\n"
-            "    <li><strong>This sandbox can't build the demo client:</strong> the frontend needs\n"
-            "      <code>npm install</code>, and the npm registry is egress-blocked here by policy.</li>\n"
-            "    <li><strong>Use the module-5 lesson flow instead</strong> — start the backend per the\n"
-            "      lesson's SANDBOX NOTE (<span class=\"term\">cd " + REPO + "/demo/backend\n"
-            "uvicorn server:app --host 0.0.0.0 --port 8010</span>) and work through\n"
-            "      <code>code/5-deep-agents/deep_agent.py</code>.</li>\n"
-            "    <li><strong>Want the full UI?</strong> Run this demo on a GPU/desktop pathway\n"
-            "      (Brev / AI Workbench), where <code>npm install</code> works.</li>\n"
+            "    <li><strong>The frontend isn't built yet.</strong> setup.sh normally does this for\n"
+            "      you; if you are seeing this page, the install/build step was skipped or failed.</li>\n"
+            "    <li><strong>Build it from a JupyterLab terminal:</strong>\n"
+            "      <span class=\"term\">cd " + REPO + "/demo &amp;&amp; npm install --no-audit --no-fund\n"
+            "npm run build</span> then reopen this tile. The npm registry is allowed by the\n"
+            "      sandbox egress policy (read-only), so this works here.</li>\n"
+            "    <li><strong>Backend:</strong> start it per the module-5 lesson SANDBOX NOTE —\n"
+            "      <span class=\"term\">cd " + REPO + "/demo/backend\n"
+            "uvicorn server:app --host 0.0.0.0 --port 8010</span>.</li>\n"
             "  " )
         text = text[:start] + replacement + text[end:]
+        # rewrite_project_paths() only touches ```bash fences (markdown lessons);
+        # this is a shell script, so fix the two serve_setup_page reason strings
+        # ("run 'npm install' in /project/demo") with a plain replacement.
+        n_paths = text.count("/project/")
+        text = text.replace("/project/", f"{REPO}/")
         open(SC, "w").write(text)
         changed += 1
-        print("adapted: demo/start_client.sh (setup page sandbox guidance)")
+        print(f"adapted: demo/start_client.sh (setup page sandbox guidance, +{n_paths} /project path fixes)")
 
 # /project path fixes in lessons that need no note
 # (evaluating_safety.md moved to NOTES above — the NOTES loop also rewrites paths)

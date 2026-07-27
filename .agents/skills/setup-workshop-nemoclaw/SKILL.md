@@ -62,9 +62,13 @@ Two things must be true before setup can succeed, and only the operator
    `api.tavily.com` (modules 1/2/5 web search); all methods on
    `api.smith.langchain.com` (module 3 + workshop-wide tracing);
    `GET /encodings/**` on `openaipublic.blob.core.windows.net` (module-7
-   tiktoken); and — only if the repo is not yet cloned — git smart-HTTP on
-   `github.com` scoped to the workshop repo. `preflight.sh` probes all of
-   these and prints the exact ask for each gap.
+   tiktoken); `GET registry.npmjs.org` for the `node` binary (module-5 "Deep
+   Agents Client" tile — without it `demo/` can't `npm install` and the tile
+   only ever serves its setup page); `GET`/`POST`/`DELETE` on `mcp.tavily.com`
+   for `node` (module-2 PART 2A remote MCP — the shipped default); and — only
+   if the repo is not yet cloned — git smart-HTTP on `github.com` scoped to the
+   workshop repo. `preflight.sh` probes all of these and prints the exact ask
+   for each gap.
 2. **NVIDIA key staged** at `/sandbox/workshop-build-an-agent/secrets.env` as
    `NVIDIA_API_KEY=...` (notebooks `load_dotenv()` it themselves). Never
    accept the key through chat; the operator writes it via `docker exec`.

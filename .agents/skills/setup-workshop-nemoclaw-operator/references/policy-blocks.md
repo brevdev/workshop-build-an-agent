@@ -216,6 +216,55 @@ minus uv.
       - allow: { method: GET, path: /encodings/** }
 ```
 
+## Optional — module-6 OpenClaw (`openclaw_inference`)
+
+Only needed if you want module 6's **OpenClaw agent** to actually run, rather
+than the module falling back to its built-in mock agent. Two separate facts,
+verified live 2026-07-27:
+
+1. **Installing OpenClaw needs NO new egress.** `npm i -g openclaw@latest`
+   resolves entirely from `registry.npmjs.org`, already open via `npm_install`.
+   `openclaw` is **unscoped**, so it sidesteps the proxy rule that rejects
+   request-targets containing an encoded `/` — that rule is what blocks scoped
+   metadata like `@anthropic-ai/claude-code` (`/@scope%2Fname`). Confirmed:
+   `npm view openclaw version` → `2026.7.1-2`, install → 309 packages in 15s,
+   `openclaw --version` → `OpenClaw 2026.7.1-2`. The installer's other hosts
+   (`openclaw.ai`, nodesource, `nodejs.org`, `github.com` for `gum`,
+   `raw.githubusercontent.com` for Homebrew) are only used by the convenience
+   `install.sh` wrapper; on Linux with Node ≥ 22 already present (sandbox ships
+   v24.16.0) none are required.
+2. **Running it does need this block.** `setup_openclaw.md` configures a Custom
+   Provider at `https://integrate.api.nvidia.com/v1`, but OpenClaw is a node
+   process and the `nvidia` block's `binaries` lists only hermes/python — so
+   node gets `ERR_PROXY_TUNNEL` (control: node → `registry.npmjs.org` = PONG).
+
+```yaml
+  # Module-6 OpenClaw. Deliberately a SEPARATE narrow block instead of adding
+  # /usr/local/bin/node to the `nvidia` block: this grants node chat inference
+  # ONLY — not embeddings, not /v1/ranking, not inference-api.nvidia.com.
+  # GET /v1/models is what the onboarding wizard's connection test calls.
+  openclaw_inference:
+    name: openclaw-inference
+    endpoints:
+    - host: integrate.api.nvidia.com
+      port: 443
+      protocol: rest
+      enforcement: enforce
+      rules:
+      - allow: { method: POST, path: /v1/chat/completions }
+      - allow: { method: GET, path: /v1/models }
+    binaries:
+    - path: /usr/local/bin/node
+```
+
+⚠️ **Pedagogical caveat — state this to the learner.** Module 6 contrasts three
+tiers: mock (no defenses) → *host* OpenClaw (**unsandboxed**, prompt-level
+refusals) → NemoClaw (**sandboxed**, kernel enforcement). OpenClaw installed
+*inside* this sandbox is NOT the unsandboxed tier — it inherits the same
+Landlock/seccomp/proxy enforcement as NemoClaw, so tier 2 and tier 3 stop being
+a clean comparison. It is still strictly more than the mock-only default. If you
+want the true three-way contrast, run OpenClaw on the host, outside the sandbox.
+
 Matching keys (`TAVILY_API_KEY`, `LANGSMITH_API_KEY`) go into the same
 `secrets.env` via `stage-nvidia-key.sh --env-file` or exported env vars.
 

@@ -25,4 +25,19 @@ You'll examine harnesses across the design spectrum — from full orchestration 
   <div class="dx-cell dx-reveal" style="--i:6"><h4>VERIFIED SKILLS</h4><a href="https://github.com/NVIDIA/skills">github.com/NVIDIA/skills</a> — signed + scanned</div>
 </div>
 
+<div class="dx-island dx-tutor">
+  <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
+
+This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+
+<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+
+Ask for this module by name — `/module-7` in Claude Code, `$module-7` in Codex — or just describe what you're stuck on and the right skill loads on its own.
+
+```text
+/module-7 what is the context tax, and why does it matter?
+```
+
+</div>
+
 > Head over to [Setting up Secrets](secrets) to get started!

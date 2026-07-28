@@ -23,4 +23,19 @@ By the end of this workshop, you'll know how to:
 - **HOW** to do it (NeMo Data Designer, NeMo Gym, GRPO)
 - How to implement **safe execution** of agents by keeping the human in the loop
 
+<div class="dx-island dx-tutor">
+  <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
+
+This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+
+<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+
+Ask for this module by name — `/module-4` in Claude Code, `$module-4` in Codex — or just describe what you're stuck on and the right skill loads on its own.
+
+```text
+/module-4 should I train my agent, or just prompt it better?
+```
+
+</div>
+
 > Head over to [Setting up Secrets](secrets) to get started!

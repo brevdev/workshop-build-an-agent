@@ -366,6 +366,30 @@
 }
 .dx-island a { color: var(--dx-fg); text-decoration-color: var(--dx-green); }
 
+/* Tutor aside — the same block repeats on all seven module landing pages, so it
+   has to read as a footnote beside the module pitch rather than compete with it.
+   Everything steps down one notch from body copy: text, buttons, and the sample
+   prompt. Inline code scales on its own (it sizes in `em`); the code block does
+   not, because `pre` inherits from .markdown-section — hence the explicit rule. */
+.dx-island.dx-tutor { padding: 1.15rem 1.25rem; }
+.markdown-section .dx-tutor p {
+  font-size: 0.86rem;
+  line-height: 1.62;
+  margin: 0 0 0.75rem;
+}
+.markdown-section .dx-tutor button:not([class]) {
+  font-size: 0.76rem;
+  padding: 0.4em 0.85em;
+}
+.markdown-section .dx-tutor pre {
+  padding: 1.85em 0.95em 0.8em !important;
+  margin: 1em 0 0;
+}
+.markdown-section .dx-tutor pre > code {
+  font-size: 0.74em;
+  line-height: 1.5;
+}
+
 /* ==========================================================================
    5. SELF-TYPING AGENT TERMINAL (Termynal-inspired)
    ========================================================================== */

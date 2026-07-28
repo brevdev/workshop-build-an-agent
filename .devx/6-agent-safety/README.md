@@ -23,4 +23,19 @@ At the end of this module, you will take home:
 - Familiarity with **LLM-as-judge safety evaluation**, mirroring Module 3's quality approach
 - Knowledge of the **NemoClaw stack** and how OpenClaw, OpenShell, and Nemotron integrate into a complete safety architecture
 
+<div class="dx-island dx-tutor">
+  <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
+
+This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+
+<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+
+Ask for this module by name — `/module-6` in Claude Code, `$module-6` in Codex — or just describe what you're stuck on and the right skill loads on its own.
+
+```text
+/module-6 what does the Privacy Router actually do?
+```
+
+</div>
+
 > Head over to [Setting up Secrets](secrets) to get started!

@@ -21,5 +21,20 @@ By the end of this workshop, you'll know how to:
 - Use NVIDIA models as judges for qualitative assessment
 - Interpret evaluation results and identify improvement areas
 
+<div class="dx-island dx-tutor">
+  <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
+
+This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+
+<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+
+Ask for this module by name — `/module-3` in Claude Code, `$module-3` in Codex — or just describe what you're stuck on and the right skill loads on its own.
+
+```text
+/module-3 my faithfulness score is 0.6 - what does that actually mean?
+```
+
+</div>
+
 > Head over to [Setting up Secrets](secrets) to get started!
 

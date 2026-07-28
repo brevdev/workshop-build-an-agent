@@ -23,6 +23,11 @@ progressive-unfold plugin splits pages by top-level element count).
 </div>
 ```
 
+Add `dx-tutor` (`class="dx-island dx-tutor"`) for the "work alongside an AI tutor" aside
+that repeats on every module landing page. It steps text, buttons, and any code block down
+one notch from body copy so a block that appears seven times reads as a footnote rather than
+competing with the module pitch.
+
 ## Self-typing terminal
 
 ```html

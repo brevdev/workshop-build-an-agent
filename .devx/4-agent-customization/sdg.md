@@ -232,8 +232,6 @@ class CLIToolCall(BaseModel):
 
 Samplers control the distribution of the **seed** values each example is built from — they're what stops your dataset clustering around a couple of common cases. Add the following to the `values` list in `CategorySamplerParams`: `"react-agent-python"`, `"memory-agent-python"`, `"retrieval-agent-python"`, `"data-enrichment-agent-python"`, `"new-langgraph-project-python"`.
 
-> These are the real LangGraph CLI template names — note they all end in `-python`.
-
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 

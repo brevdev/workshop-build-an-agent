@@ -96,8 +96,12 @@ Models via `ChatNVIDIA`/`MODEL_MAP` (nemotron, llama, deepseek…). Backends:
 `DockerSandboxBackend` (isolated container, no host mounts). HITL via
 `interrupt_on=INTERRUPT_TOOLS` (`write_file`/`edit_file`/`execute`). Test:
 `cd demo/backend && source .venv/bin/activate && python ../../code/5-deep-agents/deep_agent.py`
-(dry run). To use in the Client: copy your file into `demo/backend/agent.py`, run
-`uvicorn server:app --port 8000`, launch the **Deep Agents Client**.
+(dry run). To use in the Client: **nothing to copy** — `demo/backend/agent.py` imports
+`create_agent()` from `code/5-deep-agents/deep_agent.py`. Just restart
+`uvicorn server:app --port 8000` and launch the **Deep Agents Client**. The backend prints
+`Using YOUR implementation` once every blank is filled; while any remain it loads
+`deep_agent.answers.py` and names the functions still open (so the Client works from the
+"Experience a Deep Agent" page onward).
 
 ## Key concepts (quick recall)
 Full reference + the workshop's framing in `references/concepts.md`. Essentials:

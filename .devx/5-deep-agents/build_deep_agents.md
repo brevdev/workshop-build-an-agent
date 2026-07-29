@@ -2,7 +2,7 @@
 
 Time to get hands-on. In this section, you'll build a deep agent step by step by filling in the core functions that power it. We'll work through the backend code and then test everything using the interactive Deep Agent Client from the previous section.
 
-<button onclick="openOrCreateFileInJupyterLab('code/5-deep-agents/deep_agent.py');"><i class="fa-brands fa-python"></i> code/5-deep-agents/deep_agent.py</button> is the skeleton file you'll complete. This is a mirror of the Client code in `demo/backend/agent.py` but with key sections left as exercises.
+<button onclick="openOrCreateFileInJupyterLab('code/5-deep-agents/deep_agent.py');"><i class="fa-brands fa-python"></i> code/5-deep-agents/deep_agent.py</button> is the skeleton file you'll complete — and it *is* the factory the Deep Agents Client runs. Fill in the blanks and restart the backend; there's nothing to copy. Until every blank is filled it runs the reference implementation instead, and says so on startup.
 
 <!-- fold:break -->
 
@@ -228,16 +228,16 @@ If successful, you should see a "Your deep agent is working!" message at the end
 
 ## Run Your Agent
 
-> If you would like to use this agent you just created in the main Deep Agent Client, copy the entire file contents you just wrote from ``code/5-deep-agents/deep_agent.py`` into ``demo/backend/agent.py``. 
-
-Re-launch the backend with this agent implementation: 
+The backend reads your file once, at startup — restart it to pick up your work:
 
 ```bash
-# Terminal 1: Ensure Backend is Running
+# Terminal 1: restart the backend so it re-reads deep_agent.py
 cd demo/backend
 source .venv/bin/activate
 uvicorn server:app --host 0.0.0.0 --port 8000
 ```
+
+It should print `Using YOUR implementation`. If it still says `Using the REFERENCE implementation`, it names the functions that still contain a `...` blank.
 
 <!-- fold:break -->
 

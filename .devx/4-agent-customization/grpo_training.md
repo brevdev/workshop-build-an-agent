@@ -23,13 +23,15 @@ CLI commands are either correct or wrong—no subjectivity. A reward server can 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">RLVR - RL WITH VERIFIABLE REWARDS</p>
   <ul>
-    <li><span class="dx-chip">OBJECTIVE</span> no judge bias or inconsistency.</li>
+    <li><span class="dx-chip">DETERMINISTIC</span> the same output always scores the same - no judge drift between runs.</li>
     <li><span class="dx-chip">FAST</span> milliseconds per verification.</li>
     <li><span class="dx-chip">SCALABLE</span> no human annotators needed.</li>
   </ul>
 </div>
 
 The NeMo Gym server runs these checks and returns reward scores to guide training.
+
+> **"Verifiable" describes the comparison, not the answer.** The verifier checks each output against a reference label, and those labels came from SDG. A mislabeled row doesn't make the reward noisy — it makes it *confidently wrong*, and GRPO will reinforce it.
 
 <!-- fold:break -->
 

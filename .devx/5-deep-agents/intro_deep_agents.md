@@ -157,7 +157,7 @@ Here's what's ahead in this module, page by page:
 
 **[What Are Deep Agents?](deep_agents)** — The four pillars of deep agent architecture, real-world applications, and how the deepagents library implements it all.
 
-**[Set Up the Agent Builder](setup_agent_builder)** — Get the Deep Agent Builder UI running so you have an interactive environment for the hands-on exercises.
+**[Experience a Deep Agent](experience_deep_agent)** — Get the Deep Agent Builder UI running so you have an interactive environment for the hands-on exercises.
 
 **[Build a Deep Agent](build_deep_agents)** — Hands-on with the deepagents library. You'll build a deep agent step by step, filling in the core functions that power it, and test it using an interactive UI with drag-and-drop tools.
 

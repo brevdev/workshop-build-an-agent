@@ -2,7 +2,7 @@
 
 <img src="_static/robots/operator.png" alt="Klondike 5, 4 6 5 2. On the double, we gotta 23 skidoo!" style="float:right;max-width:300px;margin:25px;" />
 
-We've done our part, its time to put this agent to work! In this excercise, we will start the agent and ask it a few questions. We will learn the tricks of the trade used by developers to test and debug agents.
+We've done our part, it's time to put this agent to work! In this exercise, we will start the agent and ask it a few questions. We will learn the tricks of the trade used by developers to test and debug agents.
 
 <!-- fold:break -->
 
@@ -32,7 +32,7 @@ langgraph dev
 
 <!-- fold:break -->
 
-### Examing the Log Output
+### Examining the Log Output
 
 <img src="_static/robots/debug.png" alt="A bug in the machine." style="float:right;max-width:300px;margin:25px;" />
 
@@ -89,7 +89,7 @@ If you see any errors while running your agent, they will appear in this termina
 
 ## Chat with the Agent
 
-Let's spin up a chat client and see how our agent preforms. A simple Streamlit app has been included for chatting with agent, <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-rocket"></i> Simple Agents Client</button>.
+Let's spin up a chat client and see how our agent performs. A simple Streamlit app has been included for chatting with the agent, <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-rocket"></i> Simple Agents Client</button>.
 
 In the sidebar, ensure the `rag_agent` client is selected and try chatting! If you aren't sure what to ask, try asking:
 

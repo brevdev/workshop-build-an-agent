@@ -94,7 +94,7 @@ Training an agent requires three components working together:
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell is-wide"><h4>1 &middot; GENERATE DATA</h4><span class="dx-chip">NeMo Data Designer</span> Synthetic input/output pairs that cover the whole command space - no real user logs needed.</div>
-  <div class="dx-cell"><h4>2 &middot; DEFINE REWARDS</h4><span class="dx-chip">NeMo Gym</span> Code-based verification scores each output - objective, fast, no judge bias.</div>
+  <div class="dx-cell"><h4>2 &middot; DEFINE REWARDS</h4><span class="dx-chip">NeMo Gym</span> Code-based verification scores each output - deterministic, fast, no judge drift.</div>
   <div class="dx-cell"><h4>3 &middot; TRAIN</h4><span class="dx-chip">GRPO</span> The model generates candidates, the reward server scores them, the best are reinforced.</div>
 </div>
 
@@ -117,7 +117,7 @@ A reward server checks:
 - Is `<command>` a real CLI command?
 - Are the parameters correct for that command?
 
-This is **RLVR (Reinforcement Learning with Verifiable Rewards)** — objective, consistent, and scalable.
+This is **RLVR (Reinforcement Learning with Verifiable Rewards)** — deterministic, consistent, and scalable.
 
 <!-- fold:break -->
 

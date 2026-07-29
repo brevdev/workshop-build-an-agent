@@ -149,9 +149,11 @@ def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
             # TODO: Exercise 1b — implement the agentic loop:
             #   1. call invoke_with_retry(model, messages) and append the response
             #   2. if the response has no .tool_calls, return response.content
-            #   3. otherwise execute each tool call via `registry` — catching any
-            #      exception as an f"ERROR: ..." result so the model can correct
-            #      itself — and append a ToolMessage(content=str(result),
+            #   3. otherwise, for each tool call: print a one-line trace
+            #      (f"  🛠️  {call['name']}({json.dumps(call['args'])[:120]})") so you
+            #      can watch the harness work, then execute it via `registry` —
+            #      catching any exception as an f"ERROR: ..." result so the model
+            #      can correct itself — and append a ToolMessage(content=str(result),
             #      tool_call_id=call["id"])
             raise NotImplementedError("Complete Exercise 1b")
         return "ERROR: max turns exceeded"

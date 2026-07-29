@@ -67,9 +67,13 @@ learner's escape hatch is the teaching page's `🆘 Need some help?` block. Per 
 ---
 ## Running & testing (guide; don't run it for them)
 - **Dry-run test:** `cd demo/backend && source .venv/bin/activate && python ../../code/5-deep-agents/deep_agent.py` → success prints "🎉 Your deep agent is working!".
-- **Use it in the UI:** copy the completed `deep_agent.py` into `demo/backend/agent.py`,
-  then `cd demo/backend && source .venv/bin/activate && uvicorn server:app --host 0.0.0.0 --port 8000`,
-  and launch the **Deep Agents Client** tile. In the Client: pick a model (Nemotron), drag
+- **Use it in the UI:** no copying — `demo/backend/agent.py` imports `create_agent()` from
+  `code/5-deep-agents/deep_agent.py`. Restart the backend so it re-reads the file
+  (`cd demo/backend && source .venv/bin/activate && uvicorn server:app --host 0.0.0.0 --port 8000`),
+  and launch the **Deep Agents Client** tile. Check the backend's first lines: `Using YOUR
+  implementation` means their code is live; `Using the REFERENCE implementation` lists the
+  exercise functions that still contain a `...` blank — that's the diagnostic to point a
+  stuck learner at. In the Client: pick a model (Nemotron), drag
   tools (Web Search / File I/O / Shell Execution), Build, then chat ("list files in the
   workspace", "write and run a hello world", "search latest GPU specs"). Watch the tool traces.
 - **Sandbox demo:** toggle Sandbox Mode in the Client and re-ask "what files are in my

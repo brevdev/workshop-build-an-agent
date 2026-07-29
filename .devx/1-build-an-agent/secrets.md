@@ -12,7 +12,7 @@ You can also launch the Secrets Manager from the launcher.
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
 <details class="dx-peek is-setup">
-<summary>⚠️ Dont have an account?</summary>
+<summary>⚠️ Don't have an account?</summary>
 
 You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>

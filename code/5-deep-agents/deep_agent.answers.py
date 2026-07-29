@@ -1,18 +1,45 @@
 """
-Deep Agent Factory — Module 5 Exercise File
+Deep Agent Factory — Module 5 Reference Solution
 
-Complete the TODO exercises below to build a production-grade deep agent.
-Each exercise corresponds to a section in the Build a Deep Agent lesson.
+The completed version of deep_agent.py. The backend loads this automatically
+while the exercise file still has blanks, so the Deep Agents Client works from
+the very first page of the module.
 
-Run the completed agent via the demo UI:
-    Click "Deep Agents Client" tile from the Jupyterlab Launcher page                                # Frontend
+This file IS the factory the Deep Agents Client runs — demo/backend/agent.py
+imports create_agent() from here, so there is nothing to copy. Until every blank
+is filled it falls back to deep_agent.answers.py, and says so on startup.
+
+Dry-run your implementation:
+    cd demo/backend && source .venv/bin/activate
+    python ../../code/5-deep-agents/deep_agent.py
+
+Run it in the UI (restart the backend so it re-reads this file):
+    Click "Deep Agents Client" from the JupyterLab Launcher                                          # Frontend
     cd demo/backend && source .venv/bin/activate && uvicorn server:app --host 0.0.0.0 --port 8000    # Backend
 """
 
 import os
+import sys
+
 from dotenv import load_dotenv
 
+# ── Paths ────────────────────────────────────────────────────────────────────
+# demo/backend/agent.py imports create_agent() from this file, so it must resolve
+# its dependencies the same way however it's started — backend server, dry run,
+# or any working directory.
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(THIS_DIR, os.pardir, os.pardir))
+DEMO_BACKEND_DIR = os.path.join(REPO_ROOT, "demo", "backend")
+
+# docker_sandbox.py and rag.py live with the demo backend.
+if os.path.isdir(DEMO_BACKEND_DIR) and DEMO_BACKEND_DIR not in sys.path:
+    sys.path.insert(0, DEMO_BACKEND_DIR)
+
+# secrets.env is what the Secrets Manager writes; the environment wins over it.
 load_dotenv()
+load_dotenv(os.path.join(REPO_ROOT, "secrets.env"), override=False)
+load_dotenv(os.path.join(REPO_ROOT, "variables.env"), override=False)
 
 from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend, LocalShellBackend, CompositeBackend
@@ -27,9 +54,9 @@ WORKSPACE_DIR = "/tmp/deepagent_workspace"            # Local (has sensitive fil
 SANDBOX_WORKSPACE_DIR = "/workspace"                  # Path INSIDE Docker container
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
 
-# Skills directory
-SKILLS_DIR = os.path.join(os.path.dirname(__file__), "skills")
-os.makedirs(SKILLS_DIR, exist_ok=True)
+# Skills directory — the skill markdown ships with the demo backend, so point at
+# it explicitly rather than at a folder next to this file (which would be empty).
+SKILLS_DIR = os.path.join(DEMO_BACKEND_DIR, "skills")
 
 # Shared checkpointer for all sessions (in-memory, resets on server restart)
 checkpointer = MemorySaver()
@@ -322,16 +349,19 @@ if __name__ == "__main__":
     import asyncio
 
     async def test():
-        agent = create_agent(
+        # create_agent returns (agent, sandbox) — sandbox is None unless a Docker
+        # sandbox was requested AND started successfully.
+        agent, sandbox = create_agent(
             skill_ids=["websearch", "fileio"],
             model_id="nemotron",
             hitl_enabled=False,
         )
         print("✅ Agent created successfully!")
-        print(f"   Type: {type(agent).__name__}")
+        print(f"   Type:    {type(agent).__name__}")
+        print(f"   Sandbox: {'active' if sandbox else 'none (local execution)'}")
 
         # Test with a simple query
-        result = await agent[0].ainvoke(
+        result = await agent.ainvoke(
             {"messages": [{"role": "user", "content": "List all files in /tmp/deepagent_workspace"}]},
             config={"configurable": {"thread_id": "test"}},
         )

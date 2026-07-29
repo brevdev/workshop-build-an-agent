@@ -6,13 +6,19 @@ Runtime fixes below are fair to give directly; they aren't the learning content.
 
 ## Prerequisite agents (Modules 1 & 2)
 Module 3 evaluates the M1 and M2 agents, so they must be **built and importable**.
-- The RAG notebook imports the Module 2 `AGENT`; the report notebook imports the Module 1
-  `agent`. Import errors / `AGENT is None` → that module's code still has unfilled blanks.
-- It's fine to tell a stuck learner to paste `code/2-agentic-rag/rag_agent.answers.py`
-  into `rag_agent.py` to get a runnable agent-under-test (the workshop says to). **For
-  cleanest RAG-eval results, remove `web_search`, `get_skill`, and
-  `list_available_skills` from that agent's `create_react_agent` tool list** so it only
-  uses the knowledge base.
+- The RAG notebook imports Module 2's *components* (`llm`, `RETRIEVER`, `RETRIEVER_TOOL`)
+  and assembles its own retrieval-only agent from them; the report notebook imports the
+  Module 1 `agent`. A `RuntimeError` naming an unfilled blank → that module's code is
+  incomplete.
+- Only Module 2's **RAG** exercises are required (`splitter`, `embeddings`, `reranker`,
+  `llm`). MCP and Skills are optional for Module 3.
+- **Do not tell them to strip tools out of their Module 2 agent** — that used to be the
+  advice and it is no longer needed. The eval notebook never edits `rag_agent.py`; it
+  builds a separate one-tool agent so faithfulness / context precision / context recall are
+  measured against knowledge-base context only. Their four-tool agent keeps working in the
+  Simple Agents Client.
+- It's still fine to tell a stuck learner to paste `code/2-agentic-rag/rag_agent.answers.py`
+  into `rag_agent.py` to get a runnable agent-under-test (the workshop says to).
 
 ## API keys
 Keys load from repo-root **`secrets.env`** (gitignored). Needs **`NVIDIA_API_KEY`** (the

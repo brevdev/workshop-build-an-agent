@@ -68,7 +68,7 @@ That's it! Skills are intentionally simple.
 
 <!-- fold:break -->
 
-Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', '');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'AGENT = ');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
+Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', 'name: code_review');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'name: technical_writing');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
 
 <!-- fold:break -->
 

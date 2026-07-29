@@ -45,7 +45,7 @@ Skip `.bind_tools(tools)` and the model never sees the tool schemas — it will 
 
 ### 1b — The agentic loop
 
-<button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 1b');"><i class="fas fa-code"></i> TODO: Exercise 1b</button> — the ~10 lines that *are* the harness. One turn: call the model with the message history and append its response; if the response contains **no** tool calls, you're done — return its text; otherwise execute each requested tool and append a `ToolMessage` so the model sees the results next turn.
+<button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 1b');"><i class="fas fa-code"></i> TODO: Exercise 1b</button> — the ~10 lines that *are* the harness. One turn: call the model with the message history and append its response; if the response contains **no** tool calls, you're done — return its text; otherwise print a one-line trace for each requested tool, execute it, and append a `ToolMessage` so the model sees the results next turn.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -56,6 +56,7 @@ messages.append(response)
 if not response.tool_calls:
     return response.content
 for call in response.tool_calls:
+    print(f"  🛠️  {call['name']}({json.dumps(call['args'])[:120]})")
     try:
         result = registry[call["name"]].invoke(call["args"])
     except Exception as exc:
@@ -63,7 +64,7 @@ for call in response.tool_calls:
     messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))
 ```
 
-Three details that matter: use the loop's local `registry` (not the module-level `TOOL_REGISTRY`) so extra tools like `load_skill` stay callable in later exercises; execute tools with `.invoke(call["args"])` — LangChain tool objects are not plain functions you can call directly; and feed tool errors back as the `ToolMessage` instead of letting them crash the loop — models occasionally emit a malformed call, and reading its own error is what lets the agent self-correct (that's tool-calling resilience, harness responsibility #4).
+Four details that matter: the `print` is what produces the `🛠️` lines in the sample run above — without it the loop runs silently; use the loop's local `registry` (not the module-level `TOOL_REGISTRY`) so extra tools like `load_skill` stay callable in later exercises; execute tools with `.invoke(call["args"])` — LangChain tool objects are not plain functions you can call directly; and feed tool errors back as the `ToolMessage` instead of letting them crash the loop — models occasionally emit a malformed call, and reading its own error is what lets the agent self-correct (that's tool-calling resilience, harness responsibility #4).
 
 </details>
 

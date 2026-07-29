@@ -583,11 +583,12 @@ if __name__ == "__main__":
             allowed_paths=["/workspace/", "/tmp/agent/"],
         )
         print(f"  {result.summary}")
-        print(f"    Aggregate Score:  {result.aggregate_score:.2%}")
-        print(f"    Policy Valid:     {result.policy_validation.is_safe}")
-        print(f"    Red-Team Pass:    {result.redteam_result.pass_rate:.2%}")
-        print(f"    Classifications:  {len(result.sensitivity_classifications)}")
-        print(f"    LLM Evaluations:  {len(result.safety_scores)}")
+        print(f"    Aggregate Score:        {result.aggregate_score:.2%}")
+        print(f"    Policy Valid:           {result.policy_validation.is_safe}")
+        print(f"    Red-Team Pass:          {result.redteam_result.pass_rate:.2%}")
+        print(f"    Defense-in-Depth:       {result.redteam_result.defense_in_depth_score:.2%}")
+        print(f"    Classifications:        {len(result.sensitivity_classifications)}")
+        print(f"    LLM Evaluations:        {len(result.safety_scores)}")
         return result
 
     # Run 1 — Permissive policy: the gate fires, suite refuses to test the agent.

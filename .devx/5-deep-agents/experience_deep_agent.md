@@ -6,6 +6,8 @@ Before we start building, let's get the **Deep Agent Builder UI** running. This 
 
 The demo lives in the `demo/` folder and has two parts: a **React frontend** and a **FastAPI backend**.
 
+> You haven't written any agent code yet — the backend runs a reference implementation until you complete the exercises on the next page.
+
 <!-- fold:break -->
 
 ## Step 1: Backend Setup
@@ -127,7 +129,7 @@ In the Deep Agent Client, you can enable **Sandbox Mode** in the Settings panel.
 You may consider pulling the sandbox image ahead of time (one-time process) to have it cached for later:
 
 ```bash
-docker pull python:3.12-slim
+docker pull python:3.11-slim
 ```
 
 Then toggle Sandbox Mode ON in the Settings panel when building your agent. We'll talk about why this mode is important shortly. 

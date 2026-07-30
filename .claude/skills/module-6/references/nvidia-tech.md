@@ -17,6 +17,9 @@ projects, an open agent framework, and Linux-kernel primitives.
   LLM-as-judge in the safety eval (temp 0).
 - **NeMo Guardrails** — NVIDIA's input/output filtering library, cited as explore-next.
   github.com/NVIDIA/NeMo-Guardrails.
+- **NemoClaw Community** — community-driven examples, showcases, and integrations repo
+  (blueprint recipes, field demos, launchables), cited as explore-next.
+  github.com/NVIDIA/nemoclaw-community.
 - **NIM / NGC** — hosted inference behind the gateway; `NVIDIA_API_KEY`.
 
 ## Adjacent / open (NOT NVIDIA — clarify)

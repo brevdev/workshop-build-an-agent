@@ -488,6 +488,7 @@ Agent safety is the discipline — NemoClaw is one implementation. The tools and
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell is-wide"><h4>EXPLORE NEXT</h4><p><span class="dx-chip is-green">START HERE</span> <a href="https://github.com/NVIDIA/NemoClaw">NVIDIA NemoClaw</a> - the full reference stack in one deployable package.</p></div>
+  <div class="dx-cell"><h4>NEMOCLAW COMMUNITY</h4><p><a href="https://github.com/NVIDIA/nemoclaw-community">Community examples</a> - blueprints, showcases, and integrations for more use cases.</p></div>
   <div class="dx-cell"><h4>OPENSHELL</h4><p><a href="https://github.com/NVIDIA/OpenShell">Kernel-level runtime</a> - Landlock, seccomp, and the inference gateway.</p></div>
   <div class="dx-cell"><h4>POLICY SCHEMA</h4><p><a href="https://docs.nvidia.com/openshell/latest/reference/policy-schema">Complete YAML reference</a> for OpenShell policies.</p></div>
   <div class="dx-cell"><h4>OPENCLAW</h4><p><a href="https://docs.openclaw.ai/">Config-first agent framework</a> documentation.</p></div>

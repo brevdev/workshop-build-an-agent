@@ -351,3 +351,10 @@ docker logs "$C" | grep -E "DENIED|NET:FAIL" | tail
 Each line names the process path and the rule engine — that tells you whether
 to add a host rule, a path rule, or a `binaries:` entry (remember symlink
 resolution).
+
+Two expected patterns that look like breakage but are not: a boot-time
+`python3.13 → github.com:443` DENIED ("binary not allowed in policy
+'github_git_clone'") is agent-startup noise — python is deliberately absent
+from that block's `binaries`; and curl `000` paired with ALLOWED audit lines
+for the same probe is a first-touch proxy flake — retry once before touching
+policy.

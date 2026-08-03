@@ -11,7 +11,7 @@ description: >-
   HOST (outside the sandbox — the machine running the OpenShell gateway +
   docker, e.g. via Claude Code) and the user wants the workshop set up in a
   sandbox: stage/apply the egress policy (PyPI, NIM /v1/ranking, scoped GitHub
-  clone), stage the NVIDIA API key into the sandbox, kick the in-sandbox agent
+  clone), optionally stage the NVIDIA API key, kick the in-sandbox agent
   (which runs the `setup-workshop-nemoclaw` skill), then open the inbound path
   (openshell forward service + SSH/Teleport port-forward) so the user can open
   the JupyterLab token URL. Also covers sandbox lifecycle pitfalls (never
@@ -159,6 +159,10 @@ unset and `load_dotenv()` stays authoritative, so the key takes effect on the
 next cell run with no restart. This is exactly why the Tavily and LangSmith
 keys never exhibited the problem — they were never injected.
 
+`scripts/verify-sandbox-ready.sh` agrees: an absent key is a PASS in its
+default mode. Set `EXPECT_PRESEEDED=1` only when auditing an image that is
+supposed to carry a baked-in key.
+
 ⚠️ **Never fall back to `COMPATIBLE_API_KEY` / `OPENAI_API_KEY`.** Those name
 the NemoClaw *agent's* inference credential — in the community example an
 `sk-…` key for the host TLS proxy (`NEMOCLAW_ENDPOINT_URL`), not a
@@ -192,11 +196,12 @@ them to the same script; their policy blocks ship in the template.
 
 Message the sandbox agent (adjust repo path if it must clone first):
 
-> Policy now allows PyPI installs and the module-2 ranking endpoint, and
-> `NVIDIA_API_KEY` is staged at `/sandbox/workshop-build-an-agent/secrets.env`.
-> Run the `setup-workshop-nemoclaw` skill (NOT the bare-metal
-> `setup-workshop`). When JupyterLab is up, save the token URL to
+> Policy now allows the workshop-repo clone route, PyPI installs, and the
+> NIM/reranking endpoints. Run the `setup-workshop-nemoclaw` skill (NOT the
+> bare-metal `setup-workshop`). When JupyterLab is up, save the token URL to
 > `/sandbox/workshop-url.txt` and report back; I'll open the forward.
+> `NVIDIA_API_KEY` is deliberately not staged — the learner sets it in the
+> Secrets Manager tile.
 
 NemoClaw-specific gotcha: the agent's persona (`SOUL.md`) may still say
 GitHub/PyPI/serving are off-limits, making it refuse without trying. The
@@ -251,6 +256,18 @@ resolves symlinks, so e.g. `git-remote-https` → list `git-remote-http` too),
 re-apply, re-verify. If the in-sandbox agent reports a blocked call, ask it
 for the exact URL/error and match it against the log.
 
+Two verdict patterns that are NOT policy gaps (both observed live):
+
+- **Boot-time noise:** a `/usr/bin/python3.13` DENIED to `github.com:443`
+  ("binary not allowed in policy 'github_git_clone'") right after sandbox
+  start is agent-stack startup traffic. Python is deliberately absent from
+  that block's `binaries` — ignore it; it is not workshop breakage.
+- **First-touch flake:** a probe reports curl `000` while the audit log shows
+  ALLOWED at both engines for that same request — the first request to a host
+  through the L7 proxy can stall past curl's timeout. Retry before editing
+  policy (`verify-sandbox-ready.sh` retries its clone-route probe once for
+  exactly this reason).
+
 ## Lifecycle pitfalls (each caused real breakage)
 
 - **NEVER `docker restart` the sandbox container.** It boots from a static
@@ -282,7 +299,7 @@ for the exact URL/error and match it against the log.
 
 - [ ] `openshell policy get "$SANDBOX"` shows the new revision; probes via
       `openshell sandbox exec`: pypi 200, `integrate.api.nvidia.com/v1/models` 200.
-- [ ] `docker exec "$C" ls -l /sandbox/workshop-build-an-agent/secrets.env` → present, mode 600.
+- [ ] (only if a key was pre-seeded) `docker exec "$C" ls -l /sandbox/workshop-build-an-agent/secrets.env` → present, mode 600.
 - [ ] Sandbox agent reports JupyterLab up; `docker exec "$C" cat /sandbox/workshop-url.txt` → URL.
 - [ ] Forward running; host `curl …:8888/lab` → 302.
 - [ ] Laptop tunnel up; browser shows 11 launcher tiles; a module-2 rerank cell returns 200.

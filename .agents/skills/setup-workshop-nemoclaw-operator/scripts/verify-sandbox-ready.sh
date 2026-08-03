@@ -3,8 +3,11 @@
 # Build-an-Agent workshop sandbox. Run on the sandbox HOST (outside).
 #
 # Checks the operator contract the in-sandbox agent depends on:
-#   container up · policy live (pypi / NIM) · repo present · secrets staged ·
+#   container up · policy live (pypi / NIM) · repo present · key staging state ·
 #   (if a forward is up) Jupyter answering.
+# An UNSET NVIDIA_API_KEY is the correct default (learner sets it in the
+# Secrets Manager tile — SKILL.md Phase 2); set EXPECT_PRESEEDED=1 to require
+# a pre-seeded key (unattended classroom image).
 # Egress probes run via `openshell sandbox exec` (Landlock-real).
 # Exit 0 = ready to tell the sandbox agent "try now"; exit 1 = gaps printed.
 set -uo pipefail
@@ -75,13 +78,25 @@ if docker exec "$C" test -d "$REPO_IN_SANDBOX/.git" 2>/dev/null; then
 else
   warnf "repo NOT at $REPO_IN_SANDBOX — sandbox agent will clone (needs github_git_clone block)"
   code=$(sx 'curl -s -m 20 -o /dev/null -w "%{http_code}" "https://github.com/brevdev/workshop-build-an-agent.git/info/refs?service=git-upload-pack"')
+  if [ "$code" != "200" ]; then
+    # First touch of a host through the L7 proxy can return 000 even when the
+    # route is open (observed live: audit log ALLOWED at both engines while
+    # curl reported 000; immediate retry gave 200). Retry once before failing.
+    code=$(sx 'curl -s -m 20 -o /dev/null -w "%{http_code}" "https://github.com/brevdev/workshop-build-an-agent.git/info/refs?service=git-upload-pack"')
+  fi
   [ "$code" = "200" ] && pass "github.com clone route from inside: 200" \
-    || failf "github.com clone route from inside: HTTP ${code:-000} — add github_git_clone block"
+    || failf "github.com clone route from inside: HTTP ${code:-000} after retry — check the audit log first (docker logs <container> | grep github): ALLOWED lines mean the route is open and this was transient (re-run); DENIED lines mean add the github_git_clone block"
 fi
+# NVIDIA_API_KEY is INTENTIONALLY absent in the normal flow (SKILL.md Phase 2):
+# the learner sets it in the Secrets Manager tile, and a key baked in at server
+# launch shadows later tile edits until start-jupyter.sh re-runs. Absence is
+# only a failure when the operator explicitly expects a pre-seeded image.
 if docker exec "$C" sh -c "test -s $REPO_IN_SANDBOX/secrets.env && grep -q '^NVIDIA_API_KEY=' $REPO_IN_SANDBOX/secrets.env" 2>/dev/null; then
-  pass "secrets.env staged with NVIDIA_API_KEY"
+  pass "secrets.env pre-seeded with NVIDIA_API_KEY (server env shadows later Secrets-Manager edits — re-run start-jupyter.sh after changing the key)"
+elif [ "${EXPECT_PRESEEDED:-0}" = "1" ]; then
+  failf "EXPECT_PRESEEDED=1 but secrets.env missing/empty at $REPO_IN_SANDBOX — run scripts/stage-nvidia-key.sh"
 else
-  failf "secrets.env missing/empty at $REPO_IN_SANDBOX — run scripts/stage-nvidia-key.sh"
+  pass "NVIDIA_API_KEY not pre-seeded (correct default — learner sets it in the Secrets Manager tile; set EXPECT_PRESEEDED=1 to require a baked-in key)"
 fi
 
 # 4. Forward + Jupyter (only meaningful after the sandbox agent launched it)

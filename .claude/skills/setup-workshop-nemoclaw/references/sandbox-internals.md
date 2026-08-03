@@ -330,9 +330,11 @@ needed. Verified end-to-end 2026-07-21.
   and raises `IOException: Permission denied` unless the filesystem policy
   grants `/sys/fs/cgroup` read-only (no config bypass exists — setting
   `memory_limit` still probes `cpu.max`; verified on 1.2.2/1.3.2). The
-  community example's `policy.yaml` template carries the grant; like all
-  `filesystem_policy` entries it activates at sandbox RECREATE, not live
-  apply. Until then modules 3/4 SDG cells raise that IOException.
+  operator applies the grant to the sandbox's LIVE policy — the deployment
+  recipe's `policy.yaml` template stays stock (the operator skill's
+  policy-blocks.md documents the grant); like all `filesystem_policy`
+  entries it activates at sandbox RECREATE, not live apply. Until then
+  modules 3/4 SDG cells raise that IOException.
 - joblib warns and falls back to serial mode (sandbox blocks semaphores) —
   benign.
 - Background waits are clamped (e.g. 180 s) and sessions have tool-iteration

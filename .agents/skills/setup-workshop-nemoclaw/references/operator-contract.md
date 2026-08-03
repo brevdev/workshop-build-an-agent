@@ -105,9 +105,9 @@ file applied was stale and silently reverted other blocks.
 The operator appends `TAVILY_API_KEY=` / `LANGSMITH_API_KEY=` lines to the
 same `secrets.env` **and** ensures the `tavily_search` (`api.tavily.com` —
 NOT `mcp.tavily.com`, which is the remote-MCP host and would also need npm)
-and `langsmith_api` (`api.smith.langchain.com`) policy blocks are live (see
-the operator skill's policy-blocks.md; both ship in the community example's
-template). Without the Tavily key/route, agents still run but silently write
+and `langsmith_api` (`api.smith.langchain.com`) policy blocks are live
+(exact YAML in the operator skill's policy-blocks.md).
+Without the Tavily key/route, agents still run but silently write
 no-search reports; without the LangSmith route, every notebook spams tracing
 retry errors because `variables.env` enables tracing globally.
 

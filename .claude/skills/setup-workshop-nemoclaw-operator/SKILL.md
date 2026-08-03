@@ -290,7 +290,7 @@ kernels pick the key up.
 Never paste keys through the agent's chat channel (the in-sandbox agent will
 itself refuse them). Tavily (modules 1/2/5 search) and LangSmith (module-3
 tracing) are handled the same way — set them in the Secrets Manager, or pass
-them to the same script; their policy blocks ship in the template.
+them to the same script; their policy blocks are in `references/policy-blocks.md` too.
 
 ## Phase 3 — Kick the in-sandbox agent
 

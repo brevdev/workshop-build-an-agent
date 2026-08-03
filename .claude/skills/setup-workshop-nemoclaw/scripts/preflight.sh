@@ -96,8 +96,14 @@ fi
 code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST https://api.tavily.com/search \
   -H 'Content-Type: application/json' \
   -d "{\"api_key\":\"${TAVILY_API_KEY:-}\",\"query\":\"ping\",\"max_results\":1}" 2>/dev/null)
-if [ "$code" = "200" ]; then pass "api.tavily.com POST /search: 200 (modules 1/2/5 web search)"; else
-  warnf "api.tavily.com POST /search: HTTP ${code:-000} — module-1 docgen, module-2 web_search, module-5 search degrade to no-search output"
+if [ "$code" = "200" ]; then pass "api.tavily.com POST /search: 200 (modules 1/2/5 web search)"
+elif [ "$code" = "401" ] || [ "$code" = "422" ] || [ "$code" = "432" ]; then
+  # A 4xx FROM Tavily proves the request traversed the proxy — the
+  # tavily_search policy block is LIVE; only the key is missing/invalid.
+  # Do NOT report this as a policy gap to the operator.
+  warnf "api.tavily.com POST /search: HTTP $code — route OPEN, TAVILY_API_KEY missing/invalid (expected default; the learner sets it in the Secrets Manager tile). Search flows (modules 1/2/5) degrade to no-search output until then."
+else
+  warnf "api.tavily.com POST /search: HTTP ${code:-000} — route BLOCKED at the proxy; module-1 docgen, module-2 web_search, module-5 search degrade to no-search output"
   ask  "add the tavily_search policy block (POST /search + /extract on api.tavily.com; see operator skill policy-blocks.md) and stage TAVILY_API_KEY in secrets.env"
 fi
 code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' https://api.smith.langchain.com/info \

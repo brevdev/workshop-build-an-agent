@@ -68,8 +68,12 @@ cd <nemoclaw-community>/examples/personal-community-sentiment-triage
 
 Two policy files matter in the community example: **`policy.yaml`** (the
 TEMPLATE — re-rendered into the sandbox at every recreate) and
-**`policy.hermes-direct.yaml`** (the live-policy capture you hand-edit). Keep
-BOTH in sync with any change, or a recreate/re-apply silently reverts it.
+**`policy.hermes-direct.yaml`** (the live-policy capture you hand-edit). Do
+NOT assume the capture pre-exists — a fresh deployment ships only the
+template. When it is missing, create it by extracting the sandbox's live
+policy first (the header-stripped capture from Phase 0 is exactly that
+baseline) and only then add and apply adjustments on top. Keep BOTH in sync
+with any change, or a recreate/re-apply silently reverts it.
 
 > **If you are an agent (e.g. Claude Code) driving this:** egress-widening
 > `openshell policy set` runs are typically denied by the permission layer
@@ -87,6 +91,31 @@ docker exec "$C" ls -la /sandbox/workshop-build-an-agent 2>&1 | head -3   # repo
 docker exec "$C" ls -l /sandbox/workshop-build-an-agent/secrets.env 2>&1  # key staged?
 ```
 
+(`openshell policy get` prints `Active: 0` next to `Status: Loaded` for a
+policy that has never been superseded — normal for a fresh sandbox, not "no
+policy active".)
+
+Then extract the live policy and establish which way drift runs — do NOT
+assume the sandbox is running the recipe's stock policy. `--full` prepends a
+metadata header (`Version:`/`Hash:`/… plus a `---` line) that must be
+stripped before the YAML is usable:
+
+```bash
+openshell policy get "$SANDBOX" --full | sed '1,/^---$/d' > /tmp/live.yaml
+python3 -c 'import yaml,sys
+a,b=[sorted(yaml.safe_load(open(f))["network_policies"]) for f in sys.argv[1:]]
+print("template-only:", [k for k in a if k not in b])
+print("live-only:    ", [k for k in b if k not in a])' policy.yaml /tmp/live.yaml
+```
+
+Read the result in BOTH directions. `template-only` blocks = the live policy
+is missing grants → Phase 1 applies them. `live-only` blocks (e.g. the
+deployment was brought up from an already-workshop-laden template) = Phase
+1's apply is a no-op, but the tracked template is BEHIND live and the next
+recreate/re-apply from it would silently drop those grants → sync the
+template instead. The stripped `/tmp/live.yaml` is also the seed for
+`policy.hermes-direct.yaml` when that capture does not exist yet.
+
 `docker exec` is fine for these *filesystem* peeks. It is **NOT** a valid
 probe for egress/syscall behavior — exec'd processes bypass the per-process
 Landlock/seccomp layers and yield false "allowed" results. Egress tests go
@@ -95,8 +124,11 @@ multi-line args).
 
 ## Phase 1 — Egress policy (one-time)
 
-The sandbox denies all egress by default. The workshop needs three additions —
-exact YAML in `references/policy-blocks.md`:
+The sandbox denies all egress by default. The workshop needs the additions
+below — but do not assume they are absent: go by the Phase 0 drift check (a
+deployment brought up from a workshop-laden template already has them live;
+then skip the apply and only sync the template/capture files up to the live
+state). Exact YAML in `references/policy-blocks.md`:
 
 | Block | Opens | Needed for |
 |---|---|---|
@@ -122,11 +154,16 @@ and raw `docker restart` hits the stale-bootstrap-JWT crash loop.
 
 Workflow (details + YAML in the reference):
 
-1. Capture live policy: `openshell policy get "$SANDBOX" --full > /tmp/live.yaml`.
+1. Capture the live policy WITH the metadata header stripped (raw `--full`
+   output is not valid apply input; already done if you ran the Phase 0
+   drift check):
+   `openshell policy get "$SANDBOX" --full | sed '1,/^---$/d' > /tmp/live.yaml`
 2. Build the apply file = **live policy + the new blocks and nothing else**
    (minimal delta), and structurally verify it (same block names ± the
    additions) before applying. Update `policy.yaml` AND
-   `policy.hermes-direct.yaml` in the repo to the same desired state.
+   `policy.hermes-direct.yaml` in the repo to the same desired state — and
+   when `policy.hermes-direct.yaml` does not exist yet (fresh deployment),
+   create it from the stripped live capture.
 3. Apply (human runs it if the permission layer blocks you):
    ```bash
    openshell policy set "$SANDBOX" --policy <file> --wait

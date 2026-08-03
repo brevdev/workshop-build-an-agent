@@ -16,6 +16,7 @@ SANDBOX="${SANDBOX:-hermes-direct}"
 REPO_IN_SANDBOX="${REPO_IN_SANDBOX:-/sandbox/workshop-build-an-agent}"
 PORT="${PORT:-8888}"
 fail=0
+jupyter_up=0
 
 pass() { printf '  PASS  %s\n' "$1"; }
 warnf() { printf '  WARN  %s\n' "$1"; }
@@ -104,6 +105,7 @@ if pgrep -f "forward service $SANDBOX" >/dev/null 2>&1; then
   code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORT/lab" 2>/dev/null)
   if [ "$code" = "302" ] || [ "$code" = "200" ]; then
     pass "forward up + Jupyter answering on host 127.0.0.1:$PORT (HTTP $code)"
+    jupyter_up=1
     docker exec "$C" cat /sandbox/workshop-url.txt 2>/dev/null | sed 's/^/        URL: /' || true
   else
     warnf "forward process found but host :$PORT gives HTTP ${code:-000} — is Jupyter up inside yet?"
@@ -117,5 +119,9 @@ if [ "$fail" -ne 0 ]; then
   echo "VERDICT: BLOCKED — fix the FAIL lines (policy: references/policy-blocks.md; secrets: scripts/stage-nvidia-key.sh)."
   exit 1
 fi
-echo "VERDICT: READY — tell the in-sandbox agent to run the setup-workshop-nemoclaw skill ('try now')."
+if [ "$jupyter_up" = "1" ]; then
+  echo "VERDICT: READY — workshop is UP (forward + Jupyter answering); hand the user the token URL above via the laptop tunnel (SKILL.md Phase 4)."
+else
+  echo "VERDICT: READY — tell the in-sandbox agent to run the setup-workshop-nemoclaw skill ('try now')."
+fi
 exit 0

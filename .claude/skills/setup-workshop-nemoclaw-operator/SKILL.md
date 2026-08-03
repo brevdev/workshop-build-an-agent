@@ -210,8 +210,18 @@ openshell policy get "$SANDBOX" --full | sed '1,/^---$/d' > /tmp/boot.yaml
 IMG=$(docker inspect "$C" --format '{{.Config.Image}}')
 PROVIDERS=$(openshell sandbox provider list "$SANDBOX" | awk 'NR>1 && $1 != "" {printf "--provider %s ", $1}')
 # Runtime env the recipe injected at create (harvest BEFORE the delete).
-# Values here are space-free; quote-handle yours if not:
-ENVS=$(docker exec "$C" sh -c "tr '\0' '\n' < /proc/1/environ" | grep -E '^(OUTLOOK_|SLACK_ALLOW|GITHUB_READONLY_REPO=|NEMOCLAW_MESSAGING_CHANNELS_B64=|CHAT_UI_URL=|PHOENIX_)')
+# ⚠️ Harvest from the nemoclaw-start PROCESS, not /proc/1: PID 1 is the
+# OpenShell supervisor and carries only image-baked ENV — the `-- env …`
+# wrapper vars ride the exec session running nemoclaw-start. Reading
+# /proc/1/environ silently drops the SLACK_ALLOW*/OUTLOOK_* authorization
+# config; the recreated gateway then answers every Slack user with a
+# pairing code and never starts the outlook-bridge (verified live —
+# recovery WITHOUT another recreate: references/access-and-lifecycle.md
+# § Recovering lost create-time env, also the fallback if the stack is
+# already down and unharvestable). Values here are space-free;
+# quote-handle yours if not:
+NSPID=$(docker exec "$C" sh -c 'pgrep -f "bash /usr/local/bin/[n]emoclaw-start" | head -1')
+ENVS=$(docker exec "$C" sh -c "tr '\0' '\n' < /proc/$NSPID/environ" | grep -E '^(OUTLOOK_|SLACK_ALLOW|GITHUB_READONLY_REPO=|NEMOCLAW_MESSAGING_CHANNELS_B64=|CHAT_UI_URL=|PHOENIX_)')
 openshell sandbox delete "$SANDBOX"
 openshell sandbox create --from "$IMG" --name "$SANDBOX" --policy /tmp/boot.yaml $PROVIDERS -- env $ENVS nemoclaw-start
 # create streams sandbox stdout; once `openshell sandbox list` (other shell)
@@ -221,7 +231,15 @@ openshell policy set "$SANDBOX" --policy /tmp/boot.yaml --wait   # recipe's two-
 C=$(docker ps --format '{{.Names}}' | grep "openshell-$SANDBOX")  # container name changed
 ```
 
-Re-probe PTY (expect `PTY-OK`), then continue with the next phases.
+Re-probe PTY (expect `PTY-OK`). On Slack/Outlook deployments also confirm the
+authorization env reached the relaunched gateway — 0 here reproduces the
+pairing-code regression; recover per references/access-and-lifecycle.md:
+
+```bash
+docker exec "$C" sh -c 'pid=$(pgrep -f "[h]ermes gateway run" | head -1); tr "\0" "\n" < /proc/$pid/environ' | grep -cE '^(SLACK_ALLOW|OUTLOOK_)'   # expect ≥ 1
+```
+
+Then continue with the next phases.
 Self-annealing: after one 1b recreate, boot policy == live policy, so the
 grants survive subsequent same-flow recreates.
 
@@ -368,7 +386,11 @@ Two verdict patterns that are NOT policy gaps (both observed live):
   (network AND filesystem) silently reverts; a Phase 1b recreate boots the
   live policy and keeps them. After a stock recreate: re-run Phase 1 + 1b;
   after either: redo Phase 2 if a key was pre-seeded, then have the agent
-  re-run `setup.sh` + `start-jupyter.sh` (all idempotent).
+  re-run `setup.sh` + `start-jupyter.sh` (all idempotent). Either way, verify
+  the create-time authorization env survived (Phase 1b check) — a Slack bot
+  that answers everyone with pairing codes plus a missing `outlook-bridge.py`
+  process means it didn't; fix per references/access-and-lifecycle.md, no
+  re-recreate needed.
 - **`docker exec` proves nothing about the agent's sandbox** (1 seccomp filter
   vs the agent's 4, no Landlock). Egress/syscall tests: `openshell sandbox
   exec` only.

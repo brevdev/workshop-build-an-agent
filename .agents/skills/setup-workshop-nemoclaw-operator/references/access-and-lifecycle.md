@@ -84,10 +84,13 @@ recreate-from-live boots the live policy and keeps them. After a recreate:
 1. Verify policy blocks survived (Phase 1b path) — after a stock recreate,
    re-run Phase 1 + 1b instead:
    `openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'curl -s -o /dev/null -w "%{http_code}" https://pypi.org/simple/'`
-2. Re-stage `secrets.env` (Phase 2).
-3. Tell the in-sandbox agent to re-run `setup.sh` + `start-jupyter.sh` (both
+2. Verify the create-time authorization env survived (expect ≥ 1; if 0, see
+   § Recovering lost create-time env below):
+   `docker exec "$C" sh -c 'pid=$(pgrep -f "[h]ermes gateway run" | head -1); tr "\0" "\n" < /proc/$pid/environ' | grep -cE '^(SLACK_ALLOW|OUTLOOK_)'`
+3. Re-stage `secrets.env` (Phase 2).
+4. Tell the in-sandbox agent to re-run `setup.sh` + `start-jupyter.sh` (both
    idempotent).
-4. Re-open the forward (Phase 4).
+5. Re-open the forward (Phase 4).
 
 **What survives what:**
 
@@ -96,6 +99,77 @@ recreate-from-live boots the live policy and keeps them. After a recreate:
 | Gateway restart | ✓ | ✓ | ✓ | ✓ |
 | Container restart (avoid!) | ✓ (if JWT valid) | ✓ | ✗ relaunch stack | ✗ re-run start-jupyter.sh |
 | Sandbox recreate | stock path: STOCK template (workshop grants revert); Phase 1b path: live policy kept | ✗ wiped | ✓ (fresh) | ✗ full redo from Phase 2 |
+
+## Recovering lost create-time env (Slack pairing-code regression)
+
+The deployment recipe injects per-user **authorization** env at create
+(`scripts/03-sandbox.sh` `-- env …`): `SLACK_ALLOWED_USERS` *or*
+`SLACK_ALLOW_ALL_USERS`, plus `OUTLOOK_TARGET_MAILBOX` / `OUTLOOK_REPLY_TO` /
+`OUTLOOK_ALLOWED_SENDERS`. These ride the exec session running
+`nemoclaw-start`, NOT `/proc/1/environ` (PID 1 = supervisor: image ENV only).
+The Slack/GitHub/Graph *tokens* are different: providers inject them into
+every supervisor session, so they survive a recreate untouched.
+
+Symptom set when the recreate lost the authorization env (all verified live):
+the Slack bot still answers (tokens fine) but greets EVERY user with a pairing
+code — `run.py:_is_user_authorized` finds neither `SLACK_ALLOWED_USERS` nor
+`SLACK_ALLOW_ALL_USERS`; `ps` shows no `outlook-bridge.py`; the gateway env
+check (recreate step 2 above) returns 0.
+
+Fix WITHOUT another recreate (which would wipe the built workshop):
+
+```bash
+# 1. Rebuild the values exactly as scripts/03-sandbox.sh does, from the
+#    deployment's .env (values never echoed):
+cd <deployment-recipe-dir>
+(
+  set -a; source ./.env; set +a
+  mapfile -t B64 < <(python3 scripts/lib/build-channels.py)
+  ids=$(printf '%s' "${B64[1]}" | base64 -d | python3 -c 'import json,sys; print(",".join(json.load(sys.stdin).get("slack", [])))')
+  umask 077
+  {
+    if [ -n "${SLACK_BOT_TOKEN:-}${SLACK_APP_TOKEN:-}" ]; then
+      if [ -n "$ids" ]; then printf 'export SLACK_ALLOWED_USERS=%q\n' "$ids"
+      else printf 'export SLACK_ALLOW_ALL_USERS=true\n'; fi
+    fi
+    printf 'export OUTLOOK_TARGET_MAILBOX=%q\n'  "${OUTLOOK_TARGET_MAILBOX:-}"
+    printf 'export OUTLOOK_REPLY_TO=%q\n'        "${OUTLOOK_REPLY_TO:-}"
+    printf 'export OUTLOOK_ALLOWED_SENDERS=%q\n' "${OUTLOOK_ALLOWED_SENDERS:-}"
+  } > /tmp/nemoclaw-restore-env.sh
+)
+docker cp /tmp/nemoclaw-restore-env.sh "$C:/tmp/nemoclaw-restore-env.sh"
+docker exec "$C" chown sandbox:sandbox /tmp/nemoclaw-restore-env.sh
+
+# 2. Kill the stack, then relaunch it under a SUPERVISOR session — leave this
+#    stream running (tmux/background); it is the stack's parent:
+docker exec "$C" bash -c 'pkill -f "[h]ermes gateway run"; pkill -f "[s]ocat TCP-LISTEN:8642"; pkill -f "[n]emo-relay --bind"; pkill -f "[o]utlook-bridge.py"; pkill -f "bash /usr/local/bin/[n]emoclaw-start"'
+openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'set -a; . /tmp/nemoclaw-restore-env.sh; set +a; exec /usr/local/bin/nemoclaw-start'
+
+# 3. From another shell — verify, then detach the LOCAL client (the remote
+#    session and the stack survive, same detach as the recipe's create flow):
+docker exec "$C" sh -c 'pid=$(pgrep -f "[h]ermes gateway run" | head -1); tr "\0" "\n" < /proc/$pid/environ' | grep -cE '^(SLACK_ALLOW|OUTLOOK_)'   # ≥ 1
+openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc '. /sandbox/.hermes-data/.env >/dev/null 2>&1; curl -sS --max-time 12 -X POST -H "Authorization: Bearer ${SLACK_APP_TOKEN}" https://slack.com/api/apps.connections.open'   # → "ok":true
+pkill -f "sandbox [e]xec -n $SANDBOX"
+docker exec "$C" rm -f /tmp/nemoclaw-restore-env.sh
+```
+
+Do NOT relaunch the stack via `docker exec` — both variants fail (observed
+live). As root: `drop_capabilities` strips `CAP_DAC_OVERRIDE`, so
+`nemoclaw-start` dies reading the sandbox-owned config — and its early log
+setup leaves root-owned `/tmp/nemoclaw-start.log` + `/tmp/nemoclaw-proxy-env.sh`
+that block every later sandbox-user relaunch (sticky `/tmp`; clean them as
+root first if this happened). As `-u sandbox`: the stack starts, but it lives
+OUTSIDE the supervisor's inner netns, so the L7 proxy cannot attribute its
+flows — Slack connects die with `403 http://10.200.0.1:3128` and the audit log
+fills with `graph.microsoft.com … failed to resolve peer binary`. Also avoid
+`setsid nohup … &` inside the supervisor session (hung the session twice,
+never spawning); the plain foreground `exec` form starts immediately.
+
+Durability: `nemoclaw-start` re-emits the restored vars into
+`/tmp/nemoclaw-proxy-env.sh` (sourced by later `bash -l` sessions), so
+profile-based relaunches — e.g. the autoheal watchdog's — keep them from then
+on. JupyterLab daemonizes outside the stack: token, URL, and the host forward
+all survive this surgery.
 
 **Persona/SOUL gating (NemoClaw).** The agent's `SOUL.md` may prohibit
 git/PyPI/web-serving, making it refuse newly-granted capabilities. The durable

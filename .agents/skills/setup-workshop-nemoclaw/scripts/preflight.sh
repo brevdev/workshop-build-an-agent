@@ -87,8 +87,8 @@ else
 fi
 
 # 5b. Workshop integration egress (module coverage; 2026-07-21 audit).
-# Key-authenticated where possible for definitive 200s. All four blocks ship
-# in the community example's policy template — a failure here means policy
+# Key-authenticated where possible for definitive 200s. All four blocks are
+# part of the operator skill's Phase 1 apply — a failure here means policy
 # drift or a missing key, and names exactly which modules degrade.
 if [ -s "$REPO/secrets.env" ]; then
   set -a; . "$REPO/secrets.env" >/dev/null 2>&1; set +a
@@ -163,7 +163,7 @@ if python3 -c 'import os; os.openpty()' >/dev/null 2>&1; then
   pass "PTY allocation works — Terminal tile will function"
 else
   warnf "PTY allocation denied (Landlock /dev/pts) — Terminal tile will be disabled; notebooks unaffected"
-  ask  "add /dev/pts to filesystem_policy.read_write in the policy TEMPLATE — it activates at the next sandbox recreate (fs policy is boot-time; a live apply will not enable it)"
+  ask  "run the operator skill's Phase 1b recreate-from-live — /dev/pts ships in the Phase 1 apply, but fs policy is boot-time (a live apply will not enable it)"
 fi
 
 # 7. Disk

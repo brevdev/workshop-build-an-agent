@@ -96,8 +96,9 @@ seccomp — there IS an operator knob: the sandbox policy's
 `filesystem_policy.read_write` simply lacks `/dev/pts`. (`/dev/ptmx` is a
 symlink to `pts/ptmx`, so the one grant covers master and slaves.)
 
-Fix (operator side): add `- /dev/pts` to `filesystem_policy.read_write` in
-the policy TEMPLATE and **recreate the sandbox**. A live `openshell policy
+Fix (operator side): apply `- /dev/pts` under `filesystem_policy.read_write`
+with the rest of the workshop policy (operator skill Phase 1), then run that
+skill's Phase 1b recreate-from-live so a fresh boot picks it up. A live `openshell policy
 set` does NOT activate fs grants: the supervisor parses `filesystem_policy`
 once at container boot and builds every per-spawn Landlock ruleset from that
 boot-time copy (verified: after a live apply added /dev/pts, new spawns
@@ -261,9 +262,9 @@ Teleport troubleshooting: operator skill.
 
 ## Integration egress (Tavily / LangSmith / tiktoken / ragas)
 
-Four additional routes the workshop content actually exercises (all in the
-community example's policy template as of 2026-07-21; preflight.sh probes
-them):
+Four additional routes the workshop content actually exercises (exact YAML
+for every one lives in the operator skill's policy-blocks.md; preflight.sh
+probes them):
 
 - `api.tavily.com` `POST /search|/extract` — `tavily-python` REST (module-1
   docgen tool, module-2 local MCP server, module-5 search). Without it the
@@ -301,7 +302,7 @@ needed. Verified end-to-end 2026-07-21.
 
 ## Module coverage on this sandbox (audited 2026-07-21)
 
-- **Fully working (CPU + policy template):** module 1 (both notebooks),
+- **Fully working (CPU + workshop policy blocks):** module 1 (both notebooks),
   module 2 (RAG + local-MCP web search; `langgraph dev` serving needs the
   langgraph-cli pin), module 3 (generate + eval; rag-eval needs the module-2
   local-MCP swap to avoid npx hangs), module-4 `bash_agent` + `01_synthetic`

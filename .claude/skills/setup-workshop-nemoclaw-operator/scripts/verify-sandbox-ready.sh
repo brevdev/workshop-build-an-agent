@@ -53,8 +53,10 @@ code=$(sx 'python3 -c "import urllib.request,ssl;print(urllib.request.urlopen(\"
   || failf "integrate.api.nvidia.com from inside: HTTP ${code:-000} — NIM routes missing"
 if [ "$(sx 'python3 -c "import os; os.openpty()" >/dev/null 2>&1 && echo ok')" = "ok" ]; then
   pass "PTY allocation from inside: ok (Terminal tile will work)"
+elif docker exec "$C" test -d "$REPO_IN_SANDBOX/.git" 2>/dev/null; then
+  warnf "PTY allocation denied — Terminal tile auto-hidden (fs grants are boot-time; a live apply will not activate them). Recreating now wipes the built workshop — accept the hidden tile, or run the SKILL.md Phase 1b recreate-from-live and redo setup"
 else
-  warnf "PTY allocation denied — Terminal tile auto-hidden; add /dev/pts to the policy TEMPLATE and recreate the sandbox (fs policy is boot-time — a live apply will not activate it; references/policy-blocks.md)"
+  failf "PTY allocation denied on a PRISTINE sandbox — run the SKILL.md Phase 1b recreate-from-live NOW, before staging/kick (free at this point; boots the /dev/pts grant applied in Phase 1)"
 fi
 # Workshop integration routes (2026-07-21 audit). Unauthed reachability
 # heuristics: a server 4xx means the route is OPEN (request reached the API);

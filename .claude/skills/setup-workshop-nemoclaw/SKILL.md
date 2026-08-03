@@ -297,9 +297,9 @@ only inbound path. Details live in the operator skill.
 - Terminal tile → "Launcher Error: Unhandled error" (500 on POST
   `/api/terminals`; log ends `OSError: out of pty devices`) → the real error
   is a swallowed EACCES from `os.openpty()`: Landlock lacks rw `/dev/pts`.
-  Operator adds it to the policy TEMPLATE; it activates at the next sandbox
-  recreate (fs policy is parsed at container boot — a live apply changes
-  nothing, even for new processes). Details in
+  Operator remedy: the operator skill's Phase 1b recreate-from-live (the
+  grant is applied with Phase 1, but fs policy is parsed at container boot —
+  a live apply changes nothing, even for new processes). Details in
   `references/sandbox-internals.md`.
 - Wrong CA bundle (`ca-certificates.crt`) → uv TLS failures. Use
   `/etc/openshell-tls/ca-bundle.pem`.

@@ -66,14 +66,18 @@ C=$(docker ps --format '{{.Names}}' | grep "openshell-$SANDBOX")   # its contain
 cd <nemoclaw-community>/examples/personal-community-sentiment-triage
 ```
 
-Two policy files matter in the community example: **`policy.yaml`** (the
-TEMPLATE — re-rendered into the sandbox at every recreate) and
-**`policy.hermes-direct.yaml`** (the live-policy capture you hand-edit). Do
-NOT assume the capture pre-exists — a fresh deployment ships only the
-template. When it is missing, create it by extracting the sandbox's live
-policy first (the header-stripped capture from Phase 0 is exactly that
-baseline) and only then add and apply adjustments on top. Keep BOTH in sync
-with any change, or a recreate/re-apply silently reverts it.
+Policy ownership: the deployment's `policy.yaml` template belongs to the
+deployment recipe — this flow does NOT edit it (or any other file of that
+example). The workshop policy lives in the sandbox's **live** policy: Phase 1
+applies live + the additions from `references/policy-blocks.md`, and the
+live policy is thereafter the source of truth. Captures
+(`openshell policy get "$SANDBOX" --full | sed '1,/^---$/d'`) are scratch
+artifacts — regenerate on demand, do not track them. Consequence: a recreate
+through the recipe's own machinery (e.g. `bring-up.sh`/`03-sandbox.sh`, an
+autoheal `watchdog.sh`) re-renders the STOCK template, silently reverting
+every workshop grant (network AND filesystem) and wiping the workshop
+filesystem — after such a recreate, re-run Phase 1, then 1b, then Phase 3
+(all idempotent).
 
 > **If you are an agent (e.g. Claude Code) driving this:** egress-widening
 > `openshell policy set` runs are typically denied by the permission layer
@@ -109,12 +113,12 @@ print("live-only:    ", [k for k in b if k not in a])' policy.yaml /tmp/live.yam
 ```
 
 Read the result in BOTH directions. `template-only` blocks = the live policy
-is missing grants → Phase 1 applies them. `live-only` blocks (e.g. the
-deployment was brought up from an already-workshop-laden template) = Phase
-1's apply is a no-op, but the tracked template is BEHIND live and the next
-recreate/re-apply from it would silently drop those grants → sync the
-template instead. The stripped `/tmp/live.yaml` is also the seed for
-`policy.hermes-direct.yaml` when that capture does not exist yet.
+is missing stock grants (unusual — investigate before overwriting them).
+`live-only` blocks = the workshop additions are already applied (the expected
+state after Phase 1, or after a prior run) → Phase 1's apply is a no-op.
+Either way the template stays untouched — it is the recipe's file, and a
+recreate from it always reverts to stock; Phase 1b and the lifecycle notes
+below deal with that.
 
 `docker exec` is fine for these *filesystem* peeks. It is **NOT** a valid
 probe for egress/syscall behavior — exec'd processes bypass the per-process
@@ -125,10 +129,10 @@ multi-line args).
 ## Phase 1 — Egress policy (one-time)
 
 The sandbox denies all egress by default. The workshop needs the additions
-below — but do not assume they are absent: go by the Phase 0 drift check (a
-deployment brought up from a workshop-laden template already has them live;
-then skip the apply and only sync the template/capture files up to the live
-state). Exact YAML in `references/policy-blocks.md`:
+below — but do not assume they are absent: go by the Phase 0 drift check (if
+they are already live, skip the apply; the live policy is the source of
+truth and no repo file needs syncing). Exact YAML in
+`references/policy-blocks.md`:
 
 | Block | Opens | Needed for |
 |---|---|---|
@@ -148,9 +152,10 @@ Not needed: `build.nvidia.com` (notebook prose only — every model call goes to
 ⚠️ The supervisor parses `filesystem_policy` ONCE at container **boot** —
 `openshell policy set` hot-reloads network rules but NOT filesystem grants
 (verified live: after applying a `/dev/pts` grant, new spawns still built
-the old ruleset). The grant must be in the TEMPLATE (`policy.yaml`) and
-takes effect at the next sandbox **recreate**. There is no restart command,
-and raw `docker restart` hits the stale-bootstrap-JWT crash loop.
+the old ruleset). Include the fs grants in the Phase 1 apply anyway (they
+ride along dormant), then boot them with the **Phase 1b recreate-from-live**
+below. There is no restart command, and raw `docker restart` hits the
+stale-bootstrap-JWT crash loop.
 
 Workflow (details + YAML in the reference):
 
@@ -160,10 +165,10 @@ Workflow (details + YAML in the reference):
    `openshell policy get "$SANDBOX" --full | sed '1,/^---$/d' > /tmp/live.yaml`
 2. Build the apply file = **live policy + the new blocks and nothing else**
    (minimal delta), and structurally verify it (same block names ± the
-   additions) before applying. Update `policy.yaml` AND
-   `policy.hermes-direct.yaml` in the repo to the same desired state — and
-   when `policy.hermes-direct.yaml` does not exist yet (fresh deployment),
-   create it from the stripped live capture.
+   additions) before applying. Include the `filesystem_policy` additions
+   (`/dev/pts` rw, `/sys/fs/cgroup` ro) — dormant until Phase 1b boots them.
+   Do NOT edit the deployment recipe's files: the applied live policy is the
+   only carrier of workshop state.
 3. Apply (human runs it if the permission layer blocks you):
    ```bash
    openshell policy set "$SANDBOX" --policy <file> --wait
@@ -179,6 +184,46 @@ Workflow (details + YAML in the reference):
    openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'curl -s -o /dev/null -w "%{http_code}\n" https://pypi.org/simple/'   # expect 200
    ```
    `scripts/verify-sandbox-ready.sh` runs the full probe set.
+
+## Phase 1b — Boot the filesystem grants (fresh sandbox: recreate NOW)
+
+The `/dev/pts` + `/sys/fs/cgroup` grants applied in Phase 1 stay dormant
+until a container boot. Probe under real enforcement:
+
+```bash
+openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'python3 -c "import os; os.openpty()" && echo PTY-OK'
+```
+
+`PTY-OK` → skip this phase. Denied and the sandbox is still **pristine**
+(Phase 0 found no repo clone, no `secrets.env`) → recreate NOW, before Phase
+3, while it costs nothing. Denied on a sandbox already carrying workshop
+state → recreating wipes it (venv, clone, server); either accept a hidden
+Terminal tile or redo setup after the recreate — operator's call.
+
+Do NOT recreate via the deployment recipe's scripts (e.g.
+`03-sandbox.sh`/`bring-up.sh` — they boot the STOCK template: every workshop
+grant reverts). Boot from the live policy instead — Phase 1 just made it the
+full desired state:
+
+```bash
+openshell policy get "$SANDBOX" --full | sed '1,/^---$/d' > /tmp/boot.yaml
+IMG=$(docker inspect "$C" --format '{{.Config.Image}}')
+PROVIDERS=$(openshell sandbox provider list "$SANDBOX" | awk 'NR>1 && $1 != "" {printf "--provider %s ", $1}')
+# Runtime env the recipe injected at create (harvest BEFORE the delete).
+# Values here are space-free; quote-handle yours if not:
+ENVS=$(docker exec "$C" sh -c "tr '\0' '\n' < /proc/1/environ" | grep -E '^(OUTLOOK_|SLACK_ALLOW|GITHUB_READONLY_REPO=|NEMOCLAW_MESSAGING_CHANNELS_B64=|CHAT_UI_URL=|PHOENIX_)')
+openshell sandbox delete "$SANDBOX"
+openshell sandbox create --from "$IMG" --name "$SANDBOX" --policy /tmp/boot.yaml $PROVIDERS -- env $ENVS nemoclaw-start
+# create streams sandbox stdout; once `openshell sandbox list` (other shell)
+# shows Ready, Ctrl-C the stream — the sandbox survives (the recipe's own
+# script detaches the same way, via a pgrp kill).
+openshell policy set "$SANDBOX" --policy /tmp/boot.yaml --wait   # recipe's two-stage pattern
+C=$(docker ps --format '{{.Names}}' | grep "openshell-$SANDBOX")  # container name changed
+```
+
+Re-probe PTY (expect `PTY-OK`), then continue with the next phases.
+Self-annealing: after one 1b recreate, boot policy == live policy, so the
+grants survive subsequent same-flow recreates.
 
 ## Phase 2 — Keys: leave NVIDIA_API_KEY UNSET (default)
 
@@ -317,10 +362,13 @@ Two verdict patterns that are NOT policy gaps (both observed live):
   community repo's autoheal `watchdog.sh`), then have the agent re-run
   `start-jupyter.sh`.
 - **A sandbox recreate wipes the container filesystem** (venv, shim,
-  `secrets.env`, the server). Policy is re-rendered from the `policy.yaml`
-  TEMPLATE at recreate — which is why the workshop blocks must live in the
-  template too. After recreate: redo Phase 2, then have the agent re-run
-  `setup.sh` + `start-jupyter.sh` (both idempotent).
+  `secrets.env`, the server). What it boots with depends on the path: the
+  deployment recipe's own machinery (`bring-up.sh`/`03-sandbox.sh`, autoheal
+  `watchdog.sh`) re-renders the STOCK template — every workshop grant
+  (network AND filesystem) silently reverts; a Phase 1b recreate boots the
+  live policy and keeps them. After a stock recreate: re-run Phase 1 + 1b;
+  after either: redo Phase 2 if a key was pre-seeded, then have the agent
+  re-run `setup.sh` + `start-jupyter.sh` (all idempotent).
 - **`docker exec` proves nothing about the agent's sandbox** (1 seccomp filter
   vs the agent's 4, no Landlock). Egress/syscall tests: `openshell sandbox
   exec` only.
@@ -341,4 +389,5 @@ Two verdict patterns that are NOT policy gaps (both observed live):
 - [ ] Forward running; host `curl …:8888/lab` → 302.
 - [ ] Laptop tunnel up; browser shows 11 launcher tiles; a module-2 rerank cell returns 200.
 - [ ] Terminal tile opens a shell (`POST /api/terminals` with token → 200) —
-      needs the `/dev/pts` grant; when absent the tile is auto-hidden.
+      needs the `/dev/pts` grant BOOTED. An auto-hidden tile means the Phase
+      1b recreate was skipped; on a fresh sandbox run it before setup.

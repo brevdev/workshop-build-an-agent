@@ -97,7 +97,7 @@ was operator-pre-approved as the sanctioned fallback. Never dodge seccomp via
 ## Fast path (idempotent scripts)
 
 `SKILL_DIR` is wherever this skill lives — resolve it, don't assume. Known
-locations: the repo checkout (`/sandbox/workshop-build-an-agent/.agents/skills/setup-workshop-nemoclaw`)
+locations: the repo checkout (`/sandbox/workshop-build-an-agent/.claude/skills/setup-workshop-nemoclaw`)
 or the agent skill library (`/sandbox/.hermes-data/skills/**/setup-workshop-nemoclaw`).
 
 ```bash
@@ -241,7 +241,7 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
 
 8. **Workshop skills → agent skill library** (`setup.sh`, final step). The
    NemoClaw harness only scans its own library
-   (`/sandbox/.hermes-data/skills/`) — repo-local `.agents/skills` are
+   (`/sandbox/.hermes-data/skills/`) — repo-local `.claude/skills` are
    invisible to it, so without this step a resident agent asked about the
    workshop denies knowing any workshop skills even after a successful setup.
    `setup.sh` copies every workshop skill (modules 1–7, `workshop`, `nvwb`,
@@ -297,9 +297,9 @@ only inbound path. Details live in the operator skill.
 - Terminal tile → "Launcher Error: Unhandled error" (500 on POST
   `/api/terminals`; log ends `OSError: out of pty devices`) → the real error
   is a swallowed EACCES from `os.openpty()`: Landlock lacks rw `/dev/pts`.
-  Operator adds it to the policy TEMPLATE; it activates at the next sandbox
-  recreate (fs policy is parsed at container boot — a live apply changes
-  nothing, even for new processes). Details in
+  Operator remedy: the operator skill's Phase 1b recreate-from-live (the
+  grant is applied with Phase 1, but fs policy is parsed at container boot —
+  a live apply changes nothing, even for new processes). Details in
   `references/sandbox-internals.md`.
 - Wrong CA bundle (`ca-certificates.crt`) → uv TLS failures. Use
   `/etc/openshell-tls/ca-bundle.pem`.

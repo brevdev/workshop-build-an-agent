@@ -77,9 +77,11 @@ Only if the operator explicitly wants a key baked into an unattended image:
 **Terminal tile wanted but PTY denied (probe 5 fails):**
 
 > JupyterLab's Terminal needs PTY devices, which the sandbox Landlock policy
-> currently denies. Please add `/dev/pts` to `filesystem_policy.read_write`
-> in the policy TEMPLATE (in the NemoClaw community example: `policy.yaml`
-> AND `policy.hermes-direct.yaml`). Note it only takes effect at a sandbox
+> currently denies. Please make sure `/dev/pts` is in
+> `filesystem_policy.read_write` of the APPLIED live policy (the operator
+> skill's Phase 1 includes it), then run that skill's Phase 1b
+> recreate-from-live — do not edit the deployment recipe's template.
+> Note it only takes effect at a sandbox
 > **recreate** — filesystem policy is parsed at container boot; a live
 > `policy set` won't activate it even for new processes (network rules
 > hot-reload, fs rules don't). After the recreate I'll re-run setup and

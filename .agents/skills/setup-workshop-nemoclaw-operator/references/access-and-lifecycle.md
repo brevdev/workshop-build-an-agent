@@ -75,11 +75,14 @@ then have the in-sandbox agent re-run `start-jupyter.sh`.
 
 **Sandbox recreate wipes the container filesystem** — venv, netlink shim,
 `secrets.env`, `.launcher-config`, the running server, `/sandbox/workshop-url.txt`.
-Policy is re-rendered from the `policy.yaml` TEMPLATE at recreate, which is
-why the workshop blocks must live in the template, not only in the live
-policy. After a recreate:
+What the new container boots with depends on the recreate path: the recipe's
+own machinery (`bring-up.sh`/`03-sandbox.sh`, autoheal `watchdog.sh`)
+re-renders the STOCK `policy.yaml` template — every workshop grant (network
+AND filesystem) silently reverts — while the SKILL.md Phase 1b
+recreate-from-live boots the live policy and keeps them. After a recreate:
 
-1. Verify policy blocks survived (they did if the template was kept in sync):
+1. Verify policy blocks survived (Phase 1b path) — after a stock recreate,
+   re-run Phase 1 + 1b instead:
    `openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'curl -s -o /dev/null -w "%{http_code}" https://pypi.org/simple/'`
 2. Re-stage `secrets.env` (Phase 2).
 3. Tell the in-sandbox agent to re-run `setup.sh` + `start-jupyter.sh` (both
@@ -92,7 +95,7 @@ policy. After a recreate:
 |---|---|---|---|---|
 | Gateway restart | ✓ | ✓ | ✓ | ✓ |
 | Container restart (avoid!) | ✓ (if JWT valid) | ✓ | ✗ relaunch stack | ✗ re-run start-jupyter.sh |
-| Sandbox recreate | re-rendered from TEMPLATE | ✗ wiped | ✓ (fresh) | ✗ full redo from Phase 2 |
+| Sandbox recreate | stock path: STOCK template (workshop grants revert); Phase 1b path: live policy kept | ✗ wiped | ✓ (fresh) | ✗ full redo from Phase 2 |
 
 **Persona/SOUL gating (NemoClaw).** The agent's `SOUL.md` may prohibit
 git/PyPI/web-serving, making it refuse newly-granted capabilities. The durable

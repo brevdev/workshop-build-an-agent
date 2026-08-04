@@ -98,7 +98,8 @@ symlink to `pts/ptmx`, so the one grant covers master and slaves.)
 
 Fix (operator side): apply `- /dev/pts` under `filesystem_policy.read_write`
 with the rest of the workshop policy (operator skill Phase 1), then run that
-skill's Phase 1b recreate-from-live so a fresh boot picks it up. A live `openshell policy
+skill's Phase 1b token-window-guarded container restart so a fresh boot
+picks it up. A live `openshell policy
 set` does NOT activate fs grants: the supervisor parses `filesystem_policy`
 once at container boot and builds every per-spawn Landlock ruleset from that
 boot-time copy (verified: after a live apply added /dev/pts, new spawns
@@ -185,8 +186,9 @@ is injected by AI Workbench's DevX layer — absent in plain JupyterLab.
   implementing `init(sharedScope)` + `get('./extension')`) plus a
   `package.json` with the `jupyterlab: {"_build": {"load":
   "static/remoteEntry.js", "extension": "./extension"}}` markers. Shipped as
-  `assets/devx-jupyterapp-bridge.tar.gz`; extract into
-  `$VENV/share/jupyter/labextensions/` — no build step.
+  inspectable, SPDX-headed source under `assets/devx-jupyterapp-bridge/`
+  (no archive, no build step); copy the directory into
+  `$VENV/share/jupyter/labextensions/`.
 - Verify: `jupyter labextension list` shows `devx-jupyterapp-bridge v1.0.0
   enabled OK`, and the lab page's `federated_extensions` config includes it.
 - The docsify lesson pages also load CDN assets (jsdelivr/unpkg) — the

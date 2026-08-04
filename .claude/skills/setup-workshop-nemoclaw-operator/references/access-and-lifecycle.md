@@ -61,28 +61,41 @@ Then open `http://localhost:8888/lab?token=…` in the laptop browser.
 
 ## Lifecycle & recovery
 
-**Container restart (`docker restart`) — DON'T.** The container boots from a
-static bootstrap JWT with a 1-hour TTL that is not refreshed on disk. A
-restart re-reads the stale token and the supervisor crash-loops
-(`Policy fetch failed … ExpiredSignature`), leaving the sandbox stuck in
-`Provisioning`. Recovery requires re-minting the bootstrap token or a full
-delete/recreate/restore cycle.
+**Container restart (`docker restart`) — only inside the token window.** The
+container boots from a static bootstrap JWT written once at create
+(`/etc/openshell/auth/sandbox.jwt`, ~1-hour TTL, never refreshed on disk —
+mtime verified unchanged across a 22-hour run and across restarts). Within
+the window a restart recovers cleanly and boots any dormant
+`filesystem_policy` grants (verified on OpenShell v0.0.96: Ready in ~10 s,
+`/dev/pts` grant live afterwards). Past the window the supervisor re-reads
+the expired token and crash-loops (`Unauthenticated`/`ExpiredSignature`),
+leaving the sandbox stuck in `Provisioning` — verified live on both a
+v0.0.53-created and a v0.0.96-resumed sandbox. Recovery then requires a
+recreate (no token re-mint exists in the CLI).
 
-**If the container did restart anyway:** the supervisor comes back but the
-agent stack (`nemoclaw-start`: agent, relay, bridges) stays down — and so does
-JupyterLab. Relaunch the stack (community repo: `bash scripts/autoheal/watchdog.sh`),
-then have the in-sandbox agent re-run `start-jupyter.sh`.
+**Gateway upgrades restart sandbox containers.** A restarted (upgraded)
+gateway resumes sandboxes by restarting their containers, so every sandbox
+older than its token window bricks as above — observed live during the
+0.0.53 → 0.0.96 upgrade. Recreate sandboxes around gateway upgrades.
+
+**After any container restart** (including a Phase 1b grant-boot restart):
+the supervisor comes back (token window permitting) but the agent stack
+(`nemoclaw-start`: agent, relay, bridges) stays down — and so does
+JupyterLab. Relaunch the stack with the recipe-derived env file
+(§ Recovering lost create-time env below, which doubles as the post-restart
+relaunch procedure) or the community repo's autoheal `watchdog.sh`, then
+have the in-sandbox agent re-run `start-jupyter.sh`.
 
 **Sandbox recreate wipes the container filesystem** — venv, netlink shim,
 `secrets.env`, `.launcher-config`, the running server, `/sandbox/workshop-url.txt`.
-What the new container boots with depends on the recreate path: the recipe's
-own machinery (`bring-up.sh`/`03-sandbox.sh`, autoheal `watchdog.sh`)
-re-renders the STOCK `policy.yaml` template — every workshop grant (network
-AND filesystem) silently reverts — while the SKILL.md Phase 1b
-recreate-from-live boots the live policy and keeps them. After a recreate:
+The sanctioned recreate path is the recipe's own machinery
+(`bring-up.sh`/`03-sandbox.sh`, autoheal `watchdog.sh`); it re-renders the
+STOCK `policy.yaml` template, so every workshop grant (network AND
+filesystem) reverts by design. After a recreate:
 
-1. Verify policy blocks survived (Phase 1b path) — after a stock recreate,
-   re-run Phase 1 + 1b instead:
+1. Re-apply the workshop policy (SKILL.md Phase 1) and boot the fs grants
+   with the Phase 1b restart — the fresh sandbox is well inside the token
+   window. Probe:
    `openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'curl -s -o /dev/null -w "%{http_code}" https://pypi.org/simple/'`
 2. Verify the create-time authorization env survived (expect ≥ 1; if 0, see
    § Recovering lost create-time env below):
@@ -96,9 +109,11 @@ recreate-from-live boots the live policy and keeps them. After a recreate:
 
 | Event | Policy | /sandbox files (venv, shim, secrets) | Agent stack | Jupyter |
 |---|---|---|---|---|
-| Gateway restart | ✓ | ✓ | ✓ | ✓ |
-| Container restart (avoid!) | ✓ (if JWT valid) | ✓ | ✗ relaunch stack | ✗ re-run start-jupyter.sh |
-| Sandbox recreate | stock path: STOCK template (workshop grants revert); Phase 1b path: live policy kept | ✗ wiped | ✓ (fresh) | ✗ full redo from Phase 2 |
+| Gateway restart (same version) | ✓ | ✓ | ✓ | ✓ |
+| Gateway upgrade (resume restarts containers) | ✓ | ✓ | ✗ | ✗ — and sandboxes past the token window brick |
+| Container restart, inside token window | ✓ (dormant fs grants boot) | ✓ | ✗ relaunch stack | ✗ re-run start-jupyter.sh |
+| Container restart, past token window | sandbox bricked (`ExpiredSignature`) — recreate | ✓ but unreachable | ✗ | ✗ |
+| Sandbox recreate (recipe machinery) | STOCK template — re-run Phase 1 + 1b | ✗ wiped | ✓ (fresh) | ✗ full redo from Phase 2b |
 
 ## Recovering lost create-time env (Slack pairing-code regression)
 

@@ -163,7 +163,7 @@ if python3 -c 'import os; os.openpty()' >/dev/null 2>&1; then
   pass "PTY allocation works — Terminal tile will function"
 else
   warnf "PTY allocation denied (Landlock /dev/pts) — Terminal tile will be disabled; notebooks unaffected"
-  ask  "run the operator skill's Phase 1b recreate-from-live — /dev/pts ships in the Phase 1 apply, but fs policy is boot-time (a live apply will not enable it)"
+  ask  "run the operator skill's Phase 1b token-window-guarded restart — /dev/pts ships in the Phase 1 apply, but fs policy is boot-time (a live apply will not enable it)"
 fi
 
 # 7. Disk

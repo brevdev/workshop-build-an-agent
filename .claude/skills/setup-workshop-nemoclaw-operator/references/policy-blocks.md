@@ -1,7 +1,8 @@
 # Policy blocks — exact YAML, apply semantics, verification
 
-Everything here was verified live against OpenShell v0.0.53 (gateway as a user
-systemd unit `openshell-gateway.service`; L7 proxy + OCSF audit log via
+Everything here was verified live against OpenShell v0.0.53, with
+lifecycle-sensitive items re-verified on v0.0.96 where noted (gateway as a
+user systemd unit `openshell-gateway.service`; L7 proxy + OCSF audit log via
 `docker logs <container>`). Adjust the repo slug / sandbox name if yours
 differ.
 
@@ -33,9 +34,8 @@ openshell policy get "$SANDBOX" --full | sed '1,/^---$/d' > /tmp/live.yaml
 # 0. If the blocks below are ALREADY in /tmp/live.yaml (e.g. Phase 1 ran
 #    before), apply nothing — the live policy is the source of truth and no
 #    repo file needs syncing.
-# 1. Copy /tmp/live.yaml -> /tmp/apply.yaml; append ONLY the new blocks below.
-# 2. Structural check (e.g. python+yaml): block names in apply.yaml ==
-#    block names in live.yaml + the additions; nothing else differs.
+# 1+2. Compose + structural self-verify in one step (idempotent):
+#    python3 <operator skill>/scripts/build-workshop-policy.py /tmp/live.yaml /tmp/apply.yaml
 # 3. Hand the human:  openshell policy set "$SANDBOX" --policy /tmp/apply.yaml --wait
 #    with a one-line statement of exactly what it opens.
 ```
@@ -308,11 +308,13 @@ openshell sandbox exec -n "$SANDBOX" --no-tty -- sh -lc 'python3 -c "import os; 
 ⚠️ `filesystem_policy` is parsed ONCE at container boot — a live `policy set`
 does NOT activate new fs grants, even for freshly spawned processes (network
 blocks DO hot-reload; watch the supervisor's `Landlock ruleset built` log
-lines: the rw count won't change on a live apply). Apply the grants with the
-rest of Phase 1 (they ride along dormant), then boot them via the SKILL.md
-Phase 1b recreate-from-live; after the recreate, `start-jupyter.sh`
-auto-detects working PTYs and enables the Terminal tile. No restart shortcut
-exists (`docker restart` = stale-bootstrap-JWT crash loop).
+lines: the rw count won't change on a live apply; no-hot-reload verified on
+both v0.0.53 and v0.0.96). Apply the grants with the rest of Phase 1 (they
+ride along dormant), then boot them via the SKILL.md Phase 1b
+token-TTL-guarded restart — a within-window `docker restart` boots the
+grants cleanly (verified on v0.0.96), while a restart past the ~1 h token
+window bricks the sandbox (`ExpiredSignature` crash loop). After the boot,
+`start-jupyter.sh` auto-detects working PTYs and enables the Terminal tile.
 
 ## What NOT to open
 

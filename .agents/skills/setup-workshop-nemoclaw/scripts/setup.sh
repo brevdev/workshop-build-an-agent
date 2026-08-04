@@ -65,9 +65,9 @@ say "3. devx-jupyterapp-bridge labextension"
 LABEXT_ROOT="$VENV/share/jupyter/labextensions"
 if [ ! -f "$LABEXT_ROOT/devx-jupyterapp-bridge/static/remoteEntry.js" ]; then
   mkdir -p "$LABEXT_ROOT"
-  tar -C "$LABEXT_ROOT" -xzf "$SKILL_DIR/assets/devx-jupyterapp-bridge.tar.gz"
+  cp -R "$SKILL_DIR/assets/devx-jupyterapp-bridge" "$LABEXT_ROOT/"
 fi
-[ -f "$LABEXT_ROOT/devx-jupyterapp-bridge/static/remoteEntry.js" ] || { echo "FATAL: bridge extraction failed"; exit 1; }
+[ -f "$LABEXT_ROOT/devx-jupyterapp-bridge/static/remoteEntry.js" ] || { echo "FATAL: bridge install failed"; exit 1; }
 
 # ---- 4. launcher config with rewritten paths + anti-duplication -------------
 say "4. launcher config"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # verify-sandbox-ready.sh — READ-ONLY host-side readiness probe for the
 # Build-an-Agent workshop sandbox. Run on the sandbox HOST (outside).
 #
@@ -33,9 +34,11 @@ command -v openshell >/dev/null || { failf "openshell CLI not on PATH — is thi
 command -v docker >/dev/null    || { failf "docker not on PATH — is this the sandbox host?"; echo "VERDICT: BLOCKED"; exit 1; }
 
 # 1. Container
-C=$(docker ps --format '{{.Names}}' | grep "openshell-$SANDBOX" | head -1)
-if [ -n "$C" ]; then pass "container up: $C"; else
-  failf "no running container matching openshell-$SANDBOX (docker ps)"; echo "VERDICT: BLOCKED"; exit 1
+# Exact, fail-closed container selection (shared helper; labels are the only
+# container identity stable across OpenShell versions).
+. "$(dirname "$0")/lib.sh"
+if C=$(resolve_sandbox_container "$SANDBOX" 2>/dev/null); then pass "container up: $C"; else
+  failf "no unique container labeled openshell.ai/sandbox-name=$SANDBOX (fail-closed)"; echo "VERDICT: BLOCKED"; exit 1
 fi
 
 # 2. Policy revision (informational) + egress probes under enforcement
@@ -54,9 +57,9 @@ code=$(sx 'python3 -c "import urllib.request,ssl;print(urllib.request.urlopen(\"
 if [ "$(sx 'python3 -c "import os; os.openpty()" >/dev/null 2>&1 && echo ok')" = "ok" ]; then
   pass "PTY allocation from inside: ok (Terminal tile will work)"
 elif docker exec "$C" test -d "$REPO_IN_SANDBOX/.git" 2>/dev/null; then
-  warnf "PTY allocation denied — Terminal tile auto-hidden (fs grants are boot-time; a live apply will not activate them). Recreating now wipes the built workshop — accept the hidden tile, or run the SKILL.md Phase 1b recreate-from-live and redo setup"
+  warnf "PTY allocation denied — Terminal tile auto-hidden (fs grants are boot-time; a live apply will not activate them). Inside the token window: run the SKILL.md Phase 1b restart, relaunch the stack, re-run start-jupyter.sh. Past it: accept the hidden tile or recreate and redo setup"
 else
-  failf "PTY allocation denied on a PRISTINE sandbox — run the SKILL.md Phase 1b recreate-from-live NOW, before staging/kick (free at this point; boots the /dev/pts grant applied in Phase 1)"
+  failf "PTY allocation denied on a PRISTINE sandbox — run the SKILL.md Phase 1b token-window restart NOW, before staging/kick (boots the /dev/pts grant applied in Phase 1)"
 fi
 # Workshop integration routes (2026-07-21 audit). Unauthed reachability
 # heuristics: a server 4xx means the route is OPEN (request reached the API);

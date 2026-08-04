@@ -142,12 +142,13 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
    **`python -m ziglang cc`** (no system gcc; npm is 403-blocked). Preload it
    **only on the Jupyter process tree**, never session-wide.
 
-4. **Bridge labextension** (`assets/devx-jupyterapp-bridge.tar.gz`). The
-   in-lesson buttons call `openVoila()` → `window.parent.jupyterapp`, which
-   only AI Workbench's DevX layer normally injects. npm being 403-blocked,
-   this is a hand-crafted federated labextension (Module Federation
-   `remoteEntry.js`, ~2 KB) whose plugin sets `window.jupyterapp = app`.
-   Extract into `$VENV/share/jupyter/labextensions/` — no build step.
+4. **Bridge labextension** (`assets/devx-jupyterapp-bridge/`, checked-in
+   source). The in-lesson buttons call `openVoila()` →
+   `window.parent.jupyterapp`, which only AI Workbench's DevX layer normally
+   injects. npm being 403-blocked, this is a hand-crafted federated
+   labextension (Module Federation `remoteEntry.js`, ~2 KB) whose plugin sets
+   `window.jupyterapp = app`. Copy the directory into
+   `$VENV/share/jupyter/labextensions/` — no archive, no build step.
 
 5. **Launcher config + anti-duplication** (`templates/jp_app_launcher.yaml`,
    11 tiles: 7 modules + Secrets Manager + Simple Agents/Deep Agents/NemoClaw
@@ -297,10 +298,10 @@ only inbound path. Details live in the operator skill.
 - Terminal tile → "Launcher Error: Unhandled error" (500 on POST
   `/api/terminals`; log ends `OSError: out of pty devices`) → the real error
   is a swallowed EACCES from `os.openpty()`: Landlock lacks rw `/dev/pts`.
-  Operator remedy: the operator skill's Phase 1b recreate-from-live (the
-  grant is applied with Phase 1, but fs policy is parsed at container boot —
-  a live apply changes nothing, even for new processes). Details in
-  `references/sandbox-internals.md`.
+  Operator remedy: the operator skill's Phase 1b token-window-guarded
+  container restart (the grant is applied with Phase 1, but fs policy is
+  parsed at container boot — a live apply changes nothing, even for new
+  processes). Details in `references/sandbox-internals.md`.
 - Wrong CA bundle (`ca-certificates.crt`) → uv TLS failures. Use
   `/etc/openshell-tls/ca-bundle.pem`.
 - Skipping the shim → kernels never start (`Kernel died before replying to

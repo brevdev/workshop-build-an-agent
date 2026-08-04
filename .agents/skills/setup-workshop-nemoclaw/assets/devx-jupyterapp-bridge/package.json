@@ -1,0 +1,12 @@
+{
+  "name": "devx-jupyterapp-bridge",
+  "version": "1.0.0",
+  "description": "Exposes the JupyterLab app as window.jupyterapp for DevX workshop lesson iframes (replaces the NVIDIA AI Workbench DevX injection).",
+  "jupyterlab": {
+    "extension": true,
+    "_build": {
+      "load": "static/remoteEntry.js",
+      "extension": "./extension"
+    }
+  }
+}

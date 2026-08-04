@@ -36,7 +36,7 @@ say "0. preflight"
   echo "  git clone --branch $BRANCH https://github.com/$REPO_SLUG $REPO"; exit 1; }
 command -v uv >/dev/null || { echo "FATAL: uv not on PATH"; exit 1; }
 [ -f "$SSL_CERT_FILE" ] || { echo "FATAL: CA bundle missing at $SSL_CERT_FILE"; exit 1; }
-[ -f "$REPO/secrets.env" ] || echo "WARN: $REPO/secrets.env missing — notebooks will lack NVIDIA_API_KEY (operator must stage it; see references/operator-contract.md)."
+[ -f "$REPO/secrets.env" ] || echo "WARN: $REPO/secrets.env missing — notebooks will lack NVIDIA_API_KEY (the learner sets it in the Secrets Manager tile after launch; see references/operator-contract.md)."
 mkdir -p "$RUNTIME_DIR"
 
 # ---- 1. venv + deps ---------------------------------------------------------

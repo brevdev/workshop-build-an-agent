@@ -125,7 +125,7 @@ and any mirror host), alongside the chat/completions/embeddings rules:
 ## Workshop integration blocks (audited 2026-07-21)
 
 Four more routes the module content actually exercises. Full-coverage
-sandboxes should carry all four (a SKILL.md Phase 1b recreate boots from the
+sandboxes should carry all four (a SKILL.md Phase 1b restart boots from the
 live policy, so they survive it; a stock-template recreate reverts them —
 re-run Phase 1). Binaries: same python/curl set as `pypi_install` minus uv.
 

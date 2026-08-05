@@ -271,6 +271,10 @@ the token. Once `start-jupyter.sh` succeeds, send the user/operator:
 > `tsh ls`; `-N` is SILENT when it works); **(3)** open the token URL from
 > `/sandbox/workshop-url.txt` (readable on the host via
 > `docker exec <container> cat /sandbox/workshop-url.txt`).
+> FYI: keep step (1)'s command handy — the forward dies silently with the
+> shell or agent session that spawned it (`openshell forward list` does not
+> track it). If the URL ever stops responding, re-run that same command on
+> the host to restore access.
 
 Agent processes live in an inner network namespace — a server bound even to
 0.0.0.0 is unreachable at the container IP. The gRPC forward + SSH hop is the

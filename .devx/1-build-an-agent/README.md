@@ -1,20 +1,19 @@
-# Build An Agent Workshop
-
-<img src="_static/robots/hero.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
+<div class="dx-hero" data-eyebrow="MODULE 01 / BUILD AN AGENT" data-title="Build An Agent Workshop" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
 The Build An Agent Workshop teaches you how to create AI agents that can perform complex tasks using Large Language Models (LLMs) and tools. You'll build a **Report Generation Agent** - an intelligent system that can research any topic, create comprehensive outlines, write detailed sections, and compile professional reports automatically. Unlike simple workflows, agents are intelligent programs that can adapt to changing requirements, choose tools dynamically, and perform complex reasoning and planning.
 
-This workshop will help you get started building AI agents from scratch. At the end of this workshop, you will take home:
+This workshop will help you get started building AI agents from scratch. Here's what you're in for:
 
-* Understanding of the four core components of any AI agent
-* A working document generation agent that can research and write reports
-* Knowledge of how to build agents using LangGraph and NVIDIA NIM
-* A turn-key, portable development environment
-* Your own customized agent ready to share as a launchable
-
-This learning module can take around 1 to 2 hours to complete.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide is-tall"><h4>YOU WILL BUILD</h4>A <b>Report Generation Agent</b> - an AI system that researches any topic, plans an outline, writes the sections, and compiles a cited, professional report automatically.</div>
+  <div class="dx-cell"><h4>DURATION</h4><span class="dx-big">1-2 h</span>self-paced</div>
+  <div class="dx-cell"><h4>BUILT WITH</h4>LangGraph + NVIDIA NIM</div>
+  <div class="dx-cell is-wide"><h4>YOU'LL TAKE HOME</h4>The four core agent components, a working doc-gen agent, a turn-key portable dev environment, and your own agent ready to share as a launchable.</div>
+</div>
 
 ## Learning Objectives
+
+<img src="_static/robots/hero.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 
 By the end of this module, you'll understand:
 - Why agents exist and what problems they solve
@@ -24,6 +23,21 @@ By the end of this module, you'll understand:
 - How system prompts shape agent behavior
 - When to use agents vs simpler approaches
 - How to build agents both from scratch and with LangChain
+
+<div class="dx-island dx-tutor">
+  <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
+
+This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+
+<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+
+Ask for this module by name — `/module-1` in Claude Code, `$module-1` in Codex — or just describe what you're stuck on and the right skill loads on its own.
+
+```text
+/module-1 explain the ReAct pattern in plain terms
+```
+
+</div>
 
 > Head over to [Setting up Secrets](secrets) to get started!
 

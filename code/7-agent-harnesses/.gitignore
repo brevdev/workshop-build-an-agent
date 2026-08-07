@@ -1,0 +1,6 @@
+.nvidia-skills-cache/
+test_data/
+skills/accelerated-computing-cudf/
+harness_hello.txt
+.venv/
+__pycache__/

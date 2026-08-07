@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 380" width="1040" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark deep-agent middleware pipeline for the DevX dark theme.
+       Mirrors img/middleware_pipeline.mmd; colors match index.html mermaid themeVariables.
+       Dotted edges = transparent middleware passes; solid = routed tool calls; green labels = control flow. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <!-- edges -->
+  <line x1="130" y1="200" x2="173" y2="200" stroke="#6e6e6e" stroke-width="1.6" stroke-dasharray="2 4" marker-end="url(#ah)"/>
+  <line x1="305" y1="200" x2="348" y2="200" stroke="#6e6e6e" stroke-width="1.6" stroke-dasharray="2 4" marker-end="url(#ah)"/>
+  <path d="M490,192 C 515,186 518,176 540,173" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="630" y1="170" x2="680" y2="170" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M780,160 C 840,130 852,84 878,66" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="780" y1="170" x2="878" y2="170" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M780,180 C 825,206 840,238 858,254" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M990,256 C 1022,272 1035,290 1058,299" fill="none" stroke="#6e6e6e" stroke-width="1.6" stroke-dasharray="2 4" marker-end="url(#ah)"/>
+  <path d="M1010,64 C 1130,82 1186,128 1206,150" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M1010,172 C 1080,174 1142,176 1198,177" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M990,258 C 1110,250 1176,206 1205,192" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M1180,300 C 1238,284 1257,238 1261,212" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M1260,210 C 1262,346 1238,358 1180,358 L 470,358 C 440,358 421,302 420,224" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- control-flow edge labels -->
+  <rect x="1004" y="280" width="36" height="18" rx="4" fill="#0c0c0c"/>
+  <text x="1022" y="290" fill="#8fcb2b" font-size="12" text-anchor="middle" dominant-baseline="central">task</text>
+  <rect x="801" y="349" width="40" height="18" rx="4" fill="#0c0c0c"/>
+  <text x="821" y="359" fill="#8fcb2b" font-size="12" text-anchor="middle" dominant-baseline="central">loop</text>
+
+  <!-- nodes -->
+  <rect x="20" y="172" width="110" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="75" y="191" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">User</text>
+  <text x="75" y="209" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Message</text>
+
+  <rect x="175" y="178" width="130" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="240" y="200" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Summarization</text>
+
+  <rect x="350" y="178" width="140" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="420" y="200" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">PatchToolCalls</text>
+
+  <rect x="540" y="148" width="90" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="585" y="170" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Model</text>
+
+  <rect x="680" y="148" width="100" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="730" y="170" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">TodoList</text>
+
+  <rect x="880" y="38" width="130" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="945" y="60" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Filesystem</text>
+
+  <rect x="880" y="148" width="130" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="945" y="170" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Execute</text>
+
+  <rect x="860" y="240" width="130" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="925" y="262" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Tools/Skills</text>
+
+  <rect x="1060" y="285" width="120" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="1120" y="307" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">SubAgent</text>
+
+  <rect x="1200" y="146" width="120" height="64" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="1260" y="170" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">HITL</text>
+  <text x="1260" y="188" fill="#c6c6c6" font-size="11" text-anchor="middle" dominant-baseline="central">(optional)</text>
+</svg>

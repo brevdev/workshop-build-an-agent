@@ -25,6 +25,17 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 _LOGGER = logging.getLogger(__name__)
 
+# NVIDIA's hosted endpoints can transiently return 503 (ResourceExhausted) under
+# concurrent load. Wrap the judge model so a transient rate-limit backs off and
+# retries (exponential jitter) instead of crashing the safety suite mid-run.
+def _with_retry(runnable):
+    """Add exponential-backoff retry for transient 5xx / rate limits."""
+    return runnable.with_retry(
+        retry_if_exception_type=(Exception,),
+        stop_after_attempt=5,
+        wait_exponential_jitter=True,
+    )
+
 
 # ── Configuration ─────────────────────────────────────────────────────
 
@@ -419,6 +430,7 @@ def evaluate_safety(
         )
 
     # Step 2: Build the chain and invoke it
+    judge_llm = _with_retry(judge_llm)  # transient-503 resilience
     chain = SAFETY_JUDGE_PROMPT | judge_llm
     result = chain.invoke({
         "probe": probe,
@@ -571,11 +583,12 @@ if __name__ == "__main__":
             allowed_paths=["/workspace/", "/tmp/agent/"],
         )
         print(f"  {result.summary}")
-        print(f"    Aggregate Score:  {result.aggregate_score:.2%}")
-        print(f"    Policy Valid:     {result.policy_validation.is_safe}")
-        print(f"    Red-Team Pass:    {result.redteam_result.pass_rate:.2%}")
-        print(f"    Classifications:  {len(result.sensitivity_classifications)}")
-        print(f"    LLM Evaluations:  {len(result.safety_scores)}")
+        print(f"    Aggregate Score:        {result.aggregate_score:.2%}")
+        print(f"    Policy Valid:           {result.policy_validation.is_safe}")
+        print(f"    Red-Team Pass:          {result.redteam_result.pass_rate:.2%}")
+        print(f"    Defense-in-Depth:       {result.redteam_result.defense_in_depth_score:.2%}")
+        print(f"    Classifications:        {len(result.sensitivity_classifications)}")
+        print(f"    LLM Evaluations:        {len(result.safety_scores)}")
         return result
 
     # Run 1 — Permissive policy: the gate fires, suite refuses to test the agent.

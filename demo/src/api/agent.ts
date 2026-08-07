@@ -19,6 +19,18 @@ export type AgentEvent = TokenEvent | ToolStartEvent | ToolEndEvent | ErrorEvent
 
 
 /**
+ * Result of creating an agent session. `sandboxActive` reflects the ACTUAL
+ * backend state — a requested sandbox that failed to start (Docker
+ * unavailable) reports `sandboxRequested: true, sandboxActive: false` so the
+ * UI never claims isolation it doesn't have.
+ */
+export interface AgentSessionInfo {
+  sessionId: string;
+  sandboxRequested: boolean;
+  sandboxActive: boolean;
+}
+
+/**
  * Create a new agent session.
  */
 export async function createAgentSession(
@@ -26,7 +38,7 @@ export async function createAgentSession(
   skillIds: string[],
   hitlEnabled: boolean = false,
   sandboxMap: Record<string, boolean> = {},
-): Promise<string> {
+): Promise<AgentSessionInfo> {
   const response = await fetch('api/agent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -34,7 +46,11 @@ export async function createAgentSession(
   });
   if (!response.ok) throw new Error(`Failed to create agent: ${await response.text()}`);
   const data = await response.json();
-  return data.session_id;
+  return {
+    sessionId: data.session_id,
+    sandboxRequested: Boolean(data.sandbox_requested),
+    sandboxActive: Boolean(data.sandbox_active),
+  };
 }
 
 /**

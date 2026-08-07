@@ -1,6 +1,4 @@
-# Implementing MCP
-
-<img src="_static/robots/MCP.png" alt="MCP Robot Character" style="float:right;max-width:300px;margin:25px;" />
+<div class="dx-hero" data-eyebrow="MODULE 02 / 04 - MCP" data-title="Implementing MCP" data-meta="TIME::35 min|CONCEPTS::4|EXERCISES::3"></div>
 
 The Model Context Protocol (MCP) is an open standard developed by Anthropic that defines how AI agents connect to external tools, data sources, and services. Think of it as a universal adapter that lets your agent plug into anything.
 
@@ -8,19 +6,14 @@ In this lesson, we'll explore what MCP is, why it matters, and how it transforms
 
 <!-- fold:break -->
 
-## The Tool Problem
-
-<img src="_static/robots/toolprobem.png" alt="Tools Robot" style="float:left;max-width:250px;margin:25px;" />
-
-In the previous sections, you built tools directly into your agent. The Tavily search tool and the RAG retriever were Python functions defined in your codebase.
-
-This works, but it has limitations:
-
-- **Tight coupling** — Tools live inside your agent's code
-- **Duplication** — Every agent project rebuilds the same integrations
-- **No ecosystem** — Hard to share and reuse tools across projects
-
-What if tools could be developed, shared, and connected independently of any specific agent?
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">THE TOOL PROBLEM</p>
+  <p>In the previous sections, you built tools directly into your agent - the Tavily search and the RAG retriever were Python functions in your codebase. That works, but it has limits:</p>
+  <p><span class="dx-chip">TIGHT COUPLING</span> Tools live inside your agent's code.</p>
+  <p><span class="dx-chip">DUPLICATION</span> Every agent project rebuilds the same integrations.</p>
+  <p><span class="dx-chip">NO ECOSYSTEM</span> Hard to share and reuse tools across projects.</p>
+  <p>What if tools could be developed, shared, and connected independently of any specific agent?</p>
+</div>
 
 <!-- fold:break -->
 
@@ -60,24 +53,13 @@ The protocol defines three core primitives:
 
 ### Why MCP Matters
 
-<img src="_static/robots/strong.png" alt="Power Robot" style="float:left;max-width:250px;margin:25px;" />
-
 MCP is transforming the agent ecosystem:
 
-**For Developers:**
-- Build a tool once, use it everywhere
-- Connect to a growing library of pre-built MCP servers
-- Standardized patterns reduce boilerplate
-
-**For Organizations:**
-- Centralized tool governance and security
-- Consistent integration patterns across teams
-- Tools can be updated without redeploying agents
-
-**For the Ecosystem:**
-- Open source MCP servers for databases, APIs, file systems
-- Commercial MCP servers for enterprise integrations
-- A shared language for agent capabilities
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>FOR DEVELOPERS</h4>Build a tool once, use it everywhere. Tap a growing library of pre-built MCP servers. Standardized patterns cut boilerplate.</div>
+  <div class="dx-cell"><h4>FOR ORGANIZATIONS</h4>Centralized tool governance and security. Consistent integration across teams. Update tools without redeploying agents.</div>
+  <div class="dx-cell is-wide"><h4>FOR THE ECOSYSTEM</h4>Open-source MCP servers for databases, APIs, and file systems; commercial servers for enterprise; a shared language for agent capabilities.</div>
+</div>
 
 <!-- fold:break -->
 
@@ -92,6 +74,14 @@ You may already be using MCP without realizing it. If you've used:
 ...you've experienced MCP in action.
 
 The tools appear seamlessly in the model's context, ready to be invoked when needed, just like the ReAct pattern you learned earlier.
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">You connect your agent to Tavily's hosted MCP server for web search. Where does the search tool's code actually run?</p>
+  <button class="dx-quiz-opt" data-fb="That's the pre-MCP approach - bundling the tool's implementation into your agent's codebase. MCP exists precisely to decouple the two.">Inside your agent's process, after MCP copies the tool code into it</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. The tool lives and runs on the MCP server (here, Tavily's hosted one); your agent just discovers and calls it over the protocol. Build once, use anywhere.">On the MCP server; your agent discovers and calls it over the protocol</button>
+  <button class="dx-quiz-opt" data-fb="The LLM never executes tool code - it only requests a call. With MCP, the MCP server runs the tool, not the model.">The LLM runs it directly as part of generating its response</button>
+</div>
 
 <!-- fold:break -->
 
@@ -109,6 +99,8 @@ We'll see how to do both.
 <!-- fold:break -->
 
 ### The Goal
+
+<img src="_static/robots/MCP.png" alt="MCP Robot Character" style="float:right;max-width:300px;margin:25px;" />
 
 Right now your agent only has one tool:
 - `company_llc_it_knowledge_base` — Internal IT policies
@@ -130,7 +122,7 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 
 The mcp-remote package acts as a bridge, allowing stdio-based clients to connect to remote MCP servers over HTTP.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -153,7 +145,7 @@ This configuration connects to Tavily's hosted MCP server URL. No local server i
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'result = ...');"><i class="fas fa-code"></i> result</button> — Inside `web_search()`, call the Tavily search tool through the MCP client.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -172,7 +164,7 @@ The `session.call_tool()` method invokes the Tavily search tool on the remote MC
 
 In addition to the `RETRIEVER_TOOL` you implemented previously, also add in `web_search` you just built. This replaces your earlier definition — we're expanding the agent's toolkit.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘  Need some help?</summary>
 
 ```python
@@ -191,10 +183,17 @@ AGENT = create_react_agent(
 
 After filling in these blanks, your agent can now differentiate between the following queries:
 
-| Question Type | Tool Used | Citation |
-|---------------|-----------|----------|
-| "How do I reset my password?" | Knowledge Base | [KB] |
-| "What are the latest AI trends?" | Web Search | [Web] |
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">rag_agent</span>
+  <span class="dx-term-line" data-kind="prompt">How do I reset my password?</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">Internal IT policy - the knowledge base should have this.</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[action] company_llc_it_knowledge_base("reset password")</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="350">...follow the self-service reset steps. [KB]</span>
+  <span class="dx-term-line" data-kind="prompt" data-delay="500">What are the latest AI trends?</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">Not in our IT policies, and it needs current info - use web search.</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[action] web_search("latest AI trends 2025")</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="350">...here are the current trends... [Web]</span>
+</div>
 
 The agent decides which tool to use based on the question!
 

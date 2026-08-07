@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 150" width="640" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <defs><marker id="ah" markerWidth="8" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,3.5 L0,7 Z" fill="#8a8a8a"/></marker></defs>
+  <rect x="90" y="46" width="420" height="88" rx="10" fill="#76b900" fill-opacity="0.05" stroke="#76b900" stroke-width="1.5"/>
+  <text x="104" y="64" fill="#76b900" font-size="13" font-weight="700" letter-spacing="1">Retrieval Chain</text>
+  <line x1="37" y1="92" x2="118" y2="92" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="230" y1="92" x2="338" y2="92" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="460" y1="92" x2="619" y2="92" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <circle cx="28" cy="92" r="9" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <circle cx="632" cy="92" r="9" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <rect x="120" y="70" width="110" height="44" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text text-anchor="middle" font-size="13" fill="#f2f2f2"><tspan x="175" y="88">Embedding</tspan><tspan x="175" y="103">Model</tspan></text>
+  <rect x="340" y="66" width="120" height="52" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <path d="M348,78 a52,5 0 0 0 104,0" fill="none" stroke="#3a3a3a" stroke-width="1.3"/>
+  <text text-anchor="middle" font-size="12" fill="#f2f2f2"><tspan x="400" y="96">Vector DB</tspan><tspan x="400" y="110">Search</tspan></text>
+</svg>

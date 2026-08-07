@@ -112,8 +112,21 @@ async def create_agent_session(request: CreateAgentRequest):
             agent, request.model_id, request.skill_ids, thread_id, request.hitl_enabled, sandbox=sandbox
         )
         sandboxed_tools = [k for k, v in request.sandbox_map.items() if v]
-        print(f"[Session] Created {session_id} model={request.model_id} hitl={request.hitl_enabled} sandboxed={sandboxed_tools}")
-        return {"session_id": session_id, "hitl_enabled": request.hitl_enabled}
+        # Report the ACTUAL sandbox state, not what was requested. `sandbox` is
+        # non-None only when the Docker container was really created; if it was
+        # requested but Docker was unavailable, create_agent fell back to local.
+        # The UI drives its badge from these so it never shows "🔒 Sandboxed"
+        # over unsandboxed execution.
+        sandbox_requested = bool(sandboxed_tools)
+        sandbox_active = sandbox is not None
+        print(f"[Session] Created {session_id} model={request.model_id} hitl={request.hitl_enabled} "
+              f"sandbox_requested={sandbox_requested} sandbox_active={sandbox_active}")
+        return {
+            "session_id": session_id,
+            "hitl_enabled": request.hitl_enabled,
+            "sandbox_requested": sandbox_requested,
+            "sandbox_active": sandbox_active,
+        }
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

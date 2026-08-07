@@ -1,4 +1,4 @@
-# Sandboxing and Security
+<div class="dx-hero" data-eyebrow="MODULE 05 / 05 - SECURITY" data-title="Sandboxing and Security" data-meta="READ::20 min|DEMOS::2|TAKEAWAY::defense in depth"></div>
 
 <img src="_static/robots/spyglass.png" alt="Security Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -18,15 +18,14 @@ Three characteristics of deep agents amplify security concerns compared to the s
 
 The key insight: **once an agent passes control to a subprocess, only OS-level enforcement can ensure containment**. Application-level controls — prompt instructions like "don't delete files" — are insufficient because the model can hallucinate past them, and subprocess execution bypasses them entirely.
 
-<details>
-<summary><strong>Concrete risk examples</strong></summary>
-
-- **Hallucinated destructive commands** — The agent generates and executes `rm -rf /important/data` while trying to "clean up"
-- **Supply chain attacks** — The agent fabricates package names that happen to match malicious packages on public registries
-- **Data exfiltration** — A compromised sub-agent leaks sensitive data via DNS tunneling or encoded HTTP requests
-- **Resource exhaustion** — An agent in a retry loop spawns thousands of sub-processes, consuming all available compute
-
-</details>
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHAT CAN GO WRONG</p>
+  <p>These are not hypotheticals - each is a documented failure mode for autonomous agents:</p>
+  <p><span class="dx-chip">DESTRUCTIVE COMMANDS</span> The agent generates and runs rm -rf /important/data while trying to clean up.</p>
+  <p><span class="dx-chip">SUPPLY CHAIN</span> It fabricates a package name that happens to match a malicious package on a public registry.</p>
+  <p><span class="dx-chip">DATA EXFILTRATION</span> A compromised sub-agent leaks data via DNS tunneling or encoded HTTP requests.</p>
+  <p><span class="dx-chip">RESOURCE EXHAUSTION</span> An agent stuck in a retry loop spawns thousands of sub-processes.</p>
+</div>
 
 <!-- fold:break -->
 
@@ -42,10 +41,12 @@ In the Deep Agent Builder UI, make sure **Sandbox Mode is OFF** (you'll see "⚠
 
 The agent will respond with something like:
 
-```
-/tmp/deepagent_workspace/passwords.txt
-/tmp/deepagent_workspace/ssn_records.txt
-```
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">no sandbox - agent runs on the host</span>
+  <span class="dx-term-line" data-kind="prompt">What files are in my workspace?</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="300">ls /tmp/deepagent_workspace</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="350">passwords.txt    ssn_records.txt</span>
+</div>
 
 <!-- fold:break -->
 
@@ -55,19 +56,20 @@ Now ask it to read one:
 
 The agent will happily return:
 
-```
-admin:SuperSecret123!
-root:P@ssw0rd_2026
-db_user:mysql_prod_xK9#mN2
-```
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">no sandbox - reading a host file</span>
+  <span class="dx-term-line" data-kind="prompt">Read the contents of passwords.txt</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="300">read_file(passwords.txt)</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="350">admin:SuperSecret123!</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="120">root:P@ssw0rd_2026</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="120">db_user:mysql_prod_xK9#mN2</span>
+</div>
 
 **This is the problem.** The agent can see — and exfiltrate — every file on the host system that the process has access to.
 
 <!-- fold:break -->
 
 ### The Solution: Sandboxing
-
-<img src="_static/robots/operator.png" alt="Sandbox" style="float:right;max-width:250px;margin:15px;" />
 
 **Sandboxing** isolates the agent's execution environment from the host system. The agent operates inside a container or VM that has no access to the host's files, network, or credentials.
 
@@ -81,9 +83,12 @@ Build a new agent and ask the same question:
 
 The agent responds:
 
-```
-The workspace at /workspace is currently empty. There are no files present. Would you like to create or upload any files to your workspace?
-```
+<div class="dx-term dx-reveal">
+  <span class="dx-term-title">sandboxed - fresh container, no host mounts</span>
+  <span class="dx-term-line" data-kind="prompt">What files are in my workspace?</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="300">ls /workspace</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="350">The workspace at /workspace is empty - no files present. The host filesystem is not visible from inside the container.</span>
+</div>
 
 **The sensitive files don't exist inside the sandbox.** The agent runs in a fresh Docker container with no host mounts. It literally cannot see your files.
 
@@ -93,14 +98,17 @@ The workspace at /workspace is currently empty. There are no files present. Woul
 
 Not all isolation is equal. Approaches range from trusting the model entirely to full hardware virtualization. Understanding this spectrum helps you choose the right level for your use case.
 
-| Tier | Approach | Isolation Level | Use Case |
-|------|----------|----------------|----------|
-| Weakest | Prompt-only controls | None (trust the model) | Development and testing only |
-| | Permission-gated runtimes (Deno) | Capability grants | Lightweight scripting tasks |
-| | OS-level sandboxing (Bubblewrap/Seatbelt) | Filesystem and network boundaries | Desktop agents (e.g., Claude Code) |
-| | Container hardening (Docker + seccomp) | Process-level, shared kernel | Most production workloads |
-| | User-space kernel (gVisor) | Syscall emulation | High-security workloads |
-| Strongest | Hardware virtualization (Firecracker) | Full VM, separate kernel | Maximum isolation |
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">THE SECURITY SPECTRUM - ISOLATION STRENGTH</p>
+  <div class="dx-tax">
+    <div class="dx-tax-row" style="--dx-w:8"><span class="dx-tax-name">Prompt-only</span><div class="dx-tax-track"><div class="dx-tax-fill">none</div></div><span class="dx-tax-note">dev/testing only</span></div>
+    <div class="dx-tax-row" style="--dx-w:28"><span class="dx-tax-name">Deno runtime</span><div class="dx-tax-track"><div class="dx-tax-fill">grants</div></div><span class="dx-tax-note">lightweight scripting</span></div>
+    <div class="dx-tax-row" style="--dx-w:48"><span class="dx-tax-name">Bubblewrap / Seatbelt</span><div class="dx-tax-track"><div class="dx-tax-fill">FS + net</div></div><span class="dx-tax-note">desktop agents (Claude Code)</span></div>
+    <div class="dx-tax-row" style="--dx-w:68"><span class="dx-tax-name">Docker + seccomp</span><div class="dx-tax-track"><div class="dx-tax-fill">process</div></div><span class="dx-tax-note">most production</span></div>
+    <div class="dx-tax-row" style="--dx-w:85"><span class="dx-tax-name">gVisor</span><div class="dx-tax-track"><div class="dx-tax-fill">syscall</div></div><span class="dx-tax-note">high-security</span></div>
+    <div class="dx-tax-row" data-tier="max" style="--dx-w:100"><span class="dx-tax-name">Firecracker VM</span><div class="dx-tax-track"><div class="dx-tax-fill">full VM</div></div><span class="dx-tax-note">maximum isolation</span></div>
+  </div>
+</div>
 
 > Our demo uses **Docker containers** for agent execution sandboxing and isolation.
 
@@ -117,8 +125,6 @@ Ask these questions:
 3. **Does the agent execute code?** Any code execution — even "just" shell commands — requires at minimum container-level isolation.
 4. **What are the consequences of a breach?** A leaked API key is bad. A deleted production database is catastrophic. Match isolation to impact.
 
-</details>
-
 <!-- fold:break -->
 
 ## Patterns for Agent Sandboxing
@@ -129,7 +135,7 @@ Before choosing a sandbox **technology**, you need to choose a sandbox **pattern
 
 The **agent itself** runs inside the sandbox. It communicates with external systems — the LLM API, databases, user interfaces — over HTTP or WebSocket connections.
 
-![Agent IN Sandbox](img/agent_in_sandbox.png)
+![Agent IN Sandbox](img/agent_in_sandbox_dark.svg)
 
 **Pros:** Mirrors local development; simple architecture — everything runs in one place.
 
@@ -143,7 +149,7 @@ The **agent itself** runs inside the sandbox. It communicates with external syst
 
 The **agent runs locally** (or on your server), and code execution is **delegated** to remote sandboxes via API calls. The sandbox is just another tool the agent can call.
 
-![Sandbox as Tool](img/sandbox_as_tool.png)
+![Sandbox as Tool](img/sandbox_as_tool_dark.svg)
 
 **Pros:** API keys stay outside the sandbox; instant agent updates without container rebuilds; clean separation of agent state and execution; enables parallel sandbox execution; sandbox failures don't crash the agent.
 
@@ -204,8 +210,8 @@ There are several approaches to sandboxing, each with different tradeoffs:
 
 Learn more about a few options by clicking each of the examples below. 
 
-<details>
-<summary><strong>1. Docker Containers</strong></summary>
+<details class="dx-peek">
+<summary>1. Docker Containers</summary>
 
 Docker is a common approach for agent sandboxing in development. It provides:
 
@@ -220,8 +226,8 @@ Docker is a common approach for agent sandboxing in development. It provides:
 
 </details>
 
-<details>
-<summary><strong>2. Firecracker MicroVMs</strong></summary>
+<details class="dx-peek">
+<summary>2. Firecracker MicroVMs</summary>
 
 Full hardware virtualization with ~150ms startup time. **E2B** is a leading agent sandboxing platform built on Firecracker.
 
@@ -234,8 +240,8 @@ Full hardware virtualization with ~150ms startup time. **E2B** is a leading agen
 
 </details>
 
-<details>
-<summary><strong>3. OS-Level Sandboxing</strong></summary>
+<details class="dx-peek">
+<summary>3. OS-Level Sandboxing</summary>
 
 Lightweight sandboxing built into the operating system:
 
@@ -269,8 +275,10 @@ Here are the layers, from closest to the user to closest to the hardware:
 
 The key principle: assume any single layer can fail. HITL can be bypassed by batch operations. Permission systems can have gaps. Containers can have escape vulnerabilities. But all six failing simultaneously is extraordinarily unlikely.
 
-<details>
-<summary><strong>Show me an example of a layered defense. Click me!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-sandboxing_security-1">Show me an example of a layered defense.</button>
+<div id="aside-sandboxing_security-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-sandboxing_security-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 Consider a deep research agent deployed in production:
 
@@ -283,16 +291,19 @@ Consider a deep research agent deployed in production:
 
 If the agent is tricked by a prompt injection attack into trying to exfiltrate data, it would need to bypass the application file path restriction, escape the container's filesystem boundary, evade network egress controls, and avoid detection in the audit logs — all simultaneously.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
 ## Agent Security Principles
 
+<img src="_static/robots/operator.png" alt="Security Principles" style="float:right;max-width:250px;margin:15px;" />
+
 Beyond sandboxing, here are the fundamental security principles for production agents. Click on each of them to learn more: 
 
-<details>
-<summary><strong>1. Trust the Sandbox, Not the Model</strong></summary>
+<details class="dx-peek">
+<summary>1. Trust the Sandbox, Not the Model</summary>
 
 From the [deepagents security docs](https://github.com/langchain-ai/deepagents):
 
@@ -302,47 +313,56 @@ Never rely on the model to avoid dangerous actions. It *will* hallucinate. Enfor
 
 </details>
 
-<details>
-<summary><strong>2. Principle of Least Privilege</strong></summary>
+<details class="dx-peek">
+<summary>2. Principle of Least Privilege</summary>
 
 Give the agent only the tools it needs. If it doesn't need shell access, don't enable it. If it doesn't need file write, use read-only mode.
 
 </details>
 
-<details>
-<summary><strong>3. Credential Isolation</strong></summary>
+<details class="dx-peek">
+<summary>3. Credential Isolation</summary>
 
 API keys, database passwords, and tokens should **never** be accessible to the agent. Use environment variables outside the sandbox, and don't mount credential files into containers.
 
 </details>
 
-<details>
-<summary><strong>4. Audit Everything</strong></summary>
+<details class="dx-peek">
+<summary>4. Audit Everything</summary>
 
 Every tool call, every file write, every command execution should be logged. LangSmith provides tracing and monitoring for this — you can review every action the agent took after the fact.
 
 </details>
 
-<details>
-<summary><strong>5. Rate Limiting</strong></summary>
+<details class="dx-peek">
+<summary>5. Rate Limiting</summary>
 
 Prevent runaway agents from making thousands of API calls or running infinite loops. Set recursion limits on the graph and timeouts on tool execution.
 
 </details>
 
-<details>
-<summary><strong>6. Adversarial Testing</strong></summary>
+<details class="dx-peek">
+<summary>6. Adversarial Testing</summary>
 
 Before deploying, probe your agent with inputs designed to trigger unsafe behavior — prompt injection, harmful instructions, and edge cases. If you haven't tried to break it, you don't know it's safe.
 
 </details>
 
-<details>
-<summary><strong>7. Environment Separation</strong></summary> 
+<details class="dx-peek">
+<summary>7. Environment Separation</summary>
 
 Use distinct configurations for development, staging, and production. Never test with production credentials or data.
 
 </details>
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Your agent keeps generating dangerous shell commands. What is the right way to contain it?</p>
+  <button class="dx-quiz-opt" data-fb="The model can hallucinate right past any instruction, and a subprocess bypasses prompt rules entirely. Application-level controls are necessary but never sufficient.">Add a rule to the system prompt telling it never to run destructive commands</button>
+  <button class="dx-quiz-opt" data-fb="Lowering temperature reduces randomness but not capability - one bad command is still catastrophic. Enforce limits at the infrastructure level.">Lower the model temperature so it behaves more predictably</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Once an agent passes control to a subprocess, only OS-level enforcement can guarantee containment. A sandbox with no host mounts means the dangerous command has nothing to destroy.">Run it in a sandbox with no host mounts and resource limits</button>
+  <button class="dx-quiz-opt" data-fb="A bigger model is still a model - it will still occasionally hallucinate. Safety comes from the boundary around the agent, not the agent's own judgment.">Switch to a larger, more capable model</button>
+</div>
 
 <!-- fold:break -->
 
@@ -352,24 +372,24 @@ You now have the complete toolkit — from building your first agent to deployin
 
 ### What You Learned
 
-| Topic | Key Takeaway |
-|-------|-------------|
-| **What Deep Agents Are** | Same LLM loop + planning, delegation, memory, skills |
-| **Shallow vs. Deep** | Shallow for focused tasks; deep for complex, long-horizon work |
-| **Real-World Applications** | Deep research, coding agents, analysis pipelines |
-| **Security and Sandboxing** | OS-level isolation is essential for deep agent safety |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>WHAT DEEP AGENTS ARE</h4>Same LLM loop plus planning, delegation, memory, and skills.</div>
+  <div class="dx-cell"><h4>SHALLOW VS DEEP</h4>Shallow for focused tasks; deep for complex, long-horizon work.</div>
+  <div class="dx-cell"><h4>REAL-WORLD USE</h4>Deep research, coding agents, analysis pipelines.</div>
+  <div class="dx-cell"><h4>SECURITY</h4>OS-level isolation is essential for deep agent safety.</div>
+</div>
 
 <!-- fold:break -->
 
 ### The Full Workshop Arc
 
-| Module | What You Learned | Key Capability | Security Considerations |
-|--------|-----------------|----------------|----------------|
-| Module 1 | Build agents with ReAct | Agent fundamentals | Tool selection |
-| Module 2 | Extend with RAG and tools | Agent capabilities | Data security and access |
-| Module 3 | Measure and evaluate | Agent quality | Adversarial test cases |
-| Module 4 | Customize through training | Agent expertise | Human-in-the-loop |
-| **Module 5** | **Deep agents + sandboxing** | **Agent autonomy** | **OS-level sandboxing** |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">ReAct</span>Agent fundamentals - tool selection.</div>
+  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG + tools</span>Agent capabilities - data security and access.</div>
+  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Agent quality - adversarial test cases.</div>
+  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Customization</span>Agent expertise - human-in-the-loop.</div>
+  <div class="dx-cell is-wide"><h4>MODULE 5 - YOU ARE HERE</h4><span class="dx-big">Deep agents</span>Agent autonomy - OS-level sandboxing.</div>
+</div>
 
 Each level of capability demands a corresponding level of security. Deep agents sit at the far end of this spectrum — the most capable and the most in need of containment.
 
@@ -377,8 +397,9 @@ Each level of capability demands a corresponding level of security. Deep agents 
 
 ### What to Explore Next
 
-- **[NVIDIA NeMo Agent Toolkit](https://github.com/NVIDIA/NeMo-Agent-Toolkit)**: Open-source, framework-agnostic library for connecting, evaluating, and profiling AI agents. Includes built-in RAG evaluators, agent trajectory evaluation, and custom evaluator support. Works with LangChain, LlamaIndex, CrewAI, and other frameworks.
-
-- **[AI-Q NVIDIA Research Assistant Blueprint](https://github.com/NVIDIA-AI-Blueprints/aiq)**: An open reference example for building intelligent AI agents that connect to your enterprise data, reason using state-of-the-art models, and deliver trusted business insights. This is an example of an enterprise-ready deep agent you can deploy in your own enterprise.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>EXPLORE NEXT</h4><p><span class="dx-chip is-green">START HERE</span> <a href="https://github.com/NVIDIA/NeMo-Agent-Toolkit">NVIDIA NeMo Agent Toolkit</a> - open-source, framework-agnostic library for connecting, evaluating, and profiling AI agents, with built-in RAG and trajectory evaluators.</p></div>
+  <div class="dx-cell is-wide"><h4>GO DEEPER</h4><p><a href="https://github.com/NVIDIA-AI-Blueprints/aiq">AI-Q Research Assistant Blueprint</a> - an open reference for enterprise deep agents that connect to your data, reason with SOTA models, and deliver trusted business insights.</p></div>
+</div>
 
 > **Congratulations!** You've completed Module 5: Deep Agents.

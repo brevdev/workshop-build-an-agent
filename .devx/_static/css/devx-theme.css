@@ -1,0 +1,1585 @@
+/* ==========================================================================
+   DevX Workshop design system — SHARED across all DevX Workshop modules
+   "Hybrid NVIDIA" design system: dark hero + dark widget islands + dark
+   terminal panels on the reading surface. Kaizen tokens throughout.
+   Loaded by every module from _static/css/devx-theme.css + _static/js/devx-theme.js;
+   each module's index.html carries `dx-dark dx-mod<N>` on <html>.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('./fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('./fonts/JetBrainsMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Kaizen surface ladder */
+  --dx-black: #000000;
+  --dx-sunken: #0c0c0c;
+  --dx-raised: #161616;
+  --dx-overlay: #222222;
+  --dx-border: #313131;
+  --dx-border-hover: #5e5e5e;
+
+  /* Green is a scalpel */
+  --dx-green: #76b900;
+  --dx-green-hover: #549a00;
+  --dx-green-dim: rgba(118, 185, 0, 0.14);
+
+  /* Amber = a "reveal the answer" accent (dx-peek.is-solution only) */
+  --dx-amber: #e8a33d;
+  --dx-amber-dim: rgba(232, 163, 61, 0.14);
+
+  /* Text on dark */
+  --dx-fg: #f2f2f2;
+  --dx-fg-dim: #c6c6c6;
+  --dx-fg-mute: #8f8f8f;
+
+  --dx-radius: 4px;
+  --dx-ease: 0.2s ease-out;
+  --dx-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --dx-sans: 'NVIDIASans', sans-serif;
+}
+
+/* ==========================================================================
+   1. HERO BAND — one per page. The only place glow + grain + grid exist.
+   ========================================================================== */
+
+.dx-hero {
+  position: relative;
+  margin: 0 0 2.4rem;
+  padding: 2.9rem 2.4rem 2.5rem;
+  background: var(--dx-black);
+  overflow: hidden;
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+}
+
+/* faint engineering dot grid, masked so it fades before the text baseline */
+.dx-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(118, 185, 0, 0.22) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.35;
+  -webkit-mask-image: linear-gradient(115deg, black 20%, transparent 70%);
+  mask-image: linear-gradient(115deg, black 20%, transparent 70%);
+  pointer-events: none;
+}
+
+/* the single rationed glow + film grain to kill banding */
+.dx-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"),
+    radial-gradient(620px 300px at 82% 30%, rgba(118, 185, 0, 0.28), transparent 70%);
+  background-blend-mode: overlay, normal;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.dx-hero > * { position: relative; z-index: 1; }
+
+.dx-hero .dx-eyebrow {
+  font-family: var(--dx-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dx-green);
+  margin: 0 0 0.9rem;
+}
+.dx-hero .dx-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 22px;
+  height: 2px;
+  background: var(--dx-green);
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+.dx-hero h1 {
+  font-family: var(--dx-sans);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 4.5vw, 3.1rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.9rem;
+  max-width: 17em;
+  color: var(--dx-fg);
+  background: linear-gradient(100deg, #ffffff 55%, var(--dx-green) 115%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border: none;
+}
+
+.dx-hero .dx-sub {
+  font-family: var(--dx-sans);
+  font-weight: 200;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--dx-fg-dim);
+  max-width: 44em;
+  margin: 0;
+}
+
+.dx-hero .dx-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.4rem;
+}
+.dx-hero .dx-meta span {
+  font-family: var(--dx-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.dx-hero .dx-meta span b { color: var(--dx-green); font-weight: 700; }
+
+/* ==========================================================================
+   2. READING SURFACE refinements (light, stays close to other modules)
+   ========================================================================== */
+
+.markdown-section { max-width: 56em; }
+
+.markdown-section h2 {
+  font-family: var(--dx-sans);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: 2.6rem;
+}
+.markdown-section h2::before {
+  content: '';
+  display: block;
+  width: 34px;
+  height: 3px;
+  background: var(--dx-green);
+  margin-bottom: 0.55rem;
+}
+
+/* links: dark text, green signal on hover — green is never body-link color.
+   !important required: theme-simple sets link color via higher-specificity vars. */
+.markdown-section a:not(.dx-cta) {
+  color: #1a1a1a !important;
+  text-decoration: underline;
+  text-decoration-color: var(--dx-green);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: color var(--dx-ease);
+}
+.markdown-section a:not(.dx-cta):hover { color: var(--dx-green-hover) !important; }
+
+/* …but on dark surfaces links must stay light (higher specificity wins) */
+.markdown-section .dx-island a,
+.markdown-section .dx-skillcard a,
+.markdown-section .dx-choose a,
+.markdown-section .docsify-tabs__content a {
+  color: var(--dx-fg) !important;
+  text-decoration-color: var(--dx-green);
+}
+.markdown-section .dx-island a:hover,
+.markdown-section .dx-skillcard a:hover,
+.markdown-section .dx-choose a:hover,
+.markdown-section .docsify-tabs__content a:hover { color: var(--dx-green) !important; }
+
+/* bold terms stay ink-dark on the light surface (theme tints them otherwise) */
+.markdown-section strong { color: #202020; }
+.markdown-section .dx-island strong,
+.markdown-section .docsify-tabs__content strong,
+.markdown-section .dx-choose strong { color: var(--dx-fg); }
+
+/* inline code on light surface */
+.markdown-section code:not([class*="lang-"]) {
+  font-family: var(--dx-mono);
+  font-size: 0.82em;
+  background: #f2f2f2;
+  border: 1px solid #e2e2e2;
+  border-radius: 3px;
+  padding: 0.12em 0.4em;
+  color: #202020;
+}
+
+/* tables: engineering data sheet */
+.markdown-section table {
+  border: 1px solid #e2e2e2;
+  border-radius: var(--dx-radius);
+  font-size: 0.92em;
+}
+.markdown-section thead th {
+  font-family: var(--dx-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--dx-black);
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border);
+}
+.markdown-section tr:nth-child(2n) { background: #fafafa; }
+
+/* blockquote → quiet aside with green spine */
+.markdown-section blockquote {
+  border-left: 3px solid var(--dx-green);
+  background: #fafafa;
+  border-radius: 0 var(--dx-radius) var(--dx-radius) 0;
+  padding: 0.7em 1.1em;
+  color: #343434;
+}
+
+/* mascot images get consistent treatment */
+.markdown-section img[src*="robots"] {
+  border: none !important;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.04));
+}
+
+/* ==========================================================================
+   3. TERMINAL PANELS — all fenced code blocks become dark terminals
+   ========================================================================== */
+
+.markdown-section pre {
+  position: relative;
+  background: var(--dx-sunken) !important;
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  padding: 2.1em 1.1em 1em !important;
+  margin: 1.4em 0;
+}
+/* traffic-light header dots */
+.markdown-section pre::before {
+  content: '';
+  position: absolute;
+  top: 11px;
+  left: 14px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  box-shadow: 16px 0 0 #3a3a3a, 32px 0 0 #3a3a3a;
+}
+/* language tag, top right */
+.markdown-section pre::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 7px;
+  right: 12px;
+  font-family: var(--dx-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dx-fg-mute);
+  background: none;
+  padding: 0;
+}
+.markdown-section pre > code {
+  font-family: var(--dx-mono) !important;
+  font-size: 0.83em;
+  line-height: 1.6;
+  background: transparent !important;
+  color: #e6e6e6;
+  white-space: pre;
+}
+
+/* Prism token colors tuned for the dark panel (green-anchored, no rainbow) */
+.markdown-section pre .token.comment { color: #767676; }
+.markdown-section pre .token.string { color: #b3dd6d; }
+.markdown-section pre .token.keyword { color: #8fcb2b; }
+.markdown-section pre .token.function { color: #ffffff; }
+.markdown-section pre .token.number { color: #d8d8d8; }
+.markdown-section pre .token.operator,
+.markdown-section pre .token.punctuation { color: #8f8f8f; background: none; }
+
+/* docsify-copy-code restyled: quiet chip, green confirmation */
+.docsify-copy-code-button {
+  background: var(--dx-overlay) !important;
+  color: var(--dx-fg-dim) !important;
+  font-family: var(--dx-mono) !important;
+  font-size: 0.62rem !important;
+  border-radius: var(--dx-radius) !important;
+  border: 1px solid var(--dx-border) !important;
+}
+.docsify-copy-code-button.success { background: var(--dx-green) !important; color: #000 !important; }
+
+/* ==========================================================================
+   4. DARK WIDGET ISLAND — shared shell for all interactive components
+   ========================================================================== */
+
+.dx-island {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  padding: 1.4rem 1.5rem;
+  margin: 1.6rem 0;
+  color: var(--dx-fg);
+  font-family: var(--dx-sans);
+}
+/* theme-simple colors p/li/blockquote explicitly — force light text inside
+   every dark container at the element level */
+.markdown-section .dx-island p,
+.markdown-section .dx-island li,
+.markdown-section .dx-island blockquote,
+.markdown-section .dx-island blockquote p,
+.markdown-section .dx-skillcard p,
+.markdown-section .dx-skillcard li,
+.markdown-section .dx-choose p,
+.markdown-section .dx-choose li,
+.markdown-section .dx-choose blockquote p,
+.markdown-section .docsify-tabs__content p,
+.markdown-section .docsify-tabs__content li,
+.markdown-section .docsify-tabs__content blockquote,
+.markdown-section .docsify-tabs__content blockquote p {
+  color: var(--dx-fg-dim) !important;
+}
+.markdown-section .dx-island h3,
+.markdown-section .dx-island h4,
+.markdown-section .dx-choose summary,
+.markdown-section .docsify-tabs__content h3,
+.markdown-section .docsify-tabs__content h4 {
+  color: var(--dx-fg) !important;
+}
+
+.dx-island .dx-island-title {
+  font-family: var(--dx-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dx-green);
+  margin: 0 0 1rem;
+}
+.dx-island a { color: var(--dx-fg); text-decoration-color: var(--dx-green); }
+
+/* Tutor aside — the same block repeats on all seven module landing pages, so it
+   has to read as a footnote beside the module pitch rather than compete with it.
+   Everything steps down one notch from body copy: text, buttons, and the sample
+   prompt. Inline code scales on its own (it sizes in `em`); the code block does
+   not, because `pre` inherits from .markdown-section — hence the explicit rule. */
+.dx-island.dx-tutor { padding: 1.15rem 1.25rem; }
+.markdown-section .dx-tutor p {
+  font-size: 0.86rem;
+  line-height: 1.62;
+  margin: 0 0 0.75rem;
+}
+.markdown-section .dx-tutor button:not([class]) {
+  font-size: 0.76rem;
+  padding: 0.4em 0.85em;
+}
+.markdown-section .dx-tutor pre {
+  padding: 1.85em 0.95em 0.8em !important;
+  margin: 1em 0 0;
+}
+.markdown-section .dx-tutor pre > code {
+  font-size: 0.74em;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   5. SELF-TYPING AGENT TERMINAL (Termynal-inspired)
+   ========================================================================== */
+
+.dx-term {
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  padding: 2.3rem 1.2rem 1.1rem;
+  margin: 1.6rem 0;
+  position: relative;
+  font-family: var(--dx-mono);
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: #e6e6e6;
+  min-height: 8em;
+}
+.dx-term::before {
+  content: '';
+  position: absolute;
+  top: 12px; left: 14px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  box-shadow: 16px 0 0 #3a3a3a, 32px 0 0 #3a3a3a;
+}
+.dx-term .dx-term-title {
+  position: absolute;
+  top: 6px; left: 0; right: 0;
+  text-align: center;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dx-fg-mute);
+}
+.dx-term-line { display: block; white-space: pre-wrap; min-height: 1.4em; }
+.dx-term-line[data-kind="prompt"]::before { content: '$ '; color: var(--dx-green); font-weight: 700; }
+.dx-term-line[data-kind="think"] { color: #8f8f8f; font-style: italic; }
+.dx-term-line[data-kind="tool"] { color: #8fcb2b; }
+.dx-term-line[data-kind="tokens"] { color: #767676; }
+.dx-term-line[data-kind="answer"] { color: #ffffff; }
+.dx-term-line.dx-typing::after {
+  content: '▋';
+  color: var(--dx-green);
+  animation: dx-blink 1s steps(1) infinite;
+}
+@keyframes dx-blink { 50% { opacity: 0; } }
+
+.dx-term-replay {
+  position: absolute;
+  top: 6px; right: 10px;
+  font-family: var(--dx-mono);
+  font-size: 0.62rem !important;
+  letter-spacing: 0.1em;
+  background: var(--dx-overlay);
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  padding: 2px 9px;
+  cursor: pointer;
+  transition: border-color var(--dx-ease), color var(--dx-ease);
+  animation: none !important;
+}
+.dx-term-replay:hover { border-color: var(--dx-green); color: var(--dx-green); }
+
+/* ==========================================================================
+   6. TOKEN GAUGE — @property conic donut + count-up
+   ========================================================================== */
+
+@property --dx-gauge {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.dx-gauges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+  justify-content: center;
+}
+.dx-gauge {
+  text-align: center;
+  flex: 0 1 150px;
+}
+.dx-gauge .dx-gauge-ring {
+  --dx-gauge: 0%;
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 0.6rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, var(--dx-raised) 78%, transparent 79% 100%),
+    conic-gradient(var(--dx-green) var(--dx-gauge), var(--dx-overlay) 0);
+  display: grid;
+  place-items: center;
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--dx-fg);
+}
+.dx-gauge.is-on .dx-gauge-ring {
+  --dx-gauge: var(--dx-gauge-to, 50%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dx-gauge.is-on .dx-gauge-ring { transition: --dx-gauge 1.1s ease-out; }
+}
+.dx-gauge .dx-gauge-label {
+  font-family: var(--dx-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dx-fg-mute);
+  line-height: 1.5;
+}
+.dx-gauge .dx-gauge-label b { color: var(--dx-fg-dim); }
+
+/* ==========================================================================
+   7. CONTEXT TAX METER v2
+   ========================================================================== */
+
+.dx-tax { display: grid; gap: 9px; }
+.dx-tax-row {
+  display: grid;
+  grid-template-columns: 170px 1fr 86px;
+  align-items: center;
+  gap: 12px;
+}
+.dx-tax-row .dx-tax-name {
+  font-family: var(--dx-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--dx-fg-dim);
+  text-align: right;
+}
+.dx-tax-row .dx-tax-track {
+  height: 20px;
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.dx-tax-row .dx-tax-fill {
+  height: 100%;
+  width: calc(var(--dx-w, 0) * 1%);
+  background: linear-gradient(90deg, #3d6600, var(--dx-green));
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 7px;
+  font-family: var(--dx-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #000;
+  min-width: 2.4em;
+}
+.dx-tax-row[data-tier="max"] .dx-tax-fill { background: linear-gradient(90deg, #5e5e5e, #d8d8d8); color: #000; }
+.dx-tax-row .dx-tax-note {
+  font-family: var(--dx-mono);
+  font-size: 0.64rem;
+  color: var(--dx-fg-mute);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dx-tax .dx-tax-fill { width: 0; transition: width 1s ease-out; }
+  .dx-tax.is-on .dx-tax-fill { width: calc(var(--dx-w, 0) * 1%); }
+}
+.dx-tax-row:hover .dx-tax-track { border-color: var(--dx-border-hover); }
+
+/* ==========================================================================
+   8. BENTO GRID (module landing)
+   ========================================================================== */
+
+.dx-bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 1.6rem 0;
+}
+.dx-bento .dx-cell {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  padding: 1.05rem 1.15rem;
+  color: var(--dx-fg-dim);
+  font-family: var(--dx-sans);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  transition: border-color var(--dx-ease), transform var(--dx-ease);
+}
+.dx-bento .dx-cell:hover { border-color: var(--dx-green); transform: translateY(-2px); }
+.dx-bento .dx-cell.is-wide { grid-column: span 2; }
+.dx-bento .dx-cell.is-tall { grid-row: span 2; }
+.dx-bento .dx-cell h4 {
+  font-family: var(--dx-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dx-green);
+  margin: 0 0 0.5rem;
+}
+.dx-bento .dx-cell .dx-big {
+  font-family: var(--dx-sans);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--dx-fg);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+@media (max-width: 720px) {
+  .dx-bento { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ==========================================================================
+   9. HARNESS PROFILE CARDS — restyle docsify-tabs
+   ========================================================================== */
+
+.markdown-section .docsify-tabs {
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  background: var(--dx-raised);
+  padding: 0;
+  margin: 1.6rem 0;
+  overflow: hidden;
+}
+.markdown-section .docsify-tabs__tab {
+  font-family: var(--dx-mono) !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.04em;
+  background: var(--dx-black) !important;
+  color: var(--dx-fg-mute) !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  padding: 0.95em 1.25em !important;
+  animation: none !important;
+  transition: color var(--dx-ease);
+}
+.markdown-section .docsify-tabs__tab:hover { color: var(--dx-fg) !important; }
+.markdown-section .docsify-tabs__tab--active {
+  color: var(--dx-green) !important;
+  border-bottom-color: var(--dx-green) !important;
+  background: var(--dx-raised) !important;
+}
+.markdown-section .docsify-tabs__content {
+  background: var(--dx-raised) !important;
+  border: none !important;
+  color: var(--dx-fg-dim);
+  padding: 1.6rem 1.9rem !important;
+  font-size: 1.02em;
+}
+.markdown-section .docsify-tabs__content h3 { color: var(--dx-fg); border: none; }
+.markdown-section .docsify-tabs__content a { color: var(--dx-fg); text-decoration-color: var(--dx-green); }
+.markdown-section .docsify-tabs__content blockquote {
+  background: rgba(255, 255, 255, 0.04);
+  border-left-color: var(--dx-green);
+  color: var(--dx-fg-dim);
+}
+.markdown-section .docsify-tabs__content code:not([class*="lang-"]) {
+  background: var(--dx-overlay);
+  border-color: var(--dx-border);
+  color: var(--dx-fg-dim);
+}
+
+/* chips used inside cards and prose */
+.dx-chip {
+  display: inline-block;
+  font-family: var(--dx-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  padding: 2px 8px;
+  border: 1px solid var(--dx-border);
+  color: var(--dx-fg-dim);
+  background: var(--dx-overlay);
+  vertical-align: middle;
+}
+.dx-chip.is-green { background: var(--dx-green); border-color: var(--dx-green); color: #000; }
+.dx-chip.is-outline-green { background: var(--dx-green-dim); border-color: var(--dx-green); color: #8fcb2b; }
+
+/* ==========================================================================
+   10. CHOOSER v2 + generic details styling (animated reveal)
+   ========================================================================== */
+
+.dx-choose details {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  margin: 8px 0;
+  overflow: hidden;
+}
+.dx-choose details[open] { border-color: var(--dx-border-hover); }
+.dx-choose summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--dx-sans);
+  font-size: 0.92rem;
+  color: var(--dx-fg);
+  padding: 0.85rem 1.1rem;
+  transition: background var(--dx-ease);
+}
+.dx-choose summary::-webkit-details-marker { display: none; }
+.dx-choose summary::before {
+  content: '+';
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  color: var(--dx-green);
+  display: inline-block;
+  width: 1.3em;
+}
+.dx-choose details[open] > summary::before { content: '−'; }
+.dx-choose summary:hover { background: var(--dx-overlay); }
+.dx-choose details > *:not(summary) { padding: 0 1.1rem; color: var(--dx-fg-dim); }
+.dx-choose details details { margin: 8px 0 12px; background: var(--dx-sunken); }
+
+/* recommendation card inside the chooser */
+.dx-choose blockquote {
+  background: var(--dx-green-dim) !important;
+  border: 1px solid var(--dx-green) !important;
+  border-radius: var(--dx-radius) !important;
+  color: var(--dx-fg) !important;
+  margin: 0.6rem 1.1rem 1rem !important;
+  padding: 0.8rem 1rem !important;
+}
+.dx-choose blockquote h3 { color: var(--dx-fg); border: none; margin: 0 0 0.3rem; }
+
+/* progressive enhancement: animate details opening where supported */
+@media (prefers-reduced-motion: no-preference) {
+  .dx-choose details::details-content {
+    opacity: 0;
+    transition: opacity 0.25s ease-out, content-visibility 0.25s allow-discrete;
+  }
+  .dx-choose details[open]::details-content { opacity: 1; }
+}
+
+/* hint/solution reveals on the light surface */
+.markdown-section details:not(.dx-choose details) > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   11. VERIFIED SKILL CARD v2
+   ========================================================================== */
+
+.dx-skillcard {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-top: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+  padding: 1.2rem 1.4rem;
+  margin: 1.6rem 0;
+  max-width: 640px;
+  font-family: var(--dx-sans);
+  color: var(--dx-fg-dim);
+}
+.dx-skillcard .dx-skillcard-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+.dx-skillcard .dx-skillcard-name {
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--dx-fg);
+}
+.dx-skillcard p { font-size: 0.88rem; line-height: 1.55; margin: 0 0 0.8rem; }
+.dx-skillcard ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.7rem 0 0;
+  border-top: 1px solid var(--dx-border);
+  font-size: 0.8rem;
+  font-family: var(--dx-mono);
+  line-height: 2.1;
+}
+.dx-skillcard ul b { color: var(--dx-fg); }
+.dx-skillcard .dx-check { color: var(--dx-green); font-weight: 700; }
+
+/* ==========================================================================
+   12. QUIZ — check your understanding (web.dev style)
+   ========================================================================== */
+
+.dx-quiz { counter-reset: quizopt; }
+.dx-island .dx-quiz-q {
+  font-family: var(--dx-sans);
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--dx-fg);
+  margin: 0 0 0.9rem;
+}
+.dx-quiz .dx-quiz-opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-dim);
+  font-family: var(--dx-sans);
+  font-size: 0.88rem !important;
+  padding: 0.7rem 0.95rem !important;
+  margin: 6px 0;
+  cursor: pointer;
+  transition: border-color var(--dx-ease), background var(--dx-ease);
+  animation: none !important;
+}
+.dx-quiz .dx-quiz-opt::before {
+  counter-increment: quizopt;
+  content: counter(quizopt, upper-alpha);
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--dx-green);
+  border: 1px solid var(--dx-border);
+  border-radius: 3px;
+  padding: 1px 7px;
+  margin-right: 10px;
+}
+.dx-quiz .dx-quiz-opt:hover { border-color: var(--dx-border-hover) !important; background: var(--dx-overlay); }
+.dx-quiz .dx-quiz-opt:focus-visible {
+  outline: 2px solid var(--dx-green);
+  outline-offset: 2px;
+}
+.dx-quiz .dx-quiz-opt[data-state="right"] {
+  border-color: var(--dx-green) !important;
+  background: var(--dx-green-dim);
+  color: var(--dx-fg);
+}
+.dx-quiz .dx-quiz-opt[data-state="wrong"] {
+  border-color: #8f3b3b !important;
+  background: rgba(160, 60, 60, 0.12);
+}
+.dx-quiz .dx-quiz-fb {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  border-left: 3px solid var(--dx-border-hover);
+  padding: 0.5rem 0.9rem;
+  margin: 10px 0 0;
+  color: var(--dx-fg-dim);
+  background: var(--dx-sunken);
+  border-radius: 0 var(--dx-radius) var(--dx-radius) 0;
+}
+.dx-quiz .dx-quiz-fb.is-right { border-left-color: var(--dx-green); }
+.dx-quiz .dx-quiz-fb b { color: var(--dx-fg); }
+
+/* ==========================================================================
+   13. PREDICT-BEFORE-REVEAL (place your bet)
+   ========================================================================== */
+
+.dx-bet .dx-bet-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.dx-bet .dx-bet-opt {
+  font-family: var(--dx-mono) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700;
+  background: var(--dx-sunken);
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-dim);
+  padding: 0.55rem 1.1rem !important;
+  cursor: pointer;
+  transition: border-color var(--dx-ease);
+  animation: none !important;
+}
+.dx-bet .dx-bet-opt:hover { border-color: var(--dx-green) !important; color: var(--dx-fg); }
+.dx-bet .dx-bet-opt:focus-visible { outline: 2px solid var(--dx-green); outline-offset: 2px; }
+.dx-bet .dx-bet-opt[data-state="picked"] { border-color: var(--dx-green) !important; background: var(--dx-green-dim); color: var(--dx-fg); }
+.dx-bet .dx-bet-reveal { margin-top: 0.9rem; font-size: 0.88rem; color: var(--dx-fg-dim); }
+.dx-bet .dx-bet-reveal b { color: var(--dx-green); font-family: var(--dx-mono); font-size: 1.05rem; }
+
+/* ==========================================================================
+   14. REVEAL-ON-SCROLL
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  .dx-reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition-delay: calc(var(--i, 0) * 70ms);
+  }
+  .dx-reveal.is-in { opacity: 1; transform: none; }
+}
+
+/* ==========================================================================
+   15. SIDEBAR numbering + completion, pagination, jupyter buttons
+   ========================================================================== */
+
+.sidebar-nav > ul > li {
+  counter-increment: dxstep;
+}
+.sidebar-nav > ul > li > a::before {
+  content: counter(dxstep, decimal-leading-zero);
+  font-family: var(--dx-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--dx-green);
+  margin-right: 9px;
+  opacity: 0.85;
+}
+.sidebar-nav > ul > li.dx-done > a::before {
+  content: '✓';
+  color: var(--dx-green);
+}
+.sidebar-nav > ul > li.dx-done > a { opacity: 0.65; }
+
+/* Secrets is setup, not a numbered lesson — align the sidebar with the hero
+   eyebrows (Harness Layer = 01, ... Wrapping Up = 06). Stop the first item from
+   advancing the counter so the lessons number 01-06, and show a key glyph
+   instead of the "00" the counter would otherwise render. The :not(.dx-done)
+   guard lets the ✓ completion rule above take over once Secrets is done. */
+.sidebar-nav > ul > li:first-child { counter-increment: none; }
+.sidebar-nav > ul > li:first-child:not(.dx-done) > a::before {
+  content: "\f084";                  /* Font Awesome key — matches secrets.md's fa-key */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+/* Left-justify the page titles. The shared theme makes each link a flex row
+   (justify-content: space-between) whose items are the counter (::before),
+   the title text, and the chevron (::after); space-between drops the title
+   into the gap, so it floats near center and drifts with each title's length.
+   Pack the row to the left and let the chevron absorb the free space on the
+   right via an auto margin. text-align:left also covers the case where the
+   base/CDN theme centers via text-align rather than flex. */
+.sidebar-nav > ul > li > a {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+.sidebar-nav > ul > li > a::after {
+  margin-left: auto;
+}
+
+/* De-clutter the auto sub-TOC. With subMaxLevel set, Docsify builds the nested
+   page nav from each heading's rendered HTML (it strips only <a> tags), so a chip
+   tagged onto a heading — e.g. secrets.md's `## NGC API Key <span class="dx-chip">
+   REQUIRED</span>` or harness_landscape.md's `OPEN SOURCE` tags — rides along into
+   the sidebar and clogs it. Keep the chip on the page; hide only the sidebar copy.
+   Safe to scope to .sidebar broadly: chips only ever live in .content, never in the
+   hand-written _sidebar.md nav or the search results (which render as plain text). */
+.sidebar .dx-chip { display: none; }
+
+/* pagination: quiet dark cards */
+.pagination-item-title { color: #1a1a1a !important; }
+.docsify-pagination-container {
+  border-top: 1px solid #e2e2e2 !important;
+}
+
+/* jupyter-link buttons (class-less by contract): NVIDIA black-on-green */
+.markdown-section button:not([class]) {
+  font-family: var(--dx-sans);
+  font-weight: 700;
+  font-size: 0.84rem;
+  background: var(--dx-green);
+  color: #000;
+  border: 1px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+  padding: 0.45em 1em;
+  cursor: pointer;
+  animation: none !important;
+  transition: background var(--dx-ease), transform var(--dx-ease);
+}
+.markdown-section button:not([class]):hover {
+  background: var(--dx-green-hover);
+  border-color: var(--dx-green-hover);
+  transform: translateY(-2px);
+}
+.markdown-section button:not([class]):focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+.markdown-section button:not([class]) i { margin-right: 0.45em; }
+
+/* mermaid container breathing room */
+.markdown-section .mermaid { margin: 1.6rem 0; display: flex; justify-content: center; }
+
+/* ==========================================================================
+   17. CRAFT PASS — selection, focus, scrollbars, kinetic hero, page
+   transitions, phosphor terminals, sidebar rail, progress beam.
+   ========================================================================== */
+
+/* text selection is a brand moment */
+::selection { background: var(--dx-green); color: #000; }
+
+/* dark scrollbars everywhere in the module */
+html.dx-dark {
+  /* The shared custom.css adds `padding-bottom: calc(100vh - 100px)` to <html>
+     so the progressive-unfold plugin can scroll a page's last section up to the
+     top of the viewport. That pad sits BELOW the footer and, because <html>
+     itself was never given a background, rendered as a jarring white band on
+     the otherwise-black page. Painting <html> black makes the pad seamless
+     (it also becomes the canvas/overscroll color). Scoped to dx-dark, so other
+     modules are untouched. */
+  background-color: var(--dx-black);
+  scrollbar-color: var(--dx-overlay) var(--dx-black);
+}
+html.dx-dark ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.dx-dark ::-webkit-scrollbar-track { background: var(--dx-black); }
+html.dx-dark ::-webkit-scrollbar-thumb {
+  background: var(--dx-overlay);
+  border-radius: 5px;
+  border: 2px solid var(--dx-black);
+}
+html.dx-dark ::-webkit-scrollbar-thumb:hover { background: var(--dx-border-hover); }
+
+/* one consistent focus ring */
+.markdown-section :focus-visible,
+.sidebar :focus-visible {
+  outline: 2px solid var(--dx-green) !important;
+  outline-offset: 2px;
+}
+
+/* sidebar: active rail + breadcrumb eyebrow under the logo */
+.sidebar-nav > ul > li > a { position: relative; transition: color var(--dx-ease); }
+.sidebar-nav > ul > li.active > a,
+.sidebar-nav > ul > li > a.active {
+  color: var(--dx-fg) !important;
+}
+.sidebar-nav li.active > a::after,
+.sidebar-nav li > a.active::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 10%;
+  height: 80%;
+  width: 2px;
+  background: var(--dx-green);
+}
+.app-name::after {
+  content: 'DEVX WORKSHOP';                 /* fallback; per-module text set by the html.dx-mod* rules below */
+  display: block;
+  font-family: var(--dx-mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--dx-green);
+  margin-top: 4px;
+  opacity: 0.9;
+}
+/* Per-module breadcrumb — driven by the html.dx-mod<N> class on each module's index.html.
+   This is the shared design system, so the module number is parameterized here. */
+html.dx-mod1 .app-name::after { content: 'DEVX WORKSHOP / MODULE 01'; }
+html.dx-mod2 .app-name::after { content: 'DEVX WORKSHOP / MODULE 02'; }
+html.dx-mod3 .app-name::after { content: 'DEVX WORKSHOP / MODULE 03'; }
+html.dx-mod4 .app-name::after { content: 'DEVX WORKSHOP / MODULE 04'; }
+html.dx-mod5 .app-name::after { content: 'DEVX WORKSHOP / MODULE 05'; }
+html.dx-mod6 .app-name::after { content: 'DEVX WORKSHOP / MODULE 06'; }
+html.dx-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
+
+/* sidebar search goes terminal */
+.sidebar .search { border-bottom: 1px solid var(--dx-border) !important; }
+/* The whole .input-wrap is the bordered dx field, so the (icon-less) input AND the
+   clear button live inside ONE box — matching the reset icon beside it. The input
+   is transparent and fills the box; the × is pinned at the right, inside it. This
+   replaces the old "border on the input + sibling × nudged left over it" approach
+   that caused the overlap. */
+.sidebar .search .input-wrap {
+  background: var(--dx-raised) !important;
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius) !important;
+  height: 32px !important;          /* pin the field height so it ALWAYS equals the 32px reset icon (and can't be resized by focus) */
+  box-sizing: border-box !important;
+  padding: 0 !important;            /* custom.css :focus-within adds padding on focus; zero it so nothing shifts inside the fixed box */
+  transition: border-color var(--dx-ease);
+}
+.sidebar .search .input-wrap:hover { border-color: var(--dx-border-hover) !important; }
+.sidebar .search .input-wrap:focus-within { border-color: var(--dx-green) !important; border-width: 1px !important; padding: 0 !important; }
+.sidebar .search .input-wrap::before { display: none !important; }   /* drop the broken magnifier slot */
+.sidebar .search input {
+  flex: 1 1 auto !important;        /* fill the field */
+  width: auto !important;
+  min-width: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--dx-fg) !important;
+  font-family: var(--dx-mono) !important;
+  font-size: 0.78rem !important;
+}
+.sidebar .search input:focus { outline: none !important; }
+.sidebar .search input::placeholder { color: var(--dx-fg-mute) !important; opacity: 1; }
+/* clear (×): undo custom.css's leftward shift (position:relative + right) that put it
+   over the input; keep it static at the right inside the field, and recolor the circle */
+.sidebar .search .clear-button { position: static !important; right: auto !important; top: auto !important; flex: 0 0 auto; margin: 0 4px 0 0; }
+.sidebar .search .clear-button svg circle { fill: var(--dx-overlay) !important; }
+.sidebar .search .results-panel { background: var(--dx-black) !important; }   /* black to match the sidebar/theme, not raised grey */
+.sidebar .search .matching-post { border-bottom: 1px solid var(--dx-border) !important; }
+.sidebar .search .matching-post:hover { background: var(--dx-overlay) !important; }   /* subtle dx hover instead of the base theme's brand color */
+.sidebar .search .matching-post h2 { color: var(--dx-fg) !important; }
+.sidebar .search .matching-post p { color: var(--dx-fg-mute) !important; }
+.sidebar .search .search-keyword { color: var(--dx-green) !important; }
+
+/* Sidebar controls row: lay the search bar and the reset icon on one line.
+   (.search is the first child of <aside class="sidebar"> — confirmed from the
+   live DOM. Bare `.search` selectors are used here because the plugin styles it
+   with bare selectors too; specificity ties resolve in our favor by load order.)
+   Horizontal padding owns the left/right insets; gap is the space between the
+   input and the icon; vertical padding (6px) matches the plugin default. */
+.search {
+  display: flex !important;     /* plugin leaves .search display unset; !important guards against any runtime-injected rule */
+  flex-wrap: wrap !important;
+  align-items: center;          /* center the icon against the input row; stretch made it match the taller input-wrap, not the input box */
+  gap: 6px;                     /* a touch tighter than the old 8px */
+  padding: 6px 14px !important; /* more breathing room on both outer sides (overrides the plugin's 6px) */
+}
+/* flex-basis MUST be 0, not auto. With flex-wrap, line breaks are decided from
+   each item's flex-basis BEFORE shrinking — so an `auto` (content ~200px) basis
+   made the input claim the whole ~228px row and bumped the 32px icon to the next
+   line, where the lone input then grew to full width. Zero basis lets the icon
+   share line 1; the input grows into the remainder. !important wins over the
+   docsify-themeable theme + the plugin's own injected .search rules. */
+.search .input-wrap { flex: 1 1 0 !important; min-width: 0; }
+.search .input-wrap input,
+.search input { min-width: 0; }
+.search .results-panel { flex: 1 0 100%; }              /* dropdown drops to its own full-width line */
+
+/* progress reset control — injected into the controls row by module7.js, right
+   after the search input. Carries a class, so the base theme's class-less
+   <button> rules and the module's markdown-button rule never touch it. Icon-only:
+   the label lives in title + aria-label. Fixed 32x32; the search field (.input-wrap)
+   is pinned to the SAME 32px, so the two match by construction. align-self:stretch
+   was tried but overshoots the flex line height here, so both use an explicit height.
+   To resize the pair, change BOTH this height and .input-wrap's height together. */
+.dx-reset {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;            /* equals the field height pinned on .input-wrap */
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;               /* right inset is handled by .search padding now */
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-mute);
+  cursor: pointer;
+  transition: border-color var(--dx-ease), color var(--dx-ease);
+}
+.dx-reset:hover { border-color: var(--dx-green); color: var(--dx-green); }
+.dx-reset:focus-visible { outline: 2px solid var(--dx-green); outline-offset: 2px; }
+.dx-reset .dx-reset-icon { font-size: 0.95rem; line-height: 1; }
+
+/* route-change transition: content rises in (class set by module7.js) */
+@media (prefers-reduced-motion: no-preference) {
+  .markdown-section.dx-page-in { animation: dx-pagein 0.45s ease-out both; }
+  @keyframes dx-pagein {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+/* kinetic hero: eyebrow, title, sub, meta stagger up on render */
+@media (prefers-reduced-motion: no-preference) {
+  .dx-hero .dx-eyebrow,
+  .dx-hero h1,
+  .dx-hero .dx-sub,
+  .dx-hero .dx-meta {
+    animation: dx-rise 0.55s ease-out both;
+  }
+  .dx-hero h1 { animation-delay: 0.09s; }
+  .dx-hero .dx-sub { animation-delay: 0.18s; }
+  .dx-hero .dx-meta { animation-delay: 0.27s; }
+  @keyframes dx-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  /* the dot grid drifts, barely — the page feels alive */
+  .dx-hero::before { animation: dx-drift 80s linear infinite; }
+  @keyframes dx-drift {
+    from { background-position: 0 0; }
+    to { background-position: 480px 240px; }
+  }
+}
+
+/* phosphor: green terminal lines glow faintly, like a real CRT */
+.dx-term-line[data-kind="tool"],
+.dx-term-line[data-kind="prompt"]::before {
+  text-shadow: 0 0 8px rgba(118, 185, 0, 0.45);
+}
+.dx-term .dx-typing::after { text-shadow: 0 0 8px rgba(118, 185, 0, 0.8); }
+
+/* quiz: the correct answer lands with a green pulse */
+@media (prefers-reduced-motion: no-preference) {
+  .dx-quiz .dx-quiz-opt[data-state="right"] { animation: dx-pulse 0.6s ease-out 1; }
+  @keyframes dx-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(118, 185, 0, 0.55); }
+    100% { box-shadow: 0 0 0 14px rgba(118, 185, 0, 0); }
+  }
+}
+
+/* gauges: lit ring gets a faint halo */
+.dx-gauge.is-on .dx-gauge-ring { box-shadow: 0 0 24px rgba(118, 185, 0, 0.12); }
+
+/* module progress beam: fixed 2px bar fed by module7.js (--dx-progress 0..1) */
+#dx-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  background: transparent;
+  pointer-events: none;
+}
+#dx-progress::before {
+  content: '';
+  display: block;
+  height: 100%;
+  width: calc(var(--dx-progress, 0) * 100%);
+  background: linear-gradient(90deg, #3d6600, var(--dx-green));
+  box-shadow: 0 0 10px rgba(118, 185, 0, 0.5);
+  transition: width 0.35s ease-out;
+}
+
+/* image-zoom overlay: stock plugin opens images on WHITE — keep it dark */
+html.dx-dark .medium-zoom-overlay { background: rgba(0, 0, 0, 0.92) !important; }
+html.dx-dark img.medium-zoom-image--opened { background: var(--dx-raised) !important; }
+
+/* hr + footer quietly dark */
+html.dx-dark .markdown-section hr { border-color: var(--dx-border) !important; }
+
+/* table row hover: engineering datasheet affordance */
+html.dx-dark .markdown-section tbody tr { transition: background var(--dx-ease); }
+html.dx-dark .markdown-section tbody tr:hover td { background: var(--dx-overlay); }
+
+/* progressive-unfold nav: plugin hard-codes white inline styles — reclaim them */
+.progressive-unfold-nav button {
+  background: var(--dx-overlay) !important;
+  color: var(--dx-fg-dim) !important;
+  border: 1px solid var(--dx-border) !important;
+  border-radius: var(--dx-radius) !important;
+  font-family: var(--dx-mono) !important;
+  font-size: 0.74rem !important;
+  letter-spacing: 0.06em;
+  padding: 0.5em 1.2em !important;
+  transition: border-color var(--dx-ease), color var(--dx-ease) !important;
+  animation: none !important;
+}
+.progressive-unfold-nav button:hover:not(:disabled) {
+  border-color: var(--dx-green) !important;
+  color: var(--dx-fg) !important;
+  background: var(--dx-overlay) !important;
+}
+.progressive-unfold-nav button:disabled { opacity: 0.35 !important; }
+.progressive-unfold-nav .section-indicator {
+  font-family: var(--dx-mono) !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0.1em;
+  background: var(--dx-green) !important;
+  color: #000 !important;
+  border: none !important;
+  border-radius: var(--dx-radius) !important;
+}
+
+/* ==========================================================================
+   16. FULL-DARK MODE — add class "dx-dark" to <html> to switch the whole
+   reading surface to the build.nvidia.com look. Remove the class to return
+   to the hybrid (light reading surface). Everything below is scoped.
+   ========================================================================== */
+
+html.dx-dark body,
+html.dx-dark main,
+html.dx-dark .content,
+html.dx-dark section.content,
+html.dx-dark .markdown-section {
+  background: var(--dx-black) !important;
+}
+
+/* prose */
+html.dx-dark .markdown-section,
+html.dx-dark .markdown-section p,
+html.dx-dark .markdown-section li {
+  color: var(--dx-fg-dim) !important;
+}
+html.dx-dark .markdown-section h1,
+html.dx-dark .markdown-section h2,
+html.dx-dark .markdown-section h3,
+html.dx-dark .markdown-section h4,
+html.dx-dark .markdown-section strong {
+  color: var(--dx-fg) !important;
+}
+
+/* on black, green text passes AA — links get to be green again */
+html.dx-dark .markdown-section a:not(.dx-cta) {
+  color: #8fcb2b !important;
+  text-decoration-color: rgba(143, 203, 43, 0.5);
+}
+html.dx-dark .markdown-section a:not(.dx-cta):hover { color: var(--dx-green) !important; }
+
+/* hero blends into the page instead of sitting as a card */
+html.dx-dark .dx-hero { border-color: var(--dx-border); }
+
+/* inline code */
+html.dx-dark .markdown-section code:not([class*="lang-"]) {
+  background: var(--dx-raised);
+  border-color: var(--dx-border);
+  color: #d8d8d8;
+}
+
+/* tables */
+html.dx-dark .markdown-section table { border-color: var(--dx-border); }
+html.dx-dark .markdown-section td { border-color: var(--dx-border); background: var(--dx-sunken); color: var(--dx-fg-dim); }
+html.dx-dark .markdown-section tr:nth-child(2n),
+html.dx-dark .markdown-section tr:nth-child(2n) td { background: var(--dx-raised); }
+
+/* blockquote asides */
+html.dx-dark .markdown-section blockquote {
+  background: var(--dx-raised) !important;
+  border-left-color: var(--dx-green) !important;
+  color: var(--dx-fg-dim) !important;
+}
+html.dx-dark .markdown-section blockquote p { color: var(--dx-fg-dim) !important; }
+
+/* hint/solution details on the reading surface */
+html.dx-dark .markdown-section summary { color: var(--dx-fg); }
+
+/* islands stand off the pure-black page with their raised surface + a hair more border */
+html.dx-dark .dx-island,
+html.dx-dark .dx-skillcard,
+html.dx-dark .dx-bento .dx-cell { border-color: #3a3a3a; }
+
+/* mascots: tone down so illustrations don't glare on black */
+html.dx-dark .markdown-section img[src*="robots"] { opacity: 0.92; border-radius: var(--dx-radius); }
+
+/* pagination + footer */
+html.dx-dark .pagination-item-title { color: var(--dx-fg) !important; }
+html.dx-dark .docsify-pagination-container { border-top: 1px solid var(--dx-border) !important; }
+html.dx-dark footer p { color: var(--dx-fg-mute); }
+
+/* mermaid edge labels sit on the page background — lighten them */
+html.dx-dark .markdown-section .mermaid .edgeLabel,
+html.dx-dark .markdown-section .mermaid .messageText,
+html.dx-dark .markdown-section .mermaid text {
+  fill: #c6c6c6 !important;
+  color: #c6c6c6 !important;
+}
+html.dx-dark .markdown-section .mermaid .edgeLabel { background-color: var(--dx-black) !important; }
+
+/* ==========================================================================
+   12. REVEAL WIDGETS — dx-peek (inline) · dx-aside (popover) · dx-defs (grid)
+   Replacements for bare <details> accordions. The reveal mechanism follows the
+   reading model: INLINE for linear / compare-against-your-work content, an
+   OVERLAY for optional tangents (no page reflow), a GRID for glossaries.
+   All native + attribute-driven (no page <script>). Never group blocks across
+   a <!-- fold:break --> — the progressive-unfold plugin counts top-level nodes.
+   ========================================================================== */
+
+/* ---- 12a. dx-peek — inline reveal tile (steps / solutions / setup) -------- */
+.markdown-section details.dx-peek {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-left: 3px solid var(--dx-green);     /* the clickability cue */
+  border-radius: var(--dx-radius);
+  margin: 0.7rem 0;
+  overflow: hidden;
+  transition: border-color var(--dx-ease), transform var(--dx-ease);
+}
+.markdown-section details.dx-peek:hover { transform: translateY(-1px); }
+.markdown-section details.dx-peek[open] { border-color: var(--dx-border-hover); }
+.markdown-section details.dx-peek > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--dx-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--dx-fg);
+  padding: 0.78rem 1.05rem;
+  transition: background var(--dx-ease);
+}
+.markdown-section details.dx-peek > summary::-webkit-details-marker { display: none; }
+.markdown-section details.dx-peek > summary::before {
+  content: '+';
+  flex: none;
+  width: 1.1em;
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  color: var(--dx-green);
+}
+.markdown-section details.dx-peek[open] > summary::before { content: '\2212'; }  /* minus */
+.markdown-section details.dx-peek > summary:hover { background: var(--dx-overlay); }
+.markdown-section details.dx-peek > *:not(summary) {
+  padding-left: 1.05rem;
+  padding-right: 1.05rem;
+}
+/* 15px body (a touch under the 16px base); leave headings at their normal size */
+.markdown-section details.dx-peek > *:not(summary):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
+  font-size: 0.9375rem;
+}
+/* code matches the step's body size (rem, not the fragile 0.83em-of-pre chain) */
+.markdown-section details.dx-peek pre > code { font-size: 0.9375rem; line-height: 1.5; }
+.markdown-section details.dx-peek > *:last-child { padding-bottom: 0.7rem; }
+
+/* modifier: is-solution — amber accent signals "answer / spoiler ahead" */
+.markdown-section details.dx-peek.is-solution { border-left-color: var(--dx-amber); }
+.markdown-section details.dx-peek.is-solution > summary::before { color: var(--dx-amber); }
+/* modifier: is-setup — compact + muted, for tiny conditional fallbacks */
+.markdown-section details.dx-peek.is-setup { border-left-width: 2px; }
+.markdown-section details.dx-peek.is-setup > summary { font-size: 0.86rem; font-weight: 500; padding: 0.6rem 0.95rem; color: var(--dx-fg-dim); }
+
+/* ---- 12b. dx-aside — popover overlay (explanatory / optional asides) ------ */
+.markdown-section .dx-aside { margin: 0.7rem 0; }
+.markdown-section .dx-aside-btn {
+  display: flex;                    /* full-width, mirrors a dx-peek summary */
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: left;
+  font-family: var(--dx-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--dx-fg);
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-left: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+  padding: 0.78rem 1.05rem;
+  cursor: pointer;
+  transition: border-color var(--dx-ease), background var(--dx-ease), transform var(--dx-ease);
+}
+.markdown-section .dx-aside-btn::before {
+  content: '\2922';                 /* diagonal arrows = opens an overlay */
+  font-family: var(--dx-mono);
+  font-weight: 700;
+  color: var(--dx-green);
+}
+.markdown-section .dx-aside-btn:hover { background: var(--dx-overlay); border-color: var(--dx-border-hover); transform: translateY(-1px); }
+
+/* the panel renders in the browser top layer when open — zero page reflow */
+.dx-aside-panel {
+  max-width: min(680px, 92vw);
+  max-height: 82vh;
+  overflow: auto;
+  margin: auto;                     /* UA centers popovers via inset:0 + margin:auto */
+  background: var(--dx-raised);
+  color: var(--dx-fg-dim);
+  border: 1px solid var(--dx-border-hover);
+  border-top: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+  padding: 1.3rem 1.5rem 1.5rem;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+}
+.dx-aside-panel > *:first-child { margin-top: 0; }
+.dx-aside-panel::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.dx-aside-x {
+  float: right;
+  position: sticky;
+  top: 0;
+  margin: -0.5rem -0.7rem 0.3rem 0.7rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  line-height: 1;
+  font-size: 1.25rem;
+  color: var(--dx-fg-mute);
+  background: var(--dx-overlay);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  cursor: pointer;
+  transition: color var(--dx-ease), border-color var(--dx-ease);
+}
+.dx-aside-x:hover { color: var(--dx-fg); border-color: var(--dx-green); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .dx-aside-panel { transition: opacity 0.2s ease-out, transform 0.2s ease-out; }
+  @starting-style { .dx-aside-panel:popover-open { opacity: 0; transform: translateY(8px); } }
+}
+
+/* ---- 12c. dx-defs — glossary term/definition grid ------------------------- */
+.markdown-section .dx-defs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);   /* fixed 4-col bento (matches .dx-bento) */
+  gap: 10px;
+  align-items: start;               /* expanding one tile won't stretch its row */
+  margin: 1.3rem 0;
+}
+/* span modifiers — smart packing fills each row, no dead space */
+.markdown-section .dx-defs > .dx-def.is-wide { grid-column: span 2; }
+.markdown-section .dx-defs > .dx-def.is-full { grid-column: 1 / -1; }
+@media (max-width: 720px) {
+  .markdown-section .dx-defs { grid-template-columns: repeat(2, 1fr); }
+  .markdown-section .dx-defs > .dx-def.is-wide,
+  .markdown-section .dx-defs > .dx-def.is-full { grid-column: 1 / -1; }
+}
+.markdown-section details.dx-def {
+  background: var(--dx-raised);
+  border: 1px solid var(--dx-border);
+  border-radius: var(--dx-radius);
+  overflow: hidden;
+  transition: border-color var(--dx-ease), transform var(--dx-ease);
+}
+.markdown-section details.dx-def:hover { border-color: var(--dx-green); transform: translateY(-2px); }
+.markdown-section details.dx-def[open] { border-color: var(--dx-green); }
+.markdown-section details.dx-def > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--dx-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dx-green);
+  padding: 0.75rem 0.9rem;
+}
+.markdown-section details.dx-def > summary::-webkit-details-marker { display: none; }
+.markdown-section details.dx-def > summary::after {
+  content: '+';
+  flex: none;
+  color: var(--dx-fg-mute);
+}
+.markdown-section details.dx-def[open] > summary::after { content: '\2212'; color: var(--dx-green); }
+.markdown-section details.dx-def > *:not(summary) {
+  padding: 0.1rem 0.9rem 0.8rem;
+  font-family: var(--dx-sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--dx-fg-dim);
+}
+
+/* code blocks inside reveal widgets — inset to match prose, and scroll (never clip).
+   .markdown-section pre carries padding:...!important, so we inset the panel with
+   margin rather than padding. dx-def tiles are grid items: min-width:0 lets a long
+   line scroll inside the tile instead of forcing the track wider / being clipped by
+   the tile's overflow:hidden. */
+.markdown-section details.dx-peek > pre {
+  margin-left: 1.05rem;
+  margin-right: 1.05rem;
+  overflow-x: auto;
+}
+/* nested reveal tiles inside a dx-peek: inset the whole BOX with margin — padding would
+   only inset their inner content and leave the bordered box flush to the parent's edge */
+.markdown-section details.dx-peek > details,
+.markdown-section details.dx-peek > .dx-aside,
+.markdown-section details.dx-peek > .dx-defs {
+  margin-left: 1.05rem;
+  margin-right: 1.05rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* lists inside reveal tiles: the content-padding rule sets a small left padding that
+   crowds bullets/numbers against the edge — give them a comfortable marker indent */
+.markdown-section details.dx-peek > ul,
+.markdown-section details.dx-peek > ol,
+.markdown-section details.dx-def > ul,
+.markdown-section details.dx-def > ol {
+  padding-left: 2.3rem;
+}
+/* blockquotes inside reveal tiles: match the tile's text size (the inner <p> isn't a
+   direct child, so it misses the content-size rule) and inset the spine with margin so
+   the bordered box aligns with the prose instead of sitting flush to the edge */
+.markdown-section details.dx-peek blockquote,
+.markdown-section details.dx-peek blockquote p { font-size: 0.9375rem; }
+.markdown-section details.dx-peek > blockquote { margin-left: 1.05rem; margin-right: 1.05rem; }
+.markdown-section details.dx-def blockquote,
+.markdown-section details.dx-def blockquote p { font-size: 0.85rem; }
+.markdown-section details.dx-def > blockquote { margin-left: 0.9rem; margin-right: 0.9rem; }
+.markdown-section .dx-defs > details.dx-def { min-width: 0; }
+.markdown-section details.dx-def > pre {
+  margin-left: 0.9rem;
+  margin-right: 0.9rem;
+  overflow-x: auto;
+}
+/* smaller code only inside bento tiles, so long lines fit a double-width tile */
+.markdown-section details.dx-def pre > code { font-size: 0.72em; line-height: 1.5; }
+
+/* shared: animated inline reveal for dx-peek + dx-def (matches .dx-choose) */
+@media (prefers-reduced-motion: no-preference) {
+  .markdown-section details.dx-peek::details-content,
+  .markdown-section details.dx-def::details-content {
+    opacity: 0;
+    transition: opacity 0.25s ease-out, content-visibility 0.25s allow-discrete;
+  }
+  .markdown-section details.dx-peek[open]::details-content,
+  .markdown-section details.dx-def[open]::details-content { opacity: 1; }
+}

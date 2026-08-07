@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 540" width="980" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark NemoClaw architecture / request-flow diagram for the DevX dark theme.
+       Mirrors the why_nemoclaw.md "Closing the Gaps" mermaid. Layout: Host = vertical column (left),
+       OpenShell Sandbox = horizontal row (right), External Services under the sandbox, Inference API
+       under the host - chosen to minimize intersecting lines. Colors match index.html themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <!-- clusters -->
+  <rect x="30" y="24" width="240" height="388" rx="10" fill="#76b900" fill-opacity="0.05" stroke="#76b900" stroke-width="1.5"/>
+  <text x="150" y="44" fill="#76b900" font-size="13" font-weight="700" letter-spacing="1" text-anchor="middle">Host Machine</text>
+  <rect x="330" y="24" width="660" height="300" rx="10" fill="#76b900" fill-opacity="0.05" stroke="#76b900" stroke-width="1.5"/>
+  <text x="660" y="44" fill="#76b900" font-size="13" font-weight="700" letter-spacing="1" text-anchor="middle">OpenShell Sandbox</text>
+
+  <!-- ===== edges (drawn under nodes) ===== -->
+  <!-- CLI -> Sandbox (manages) : top of the gap -->
+  <line x1="248" y1="95" x2="326" y2="95" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <!-- inference.local -> Gateway (strip+inject) : mid of the gap -->
+  <path d="M360,230 C 320,224 286,218 252,216" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <!-- Proxy -> Policy (policy check) : low in the gap, dips below inference.local -->
+  <path d="M530,255 C 460,290 372,314 252,335" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <!-- Gateway -> Inference API : down the left margin, around Policy -->
+  <path d="M52,212 C 30,242 30,300 30,400 C 30,440 60,456 150,456" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <!-- Proxy -> External Services : straight drop -->
+  <line x1="605" y1="270" x2="605" y2="372" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <!-- Agent fan-out to the four mechanisms -->
+  <path d="M615,124 C 560,160 480,185 438,210" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="648" y1="124" x2="608" y2="210" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="685" y1="124" x2="762" y2="210" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M718,124 C 800,158 880,184 912,210" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- ===== nodes ===== -->
+  <!-- host column -->
+  <rect x="52" y="66" width="196" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="150" y="89" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">NemoClaw CLI</text>
+  <text x="150" y="107" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">(orchestrator)</text>
+  <rect x="52" y="186" width="196" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="150" y="209" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">OpenShell Gateway</text>
+  <text x="150" y="227" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">(credential store)</text>
+  <rect x="52" y="306" width="196" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="150" y="329" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">Policy YAML</text>
+  <text x="150" y="347" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">(operator-defined)</text>
+
+  <!-- inference API (under host) -->
+  <rect x="52" y="456" width="196" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="150" y="485" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">Inference API</text>
+
+  <!-- sandbox: agent on top, mechanisms in a row below -->
+  <rect x="575" y="66" width="180" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="665" y="95" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">OpenClaw Agent</text>
+
+  <rect x="360" y="212" width="150" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="435" y="235" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">inference.local</text>
+  <text x="435" y="253" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">(gateway endpoint)</text>
+  <rect x="530" y="212" width="150" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="605" y="235" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">Network Proxy</text>
+  <text x="605" y="253" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">+ OPA Engine</text>
+  <rect x="700" y="212" width="130" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="765" y="235" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">Landlock LSM</text>
+  <text x="765" y="253" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">(kernel)</text>
+  <rect x="850" y="212" width="130" height="58" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="915" y="235" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">seccomp BPF</text>
+  <text x="915" y="253" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">(kernel)</text>
+
+  <!-- external services (under sandbox) -->
+  <rect x="505" y="372" width="200" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="605" y="400" fill="#f2f2f2" font-size="12" text-anchor="middle" dominant-baseline="central">External Services</text>
+
+  <!-- ===== edge labels (drawn on top) ===== -->
+  <rect x="262" y="77" width="56" height="16" rx="3" fill="#0c0c0c"/><text x="290" y="85" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">manages</text>
+  <rect x="250" y="197" width="112" height="16" rx="3" fill="#0c0c0c"/><text x="306" y="205" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">strip + inject keys</text>
+  <rect x="346" y="296" width="74" height="16" rx="3" fill="#0c0c0c"/><text x="383" y="304" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">policy check</text>
+  <rect x="86" y="430" width="128" height="16" rx="3" fill="#0c0c0c"/><text x="150" y="438" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">authenticated request</text>
+  <rect x="610" y="312" width="86" height="16" rx="3" fill="#0c0c0c"/><text x="653" y="320" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">allowed traffic</text>
+  <rect x="500" y="155" width="58" height="16" rx="3" fill="#0c0c0c"/><text x="529" y="163" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">inference</text>
+  <rect x="598" y="155" width="58" height="16" rx="3" fill="#0c0c0c"/><text x="627" y="163" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">outbound</text>
+  <rect x="700" y="155" width="48" height="16" rx="3" fill="#0c0c0c"/><text x="724" y="163" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">file I/O</text>
+  <rect x="786" y="155" width="52" height="16" rx="3" fill="#0c0c0c"/><text x="812" y="163" fill="#c6c6c6" font-size="10" text-anchor="middle" dominant-baseline="central">syscalls</text>
+</svg>

@@ -1,14 +1,19 @@
-# Agent Safety with NemoClaw
-
-<img src="_static/robots/supervisor.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
+<div class="dx-hero" data-eyebrow="MODULE 06 / AGENT SAFETY" data-title="Agent Safety with NemoClaw" data-meta="DURATION::2-2.5 hrs|MODEL::Nemotron 3 Super (local)|GPU::Local or hosted (router)"></div>
 
 Your agent runs 24/7, evolves its own behavior, and processes sensitive data. How do you make it safer when you're not watching?
 
 In this module, you'll learn about **NVIDIA NemoClaw** — a reference stack for strengthening the security of autonomous agents — to build a defense system that adds safety enforcement at the kernel level, gives operators a single primitive for routing inference between local and cloud backends, layers a content classifier in front of it so sensitive data can stay local, and continuously verifies the agent hasn't drifted. NemoClaw combines OpenClaw (agent), OpenShell (enforcement), Nemotron (local inference), and the Privacy Router (operator-controlled routing) into one deployable system.
 
-This learning module can take around 2 to 2.5 hours to complete.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide is-tall"><h4>YOU WILL BUILD</h4><span class="dx-big">A hardened autonomous agent</span>Four kernel-level enforcement layers, plus a continuous red-team and LLM-judge safety suite.</div>
+  <div class="dx-cell"><h4>DURATION</h4><span class="dx-big">2-2.5 h</span>self-paced</div>
+  <div class="dx-cell"><h4>BUILT WITH</h4>OpenClaw - OpenShell - Nemotron - Privacy Router</div>
+  <div class="dx-cell"><h4>YOU'LL TAKE HOME</h4>Kernel-level enforcement, operator-controlled routing, and continuous safety evaluation.</div>
+</div>
 
 ## Learning Objectives
+
+<img src="_static/robots/supervisor.png" alt="Workshop Robot Character" style="float:right;max-width:300px;margin:25px;" />
 
 At the end of this module, you will take home:
 
@@ -17,5 +22,20 @@ At the end of this module, you will take home:
 - Practical skills in **red-teaming autonomous agents** with adversarial probes
 - Familiarity with **LLM-as-judge safety evaluation**, mirroring Module 3's quality approach
 - Knowledge of the **NemoClaw stack** and how OpenClaw, OpenShell, and Nemotron integrate into a complete safety architecture
+
+<div class="dx-island dx-tutor">
+  <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
+
+This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+
+<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+
+Ask for this module by name — `/module-6` in Claude Code, `$module-6` in Codex — or just describe what you're stuck on and the right skill loads on its own.
+
+```text
+/module-6 what does the Privacy Router actually do?
+```
+
+</div>
 
 > Head over to [Setting up Secrets](secrets) to get started!

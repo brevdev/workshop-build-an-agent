@@ -30,3 +30,6 @@ unsloth==2026.4.4
 unsloth-zoo==2026.4.6
 trl==0.24.0
 transformers==5.5.0
+tiktoken~=0.8
+model-signing~=1.0
+cudf-cu12~=26.6

@@ -1,0 +1,53 @@
+# OPTIONAL nginx router — collapse the Workbench proxy onto a single clean port
+# (:8888) and rewrite the Host header, mirroring the Brev deployment. Only needed
+# for a tidy single-port entry or shared-host access; plain localhost:10000 works
+# without it. Install steps + placeholders are in references/persistence.md.
+# Replace __PROJECT_NAME__ and __APP__, then write to /etc/nginx/nginx.conf.
+#
+# NOTE: the Workbench proxy only accepts Host: localhost, hence the rewrite below.
+
+user  www-data;
+worker_processes  auto;
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+events { worker_connections 1024; }
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+
+    map $http_upgrade $connection_upgrade { default upgrade; '' close; }
+
+    upstream workbench_proxy { server 127.0.0.1:10000; keepalive 32; }
+
+    server {
+        listen 8888;
+        server_name _;
+
+        # Proxy the app; the backend must see Host: localhost.
+        location ^~ /projects/ {
+            proxy_pass         http://workbench_proxy;
+            proxy_http_version 1.1;
+            proxy_set_header   Host              localhost;
+            proxy_set_header   Origin            http://localhost;
+            proxy_set_header   X-Forwarded-Host  $host;
+            proxy_set_header   X-Real-IP         $remote_addr;
+            proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   Upgrade           $http_upgrade;
+            proxy_set_header   Connection        $connection_upgrade;
+            proxy_read_timeout 3600;
+            proxy_send_timeout 3600;
+            proxy_buffering    off;
+            proxy_cache        off;
+        }
+
+        # Everything else -> the DevX-Lab app path (http for local; no TLS).
+        location / {
+            return 302 http://$host/projects/__PROJECT_NAME__/applications/__APP__/;
+        }
+    }
+}

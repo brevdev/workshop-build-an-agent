@@ -1,4 +1,4 @@
-# Set Up Your OpenClaw Agent
+<div class="dx-hero" data-eyebrow="MODULE 06 / 02 - SETUP OPENCLAW" data-title="Set Up Your OpenClaw Agent" data-meta="TIME::20 min|STEPS::5+|AGENT::OpenClaw"></div>
 
 <img src="_static/robots/supervisor.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -60,7 +60,7 @@ The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates 
 
 <!-- fold:break -->
 
-## Step 3: Review OpenClaw Workspace
+### Step 3: Review OpenClaw Workspace
 
 Under the hood, OpenClaw operates in the workspace using the following components. Feel free to click on each and explore the contents. 
 
@@ -92,16 +92,24 @@ Under the hood, OpenClaw operates in the workspace using the following component
 
 <!-- fold:break -->
 
-### Step 5: Cleanup Tasks
+### Step 4: Tune Your Install
 
-There are a few changes we should first make for this agent to run with best results. Let's add our new installation to the PATH variable and expand the model context window for best results. 
+Two changes before we start the gateway: put the `openclaw` CLI on your `PATH` (in `~/.bashrc`, so the new terminals below inherit it), and expand the model context window.
 
 ```bash
-export PATH="$HOME/.npm-global/bin:$PATH" && \
-sed -i 's/"contextWindow": 16000/"contextWindow": 131072/' ~/.openclaw/openclaw.json
+grep -qxF 'export PATH="$HOME/.npm-global/bin:$PATH"' ~/.bashrc \
+  || echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+export PATH="$HOME/.npm-global/bin:$PATH"
+
+sed -i 's/"contextWindow": *16000/"contextWindow": 131072/' ~/.openclaw/openclaw.json
+
+# Verify: should print a path to openclaw, then "contextWindow": 131072
+command -v openclaw && grep -o '"contextWindow": *[0-9]*' ~/.openclaw/openclaw.json
 ```
 
-### Step 4: Start the Gateway
+<!-- fold:break -->
+
+### Step 5: Start the Gateway
 
 In this workshop environment, systemd user services aren't available, so the gateway won't auto-start as a daemon. Start it manually in a terminal:
 
@@ -119,7 +127,7 @@ openclaw gateway status
 
 <!-- fold:break -->
 
-### Step 5: Test With a Message
+### Step 6: Test With a Message
 
 There are three ways to test your newly configured OpenClaw agent. Let's introduce them. 
 
@@ -143,7 +151,7 @@ This opens a terminal UI where you can chat with your agent directly. Try asking
 
 > Hi, how are you?
 
-The agent should respond based on its SOUL configuration, mentioning it's role as an assistant and it's ability to learn and self-evolve. It should also begin writing to MEMORY.md.
+The agent should respond based on its SOUL configuration, mentioning its role as an assistant and its ability to learn and self-evolve. It should also begin writing to MEMORY.md.
 
 <!-- fold:break -->
 
@@ -178,6 +186,13 @@ With the agent running, open the <button onclick="launch('NemoClaw Client');"><i
 Before you harden it, let's see what your agent can quietly do when you're not watching. Four quick probes — each takes under a minute. Run them in your running OpenClaw session (via `openclaw tui` or the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button>).
 
 > These probes will fail — that is, succeed in doing unsafe things — on vanilla OpenClaw. You'll revisit each one on the [Working with NemoClaw](using_nemoclaw) page and watch NemoClaw's enforcement layers shut them down.
+
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>PROBE 1 - PHONE HOME</h4>Agent reaches any URL on the internet. The <b>Network</b> layer shuts this down.</div>
+  <div class="dx-cell"><h4>PROBE 2 - READ THE DIARY</h4>Agent reads /etc/passwd and other host files. The <b>Filesystem</b> layer shuts this down.</div>
+  <div class="dx-cell"><h4>PROBE 3 - SPILL THE KEYS</h4>Agent dumps NVIDIA_API_KEY from its environment. The <b>Inference</b> layer shuts this down.</div>
+  <div class="dx-cell"><h4>PROBE 4 - POISON THE MEMORY</h4>A rogue instruction persists across restarts. <b>Continuous eval</b> catches this one.</div>
+</div>
 
 <!-- fold:break -->
 

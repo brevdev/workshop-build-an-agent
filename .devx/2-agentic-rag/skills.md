@@ -1,4 +1,4 @@
-# Agent Skills
+<div class="dx-hero" data-eyebrow="MODULE 02 / 05 - SKILLS" data-title="Agent Skills" data-meta="TIME::35 min|CONCEPTS::5|EXERCISES::3"></div>
 
 <img src="_static/robots/study.png" alt="Skills Robot Character" style="float:left;max-width:300px;margin:25px;" />
 
@@ -68,25 +68,20 @@ That's it! Skills are intentionally simple.
 
 <!-- fold:break -->
 
-Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', '');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'AGENT = ');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
+Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', 'name: code_review');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'name: technical_writing');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
 
 <!-- fold:break -->
 
-### Skills vs Prompts
-
-<img src="_static/robots/blueprint.png" alt="Blueprint Robot" style="float:right;max-width:300px;margin:25px;" />
-
-You might wonder: "Why not just put instructions in the system prompt?"
-
-Skills offer advantages:
-
-- **Modularity** — Load only what's needed for each task
-- **Reusability** — Share skills across projects and teams
-- **Organization** — Keep complex instructions out of your main prompt
-- **Versioning** — Track changes to instructions over time
-- **Discovery** — The agent can select relevant skills automatically
-
-Think of skills as a library of standardized expertise that your agent can draw from.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">SKILLS vs PROMPTS</p>
+  <p>You might wonder: why not just put instructions in the system prompt? Skills offer real advantages:</p>
+  <p><span class="dx-chip">MODULARITY</span> Load only what's needed for each task.</p>
+  <p><span class="dx-chip">REUSABILITY</span> Share skills across projects and teams.</p>
+  <p><span class="dx-chip">ORGANIZATION</span> Keep complex instructions out of your main prompt.</p>
+  <p><span class="dx-chip">VERSIONING</span> Track changes to instructions over time.</p>
+  <p><span class="dx-chip">DISCOVERY</span> The agent can select relevant skills automatically.</p>
+  <p>Think of skills as a library of standardized expertise your agent can draw from.</p>
+</div>
 
 <!-- fold:break -->
 
@@ -135,21 +130,27 @@ Skills and MCP work together — MCP provides the tools, Skills provide the expe
 
 ### Skills + MCP = Powerful Agents
 
-<img src="_static/robots/strong.png" alt="Power Robot" style="float:right;max-width:300px;margin:25px;" />
-
 The combination of Skills and MCP creates highly capable agents:
 
-| Component | What It Provides |
-|-----------|------------------|
-| **LLM** | Reasoning and language |
-| **MCP** | Tools, resources, data access |
-| **Skills** | Domain knowledge, procedures, guidelines |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>LLM</h4>Reasoning and language - the agent's brain.</div>
+  <div class="dx-cell"><h4>MCP</h4>Tools, resources, and data access - what the agent can do.</div>
+  <div class="dx-cell is-wide"><h4>SKILLS</h4>Domain knowledge, procedures, and guidelines - how to do it well. (This module's focus.)</div>
+</div>
 
 For example, an IT Help Desk agent might use:
 - **MCP Server** → Query the knowledge base, create tickets
 - **Skill** → Follow company support procedures, use proper tone
 
 This separation of concerns makes agents more maintainable and adaptable.
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Your agent needs to follow your team's code-review standards. Is that a job for MCP or a Skill?</p>
+  <button class="dx-quiz-opt" data-fb="MCP provides tools and data access - the ability to do things (call an API, query a DB). Coding standards are instructions, not a tool to invoke.">MCP - it exposes the code-review standards as a callable tool</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Skills provide instructions and know-how - the how. The review standards are domain guidance the agent loads, then applies using whatever tools MCP provides.">A Skill - it loads the standards as instructions the agent follows</button>
+  <button class="dx-quiz-opt" data-fb="Hardcoding into the system prompt is exactly what Skills improve on: modularity, reuse, and on-demand loading instead of bloating every prompt.">Neither - just hardcode the standards into the system prompt permanently</button>
+</div>
 
 <!-- fold:break -->
 
@@ -183,7 +184,7 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def get_skill');"><i class="fas fa-code"></i> get_skill return</button> — Return the loaded skill content.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -198,7 +199,7 @@ return load_skill(skill_name)
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'def list_available_skills');"><i class="fas fa-code"></i> list_available_skills return</button> — Return the list of skills.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -213,7 +214,7 @@ return list_skills()
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT = ');"><i class="fas fa-code"></i> AGENT</button> — Update the `AGENT` definition one last time to wire up all four tools. This is the final version!
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -257,13 +258,13 @@ Restart your agent and try these prompts in the <button onclick="launch('Simple 
 
 ## Next Steps
 
-<img src="_static/robots/strong.png" alt="Strong Robot" style="float:right;max-width:250px;margin:25px;" />
-
 Congratulations! Your agent now has:
 
-- ✅ **RAG** — Knowledge base retrieval
-- ✅ **MCP** — Web search
-- ✅ **Skills** — Dynamic expertise
+<div class="dx-island dx-reveal">
+  <p><span class="dx-chip is-green">RAG</span> Knowledge base retrieval.</p>
+  <p><span class="dx-chip is-green">MCP</span> Web search via a standardized server.</p>
+  <p><span class="dx-chip is-green">SKILLS</span> Dynamic, loadable expertise.</p>
+</div>
 
 Skills and MCP together represent the future of agent development — agents that not only *can* do things, but *know how* to do them well. Now that you understand Skills, explore the [Anthropic Skills repo](https://github.com/anthropics/skills)** for other examples and patterns. 
 

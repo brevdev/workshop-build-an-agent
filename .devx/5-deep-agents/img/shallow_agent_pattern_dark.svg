@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 250" width="560" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark shallow/ReAct diagram for the DevX dark theme.
+       Flow mirrors img/shallow_agent_pattern.mmd; colors match index.html mermaid themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <!-- subgraph cluster: ReAct Loop -->
+  <rect x="150" y="34" width="300" height="128" rx="10" fill="#76b900" fill-opacity="0.05" stroke="#76b900" stroke-width="1.5"/>
+  <text x="300" y="53" fill="#76b900" font-size="13" font-weight="700" letter-spacing="1" text-anchor="middle">ReAct Loop</text>
+
+  <!-- edges -->
+  <line x1="112" y1="95" x2="182" y2="95" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M277,86 C 300,74 312,74 335,86" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M335,104 C 312,116 300,116 277,104" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M250,118 C 300,176 332,182 362,188" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <!-- nodes -->
+  <rect x="20" y="72" width="92" height="46" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="66" y="95" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">User</text>
+
+  <rect x="185" y="72" width="92" height="46" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="231" y="95" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Model</text>
+
+  <rect x="335" y="72" width="92" height="46" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="381" y="95" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Tool</text>
+
+  <rect x="330" y="188" width="130" height="46" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="395" y="211" fill="#f2f2f2" font-size="14" text-anchor="middle" dominant-baseline="central">Response</text>
+</svg>

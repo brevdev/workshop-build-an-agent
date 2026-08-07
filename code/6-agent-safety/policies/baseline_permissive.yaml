@@ -5,7 +5,7 @@
 # Your job in Exercise 1 is to write a validator that catches all of them.
 #
 # Format follows the OpenShell Policy Schema Reference:
-#   https://docs.nvidia.com/openshell/latest/reference/policy-schema.html
+#   https://docs.nvidia.com/openshell/latest/reference/policy-schema
 # ============================================================================
 
 version: 1

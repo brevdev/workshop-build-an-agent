@@ -28,6 +28,30 @@ DOCKER_IMAGE = "python:3.11-slim"
 WORKSPACE_IN_CONTAINER = "/workspace"
 
 
+def _default_docker_host() -> str:
+    """Resolve a sensible Docker endpoint for the current environment.
+
+    Preference order:
+      1. ``DOCKER_HOST`` if the operator set it (honored verbatim).
+      2. The workshop's mounted host socket ``/var/host-run/docker.sock`` —
+         ``.project/spec.yaml`` maps it in and ``preBuild.bash`` points
+         ``DOCKER_HOST`` at it.
+      3. The standard Linux daemon socket ``/var/run/docker.sock``.
+
+    Falls back to the Linux default socket string if neither socket is present,
+    so a misconfiguration surfaces as a connection error against a real path
+    rather than a macOS-only Colima path that can never exist in this Linux
+    container.
+    """
+    explicit = os.getenv("DOCKER_HOST")
+    if explicit:
+        return explicit
+    for candidate in ("/var/host-run/docker.sock", "/var/run/docker.sock"):
+        if os.path.exists(candidate):
+            return f"unix://{candidate}"
+    return "unix:///var/run/docker.sock"
+
+
 class DockerSandboxBackend(SandboxBackendProtocol):
     """
     A deepagents-compatible backend that runs *everything* inside a Docker
@@ -35,10 +59,7 @@ class DockerSandboxBackend(SandboxBackendProtocol):
     """
 
     def __init__(self, docker_host: str | None = None):
-        socket = docker_host or os.getenv(
-            "DOCKER_HOST",
-            f"unix://{os.path.expanduser('~')}/.colima/default/docker.sock",
-        )
+        socket = docker_host or _default_docker_host()
         self._client = docker.DockerClient(base_url=socket)
         self._container = self._client.containers.run(
             DOCKER_IMAGE,
@@ -234,7 +255,10 @@ class DockerSandboxBackend(SandboxBackendProtocol):
         code, output = self._exec(cmd)
         if not output:
             return []
-        # Return raw grep output as list of GrepMatch-like dicts
+        # Return raw grep output as GrepMatch dicts. The deepagents backend
+        # protocol (GrepMatch TypedDict) expects the keys `path`, `line`, `text`;
+        # the formatter (build_grep_results_dict) reads m["line"]/m["text"], so
+        # these names must match exactly or grep errors on every match.
         results = []
         for line in output.strip().split("\n"):
             if ":" in line:
@@ -242,8 +266,8 @@ class DockerSandboxBackend(SandboxBackendProtocol):
                 if len(parts) >= 3:
                     results.append({
                         "path": parts[0],
-                        "line_number": int(parts[1]) if parts[1].isdigit() else 0,
-                        "content": parts[2],
+                        "line": int(parts[1]) if parts[1].isdigit() else 0,
+                        "text": parts[2],
                     })
         return results
 

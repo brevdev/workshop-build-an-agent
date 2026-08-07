@@ -3,7 +3,7 @@ RAG Agent with MCP and Skills
 
 This agent combines:
 1. RAG - Knowledge base retrieval for IT help desk
-2. MCP - Web search via Tavily for current information  
+2. MCP - Web search via Tavily for current information
 3. Skills - Dynamic expertise loading for specialized tasks
 """
 

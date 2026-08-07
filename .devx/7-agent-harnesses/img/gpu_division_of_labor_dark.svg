@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 412" width="680" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark "division of labor" sequence diagram for the DevX dark theme.
+       Mirrors img/gpu_division_of_labor.mmd; colors match index.html mermaid themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+    <marker id="ahg" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#76b900"/>
+    </marker>
+  </defs>
+
+  <!-- lifelines -->
+  <line x1="90" y1="56" x2="90" y2="396" stroke="#3a3a3a" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <line x1="330" y1="56" x2="330" y2="396" stroke="#3a3a3a" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <line x1="580" y1="56" x2="580" y2="396" stroke="#3a3a3a" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <line x1="800" y1="56" x2="800" y2="396" stroke="#3a3a3a" stroke-width="1.2" stroke-dasharray="4 4"/>
+
+  <!-- actor boxes -->
+  <rect x="35" y="14" width="110" height="42" rx="6" fill="#161616" stroke="#313131" stroke-width="1.5"/>
+  <text x="90" y="35" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#128100; You</text>
+
+  <rect x="242" y="14" width="176" height="42" rx="6" fill="#161616" stroke="#313131" stroke-width="1.5"/>
+  <text x="330" y="35" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#128295; Harness (local)</text>
+
+  <rect x="502" y="14" width="156" height="42" rx="6" fill="#161616" stroke="#313131" stroke-width="1.5"/>
+  <text x="580" y="35" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#9729;&#65039; LLM (cloud)</text>
+
+  <rect x="708" y="14" width="184" height="42" rx="6" fill="#161616" stroke="#76b900" stroke-width="1.5"/>
+  <text x="800" y="35" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">&#9889; Your GPU (local)</text>
+
+  <!-- messages -->
+  <text x="210" y="88" fill="#cfcfcf" font-size="12" text-anchor="middle">&#8220;Aggregate this 10M-row dataset&#8221;</text>
+  <line x1="90" y1="96" x2="326" y2="96" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <text x="455" y="130" fill="#cfcfcf" font-size="12" text-anchor="middle">context + cuDF skill description</text>
+  <line x1="330" y1="138" x2="576" y2="138" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <text x="455" y="172" fill="#cfcfcf" font-size="12" text-anchor="middle">&#8220;Run this cudf.pandas code&#8221;</text>
+  <line x1="580" y1="180" x2="334" y2="180" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <text x="565" y="214" fill="#8fcb2b" font-size="12" text-anchor="middle">executes locally &#8212; GPU lights up &#128293;</text>
+  <line x1="330" y1="222" x2="796" y2="222" stroke="#76b900" stroke-width="1.6" marker-end="url(#ahg)"/>
+
+  <text x="565" y="256" fill="#cfcfcf" font-size="12" text-anchor="middle">results in milliseconds</text>
+  <line x1="800" y1="264" x2="334" y2="264" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <text x="455" y="298" fill="#cfcfcf" font-size="12" text-anchor="middle">results</text>
+  <line x1="330" y1="306" x2="576" y2="306" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+
+  <text x="335" y="340" fill="#cfcfcf" font-size="12" text-anchor="middle">analysis, GPU-fast</text>
+  <line x1="580" y1="348" x2="94" y2="348" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+</svg>

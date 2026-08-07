@@ -1,4 +1,4 @@
-# Continuous Improvement
+<div class="dx-hero" data-eyebrow="MODULE 03 / 05 - WRAP UP" data-title="Continuous Improvement" data-meta="READ::20 min|CONCEPTS::5+|NEXT::Module 04"></div>
 
 <img src="_static/robots/hiking.png" alt="Continuous Journey" style="float:right;max-width:300px;margin:25px;" />
 
@@ -10,12 +10,14 @@ Evaluation is not the end goal—it's a tool for continuous improvement. In this
 
 Effective agent improvement follows a continuous cycle:
 
-1. **Measure**: Run comprehensive evaluations
-2. **Analyze**: Identify patterns in failures and weaknesses
-3. **Hypothesize**: Form theories about what changes will help
-4. **Implement**: Make targeted improvements
-5. **Validate**: Re-evaluate to confirm improvements
-6. **Repeat**: Continue the cycle
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>1 &middot; MEASURE</h4>Run comprehensive evaluations.</div>
+  <div class="dx-cell is-wide"><h4>2 &middot; ANALYZE</h4>Identify patterns in failures and weaknesses.</div>
+  <div class="dx-cell is-wide"><h4>3 &middot; HYPOTHESIZE</h4>Form theories about what changes will help.</div>
+  <div class="dx-cell is-wide"><h4>4 &middot; IMPLEMENT</h4>Make targeted improvements.</div>
+  <div class="dx-cell is-wide"><h4>5 &middot; VALIDATE</h4>Re-evaluate to confirm improvements.</div>
+  <div class="dx-cell is-wide"><h4>6 &middot; REPEAT</h4>Continue the cycle - quality compounds over time.</div>
+</div>
 
 This systematic approach ensures that improvements are data-driven and measurable rather than based on guesswork.
 
@@ -25,8 +27,8 @@ This systematic approach ensures that improvements are data-driven and measurabl
 
 **Click to expand each improvement strategy to learn more.** 
 
-<details>
-<summary><strong>1. Prompt Engineering</strong></summary>
+<details class="dx-peek">
+<summary>1. Prompt Engineering</summary>
 
 Often the fastest way to improve agent performance is refining prompts.
 
@@ -55,8 +57,8 @@ system_prompt = """You are an IT help desk assistant.
 
 </details>
 
-<details>
-<summary><strong>2. Retrieval Optimization</strong></summary>
+<details class="dx-peek">
+<summary>2. Retrieval Optimization</summary>
 
 For RAG agents, improving retrieval quality often has the biggest impact.
 
@@ -104,8 +106,8 @@ retriever = vectordb.as_retriever(
 
 </details>
 
-<details>
-<summary><strong>3. Model Selection</strong></summary>
+<details class="dx-peek">
+<summary>3. Model Selection</summary>
 
 ### Strategy 3: Model Selection
 
@@ -143,8 +145,8 @@ for model_name in llm_options:
 
 </details>
 
-<details>
-<summary><strong>4. Architecture Changes</strong></summary>
+<details class="dx-peek">
+<summary>4. Architecture Changes</summary>
 
 Sometimes you need to modify the agent's structure.
 
@@ -190,8 +192,8 @@ def self_review(state):
 
 </details>
 
-<details>
-<summary><strong>5. Data Enhancement</strong></summary>
+<details class="dx-peek">
+<summary>5. Data Enhancement</summary>
 
 Improve the knowledge base or training data.
 
@@ -335,23 +337,19 @@ def validate_response(response: str, contexts: str) -> dict:
 
 ### Step 5: Offline Evaluation Results
 
-After 3 iterations of offline evaluation:
+After 3 iterations of offline evaluation, the scores tell the story:
 
-```
-OFFLINE EVALUATION SCORES:
-  Faithfulness:  0.88 (Excellent) ✅
-  Relevancy:     0.79 (Good) ✅
-  Helpfulness:   0.85 (Excellent) ✅
-  Citation Rate: 94% ✅
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">AFTER 3 ITERATIONS - OFFLINE SCORES (ILLUSTRATIVE WORKED EXAMPLE)</p>
+  <div class="dx-gauges">
+    <div class="dx-gauge" data-pct="88"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Faithfulness</b><br>0.65 &rarr; 0.88</p></div>
+    <div class="dx-gauge" data-pct="79"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Relevancy</b><br>0.78 &rarr; 0.79</p></div>
+    <div class="dx-gauge" data-pct="85"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Helpfulness</b><br>0.72 &rarr; 0.85</p></div>
+    <div class="dx-gauge" data-pct="94"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Citation Rate</b><br>45% &rarr; 94%</p></div>
+  </div>
+</div>
 
-Improvement Summary:
-  +35% Faithfulness
-  +23pp Citation Rate
-  +18% Helpfulness
-  0 Regression issues
-
-Time invested: 4 hours
-```
+Three iterations, about four hours of work: **+35% faithfulness**, **+23pp citation rate**, **+18% helpfulness**, and zero regressions.
 
 Your offline metrics look great! But how do you know these improvements translate to real-world performance? Time for the final validation step.
 
@@ -379,17 +377,18 @@ The A/B test confirms that offline improvements translate to real-world gains. S
 
 ## Module Wrap-Up
 
-<img src="_static/robots/finish.png" alt="Finish Line" style="float:right;max-width:300px;margin:25px;" />
-
 You've completed the Agent Evaluation module! Let's recap what you've accomplished:
 
-### What You Learned
-
-- **Introduction**: Why systematic evaluation matters and the unique challenges of evaluating agents
-- **Evaluation Metrics**: RAGAS metrics for RAG agents (Context Precision, Context Recall, Faithfulness, Answer Relevancy) and custom metrics for task agents
-- **Creating Evaluation Datasets**: Strategies for building test datasets tailored to different agent types
-- **Running Evaluations**: Hands-on evaluation pipelines with judge models, prompt design, and result analysis
-- **Continuous Improvement**: Closing the loop with targeted strategies and iterative refinement
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHAT YOU LEARNED</p>
+  <ul>
+    <li><b>Introduction</b> - why systematic evaluation matters and the unique challenges of evaluating agents.</li>
+    <li><b>Evaluation Metrics</b> - RAGAS metrics for RAG agents (Context Precision, Context Recall, Faithfulness, Answer Relevancy) and custom metrics for task agents.</li>
+    <li><b>Creating Evaluation Datasets</b> - strategies for building test datasets tailored to different agent types.</li>
+    <li><b>Running Evaluations</b> - hands-on pipelines with judge models, prompt design, and result analysis.</li>
+    <li><b>Continuous Improvement</b> - closing the loop with targeted strategies and iterative refinement.</li>
+  </ul>
+</div>
 
 You've transformed from relying on intuition to having a rigorous, data-driven approach to agent quality.
 
@@ -397,28 +396,33 @@ You've transformed from relying on intuition to having a rigorous, data-driven a
 
 ### Alternative Evaluation Frameworks
 
-While this module focused on RAGAS and custom LLM-as-a-judge pipelines, the evaluation ecosystem is rich with other tools worth exploring as you scale your agent development:
+While this module focused on RAGAS and custom LLM-as-a-judge pipelines, the evaluation ecosystem is rich with other tools worth exploring as you scale:
 
-- **[NVIDIA NeMo Agent Toolkit](https://github.com/NVIDIA/NeMo-Agent-Toolkit)**: Open-source, framework-agnostic library for connecting, evaluating, and profiling AI agents. Includes built-in RAG evaluators, agent trajectory evaluation, and custom evaluator support. Works with LangChain, LlamaIndex, CrewAI, and other frameworks.
-
-- **[NVIDIA NeMo Evaluator](https://developer.nvidia.com/nemo-evaluator)**: Enterprise-grade evaluation microservice supporting 100+ academic benchmarks, LLM-as-a-judge scoring, RAG metrics, and agent evaluation. Designed for CI/CD integration and production workflows at scale.
-
-- **[LangSmith](https://smith.langchain.com/)**: LangChain's platform for debugging, testing, and monitoring LLM applications. Offers tracing, dataset management, and evaluation features tightly integrated with LangChain agents.
-
-- **[Arize Phoenix](https://phoenix.arize.com/)**: An open-source observability tool for LLM applications with built-in support for tracing, evaluation, and debugging retrieval and generation quality.
-
-- **[DeepEval](https://docs.confident-ai.com/)**: An open-source evaluation framework with pre-built metrics for hallucination, relevancy, toxicity, and more. Integrates well with CI/CD pipelines.
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide is-tall"><h4>NVIDIA NeMo Agent Toolkit</h4>Open-source, framework-agnostic library for connecting, evaluating, and profiling agents - built-in RAG evaluators, agent trajectory evaluation, and custom evaluator support. Works with LangChain, LlamaIndex, CrewAI, and more. <a href="https://github.com/NVIDIA/NeMo-Agent-Toolkit">github.com/NVIDIA/NeMo-Agent-Toolkit</a></div>
+  <div class="dx-cell"><h4>NVIDIA NeMo Evaluator</h4>Enterprise microservice - 100+ benchmarks, LLM-as-a-judge scoring, RAG metrics, agent eval, built for CI/CD. <a href="https://docs.nvidia.com/nemo/microservices/latest/evaluate/index.html">docs.nvidia.com/nemo/microservices</a></div>
+  <div class="dx-cell"><h4>LangSmith</h4>LangChain's platform for tracing, dataset management, and evaluation, tightly integrated with LangChain agents. <a href="https://smith.langchain.com/">smith.langchain.com</a></div>
+  <div class="dx-cell"><h4>Arize Phoenix</h4>Open-source LLM observability - tracing, evaluation, and debugging of retrieval and generation quality. <a href="https://arize.com/phoenix/">arize.com/phoenix</a></div>
+  <div class="dx-cell"><h4>DeepEval</h4>Open-source eval framework with pre-built metrics (hallucination, relevancy, toxicity) and CI/CD integration. <a href="https://docs.confident-ai.com/">docs.confident-ai.com</a></div>
+</div>
 
 Each tool has different strengths. As your evaluation needs grow, consider how these tools might complement the techniques and concepts you've learned here.
 
 <!-- fold:break -->
 
-## Final Thoughts
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">FINAL THOUGHTS</p>
+  <p>Evaluation isn't about achieving perfect scores - it's about understanding your agent's behavior, identifying areas to improve, and building confidence in your system. The goal is continuous progress, not perfection.</p>
+  <p>The best agents aren't built in a single sprint. They're refined over time through careful measurement, analysis, and iteration. You now have the tools to make that journey a systematic one.</p>
+  <p>Happy evaluating! 🚀</p>
+</div>
 
-<img src="_static/robots/study.png" alt="Keep Learning" style="float:right;max-width:300px;margin:25px;" />
+<!-- fold:break -->
 
-Remember: evaluation is not about achieving perfect scores—it's about understanding your agent's behavior, identifying areas for improvement, and building confidence in your system. The goal is continuous progress, not perfection.
+## What's Next?
 
-The best agents aren't built in a single sprint. They're refined over time through careful measurement, analysis, and iteration. You now have the tools to make that journey a systematic one.
-
-Happy evaluating! 🚀
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>MODULE 04: CUSTOMIZATION</h4><span class="dx-chip is-green">NEXT UP</span> Tailor agents to your use case - custom tools, GRPO fine-tuning, and synthetic data generation for specialized behavior.</div>
+  <div class="dx-cell"><h4>MODULE 05: DEEP AGENTS</h4>Agents that plan, delegate to sub-agents, and tackle long-horizon multi-step tasks.</div>
+  <div class="dx-cell"><h4>MODULE 06: AGENT SAFETY</h4>Run agents that touch real systems safely - sandboxing, guardrails, and operator controls.</div>
+</div>

@@ -1,4 +1,4 @@
-# Setting up Secrets
+<div class="dx-hero" data-eyebrow="MODULE 02 / SETUP" data-title="Setting up Secrets" data-meta="NEEDS::NGC + Tavily keys|TIME::3 min"></div>
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right; max-width:300px;margin:25px;" />
 
@@ -7,51 +7,51 @@ For this agent to work, we will need to configure a few secrets. Use the <button
 
 You can also launch the Secrets Manager from the launcher.
 
-## NGC API Key
+## NGC API Key <span class="dx-chip is-green">REQUIRED</span>
 
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 
-<details>
-<summary>⚠️ Dont have an account?</summary>
+<details class="dx-peek is-setup">
+<summary>⚠️ Don't have an account?</summary>
 
 You can get free non-commercial access to NVIDIA NIMs with an [NVIDIA Developer Account](https://developer.nvidia.com/developer-program).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [NGC console](https://org.ngc.nvidia.com/setup/api-keys).
 
 </details>
 
-## Tavily API Key
+## Tavily API Key <span class="dx-chip is-green">REQUIRED</span>
 
 Tavily is a search API designed for AI agents. Later in this module, you'll use it to add web search capabilities via MCP. If you already set this up in Module 1, it should persist here.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an account?</summary>
 
 You can get free access to Tavily with a [Tavily Developer Account](https://tavily.com/).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [Tavily Dashboard](https://app.tavily.com/home).
 
 </details>
 
-## LangSmith API Key (Optional)
+## LangSmith API Key <span class="dx-chip">OPTIONAL</span>
 
 LangSmith provides tracing and monitoring for your agent. You'll use it in the [Running Your Agent](running.md) section to inspect your agent's behavior.
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an account?</summary>
 
 You can get free access to LangSmith with a [LangSmith Account](https://smith.langchain.com/).
 </details>
 
-<details>
+<details class="dx-peek is-setup">
 <summary>⚠️ Don't have an API Key?</summary>
 
 Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/settings).

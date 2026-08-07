@@ -1,39 +1,10 @@
-# Set Up NemoClaw
-
-<img src="_static/robots/supervisor.png" alt="NemoClaw Setup Robot" style="float:right;max-width:300px;margin:25px;" />
+<div class="dx-hero" data-eyebrow="MODULE 06 / 04 - SETUP NEMOCLAW" data-title="Set Up NemoClaw" data-meta="TIME::20 min|STEPS::5|RUNTIME::OpenShell sandbox"></div>
 
 You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router isolates credentials and enforces the operator's choice of inference backend, and how Nemotron can serve as that backend when sensitive queries need to stay local. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
 
 Here's what your NemoClaw deployment will look like when we're done. The agent lives inside the sandbox; all its traffic passes through the proxy; and credentials are designed to stay outside the sandbox.
 
-```mermaid
----
-config:
-  theme: 'base'
-  themeVariables:
-    primaryColor: '#eaf6e0'
-    secondaryColor: '#eaf6e0'
-    background: white
----
-graph TB
-    subgraph Host Machine
-        CLI[nemoclaw CLI]
-        GW[OpenShell Gateway]
-        CREDS[Credential Providers]
-    end
-    subgraph NemoClaw Sandbox
-        AGENT[OpenClaw Agent]
-        PROXY[Network Proxy]
-        FS[Landlock Filesystem]
-    end
-    CLI -->|manages| GW
-    GW -->|enforces policies| PROXY
-    CREDS -->|injects credentials| GW
-    AGENT -->|all traffic through| PROXY
-
-    classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
-    classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111;
-```
+![NemoClaw Deployment](img/nemoclaw_deployment_dark.svg)
 
 > **Where you are:** You completed the OpenClaw setup on the previous page and have a working agent with an active gateway. This page adds NemoClaw's enforcement layers on top.
 
@@ -72,8 +43,10 @@ The script will then build the sandbox image (~2.4 GB compressed), upload it to 
 
 <!-- fold:break -->
 
-<details>
-<summary><strong>What does the install script do behind the scenes?</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-setup_nemoclaw-1">What does the install script do behind the scenes?</button>
+<div id="aside-setup_nemoclaw-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-setup_nemoclaw-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 The Workbench project container talks to the host's Docker daemon via a mounted socket, but NemoClaw's gateway listens on the host's network namespace — not the container's. The script bridges this with three small fixes:
 
@@ -83,10 +56,17 @@ The Workbench project container talks to the host's Docker daemon via a mounted 
 
 These are workarounds for NemoClaw v0.0.49 specifically. The script is idempotent — re-running it on an already-installed setup just ensures the tunnel is up. See `code/6-agent-safety/scripts/install-nemoclaw.sh` for the implementation.
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Troubleshooting: install fails or NemoClaw stops responding</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Troubleshooting: install fails or NemoClaw stops responding</summary>
+
+**First, see which layer is down.** Run the read-only health check — it probes the tunnel, gateway, CLI, and sandbox and prints the exact recovery command:
+
+```bash
+bash code/6-agent-safety/scripts/nemoclaw-health.sh
+```
 
 The install script writes detailed logs to two files:
 
@@ -116,6 +96,8 @@ The install script writes detailed logs to two files:
 <!-- fold:break -->
 
 ## Step 2: Connect to Your Sandbox
+
+<img src="_static/robots/supervisor.png" alt="NemoClaw Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
 Time to step inside your new sandbox. Connecting to the sandbox is like stepping through an airlock -- you're entering a controlled environment where the rules are different.
 
@@ -149,15 +131,16 @@ To return to the host shell, type `exit` or press `Ctrl+D`.
 
 Let's make sure everything came up correctly. You will check status from both the host and the monitoring TUI.
 
-<details>
-<summary><strong>Still facing issues? Click me for troubleshooting!</strong></summary>
+<details class="dx-peek is-solution">
+<summary>Still facing issues? Click me for troubleshooting!</summary>
 
 If something didn't work, don't worry -- here are the most common issues and their fixes:
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `nemoclaw: command not found` | Shell PATH not updated after install | Run `source ~/.bashrc` or `export PATH="$HOME/.npm-global/bin:$PATH"` |
-| Docker permission denied | User not in the docker group | `sudo usermod -aG docker $USER` then log out and back in |
+| `Error: Cannot find module '.../dist/lib/agent/runtime'` | Partial/corrupt NemoClaw install — the CLI is on PATH but its files are incomplete | Reinstall to repair: `bash code/6-agent-safety/scripts/install-nemoclaw.sh` |
+| Docker permission denied | Shell didn't pick up the socket group / `DOCKER_HOST` | These are set by `/etc/profile.d/join-docker-group.sh`, which only runs in a login shell. Open a fresh terminal, or `source /etc/profile.d/join-docker-group.sh`. |
 | Sandbox creation fails (exit 137 / OOM) | Insufficient RAM for image push (~2.4 GB compressed) | Close other containers and add swap: `sudo dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
 | Cannot connect to sandbox | Sandbox not running or gateway stopped | Check `nemoclaw my-assistant status`, then `openshell sandbox list`. Restart gateway: `openshell gateway start --name nemoclaw` |
 | `openshell: command not found` inside sandbox | OpenShell not in PATH inside the sandbox environment | Check sandbox logs: `nemoclaw my-assistant logs --follow` |
@@ -218,9 +201,9 @@ From inside the sandbox (`nemoclaw my-assistant connect`), test the default-deny
 curl https://example.com
 ```
 
-This request should be **blocked** with a 403 Unauthorized error -- the sandbox cannot reach arbitrary external hosts. Now try an endpoint that the policy explicitly allows (your configured inference endpoint). The connection should succeed.
+This request should be **blocked** with a 403 Forbidden error -- the sandbox cannot reach arbitrary external hosts. Now try an endpoint that the policy explicitly allows (your configured inference endpoint). The connection should succeed.
 
-This confirms the kernel-level network enforcement is active.
+This confirms the network egress policy is active — enforced by OpenShell's proxy, which returned the 403.
 
 <!-- fold:break -->
 

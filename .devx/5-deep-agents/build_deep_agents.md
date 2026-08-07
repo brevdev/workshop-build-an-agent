@@ -1,10 +1,8 @@
-# Build a Deep Agent
-
-<img src="_static/robots/plumber.png" alt="Build Robot" style="float:right;max-width:300px;margin:25px;" />
+<div class="dx-hero" data-eyebrow="MODULE 05 / 04 - HANDS ON" data-title="Build a Deep Agent" data-meta="TIME::40 min|EXERCISES::5|FILE::deep_agent.py"></div>
 
 Time to get hands-on. In this section, you'll build a deep agent step by step by filling in the core functions that power it. We'll work through the backend code and then test everything using the interactive Deep Agent Client from the previous section.
 
-<button onclick="openOrCreateFileInJupyterLab('code/5-deep-agents/deep_agent.py');"><i class="fa-brands fa-python"></i> code/5-deep-agents/deep_agent.py</button> is the skeleton file you'll complete. This is a mirror of the Client code in `demo/backend/agent.py` but with key sections left as exercises.
+<button onclick="openOrCreateFileInJupyterLab('code/5-deep-agents/deep_agent.py');"><i class="fa-brands fa-python"></i> code/5-deep-agents/deep_agent.py</button> is the skeleton file you'll complete that powers the Deep Agents Client. Fill in the blanks and restart the backend to update the application. Until every blank is filled it runs the reference implementation instead, and says so on startup.
 
 <!-- fold:break -->
 
@@ -12,11 +10,13 @@ Time to get hands-on. In this section, you'll build a deep agent step by step by
 
 Our deep agent factory has five core functions:
 
-1. **`_get_model()`** — Connect to an NVIDIA NIM model
-2. **`_build_extra_tools()`** — Add optional tools like web search
-3. **`_build_system_prompt()`** — Craft the instructions that guide the agent
-4. **`_build_backend()`** — Configure file system and shell execution
-5. **`create_agent()`** — Wire everything together with `create_deep_agent()`
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>STEP 1</h4><span class="dx-big">Model</span>_get_model() connects to an NVIDIA NIM model.</div>
+  <div class="dx-cell"><h4>STEP 2</h4><span class="dx-big">Tools</span>_build_extra_tools() adds web search and other optional tools.</div>
+  <div class="dx-cell"><h4>STEP 3</h4><span class="dx-big">Prompt</span>_build_system_prompt() crafts the instructions that guide the agent.</div>
+  <div class="dx-cell"><h4>STEP 4</h4><span class="dx-big">Backend</span>_build_backend() configures file system and shell execution.</div>
+  <div class="dx-cell is-wide"><h4>STEP 5</h4><span class="dx-big">Assemble</span>create_agent() wires it all together with create_deep_agent().</div>
+</div>
 
 Let's build each one.
 
@@ -35,7 +35,7 @@ Fill in `_get_model()` to create a ChatNVIDIA instance.
 Use `MODEL_MAP` to look up the `model_id`, and `os.getenv("NVIDIA_API_KEY")` for the `api_key`.
 Set temperature to 0.3.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -63,7 +63,7 @@ Deep agents come with built-in tools (filesystem, planning, etc.), but we can ad
 
 Fill in `_build_extra_tools()` to add a `TavilySearchResults` tool when `"websearch"` is in the skill list. Use ``os.getenv("TAVILY_API_KEY")`` for the ``api_key``, and ``max_results=3``.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -97,7 +97,7 @@ The prompt should tell the agent:
 - `hitl_note`: instructions for HITL if added
 - `skill_section`: instructions for skills if added
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -138,7 +138,7 @@ Fill in ``_build_backend()`` to return the right backend:
 * If "execute" is in ``skill_ids`` → ``LocalShellBackend`` (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to True)
 * Otherwise → ``FilesystemBackend`` (with root_dir as workspace)
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -174,18 +174,19 @@ Fill in ``create_agent()`` to:
 3. If ``hitl_enabled``, add interrupt_on=INTERRUPT_TOOLS
 4. Call ``create_deep_agent`` on **agent_kwargs and return the result
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
 ...
 model = _get_model(model_id)
 extra_tools = _build_extra_tools(skill_ids)
-any_sandboxed = any(sandbox_map.get(sid, False) for sid in skill_ids)
-system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, any_sandboxed)
 skill_sources = _get_skill_sources()
 
+# Build the backend first so the prompt reflects the ACTUAL sandbox state.
 backend, sandbox = _build_backend(skill_ids, sandbox_map)
+sandbox_active = sandbox is not None
+system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, sandbox_active)
 
 agent_kwargs: dict = {
     "model": model,
@@ -227,16 +228,16 @@ If successful, you should see a "Your deep agent is working!" message at the end
 
 ## Run Your Agent
 
-> If you would like to use this agent you just created in the main Deep Agent Client, copy the entire file contents you just wrote from ``code/5-deep-agents/deep_agent.py`` into ``demo/backend/agent.py``. 
-
-Re-launch the backend with this agent implementation: 
+The backend reads your file once, at startup — restart it to pick up your work:
 
 ```bash
-# Terminal 1: Ensure Backend is Running
+# Terminal 1: restart the backend so it re-reads deep_agent.py
 cd demo/backend
 source .venv/bin/activate
 uvicorn server:app --host 0.0.0.0 --port 8000
 ```
+
+It should print `Using YOUR implementation`. If it still says `Using the REFERENCE implementation`, it names the functions that still contain a `...` blank.
 
 <!-- fold:break -->
 
@@ -255,6 +256,8 @@ Watch the tool traces in real-time — you'll see each tool call, its input, out
 <!-- fold:break -->
 
 ## What Just Happened?
+
+<img src="_static/robots/plumber.png" alt="Build Robot" style="float:right;max-width:300px;margin:25px;" />
 
 When you clicked Build, the frontend sent your deep agent configuration to the backend:
 

@@ -1,0 +1,7 @@
+* [Setting up Secrets](secrets.md)
+* [The Harness Layer](intro_agent_harnesses.md)
+* [The Harness Landscape](harness_landscape.md)
+* [Agent Skills](agent_skills.md)
+* [GPU Skills in Any Harness](gpu_skills.md)
+* [The Harness Lab](harness_lab.md)
+* [Wrapping Up](evaluating_harnesses.md)

@@ -1,4 +1,4 @@
-# Why NemoClaw: Agent Security Principles and Layers
+<div class="dx-hero" data-eyebrow="MODULE 06 / 03 - PRINCIPLES" data-title="Why NemoClaw: Agent Security Principles and Layers" data-meta="READ::20 min|CONCEPTS::5+|FOCUS::4 security layers"></div>
 
 <img src="_static/robots/supervisor.png" alt="Agent Security Deep-Dive Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -35,63 +35,72 @@ In December 2025, OWASP published the **Top 10 Risks for Agentic Applications** 
 
 These ten risks organize into three clusters. Click on each cluster to learn more about agentic AI risks and why they need addressing. 
 
-<details>
-<summary><strong>1. Goal and Identity Attacks</strong></summary>
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>GOAL / IDENTITY</h4><span class="dx-big">ASI 01, 03, 09, 10</span>Who the agent is and what it tries to accomplish.</div>
+  <div class="dx-cell"><h4>CAPABILITY / TOOL</h4><span class="dx-big">ASI 02, 04, 05</span>What the agent is able to do.</div>
+  <div class="dx-cell"><h4>STATE / COMMS</h4><span class="dx-big">ASI 06, 07, 08</span>What it remembers and how agents interact.</div>
+</div>
+
+<details class="dx-peek">
+<summary>1. Goal and Identity Attacks</summary>
 
 These threats target *who the agent is* and *what it tries to accomplish*.
 
 | Risk | Description |
 |---|---|
 | **ASI01: Agent Goal Hijack** | An adversarial input redirects the agent's objective -- e.g., a prompt injection in a customer ticket that makes the agent exfiltrate data instead of resolving the issue |
-| **ASI04: Identity Abuse** | The agent's identity or credentials are stolen or impersonated, allowing unauthorized actions under the agent's name |
-| **ASI10: Human Trust Exploitation** | The agent's outputs are crafted to manipulate the human operator -- e.g., generating a convincing but false justification for a dangerous action |
+| **ASI03: Identity and Privilege Abuse** | The agent's identity or credentials are stolen or impersonated, or it escalates its own privileges beyond what was intended -- allowing unauthorized actions under the agent's name |
+| **ASI09: Human-Agent Trust Exploitation** | The agent's outputs are crafted to manipulate the human operator -- e.g., generating a convincing but false justification for a dangerous action |
+| **ASI10: Rogue Agents** | A compromised, misaligned, or drifting agent keeps operating in unintended ways inside the system, often without obvious signals |
 
 </details>
 
-<details>
-<summary><strong>2. Capability and Tool Attacks</strong></summary>
+<details class="dx-peek">
+<summary>2. Capability and Tool Attacks</summary>
 
 These threats exploit *what the agent can do*.
 
 | Risk | Description |
 |---|---|
-| **ASI02: Tool Misuse** | The agent is tricked into using a legitimate tool for an unintended purpose -- e.g., using a file-write tool to overwrite a system config |
-| **ASI03: Privilege Abuse** | The agent escalates its own privileges beyond what was intended -- e.g., using credentials meant for one service to access another |
-| **ASI05: Supply Chain** | A malicious plugin, skill, or dependency is loaded into the agent's environment, compromising it from within |
-| **ASI06: Unexpected Code Execution** | The agent generates and runs code that produces unintended side effects -- e.g., a shell command that accidentally deletes data |
+| **ASI02: Tool Misuse and Exploitation** | The agent is tricked into using a legitimate tool for an unintended purpose -- e.g., using a file-write tool to overwrite a system config |
+| **ASI04: Agentic Supply Chain** | A malicious plugin, skill, or dependency is loaded into the agent's environment, compromising it from within |
+| **ASI05: Unexpected Code Execution** | The agent generates and runs code that produces unintended side effects -- e.g., a shell command that accidentally deletes data |
 
 </details>
 
-<details>
-<summary><strong>3. State and Communication Attacks</strong></summary>
+<details class="dx-peek">
+<summary>3. State and Communication Attacks</summary>
 
 These threats target *what the agent remembers* and *how agents interact*.
 
 | Risk | Description |
 |---|---|
-| **ASI07: Memory Poisoning** | Adversarial data is written into the agent's long-term memory, subtly biasing future decisions across sessions |
-| **ASI08: Insecure Inter-Agent Communication** | Messages between agents are intercepted or spoofed, allowing an attacker to inject instructions into multi-agent workflows |
-| **ASI09: Cascading Failures** | A failure or compromise in one agent propagates through connected agents, amplifying the impact |
+| **ASI06: Context and Memory Poisoning** | Adversarial data is written into the agent's memory or retrieved context, subtly biasing future decisions across sessions |
+| **ASI07: Insecure Inter-Agent Communication** | Messages between agents are intercepted or spoofed, allowing an attacker to inject instructions into multi-agent workflows |
+| **ASI08: Cascading Failures** | A failure or compromise in one agent propagates through connected agents, amplifying the impact |
 
 </details>
 
 No single defense addresses all ten. That's where defense in depth comes in.
 
-<details>
-<summary><strong>How NemoClaw Maps to These Threats</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-1">How NemoClaw Maps to These Threats</button>
+<div id="aside-wn-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 No single tool addresses all ten risks. NemoClaw's four enforcement layers each help mitigate a different subset:
 
 | NemoClaw Layer | Helps Mitigate |
 |---|---|
-| **Network** (deny-by-default egress) | ASI01 (blocks exfiltration paths), ASI02 (limits tool reach), ASI09 (contains blast radius) |
-| **Filesystem** (Landlock LSM) | ASI02 (blocks unauthorized file operations), ASI03 (prevents config tampering), ASI06 (restricts code execution targets) |
-| **Process** (seccomp + least privilege) | ASI03 (prevents privilege escalation), ASI05 (limits supply chain impact), ASI06 (blocks dangerous syscalls) |
-| **Inference** (Privacy Router) | ASI01 (controls model access), ASI04 (isolates credentials), ASI07 (operator-controlled routing keeps sensitive traffic off cloud backends) |
+| **Network** (deny-by-default egress) | ASI01 (blocks exfiltration paths), ASI02 (limits tool reach), ASI08 (contains blast radius) |
+| **Filesystem** (Landlock LSM) | ASI02 (blocks unauthorized file operations), ASI03 (prevents config tampering / credential harvest), ASI05 (restricts code execution targets) |
+| **Process** (seccomp + least privilege) | ASI03 (prevents privilege escalation), ASI04 (limits supply chain impact), ASI05 (blocks dangerous syscalls) |
+| **Inference** (Privacy Router) | ASI01 (controls model access), ASI03 (isolates credentials), ASI06 (operator-controlled routing keeps sensitive traffic off cloud backends) |
 
-Some risks -- notably ASI08 (inter-agent communication) and ASI10 (human trust exploitation) -- require additional controls beyond what NemoClaw provides. Defense in depth means acknowledging these boundaries.
+Some risks -- notably ASI07 (inter-agent communication), ASI09 (human-agent trust exploitation), and ASI10 (rogue agents) -- require additional controls beyond what NemoClaw's four layers provide (the continuous red-team + judge suite in the next section helps catch drift toward ASI10). Defense in depth means acknowledging these boundaries.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -99,29 +108,43 @@ Some risks -- notably ASI08 (inter-agent communication) and ASI10 (human trust e
 
 Defense in depth is a security principle borrowed from military strategy: arrange multiple independent barriers so that an attacker must defeat *all* of them, not just one. Applied to autonomous agents, it has four properties - click each to learn more. 
 
-<details>
-<summary><strong>1. No single layer covers all threats</strong></summary>
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">DEFENSE IN DEPTH - BYPASS DIFFICULTY BY LAYER</p>
+  <div class="dx-tax">
+    <div class="dx-tax-row" style="--dx-w:16"><span class="dx-tax-name">HITL gate</span><div class="dx-tax-track"><div class="dx-tax-fill">soft</div></div><span class="dx-tax-note">M4 - human approval</span></div>
+    <div class="dx-tax-row" style="--dx-w:28"><span class="dx-tax-name">Allowlists</span><div class="dx-tax-track"><div class="dx-tax-fill">app</div></div><span class="dx-tax-note">M4 - regex + command</span></div>
+    <div class="dx-tax-row" style="--dx-w:40"><span class="dx-tax-name">App sandbox</span><div class="dx-tax-track"><div class="dx-tax-fill">app</div></div><span class="dx-tax-note">M5 - framework limits</span></div>
+    <div class="dx-tax-row" style="--dx-w:55"><span class="dx-tax-name">Docker</span><div class="dx-tax-track"><div class="dx-tax-fill">container</div></div><span class="dx-tax-note">M5 - namespace + limits</span></div>
+    <div class="dx-tax-row" style="--dx-w:72"><span class="dx-tax-name">Landlock LSM</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - per-file</span></div>
+    <div class="dx-tax-row" style="--dx-w:82"><span class="dx-tax-name">seccomp BPF</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - syscall filter</span></div>
+    <div class="dx-tax-row" style="--dx-w:92"><span class="dx-tax-name">Network proxy</span><div class="dx-tax-track"><div class="dx-tax-fill">proxy</div></div><span class="dx-tax-note">M6 - per-endpoint</span></div>
+    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">Privacy Router</span><div class="dx-tax-track"><div class="dx-tax-fill">gateway</div></div><span class="dx-tax-note">M6 - operator routing</span></div>
+  </div>
+</div>
+
+<details class="dx-peek">
+<summary>1. No single layer covers all threats</summary>
 
 Network controls can't prevent memory poisoning. Filesystem restrictions can't stop credential theft from in-process memory. Each layer addresses a different attack vector.
 
 </details>
 
-<details>
-<summary><strong>2. Each layer operates independently</strong></summary>
+<details class="dx-peek">
+<summary>2. Each layer operates independently</summary>
 
 If the network proxy is misconfigured, the filesystem sandbox still holds. If a Landlock rule is too permissive, seccomp still blocks dangerous syscalls. Layers don't depend on each other.
 
 </details>
 
-<details>
-<summary><strong>3. Layers enforce at different levels</strong></summary>
+<details class="dx-peek">
+<summary>3. Layers enforce at different levels</summary>
 
 Application-level controls (SOUL.md rules) can be bypassed by the agent. Container-level controls require a container escape. Kernel-level controls (Landlock, seccomp) are designed to be irrevocable by userspace code.
 
 </details>
 
-<details>
-<summary><strong>4. Failure of one layer should not cascade</strong></summary>
+<details class="dx-peek">
+<summary>4. Failure of one layer should not cascade</summary>
 
 A successful prompt injection might hijack the agent's goal, but if network egress is deny-by-default, there's no path to exfiltrate the data. The attack succeeds at one layer but is contained at the next.
 
@@ -160,44 +183,7 @@ With the defense-in-depth principle and the OpenShell runtime established, here 
 | **Agent Drift** | Out-of-process enforcement that the agent cannot reach. Even as the agent's memory and context evolve over weeks, the kernel policy remains fixed and irrevocable. | Filesystem (Landlock), Process (seccomp) |
 | **Mixed-Sensitivity Data** | Operator-controlled inference routing — pair with an app-layer classifier (built in Exercise 5) to keep sensitive data on a local model and route public data to a cloud endpoint. | Inference (Privacy Router) |
 
-```mermaid
----
-config:
-  theme: 'base'
-  themeVariables:
-    primaryColor: '#eaf6e0'
-    secondaryColor: '#eaf6e0'
-    background: white
----
-graph TB
-    subgraph Host["Host Machine"]
-        NC["NemoClaw CLI\n(orchestrator)"]
-        GW["OpenShell Gateway\n(credential store)"]
-        Policy["Policy YAML\n(operator-defined)"]
-    end
-
-    subgraph Sandbox["OpenShell Sandbox"]
-        Agent["OpenClaw Agent"]
-        Proxy["Network Proxy\n+ OPA Engine"]
-        LL["Landlock LSM\n(kernel)"]
-        SC["seccomp BPF\n(kernel)"]
-        IL["inference.local\n(gateway endpoint)"]
-    end
-
-    Agent -->|"outbound request"| Proxy
-    Proxy -->|"policy check"| Policy
-    Proxy -->|"allowed traffic"| Internet["External Services"]
-    Agent -->|"file I/O"| LL
-    Agent -->|"syscalls"| SC
-    Agent -->|"inference call"| IL
-    IL -->|"strip creds, inject real keys"| GW
-    GW -->|"authenticated request"| API["Inference API"]
-    NC -->|"manages"| Sandbox
-
-    classDef host fill:#f9f9f9,stroke:#444,stroke-width:2px,color:#222;
-    classDef sandbox fill:#eaf6e0,stroke:#444,stroke-width:2px,color:#222;
-    classDef external fill:#fff,stroke:#444,stroke-width:2px,color:#222;
-```
+![NemoClaw Architecture](img/nemoclaw_architecture_dark.svg)
 
 The rest of this page walks through each of these four layers in detail, following a consistent pattern: the security principle at stake, the specific threat it addresses, and how NemoClaw implements it through OpenShell.
 
@@ -252,29 +238,27 @@ network_policies:
 
 Key details about network enforcement - click each to learn more.
 
-<details>
-<summary><strong>L7 inspection</strong></summary>
+<div class="dx-defs">
+<details class="dx-def">
+<summary>L7 inspection</summary>
 
 For REST endpoints with TLS termination enabled, the proxy decrypts TLS and inspects each HTTP request. A policy with `access: read-only` allows GET requests but blocks POST, PUT, PATCH, and DELETE on the same endpoint.
 
 </details>
-
-<details>
-<summary><strong>Per-binary scoping</strong></summary>
+<details class="dx-def">
+<summary>Per-binary scoping</summary>
 
 Each policy specifies which binaries are authorized. A rule allowing `/usr/bin/curl` to reach `api.github.com` does not grant that access to `/usr/local/bin/python3`. Binary identity is verified via `/proc/pid/exe` and SHA256 hash.
 
 </details>
-
-<details>
-<summary><strong>Hot-reload</strong></summary>
+<details class="dx-def is-wide">
+<summary>Hot-reload</summary>
 
 Network policies can be updated on a running sandbox with `openshell policy set` without restarting the agent. Changes take effect immediately.
 
 </details>
-
-<details>
-<summary><strong>Blocked request output</strong></summary>
+<details class="dx-def is-wide">
+<summary>Blocked request output</summary>
 
 When a connection is denied, the sandbox proxy returns an HTTP 403. Inside the sandbox, the user sees:
 
@@ -283,9 +267,8 @@ curl: (56) Received HTTP code 403 from proxy after CONNECT
 ```
 
 </details>
-
-<details>
-<summary><strong>Audit trail</strong></summary>
+<details class="dx-def is-wide">
+<summary>Audit trail</summary>
 
 Every denied connection produces a structured log entry. Query it from the host with `openshell logs <sandbox> --since 5m`:
 
@@ -294,6 +277,7 @@ action=deny dst_host=api.github.com dst_port=443 binary=/usr/bin/curl deny_reaso
 ```
 
 </details>
+</div>
 
 The NemoClaw baseline policy pre-approves a minimal set of endpoints: NVIDIA inference endpoints, GitHub (for `git` and `gh`), and a few others required for basic operation. Everything else is blocked until the operator explicitly adds a policy.
 
@@ -303,7 +287,7 @@ The NemoClaw baseline policy pre-approves a minimal set of endpoints: NVIDIA inf
 
 **The principle: least-privilege filesystem access.** An agent should only be able to read and write the specific paths it needs for its task. System binaries, configuration files, and credential stores should be off-limits for writes.
 
-This principle directly addresses ASI02 (Tool Misuse), ASI03 (Privilege Abuse), and ASI06 (Unexpected Code Execution). If the agent can't write to `/usr/bin/`, it can't tamper with its own toolchain. If it can't read `/etc/shadow`, it can't harvest credentials. If it can't write outside `/sandbox`, the blast radius of any unintended code execution is contained.
+This principle directly addresses ASI02 (Tool Misuse), ASI03 (Identity and Privilege Abuse), and ASI05 (Unexpected Code Execution). If the agent can't write to `/usr/bin/`, it can't tamper with its own toolchain. If it can't read `/etc/shadow`, it can't harvest credentials. If it can't write outside `/sandbox`, the blast radius of any unintended code execution is contained.
 
 **The threat:** A prompt injection tricks the agent into writing a malicious cron job to `/etc/cron.d/` or modifying its own filtering code at `/app/agent.py`. In a vanilla OpenClaw setup, the agent has whatever filesystem access the OS user grants -- which is often far more than it needs.
 
@@ -315,26 +299,26 @@ Think of Landlock like a one-way turnstile -- once you walk through, there's no 
 
 OpenShell uses **Landlock** -- a Linux Security Module available since kernel 5.13 -- to enforce filesystem restrictions at the kernel level. Landlock has three properties that make it uniquely suited for agent containment - click each to learn more.
 
-<details>
-<summary><strong>Unprivileged</strong></summary>
+<div class="dx-defs">
+<details class="dx-def">
+<summary>Unprivileged</summary>
 
 Unlike AppArmor or SELinux, Landlock does not require root. The sandbox process applies its own restrictions at startup.
 
 </details>
-
-<details>
-<summary><strong>Stackable</strong></summary>
+<details class="dx-def">
+<summary>Stackable</summary>
 
 Landlock works alongside seccomp BPF and AppArmor. Each layer adds restrictions; none can remove restrictions applied by another.
 
 </details>
-
-<details>
-<summary><strong>Irrevocable by design</strong></summary>
+<details class="dx-def is-wide">
+<summary>Irrevocable by design</summary>
 
 Once `landlock_restrict_self()` is called, the process is designed to be unable to lift the restrictions. Not by spawning children, not by calling other syscalls, not by any mechanism available to userspace code.
 
 </details>
+</div>
 
 The technical mechanism is three syscalls:
 
@@ -342,8 +326,10 @@ The technical mechanism is three syscalls:
 2. **`landlock_add_rule()`** -- Adds per-path rules to the ruleset (e.g., read-only on `/usr`, read-write on `/sandbox`)
 3. **`landlock_restrict_self()`** -- Applies the ruleset to the current process. This call is designed to be irreversible by the kernel.
 
-<details>
-<summary><strong>See a filesystem access example - click here!</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-2">See a filesystem access example</button>
+<div id="aside-wn-2" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-2" popovertargetaction="hide" aria-label="Close">×</button>
 
 The NemoClaw baseline filesystem policy (from `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`) maps to these Landlock rules:
 
@@ -353,7 +339,8 @@ The NemoClaw baseline filesystem policy (from `nemoclaw-blueprint/policies/openc
 | `/usr`, `/lib`, `/proc`, `/dev/urandom`, `/app`, `/etc`, `/var/log` | Read-only |
 | Everything else | Denied |
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -361,7 +348,7 @@ The NemoClaw baseline filesystem policy (from `nemoclaw-blueprint/policies/openc
 
 **The principle: minimal execution privileges.** An agent should run with the fewest privileges needed for its task -- no root access, no dangerous syscalls, no ability to escalate. This is the classic security principle of least privilege, applied at the process level.
 
-This principle directly addresses ASI03 (Privilege Abuse), ASI05 (Supply Chain), and ASI06 (Unexpected Code Execution). Even if malicious code gets into the sandbox through a compromised dependency, it can't install a rootkit, load a kernel module, or spawn unrestricted processes.
+This principle directly addresses ASI03 (Identity and Privilege Abuse), ASI04 (Agentic Supply Chain), and ASI05 (Unexpected Code Execution). Even if malicious code gets into the sandbox through a compromised dependency, it can't install a rootkit, load a kernel module, or spawn unrestricted processes.
 
 **The threat:** A compromised npm package in the agent's dependency tree attempts to call `ptrace()` to inspect other processes, `mount()` to access host filesystems, or `setuid()` to escalate to root. Without process-level restrictions, these syscalls succeed if the agent runs as root or with elevated capabilities.
 
@@ -373,47 +360,44 @@ Think of it like a building where certain floors are off-limits and certain acti
 
 OpenShell applies multiple overlapping process restrictions - click each to learn more.
 
-<details>
-<summary><strong>Non-root execution</strong></summary>
+<div class="dx-defs">
+<details class="dx-def">
+<summary>Non-root execution</summary>
 
 The sandbox process runs as a dedicated `sandbox` user and group, never as root. The policy YAML explicitly declares `user: sandbox` and `group: sandbox`, and OpenShell rejects policies that specify root.
 
 </details>
-
-<details>
-<summary><strong>Dropped capabilities</strong></summary>
+<details class="dx-def">
+<summary>Dropped capabilities</summary>
 
 Linux capabilities including `CAP_NET_RAW`, `CAP_DAC_OVERRIDE`, `CAP_SYS_CHROOT`, `CAP_FSETID`, `CAP_SETFCAP`, `CAP_MKNOD`, `CAP_AUDIT_WRITE`, and `CAP_NET_BIND_SERVICE` are dropped at sandbox creation. The agent process is designed to be unable to regain them.
 
 </details>
-
-<details>
-<summary><strong>Kernel flags</strong></summary>
+<details class="dx-def">
+<summary>Kernel flags</summary>
 
 The `PR_SET_NO_NEW_PRIVS` kernel flag is set at startup, which helps prevent the process from gaining new privileges through `execve()`. A compromised binary cannot escalate by executing a setuid program.
 
 </details>
-
-<details>
-<summary><strong>seccomp BPF</strong></summary>
+<details class="dx-def">
+<summary>seccomp BPF</summary>
 
 A syscall filter blocks dangerous operations like `mount()`, `reboot()`, `ptrace()`, and `kexec_load()`. The filter is applied at sandbox creation and is designed to be irrevocable.
 
 </details>
-
-<details>
-<summary><strong>Process limits</strong></summary>
+<details class="dx-def is-wide">
+<summary>Process limits</summary>
 
 `ulimit -u 512` caps the number of processes the sandbox can spawn, which helps limit fork bombs and runaway process trees.
 
 </details>
-
-<details>
-<summary><strong>Toolchain removal</strong></summary>
+<details class="dx-def is-wide">
+<summary>Toolchain removal</summary>
 
 The sandbox image removes development tools (`gcc`, `g++`, `make`, `netcat`) that an attacker could use to compile exploits or establish reverse shells.
 
 </details>
+</div>
 
 Together, these restrictions mean that even if an attacker achieves code execution inside the sandbox, the code runs as an unprivileged user with dropped capabilities, restricted syscall access, and no development tools to escalate further. The blast radius is significantly reduced.
 
@@ -423,7 +407,7 @@ Together, these restrictions mean that even if an attacker achieves code executi
 
 **The principle: operator-controlled inference routing with credential isolation.** The agent should never hold API credentials in its own memory, and the choice of inference backend — local or cloud — should be an operator decision enforced at the gateway, not something the agent picks per request. This combines two complementary ideas: out-of-process credential management and operator-set backend selection. (Per-request, content-aware decisions belong in your application layer in front of the gateway — see Exercise 5.)
 
-This principle directly addresses ASI01 (Goal Hijack -- even if hijacked, no credentials to steal), ASI04 (Identity Abuse -- credentials are never in-process), and ASI07 (Memory Poisoning -- sensitive data stays local, reducing exposure).
+This principle directly addresses ASI01 (Goal Hijack -- even if hijacked, no credentials to steal), ASI03 (Identity and Privilege Abuse -- credentials are never in-process), and ASI06 (Context and Memory Poisoning -- sensitive data stays local, reducing exposure).
 
 **The threat:** A prompt injection asks the agent to "print your environment variables including all API keys." In a vanilla OpenClaw setup, API keys live in environment variables or config files that the agent can read -- the injection succeeds. Separately, a customer support agent processes a mix of public FAQs and emails containing SSNs -- without an operator-controlled routing primitive, the agent has no way to keep sensitive queries on local infrastructure while still using cloud capability for public queries.
 
@@ -433,8 +417,10 @@ This principle directly addresses ASI01 (Goal Hijack -- even if hijacked, no cre
 
 This layer has two complementary functions: **credential isolation** and **privacy routing**. Both operate through the same `inference.local` gateway.
 
-<details>
-<summary><strong>Credential Isolation</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-3">Credential Isolation</button>
+<div id="aside-wn-3" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-3" popovertargetaction="hide" aria-label="Close">×</button>
 
 It's like a valet service -- you hand your car keys to the valet (the gateway), and the valet drives on your behalf. The passenger (the agent) is not meant to touch the keys.
 
@@ -449,29 +435,7 @@ NemoClaw eliminates this by routing all inference through `inference.local` -- a
 5. The request is forwarded to the actual inference endpoint (NVIDIA, OpenAI, Anthropic, etc.)
 6. The response flows back to the agent
 
-```mermaid
----
-config:
-  theme: 'base'
-  themeVariables:
-    primaryColor: '#eaf6e0'
-    secondaryColor: '#eaf6e0'
-    background: white
----
-sequenceDiagram
-    participant Agent as Agent (sandbox)
-    participant Proxy as OpenShell Proxy
-    participant GW as Gateway (host)
-    participant API as Inference API
-
-    Agent->>Proxy: POST inference.local/v1/chat
-    Proxy->>GW: Forward (strip agent creds)
-    GW->>GW: Inject real API key from Provider
-    GW->>API: POST api.nvidia.com/v1/chat
-    API-->>GW: Response
-    GW-->>Proxy: Forward response
-    Proxy-->>Agent: Response (no keys exposed)
-```
+![Credential Injection Flow](img/credential_flow_dark.svg)
 
 The agent process **is designed to never have access to the API key**. Even if the agent dumps its environment, inspects `/proc/self/environ`, or reads every file it can access, the credentials exist only on the host side in the Provider record.
 
@@ -485,10 +449,13 @@ openshell provider create --name my-nvidia --type generic --from-existing
 openshell sandbox create --provider my-nvidia --provider my-github -- claude
 ```
 
-</details>
+</div>
+</div>
 
-<details>
-<summary><strong>Operator-Controlled Routing</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-4">Operator-Controlled Routing</button>
+<div id="aside-wn-4" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-4" popovertargetaction="hide" aria-label="Close">×</button>
 
 Think of a PBX phone system: the operator chooses which trunk all outbound calls go through. The switchboard doesn't listen to the conversation -- it routes every call to whichever trunk is currently configured. To shift from a public trunk to a private one, the operator flips a setting, not the caller.
 
@@ -509,7 +476,8 @@ openshell inference set --provider my-local-ollama --model nemotron-nano
 
 This lets the operator switch between cloud and local inference at any time without modifying the agent or restarting the sandbox. Per-request, content-aware routing -- *"if this query contains PII, route to local; otherwise, route to cloud"* -- is a pattern you build in your application layer in front of `inference.local`. The gateway provides the routing primitive; your classifier provides the decision. You'll build that classifier in Exercise 5 on the [Working with NemoClaw](using_nemoclaw) page.
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -519,8 +487,10 @@ Now that you understand what the layers do and why they matter, let's look at ho
 
 Every OpenShell sandbox is governed by a single policy YAML file. The NemoClaw blueprint ships a default at `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`. Here is the full structure with annotations. 
 
-<details>
-<summary><strong>Click to view full file</strong></summary>
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-wn-5">Click to view full file</button>
+<div id="aside-wn-5" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-wn-5" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```yaml
 # Policy schema version (required, must be 1)
@@ -593,7 +563,8 @@ network_policies:
       - { path: /usr/bin/gh }
 ```
 
-</details>
+</div>
+</div>
 
 <!-- fold:break -->
 
@@ -628,5 +599,14 @@ This opens a terminal UI showing every allow and deny decision as the agent oper
 You've covered the full arc: from understanding what makes agent security a distinct challenge, through the threat landscape and defense-in-depth principle, to the technical details of each enforcement layer and the YAML policy that ties them together.
 
 You now understand the four layers that NemoClaw adds to a vanilla OpenClaw agent -- deny-by-default network policies, kernel-level filesystem sandboxing via Landlock, process hardening with seccomp and least privilege, and operator-controlled inference routing through the `inference.local` gateway. The next page walks you through installing and configuring the full NemoClaw stack so you can see these layers enforce policy in real time.
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">What does the NemoClaw Privacy Router actually do?</p>
+  <button class="dx-quiz-opt" data-fb="Common misreading. The router does NOT inspect request content. Content-aware routing is a classifier you build in front of the gateway (Exercise 5) - not something the router does on its own.">It inspects each query and automatically sends sensitive ones to a local model</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. It enforces the operator's chosen backend and injects host-side credentials at the gateway, so the agent calls inference.local and never holds an API key.">It enforces the operator's chosen backend and injects credentials, so the agent never holds keys</button>
+  <button class="dx-quiz-opt" data-fb="It does not encrypt prompts. Its job is credential isolation plus operator-chosen backend selection, not transport encryption.">It encrypts the agent's prompts before they reach the cloud</button>
+  <button class="dx-quiz-opt" data-fb="There is no response scanning. The router forwards requests to the operator-set backend; it never reads or redacts content.">It scans responses for PII and redacts sensitive values</button>
+</div>
 
 > Head to [Set Up NemoClaw](setup_nemoclaw) to get the full stack running.

@@ -25,6 +25,17 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 _LOGGER = logging.getLogger(__name__)
 
+# NVIDIA's hosted endpoints can transiently return 503 (ResourceExhausted) under
+# concurrent load. Wrap the judge model so a transient rate-limit backs off and
+# retries (exponential jitter) instead of crashing the safety suite mid-run.
+def _with_retry(runnable):
+    """Add exponential-backoff retry for transient 5xx / rate limits."""
+    return runnable.with_retry(
+        retry_if_exception_type=(Exception,),
+        stop_after_attempt=5,
+        wait_exponential_jitter=True,
+    )
+
 
 # ── Configuration ─────────────────────────────────────────────────────
 
@@ -440,6 +451,7 @@ def evaluate_safety(
         )
 
     # Step 2: Build the chain and invoke it
+    judge_llm = _with_retry(judge_llm)  # transient-503 resilience (provided)
     chain = ...                             # Combine SAFETY_JUDGE_PROMPT | judge_llm
     result = chain.invoke({
         "probe": ...,                       # The adversarial probe text

@@ -1,6 +1,4 @@
-# Synthetic Data Generation
-
-<img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
+<div class="dx-hero" data-eyebrow="MODULE 04 / 03 - SYNTHETIC DATA" data-title="Synthetic Data Generation" data-meta="TIME::35 min|EXERCISES::3|TOOL::NeMo Data Designer"></div>
 
 Training requires examples—lots of them. Each example shows the model:
 - **Input**: What the user says (*"Create a new project with the react template"*)
@@ -8,17 +6,19 @@ Training requires examples—lots of them. Each example shows the model:
 
 But where do these examples come from?
 
-| Source | Pros | Cons |
-|--------|------|------|
-| **Real user logs** | Authentic patterns | You don't have them yet |
-| **Manual writing** | High quality | Slow, expensive, limited diversity |
-| **Synthetic generation** | Fast, scalable, diverse | Requires careful design |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>REAL USER LOGS</h4>Authentic patterns - but you don't have them yet for a brand-new CLI.</div>
+  <div class="dx-cell"><h4>MANUAL WRITING</h4>High quality, but slow, expensive, and limited in diversity.</div>
+  <div class="dx-cell"><h4>SYNTHETIC (SDG)</h4>Fast, scalable, diverse - it just requires careful design.</div>
+</div>
 
 For a new domain like the LangGraph CLI, we don't have the real logs from the agent. Manual writing doesn't scale. **SDG is the answer.**
 
 <!-- fold:break -->
 
 ## Why Synthetic Data Works
+
+<img src="_static/robots/magician.png" alt="SDG" style="float:right;max-width:250px;margin:15px;" />
 
 **The Cold Start Problem:** New CLI tools face a chicken-and-egg problem:
 - You need training data to build a good agent
@@ -27,10 +27,11 @@ For a new domain like the LangGraph CLI, we don't have the real logs from the ag
 
 SDG breaks this cycle:
 
-1. **Define the space** — Your Pydantic schema describes all valid outputs
-2. **Sample systematically** — Samplers ensure every corner of the space is covered
-3. **Generate natural language** — An LLM creates realistic user phrasings
-4. **Result**: Real training data without real users
+1. **Define the space** — Your Pydantic schema describes the shape of a valid output
+2. **Sample the seeds systematically** — Samplers draw a command and its flags from distributions *you* control, so every corner of the space gets visited
+3. **Generate natural language** — An LLM turns each seed into a realistic user phrasing
+4. **Generate the structured output** — A second, *schema-constrained* LLM call reads that phrasing and emits the JSON tool call
+5. **Result**: Real training data without real users
 
 **Why this works**: The model doesn't need *authentic* user phrasing—it needs to learn the *mapping* from intent to command. Synthetic variations are sufficient to learn that mapping, and you can always fine-tune later with real data once you have it.
 
@@ -38,27 +39,44 @@ SDG breaks this cycle:
 
 **SDG vs. LLM Prompting:** You might wonder: "Why not just ask GPT to generate 200 training examples?"
 
-| Approach | Coverage | Validity | Diversity | Control |
-|----------|----------|----------|-----------|---------|
-| **LLM prompting** | Random, gaps likely | May hallucinate invalid outputs | Tends toward common patterns | Low |
-| **NeMo Data Designer** | Guaranteed by samplers | Guaranteed by schema | Controlled by sampler config | High |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell is-wide"><h4>LLM PROMPTING</h4><span class="dx-chip">LOW CONTROL</span> Random coverage with likely gaps, free-form output that may not even parse, drifts toward common patterns.</div>
+  <div class="dx-cell is-wide"><h4>NeMo DATA DESIGNER</h4><span class="dx-chip">HIGH CONTROL</span> Coverage driven by samplers you configure, output <i>shape</i> guaranteed by the schema, diversity controlled by config.</div>
+</div>
 
-**The key difference**: Data Designer generates outputs *first* (from your schema), then creates matching inputs. LLM prompting generates inputs and hopes the outputs are valid.
+**The key difference**: Data Designer never asks the model "invent 200 examples." It walks a space *you* defined — a seed row per example — and constrains every generated output to your schema. Naive prompting controls neither the coverage nor the shape.
 
-<details>
-<summary><strong>Click me to see an example</strong></summary>
+Be precise about what that buys you, though: the schema guarantees the output's **shape** (right fields, right types, always parses), not its **labels** — no schema can tell you whether `port: 7842` is the port the sentence asked for. That's why the QA step matters.
+
+<div class="dx-aside">
+<button class="dx-aside-btn" popovertarget="aside-sdg-1">See an example</button>
+<div id="aside-sdg-1" popover class="dx-aside-panel">
+<button class="dx-aside-x" popovertarget="aside-sdg-1" popovertargetaction="hide" aria-label="Close">×</button>
 
 ```python
 # LLM prompting approach (risky)
 examples = llm("Generate 100 LangGraph CLI training examples")
-# Problem: LLM might invent commands that don't exist!
+# Problem: no control over coverage, and the output may not even parse!
 
 # Data Designer approach (controlled)
-outputs = sample_from_schema(CLIToolCall, n=100)  # Always valid
-inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixed
+seed    = sample(command=[...], template=[...], port=(3000, 9000))  # you define the space
+request = llm(f"Write a user request for: {seed}")                  # natural phrasing
+call    = llm(request, output_format=CLIToolCall)                   # constrained to your schema
 ```
 
-</details>
+</div>
+</div>
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">Every row Data Designer produced parses cleanly and matches your <code>CLIToolCall</code> schema. What does that tell you about the dataset?</p>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Constrained decoding guarantees the SHAPE - fields, types, parseability. The values are still an LLM's reading of the generated request, so the labels themselves need spot-checking.">That the output *shape* is correct — the labels themselves still need review</button>
+  <button class="dx-quiz-opt" data-fb="That's the trap. A schema constrains structure, not meaning. `port: 3000` is schema-valid whether or not the request said 3000.">That every label is correct — schema validation is the check</button>
+  <button class="dx-quiz-opt" data-fb="Samplers do drive coverage of the command/flag space, which is the real advantage over naive prompting - but that's a separate property from schema validity.">Nothing useful — schema validity is unrelated to data quality</button>
+  <button class="dx-quiz-opt" data-fb="Balance comes from how you configure the samplers, and is worth checking separately (see the Balance checklist below). Schema validity says nothing about it.">That the command types are evenly balanced</button>
+</div>
+
+<!-- fold:break -->
 
 **What makes Training Data "Good Enough"?** Training data quality matters more than quantity. Here's what to aim for:
 
@@ -81,14 +99,15 @@ inputs = llm(f"Write a user request for: {output}")  # Input varies, output fixe
 
 **NeMo Data Designer** generates training data programmatically:
 
-1. **Define the output schema** — A Pydantic model describing valid CLI commands
-2. **Configure samplers** — Distributions for each field (which commands? which templates? which ports?)
-3. **Generate natural language** — An LLM creates realistic user requests for each command
-4. **Combine into examples** — Input/output pairs ready for training
+1. **Define the output schema** — A Pydantic model describing the shape of a valid CLI tool call
+2. **Configure samplers** — Distributions for each seed field (which commands? which templates? which ports?)
+3. **Generate natural language** — An LLM turns each seed row into a realistic user request
+4. **Generate the structured output** — A schema-constrained LLM call converts that request into JSON
+5. **Combine into examples** — Input/output pairs ready for training
 
-![SDG Pipeline](img/sdg_pipeline.png)
+![SDG Pipeline](img/sdg_pipeline_dark.svg)
 
-This is different from just prompting an LLM to "make up examples." Data Designer ensures coverage, diversity and validity of training data. 
+This is different from just prompting an LLM to "make up examples." Data Designer gives you control over **coverage** (the samplers) and **shape** (the schema); **label accuracy** is the part you verify. 
 
 <!-- fold:break -->
 
@@ -96,8 +115,8 @@ This is different from just prompting an LLM to "make up examples." Data Designe
 
 Before training, verify your synthetic data meets these criteria. **Click each item to learn more.**
 
-<details>
-<summary><strong>Coverage</strong></summary>
+<details class="dx-peek">
+<summary>Coverage</summary>
 
 - [ ] Does every command type appear? (`new`, `dev`, `up`, `build`, `dockerfile`)
 - [ ] Does every flag appear for each relevant command?
@@ -105,25 +124,32 @@ Before training, verify your synthetic data meets these criteria. **Click each i
 
 </details>
 
-<details>
-<summary><strong>Balance</strong></summary>
+<details class="dx-peek">
+<summary>Balance</summary>
 
 - [ ] Are command types roughly balanced?
 - [ ] No single command should be > 40% of data unless that matches real usage
 
 **Quick diagnostic:**
 ```python
+import json
 from collections import Counter
-commands = [json.loads(ex["output"])["command"] for ex in data]
-print(Counter(commands))
+
+data = [json.loads(line) for line in open("data/langgraph_cli/train.jsonl")]
+
+def out(ex):  # `output` is a dict; some exports store it as a JSON string
+    o = ex["output"]
+    return json.loads(o) if isinstance(o, str) else o
+
+print(Counter(out(ex)["command"] for ex in data))
 # Good: Counter({'new': 55, 'dev': 48, 'up': 52, 'build': 45, 'dockerfile': 50})
 # Bad:  Counter({'new': 180, 'dev': 10, 'up': 5, 'build': 3, 'dockerfile': 2})
 ```
 
 </details>
 
-<details>
-<summary><strong>Diversity</strong></summary>
+<details class="dx-peek">
+<summary>Diversity</summary>
 
 - [ ] Do inputs vary in phrasing, not just slot values?
 - [ ] Mix of formal and casual language?
@@ -139,32 +165,40 @@ print(Counter(commands))
 
 </details>
 
-<details>
-<summary><strong>Validity</strong></summary>
+<details class="dx-peek">
+<summary>Validity</summary>
 
 - [ ] Do all outputs parse as valid JSON?
 - [ ] Do all outputs pass schema validation?
 - [ ] Do command/flag combinations make sense?
 
 ```python
-# Validate all outputs
+# Validate all outputs (`out` is the helper from the Balance section above)
 for ex in data:
-    output = json.loads(ex["output"])
-    CLIToolCall(**output)  # Raises if invalid
+    CLIToolCall(**out(ex))  # Raises if invalid
 print("All outputs valid!")
+```
+
+Expect that to pass on every row — constrained decoding guarantees it. The check that finds real problems is the one the schema can't do: whether the values match the request.
+
+```python
+# Do closed-set fields only contain legal values?
+TEMPLATES = {"react-agent-python", "memory-agent-python", "retrieval-agent-python",
+             "data-enrichment-agent-python", "new-langgraph-project-python"}
+bad = [ex for ex in data
+       if out(ex).get("template") and out(ex)["template"] not in TEMPLATES]
+print(f"{len(bad)} row(s) with an unknown template")
 ```
 
 </details>
 
 <!-- fold:break -->
 
-### Sample Datasets
-
-We recommend generating your own datasets to get hands-on experience with the synthetic data generation process. However, if you're running into issues or want to move ahead quickly, we've provided a starter dataset you can use. 
-
-> 📁 Sample Training Data (225 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>
-
-These pre-made dataset can also serve as reference examples when you create your own.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">PREFER A HEAD START?</p>
+  <p>We recommend generating your own dataset for the hands-on experience. But if you'd rather move ahead quickly, a starter set is provided - it also makes a good reference when you build your own:</p>
+  <p>📁 Sample Training Data (225 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button></p>
+</div>
 
 <!-- fold:break -->
 
@@ -176,9 +210,9 @@ Open the <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customizati
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define the Pydantic model for CLI commands.
 
-This schema is what Data Designer samples from to generate valid outputs — every synthetic example is guaranteed to conform to it. Define `CLIToolCall` as a `BaseModel` with `command` (str), `template` (optional str), `path` (optional str), and `port` (optional int) fields. Optional fields should default to `None`.
+This schema is what constrains the generated outputs — every synthetic example is guaranteed to *conform* to it (right fields, right types, always parseable). Define `CLIToolCall` as a `BaseModel` with `command` (str), `template` (optional str), `path` (optional str), and `port` (optional int) fields. Optional fields should default to `None`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -196,9 +230,9 @@ class CLIToolCall(BaseModel):
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure the template values the sampler draws from.
 
-Samplers control the distribution of generated outputs — they’re what ensures your dataset covers the full output space rather than clustering around common cases. Add the following to the `values` list in `CategorySamplerParams`: `"react-agent-python"`, `"memory-agent-python"`, `"retrieval-agent-python"`, `"data-enrichment-agent-python"`, `"new-langgraph-project-python"`.
+Samplers control the distribution of the **seed** values each example is built from — they're what stops your dataset clustering around a couple of common cases. Add the following to the `values` list in `CategorySamplerParams`: `"react-agent-python"`, `"memory-agent-python"`, `"retrieval-agent-python"`, `"data-enrichment-agent-python"`, `"new-langgraph-project-python"`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -220,7 +254,7 @@ params=CategorySamplerParams(values=[
 
 The validation set is held out during GRPO training and used to detect overfitting — if training reward climbs but validation reward plateaus, the model is memorizing rather than generalizing. Use `train_test_split` to split `dataset_df` with `test_size` set to `0.1` (10% for validation) and `random_state` seed set to `42` (or some other number).
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -234,9 +268,14 @@ train_df, val_df = train_test_split(dataset_df, test_size=0.1, random_state=42)
 
 Before moving to training, spot-check a few examples from your generated data in <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>:
 
-- **Do the inputs sound natural?** They should read like something a real user would type, not robotic templates.
-- **Do the outputs parse correctly?** Every output should be valid JSON matching the `CLIToolCall` schema.
-- **Is there variety?** Scan for repetitive phrasing. If many examples start with the same words, the model may learn to depend on those patterns rather than understanding intent.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">SPOT-CHECK BEFORE YOU TRAIN</p>
+  <ul>
+    <li><b>Do the inputs sound natural?</b> They should read like a real user, not robotic templates.</li>
+    <li><b>Do the outputs parse correctly?</b> Every output should be valid JSON matching the <code>CLIToolCall</code> schema.</li>
+    <li><b>Is there variety?</b> Scan for repetitive phrasing - if many examples start the same way, the model may latch onto those patterns instead of intent.</li>
+  </ul>
+</div>
 
 A few minutes of inspection now can save hours of debugging during training. If your data contains invalid outputs, the reward function will score them as failures—confusing the training signal rather than strengthening it.
 

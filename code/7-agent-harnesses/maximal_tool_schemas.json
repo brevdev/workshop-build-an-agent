@@ -1,0 +1,401 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "read_file",
+      "description": "Reads a file from the local filesystem. file_path must be an absolute path. Reads up to 2000 lines by default; provide offset and limit for large files. Results are returned with line numbers. Reads images and PDFs and presents them visually. Do not re-read a file you just edited to verify the change.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "The absolute path to the file to read"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The line number to start reading from. Only provide if the file is too large to read at once"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The number of lines to read. Only provide if the file is too large to read at once"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "write_file",
+      "description": "Writes a file to the local filesystem, overwriting if one exists. Use when creating a new file or fully replacing one you've already read. Overwriting an existing file you haven't read will fail. For partial changes, use edit_file instead.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "The absolute path to the file to write"
+          },
+          "content": {
+            "type": "string",
+            "description": "The content to write to the file"
+          }
+        },
+        "required": [
+          "file_path",
+          "content"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "edit_file",
+      "description": "Performs exact string replacement in a file. You must read the file in this conversation before editing or the call will fail. old_string must match the file exactly, including indentation, and be unique. Use replace_all to replace every occurrence.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "The absolute path to the file to modify"
+          },
+          "old_string": {
+            "type": "string",
+            "description": "The text to replace"
+          },
+          "new_string": {
+            "type": "string",
+            "description": "The text to replace it with"
+          },
+          "replace_all": {
+            "type": "boolean",
+            "description": "Replace all occurrences (default false)"
+          }
+        },
+        "required": [
+          "file_path",
+          "old_string",
+          "new_string"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "bash",
+      "description": "Executes a bash command and returns its output. Working directory persists between calls but shell state does not. Avoid using this to read files; use the dedicated file tools. timeout is in milliseconds, default 120000, max 600000. Set run_in_background to run the command detached and monitor it later.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The command to execute"
+          },
+          "description": {
+            "type": "string",
+            "description": "Clear, concise description of what this command does in active voice"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Optional timeout in milliseconds"
+          },
+          "run_in_background": {
+            "type": "boolean",
+            "description": "Set to true to run this command in the background"
+          }
+        },
+        "required": [
+          "command"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "glob",
+      "description": "Fast file pattern matching for any codebase size. Supports glob patterns like **/*.py. Returns matching paths sorted by modification time. Use this instead of find for locating files by name.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "The glob pattern to match files against"
+          },
+          "path": {
+            "type": "string",
+            "description": "The directory to search in (defaults to working directory)"
+          }
+        },
+        "required": [
+          "pattern"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "grep",
+      "description": "Searches file contents using regular expressions. Supports full regex syntax, file filtering by glob, context lines, case-insensitive mode, and multiline matching. Use this instead of shell grep for all content searches.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "The regular expression to search for"
+          },
+          "path": {
+            "type": "string",
+            "description": "File or directory to search in"
+          },
+          "glob": {
+            "type": "string",
+            "description": "Glob pattern to filter files, e.g. *.js"
+          },
+          "output_mode": {
+            "type": "string",
+            "description": "content, files_with_matches, or count"
+          },
+          "-i": {
+            "type": "boolean",
+            "description": "Case insensitive search"
+          },
+          "-C": {
+            "type": "integer",
+            "description": "Number of context lines before and after each match"
+          }
+        },
+        "required": [
+          "pattern"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "agent",
+      "description": "Launch a sub-agent to handle complex multi-step tasks autonomously. Available types: explore (read-only search), plan (implementation design), general-purpose (full tool access). The agent's final message is returned as the tool result and is not shown to the user. Launch multiple agents in a single message to run them concurrently.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "A short 3-5 word description of the task"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The full task for the agent to perform, including all background context, file paths, constraints, and the required answer format"
+          },
+          "subagent_type": {
+            "type": "string",
+            "description": "The type of specialized agent to use"
+          }
+        },
+        "required": [
+          "description",
+          "prompt"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "task_create",
+      "description": "Create a structured task list entry for the current session. Use for any work requiring three or more distinct steps. Tasks have a subject in imperative form, a description, and an optional active form shown while in progress.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "description": "A brief actionable title in imperative form"
+          },
+          "description": {
+            "type": "string",
+            "description": "What needs to be done"
+          },
+          "activeForm": {
+            "type": "string",
+            "description": "Present continuous form shown in the spinner when in progress"
+          }
+        },
+        "required": [
+          "subject",
+          "description"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "task_update",
+      "description": "Update a task's status or fields. Status progresses pending, in_progress, completed. Only mark a task completed when fully accomplished and verified; if blocked, keep it in_progress and create a new task describing the blocker. Supports dependency edges via addBlocks and addBlockedBy.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "The ID of the task to update"
+          },
+          "status": {
+            "type": "string",
+            "description": "New status: pending, in_progress, completed, or deleted"
+          },
+          "subject": {
+            "type": "string",
+            "description": "New subject"
+          },
+          "addBlockedBy": {
+            "type": "array",
+            "description": "Task IDs that block this task"
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "web_fetch",
+      "description": "Fetches a URL, converts the page to markdown, and answers a prompt against the content. Fails on authenticated or private URLs. Cross-host redirects are returned rather than followed. Responses are cached for fifteen minutes per URL.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to fetch content from"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt to run on the fetched content"
+          }
+        },
+        "required": [
+          "url",
+          "prompt"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "web_search",
+      "description": "Search the web and return result blocks with titles and URLs. Supports domain allowlists and blocklists. After answering from results, cite the sources used.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query to use"
+          },
+          "allowed_domains": {
+            "type": "array",
+            "description": "Only include results from these domains"
+          },
+          "blocked_domains": {
+            "type": "array",
+            "description": "Never include results from these domains"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "notebook_edit",
+      "description": "Replaces, inserts, or deletes a cell in a Jupyter notebook. Cells are addressed by id. Specify cell_type when inserting. The notebook must exist; use write_file to create a new notebook.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "notebook_path": {
+            "type": "string",
+            "description": "The absolute path to the Jupyter notebook file"
+          },
+          "cell_id": {
+            "type": "string",
+            "description": "The id of the cell to edit"
+          },
+          "new_source": {
+            "type": "string",
+            "description": "The new source for the cell"
+          },
+          "cell_type": {
+            "type": "string",
+            "description": "code or markdown"
+          },
+          "edit_mode": {
+            "type": "string",
+            "description": "replace, insert, or delete"
+          }
+        },
+        "required": [
+          "notebook_path",
+          "new_source"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "enter_plan_mode",
+      "description": "Transition into plan mode for non-trivial implementation tasks. In plan mode only read-only actions are allowed while you explore the codebase and design an approach for user approval. Requires user consent.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "exit_plan_mode",
+      "description": "Signal that planning is complete and the written plan is ready for user approval. The plan is read from the plan file. Include the prompt-based permissions the implementation will need.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "allowedPrompts": {
+            "type": "array",
+            "description": "Prompt-based permissions needed to implement the plan"
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ask_user_question",
+      "description": "Ask the user a structured question when blocked on a decision that is genuinely theirs to make. Provide two to four mutually exclusive options with labels and descriptions. Users can always select Other and provide custom input. Do not use this for choices with a conventional default.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "array",
+            "description": "Questions to ask the user, each with header, options, and multiSelect flag"
+          }
+        },
+        "required": [
+          "questions"
+        ]
+      }
+    }
+  }
+]

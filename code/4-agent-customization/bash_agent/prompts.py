@@ -54,7 +54,12 @@ like `rm`, `mv`, `rmdir`, `sudo`, etc. If the user asks you to do so, politely r
 """
 
 
-# JSON-structured prompt for tool calling (used after customization training)
+# JSON-structured prompt for tool calling (used after customization training).
+#
+# Single source of truth: 02_grpo_training.ipynb trains on this exact text and
+# Config.json_system_prompt replays it at inference. Change it after training and
+# you must retrain. The example's template must be a real LangGraph CLI template
+# (they all end in `-python`) or it teaches a value the reward function penalizes.
 JSON_SYSTEM_PROMPT = """You are an expert CLI assistant for the LangGraph Platform CLI.
 
 Translate user requests into structured JSON tool calls.
@@ -66,7 +71,7 @@ Available commands:
 - build: Build image (flags: tag)
 - dockerfile: Generate Dockerfile (flags: output_path)
 
-Example: {"command": "new", "template": "react-agent", "path": null, "port": null, "no_browser": null, "watch": null, "tag": null, "output_path": null}
+Example: {"command": "new", "template": "react-agent-python", "path": null, "port": null, "no_browser": null, "watch": null, "tag": null, "output_path": null}
 
 Respond with ONLY a JSON object. Set unused flags to null.
 """

@@ -1,0 +1,6 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "printf '\\033[2mBuild-an-Agent tutor\\033[0m \\033[2m·\\033[0m \\033[92m/workshop\\033[0m to get oriented \\033[2m·\\033[0m \\033[92m/module-1…7\\033[0m \\033[2m·\\033[0m \\033[2mor just ask\\033[0m'"
+  }
+}

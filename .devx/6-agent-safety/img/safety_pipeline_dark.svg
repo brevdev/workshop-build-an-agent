@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 210" width="920" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark continuous-safety-evaluation pipeline for the DevX dark theme.
+       Mirrors the evaluating_safety.md mermaid; colors match index.html mermaid themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <!-- edges -->
+  <line x1="200" y1="98" x2="270" y2="98" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="430" y1="98" x2="490" y2="98" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <line x1="670" y1="98" x2="760" y2="98" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <path d="M840,126 C 840,178 840,182 760,182 L 230,182 C 150,182 115,160 115,126" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
+  <rect x="455" y="173" width="90" height="18" rx="4" fill="#0c0c0c"/>
+  <text x="500" y="183" fill="#8fcb2b" font-size="11" text-anchor="middle" dominant-baseline="central">regression</text>
+
+  <!-- nodes -->
+  <rect x="30" y="70" width="170" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="115" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Red-team probes</text>
+
+  <rect x="270" y="70" width="160" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="350" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">LLM-as-judge</text>
+
+  <rect x="490" y="70" width="180" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="580" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Weighted aggregate</text>
+
+  <rect x="760" y="70" width="160" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="840" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">CI/CD gate</text>
+</svg>

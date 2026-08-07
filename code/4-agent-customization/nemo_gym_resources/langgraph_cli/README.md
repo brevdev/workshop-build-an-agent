@@ -18,7 +18,7 @@ This resource server implements RLVR (Reinforcement Learning with Verifiable Rew
 
 ```
 Exact Match       → +1.0
-Correct Command   → 0.0 to +1.0 (based on flag accuracy)
+Correct Command   → -1.0 to +1.0 (flag accuracy: (correct - wrong - extra) / total)
 Wrong Command     → -1.0
 Invalid JSON      → -1.0
 ```

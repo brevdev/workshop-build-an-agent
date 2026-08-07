@@ -1,18 +1,28 @@
-# Working with NemoClaw
-
-<img src="_static/robots/supervisor.png" alt="NemoClaw Hands-On Robot" style="float:right;max-width:300px;margin:25px;" />
+<div class="dx-hero" data-eyebrow="MODULE 06 / 05 - HANDS ON" data-title="Working with NemoClaw" data-meta="TIME::35 min|EXERCISES::5|RUNTIME::OpenShell"></div>
 
 Your NemoClaw sandbox is running. The agent lives inside four enforcement layers: **Network** (egress policy), **Filesystem** (Landlock), **Process** (seccomp + least privilege), and **Inference** (Privacy Router). Reading about those layers and *feeling* them are very different things. This page walks you through five hands-on exercises that turn each layer into a copy-pasteable experience — and revisit the four probes from the [previous page](setup_openclaw) to see NemoClaw shut them down.
 
-| # | Exercise | Layer | Recalls |
-|---|---|---|---|
-| 1 | Stop the agent from phoning home | Network | Probe 1 |
-| 2 | Not all allow-rules are equal | Network (L7 vs L4) | — |
-| 3 | Make containment irrevocable | Filesystem + Process | Probe 2 |
-| 4 | Remove the keys from the agent | Inference + Network | Probe 3 |
-| 5 | Route sensitive queries locally | Inference | — |
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>EXERCISE 1</h4><span class="dx-big">Network</span>Stop the agent from phoning home (recalls Probe 1).</div>
+  <div class="dx-cell"><h4>EXERCISE 2</h4><span class="dx-big">Network L7</span>Not all allow-rules are equal.</div>
+  <div class="dx-cell"><h4>EXERCISE 3</h4><span class="dx-big">FS + Process</span>Make containment irrevocable (recalls Probe 2).</div>
+  <div class="dx-cell"><h4>EXERCISE 4</h4><span class="dx-big">Inference</span>Remove the keys from the agent (recalls Probe 3).</div>
+  <div class="dx-cell is-wide"><h4>EXERCISE 5</h4><span class="dx-big">Inference</span>Route sensitive queries locally with your own classifier.</div>
+</div>
 
 > Each exercise follows a simple pattern: **recall** the vanilla behavior, **observe** it against the sandbox, **harden** with a policy, and **validate** the outcome. Exercise 5 ends with an optional Python sidekick — a short TODO in <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> agent_safety.py</button> — that wires a content classifier in front of the inference router. Once you've finished this page, head to [Evaluating Agent Safety](evaluating_safety) for the red-team + continuous-evaluation capstone.
+
+### Before you begin — is your live sandbox up?
+
+Exercises 1–4 drive the **running** NemoClaw sandbox (`nemoclaw connect`, `openshell policy set`, …). If a command hangs, or a step fails with *"sandbox not found"* or *"Cannot find module"*, your control plane is down. Check all four layers — tunnel, gateway, CLI, and sandbox — with one read-only command:
+
+```bash
+bash code/6-agent-safety/scripts/nemoclaw-health.sh
+```
+
+It reports which layer is down and prints the single command that brings the stack back: <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> → `bash code/6-agent-safety/scripts/install-nemoclaw.sh`. That installer is **idempotent** — if parts are already healthy it just restores the socat tunnel; if the install is corrupt or the sandbox is missing it reinstalls and re-onboards. Re-run the health check afterward; you're ready when it prints **READY**.
+
+> **Can't restore the live sandbox right now? You are not blocked.** Exercise 5's content classifier and the entire [Evaluating Agent Safety](evaluating_safety) capstone — the red-team runner, the LLM judge, and the full safety suite — run **offline against a built-in mock agent**. Only Exercises 1–4 on this page need the live sandbox; read them for the concepts and come back when the stack is up.
 
 <!-- fold:break -->
 
@@ -28,8 +38,8 @@ The Network layer controls **where the agent can reach**. NemoClaw's baseline is
 
 Vanilla OpenClaw fetched `https://httpbin.org/ip` for you on the previous page. Let's see what happens inside the NemoClaw sandbox — then write a policy that grants access on purpose.
 
-<details>
-<summary><strong>Step 1 — Observe the deny</strong></summary>
+<details class="dx-peek">
+<summary>Step 1 — Observe the deny</summary>
 
 From inside the sandbox:
 
@@ -48,8 +58,8 @@ The proxy intercepted your request, checked the policy, found no matching `netwo
 
 </details>
 
-<details>
-<summary><strong>Step 2 — Read the baseline policy</strong></summary>
+<details class="dx-peek">
+<summary>Step 2 — Read the baseline policy</summary>
 
 From a host terminal (outside the sandbox):
 
@@ -61,8 +71,8 @@ You'll see three sections: `filesystem_policy` and `process` (both static — lo
 
 </details>
 
-<details>
-<summary><strong>Step 3 — Apply the policy</strong></summary>
+<details class="dx-peek">
+<summary>Step 3 — Apply the policy</summary>
 
 Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button>. We've pre-authored the **full** sandbox policy here — the baseline `filesystem_policy`, `process`, `landlock`, and the existing `network_policies` (brave, brew, pypi, …) are all included verbatim because `openshell policy set` does a full policy replacement, and the gateway will refuse a YAML that's missing the kernel-locked static layers (*"filesystem policy cannot be removed on a live sandbox"*).
 
@@ -93,8 +103,8 @@ The `--wait` flag blocks until the proxy picks up the new policy revision. **No 
 
 </details>
 
-<details>
-<summary><strong>Step 4 — Confirm the change</strong></summary>
+<details class="dx-peek">
+<summary>Step 4 — Confirm the change</summary>
 
 Back inside the sandbox:
 
@@ -119,8 +129,8 @@ Expected: a JSON response with your origin IP. The agent can now reach `httpbin.
 
 The rule you applied in Exercise 1 set `access: read-only`. Let's find out what that actually enforces — and what it doesn't.
 
-<details>
-<summary><strong>Step 1 — Try a POST against the read-only endpoint</strong></summary>
+<details class="dx-peek">
+<summary>Step 1 — Try a POST against the read-only endpoint</summary>
 
 From inside the sandbox:
 
@@ -144,8 +154,8 @@ The proxy terminated TLS, inspected the HTTP request, and denied the POST becaus
 
 </details>
 
-<details>
-<summary><strong>Step 2 — Remove the L7 hint and watch the POST slip through</strong></summary>
+<details class="dx-peek">
+<summary>Step 2 — Remove the L7 hint and watch the POST slip through</summary>
 
 Open <button onclick="openOrCreateFileInJupyterLab('code/6-agent-safety/policies/httpbin-readonly.yaml');"><i class="fa-solid fa-file-code"></i> httpbin-readonly.yaml</button> again and **delete the `protocol: rest` line** under `network_policies.httpbin_access.endpoints[0]`. Reapply:
 
@@ -161,8 +171,8 @@ Put the `protocol: rest` line back, reapply, and POST is blocked again.
 
 </details>
 
-<details>
-<summary><strong>Step 3 — Scope rules by binary</strong></summary>
+<details class="dx-peek">
+<summary>Step 3 — Scope rules by binary</summary>
 
 A rule for `/usr/bin/curl` does **not** cover `/usr/bin/python3`. From the sandbox, try Python against the same endpoint your policy allows for curl:
 
@@ -186,6 +196,8 @@ Re-run the Python snippet from inside the sandbox — it now succeeds.
 
 ## Section 2 — Layers 2 & 3: Filesystem + Process (kernel-level containment)
 
+<img src="_static/robots/supervisor.png" alt="NemoClaw Hands-On Robot" style="float:right;max-width:300px;margin:25px;" />
+
 Layers 2 and 3 share an exercise because they're both **kernel-level, static containment**. They're set once when the sandbox is created, locked in by the kernel, and unchangeable from inside the agent process by design. That tradeoff — stronger guarantee for less flexibility — is the core teaching point.
 
 <!-- fold:break -->
@@ -198,8 +210,8 @@ Vanilla OpenClaw let the agent read `/etc/passwd` without complaint. Let's see w
 
 #### Part A — Filesystem (Landlock LSM)
 
-<details>
-<summary><strong>Step 1 — Reads often still work</strong></summary>
+<details class="dx-peek">
+<summary>Step 1 — Reads often still work</summary>
 
 ```bash
 cat /etc/passwd | head -3
@@ -209,8 +221,8 @@ Expected: the first three entries print. Landlock baselines `/etc` as read-only 
 
 </details>
 
-<details>
-<summary><strong>Step 2 — Writes are where the kernel stops you</strong></summary>
+<details class="dx-peek">
+<summary>Step 2 — Writes are where the kernel stops you</summary>
 
 ```bash
 echo "malicious" > /etc/passwd
@@ -222,8 +234,8 @@ Expected: all three fail with `Permission denied`. This isn't a POSIX permission
 
 </details>
 
-<details>
-<summary><strong>Step 3 — Try two bypasses, watch both fail</strong></summary>
+<details class="dx-peek">
+<summary>Step 3 — Try two bypasses, watch both fail</summary>
 
 Landlock claims irrevocability. Let's stress-test:
 
@@ -235,14 +247,14 @@ ln -s /etc/passwd /sandbox/fake_passwd && echo "oops" > /sandbox/fake_passwd
 bash -c "echo oops > /etc/passwd"
 ```
 
-Both fail. Landlock resolves paths at the kernel before the syscall, so symlinks don't trick it. Subprocesses inherit the restriction because `PR_SET_NO_NEW_PRIVS` is set.
+Both fail. Landlock resolves paths at the kernel before the syscall, so symlinks don't trick it. Subprocesses inherit the restriction because a Landlock domain applies to the whole process tree and cannot be lifted — a child can't escape a sandbox its parent already entered.
 
 > This is what *"irrevocable by design"* means. A compromised agent cannot ask politely to be let out — the kernel enforces, not userspace.
 
 </details>
 
-<details>
-<summary><strong>Step 4 — Static vs dynamic: try to hot-reload filesystem policy</strong></summary>
+<details class="dx-peek">
+<summary>Step 4 — Static vs dynamic: try to hot-reload filesystem policy</summary>
 
 From a host terminal:
 
@@ -263,8 +275,8 @@ Expected: the gateway rejects the request with `InvalidArgument: filesystem ... 
 
 Filesystem containment keeps the agent *out of places*. Process hardening keeps the agent from *becoming something it shouldn't be*.
 
-<details>
-<summary><strong>Step 1 — Confirm non-root identity</strong></summary>
+<details class="dx-peek">
+<summary>Step 1 — Confirm non-root identity</summary>
 
 ```bash
 whoami; id
@@ -274,8 +286,8 @@ Expected: `sandbox` user, `sandbox` group, no sudoer status.
 
 </details>
 
-<details>
-<summary><strong>Step 2 — Try to escalate</strong></summary>
+<details class="dx-peek">
+<summary>Step 2 — Try to escalate</summary>
 
 ```bash
 sudo -n whoami 2>&1 | head -1
@@ -295,8 +307,8 @@ Capabilities are dropped, `no-new-privileges` is set, and seccomp BPF rejects da
 
 </details>
 
-<details>
-<summary><strong>Step 3 — Confirm toolchain is absent</strong></summary>
+<details class="dx-peek">
+<summary>Step 3 — Confirm toolchain is absent</summary>
 
 ```bash
 which gcc g++ make netcat nc 2>&1 | head -5
@@ -306,8 +318,8 @@ Expected: all report empty. An attacker who achieves code execution still has to
 
 </details>
 
-<details>
-<summary><strong>What process hardening adds up to</strong></summary>
+<details class="dx-peek">
+<summary>What process hardening adds up to</summary>
 
 | Mechanism | What it blocks |
 |---|---|
@@ -338,8 +350,8 @@ The Inference layer controls **what AI model the agent uses and how credentials 
 
 Vanilla OpenClaw dumped your `NVIDIA_API_KEY` when asked. Let's see what the sandbox has to offer.
 
-<details>
-<summary><strong>Step 1 — Check the agent's environment</strong></summary>
+<details class="dx-peek">
+<summary>Step 1 — Check the agent's environment</summary>
 
 Inside the sandbox:
 
@@ -353,8 +365,8 @@ Crucially, **`NVIDIA_API_KEY` is not present** — the sandbox process does not 
 
 </details>
 
-<details>
-<summary><strong>Step 2 — Make an inference call anyway</strong></summary>
+<details class="dx-peek">
+<summary>Step 2 — Make an inference call anyway</summary>
 
 ```bash
 curl -s -X POST https://inference.local/v1/chat/completions \
@@ -373,8 +385,8 @@ Expected: a valid JSON response. No auth header was set. The gateway stripped an
 
 Credential isolation removes one attack class — *in-process secret dumps*. It does not prevent the agent from routing around `inference.local` if the network policy permits direct access to a provider host.
 
-<details>
-<summary><strong>Step 3 — Bypass attempt: add curl to an unrelated provider's allow-list</strong></summary>
+<details class="dx-peek">
+<summary>Step 3 — Bypass attempt: add curl to an unrelated provider's allow-list</summary>
 
 We need a provider host that's **not** already in the baseline policy. `integrate.api.nvidia.com` won't work — the baseline `nvidia` rule already permits `/usr/bin/curl` to reach it (necessary for the gateway's own inference plumbing), so adding our rule would be a no-op. Use `api.openai.com` instead — it's denied at baseline, so adding the rule actually opens new egress:
 
@@ -398,8 +410,8 @@ Expected: **HTTP 401** with body `"You didn't provide an API key. ..."`. The age
 
 </details>
 
-<details>
-<summary><strong>Step 4 — Close the gap</strong></summary>
+<details class="dx-peek">
+<summary>Step 4 — Close the gap</summary>
 
 Exit the sandbox and remove the `openai_curl` rule with the incremental `--remove-rule` flag — no full policy reapply needed:
 
@@ -421,8 +433,8 @@ Retry the same curl from inside the sandbox — you should now see **HTTP 000** 
 
 The Privacy Router's marketing line — *"keep sensitive data private"* — is often misread as "the router inspects content and routes sensitive queries to a local model automatically." That's not what it does. The Privacy Router is an **operator-chosen, credential-isolating HTTP forwarder**: you decide which backend is active; the router enforces that choice. Content-aware routing is something you build *on top*.
 
-<details>
-<summary><strong>Step 1 — See what's active</strong></summary>
+<details class="dx-peek">
+<summary>Step 1 — See what's active</summary>
 
 From the host:
 
@@ -434,8 +446,8 @@ Expected: one provider + one model (e.g. `nvidia-prod` / `nvidia/nemotron-3-supe
 
 </details>
 
-<details>
-<summary><strong>Step 2 — Swap the inference target without touching the agent</strong></summary>
+<details class="dx-peek">
+<summary>Step 2 — Swap the inference target without touching the agent</summary>
 
 The Privacy Router's headline property is that **operators choose where inference runs and the agent never sees the change**. We'll demonstrate that by switching the active model on the live gateway and watching the next request from the sandbox land on the new target.
 
@@ -465,8 +477,8 @@ openshell inference set --provider nvidia-prod --model nvidia/nemotron-3-super-1
 
 > What you just demonstrated is the **transient / runtime** half of operator routing. For **durable per-sandbox routing** (the pattern an operator would use in production: "agent A always uses local Ollama, agent B always uses cloud Nemotron"), the source of truth is the sandbox *pin* — see the first aside below.
 
-<details>
-<summary><strong>The two-layer Privacy Router model: gateway-live vs sandbox-pin</strong></summary>
+<details class="dx-peek">
+<summary>The two-layer Privacy Router model: gateway-live vs sandbox-pin</summary>
 
 When you `nemoclaw connect`, the CLI reads the entering sandbox's pin, compares it to the gateway's live route, and if they don't match it forcibly resets to the pinned model *before* opening your SSH session — printing `Switching inference route to ...` when it does. The pin wins; the live route gets reconciled.
 
@@ -476,8 +488,8 @@ That's why the workshop's demo above used `nemoclaw exec` (which skips reconcili
 
 </details>
 
-<details>
-<summary><strong>Why this exercise swaps the model within `nvidia-prod` rather than the provider (e.g. to a local Ollama)</strong></summary>
+<details class="dx-peek">
+<summary>Why this exercise swaps the model within `nvidia-prod` rather than the provider (e.g. to a local Ollama)</summary>
 
 A full provider swap (the "cloud → local for sensitive data" pattern) requires the OpenShell gateway to run in **cluster mode**, where the sandbox-side `inference.local` DNS proxy can be refreshed by `kubectl` against the cluster's CoreDNS. 
 
@@ -491,8 +503,8 @@ The in-provider model swap above demonstrates the operator-chosen-routing half o
 
 > This is Privacy Router in action: operator-chosen routing enforced at the gateway. The same primitive that swaps a model within one provider also swaps providers entirely (cloud ↔ local) on a cluster-mode gateway, keeping sensitive context on local compute when the operator routes there. There is no per-request content inspection — that's a feature you build in front.
 
-<details>
-<summary><strong>Step 3 — Python sidekick: build the content classifier</strong></summary>
+<details class="dx-peek">
+<summary>Step 3 — Python sidekick: build the content classifier</summary>
 
 Open <button onclick="goToLineAndSelect('code/6-agent-safety/agent_safety.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> # TODO: Exercise 2</button> and complete `classify_sensitivity()`. It scans for three signal classes:
 
@@ -519,7 +531,7 @@ for doc in json.load(open('test_data/mixed_sensitivity_corpus.json')):
 
 Expected: `pii-*` rows → `restricted → local`; `prop-*` and `mixed-*` rows → `confidential → local`; `pub-*` rows → `public → cloud`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
@@ -558,8 +570,8 @@ def classify_sensitivity(text: str) -> SensitivityClassification:
 
 </details>
 
-<details>
-<summary><strong>Limitations of regex-based classification</strong></summary>
+<details class="dx-peek">
+<summary>Limitations of regex-based classification</summary>
 
 Regex is fast but imprecise. The SSN pattern matches any 9-digit `XXX-XX-XXXX` string (product codes, serial numbers), a redacted `***-**-6789` won't match, and "My phone number is 555-12-3456" triggers a false positive. In production, cascade regex → NER (Presidio, spaCy) → LLM-based classification, escalating to slower models only when the fast check is ambiguous.
 

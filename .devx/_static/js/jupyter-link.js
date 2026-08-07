@@ -240,70 +240,69 @@ async function openNewTerminal() {
 }
 
 
-function findLauncherCommand(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learning Path") {
+/**
+ * Resolves a launcher tile (by its displayed title + catalog) to the command id
+ * that opens it.
+ *
+ * Matching is done against the command registry, NOT the launcher DOM. The
+ * earlier DOM-based version located the tile's position within its rendered
+ * section and compared that to `item.rank` — but jupyter-app-launcher assigns
+ * rank as the tile's index in the whole jp_app_launcher.yaml array
+ * (`configs.forEach((config, i) => launcher.add({category: config.catalog, rank: i}))`),
+ * which is global, not per-catalog. The two only agree for the catalog that
+ * starts at index 0, so every button in a second catalog silently resolved to
+ * null. Each tile is registered with `label: <title>` and `category: <catalog>`,
+ * so matching on those is both correct and independent of how it renders.
+ */
+async function findLauncherCommand(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learning Path") {
     // Access the global JupyterLab app object
     const app = window.parent.jupyterapp;
     if (!app) {
         console.error('JupyterLab app is not available on window.jupyterapp');
-        return;
+        return null;
     }
 
-    // Find all widgets in the shell that are Launcher widgets
-    var launchers = Array.from(app.shell.widgets('main')).filter(w =>
+    const findLaunchers = () => Array.from(app.shell.widgets('main')).filter(w =>
         w.id && w.id.includes('launcher')
     );
-    var createdLauncher = false;
+
+    let launchers = findLaunchers();
 
     if (launchers.length == 0) {
         console.log("No launchers found, creating one");
-        app.commands.execute("launcher:create");
-        launchers = Array.from(app.shell.widgets('main')).filter(w =>
-            w.id && w.id.includes('launcher')
-        );
-        createdLauncher = true;
+        // Must be awaited — the widget is not in the shell until this resolves.
+        await app.commands.execute("launcher:create");
+        launchers = findLaunchers();
     }
 
     // Search through all launchers for the target item
     for (const launcher of launchers) {
-        // Find the section HTML
-        const h2Elements = Array.from(launcher.node.getElementsByTagName('h2'));
-        const sectionHeader = h2Elements.find(h2 => h2.innerText === sectionName);
-        if (!sectionHeader) {
-            console.error(`Section ${sectionName} not found`);
-            return null;
+        const items = launcher.content?.model?.itemsList;
+        if (!items) continue;
+
+        const item = items.find(entry =>
+            entry.category === sectionName &&
+            app.commands.label(entry.command, entry.args) === itemLabel
+        );
+
+        if (item) {
+            return item.command;
         }
-        const sectionHTML = sectionHeader?.parentElement?.parentElement;
-
-        // Get all the section labels
-        const sectionLabels = Array.from(
-            sectionHTML.getElementsByClassName("jp-LauncherCard-label")
-        ).map(label => {
-            const p = label.getElementsByTagName("p")[0];
-            return p ? p.innerText.trim() : "";
-        });
-        const itemRank = sectionLabels.indexOf(itemLabel);
-
-        // Find JupyterLab's object for this item
-        var model = launcher.content?.model;
-        var item = model.itemsList.filter(item => item.category == sectionName && item.rank == itemRank);
-
-        // Return the command
-        if (item.length > 0) {
-            return item[0].command;
-        }
-        return null;
     }
+
+    console.error(`Launcher item "${itemLabel}" not found in section "${sectionName}"`);
+    return null;
 }
 
 
-function launch(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learning Path") {
+async function launch(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learning Path") {
     const app = window.parent.jupyterapp;
     if (!app) {
         console.error('JupyterLab app is not available on window.jupyterapp');
         return;
     }
 
-    const command = findLauncherCommand(itemLabel, sectionName);
+    const command = await findLauncherCommand(itemLabel, sectionName);
     if (!command) {
         console.error('No DevX workshop command found');
         return;

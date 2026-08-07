@@ -8,7 +8,7 @@
 #   - Per-binary, per-endpoint, per-method controls
 #
 # Format follows the OpenShell Policy Schema Reference:
-#   https://docs.nvidia.com/openshell/latest/reference/policy-schema.html
+#   https://docs.nvidia.com/openshell/latest/reference/policy-schema
 # ============================================================================
 
 version: 1

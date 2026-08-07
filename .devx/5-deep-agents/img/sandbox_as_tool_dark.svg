@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 200" width="980" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark "sandbox as tool" diagram for the DevX dark theme.
+       Mirrors img/sandbox_as_tool.mmd; colors match index.html mermaid themeVariables. -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <!-- cluster: Your Server -->
+  <rect x="20" y="20" width="580" height="150" rx="10" fill="#76b900" fill-opacity="0.05" stroke="#76b900" stroke-width="1.5"/>
+  <text x="310" y="44" fill="#76b900" font-size="13" font-weight="700" letter-spacing="1" text-anchor="middle">Your Server</text>
+
+  <!-- cluster: Remote Sandbox -->
+  <rect x="660" y="20" width="500" height="150" rx="10" fill="#76b900" fill-opacity="0.05" stroke="#76b900" stroke-width="1.5"/>
+  <text x="910" y="44" fill="#76b900" font-size="13" font-weight="700" letter-spacing="1" text-anchor="middle">Remote Sandbox</text>
+
+  <!-- edge: server <-> remote -->
+  <line x1="600" y1="95" x2="660" y2="95" stroke="#6e6e6e" stroke-width="1.6" marker-start="url(#ah)" marker-end="url(#ah)"/>
+
+  <!-- Your Server nodes -->
+  <rect x="45" y="74" width="150" height="64" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="120" y="106" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Agent Process</text>
+
+  <rect x="215" y="74" width="120" height="64" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="275" y="106" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">API Keys</text>
+
+  <rect x="355" y="74" width="165" height="64" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="437" y="106" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Orchestration</text>
+
+  <!-- Remote Sandbox nodes -->
+  <rect x="685" y="74" width="140" height="64" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="755" y="106" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Sandbox API</text>
+
+  <rect x="845" y="74" width="150" height="64" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="920" y="106" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Code Execution</text>
+
+  <rect x="1015" y="74" width="130" height="64" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="1080" y="100" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Isolated</text>
+  <text x="1080" y="116" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Environment</text>
+</svg>

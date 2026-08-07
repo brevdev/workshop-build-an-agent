@@ -1,10 +1,10 @@
-# Agentic Retrieval Augmented Generation
+<div class="dx-hero" data-eyebrow="MODULE 02 / 02 - BUILDING" data-title="Agentic Retrieval Augmented Generation" data-meta="TIME::45 min|EXERCISES::5|MODEL::Super + Retriever"></div>
 
 <img src="_static/robots/datacenter.png" alt="Data Center Robot" style="float:right;max-width:300px;margin:25px;" />
 
 Let's build an IT Help Desk agent that can answer basic user queries by querying the Knowledge Base. A knowledge base has been provided at `./data/it-knowledge-base`. This directory contains markdown files documenting procedures for **Company LLC**.
 
-<button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/2-agentic-rag/rag_agent.py</button> is an initial layout for our agent's code. We will be using LangGraph's built-in classes to connect NVIDIA models and create our agent.
+<button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent.py');"><i class="fa-brands fa-python"></i> code/2-agentic-rag/rag_agent.py</button> is an initial layout for our agent's code. We will be using LangChain's built-in classes to connect NVIDIA models, and LangGraph to orchestrate them into our agent.
 
 <!-- fold:break -->
 
@@ -28,15 +28,21 @@ In production, the design of the database service and ingestion pipelines should
 
 To ingest the documents, we will **Chunk** the documents, **Embed** those chunks into vectors, and then **Insert** the vectors into the database.
 
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>CHUNK</h4>Split the knowledge-base docs into overlapping pieces (size 800, overlap 120) with RecursiveCharacterTextSplitter.</div>
+  <div class="dx-cell"><h4>EMBED</h4>Turn each chunk into a vector with NVIDIA NeMo Retriever embeddings - similar meaning lands close together.</div>
+  <div class="dx-cell is-wide"><h4>INSERT</h4>Store the vectors in an in-memory FAISS database, ready for similarity search at query time.</div>
+</div>
+
 <!-- fold:break -->
 
 ### Split documents into chunks
 
 Document splitting is controlled by two things: chunk size and chunk overlap. We already defined these as `CHUNK_SIZE` and `CHUNK_OVERLAP`. The exact size and overlap should be tuned for production, but we are starting with good values.
 
-Define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'splitter = ');"><i class="fas fa-code"></i> splitter</button> using these values and LangGraph's [`RecursiveCharacterTextSplitter`](https://python.langchain.com/docs/how_to/recursive_text_splitter/).
+Define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'splitter = ');"><i class="fas fa-code"></i> splitter</button> using these values and LangChain's [`RecursiveCharacterTextSplitter`](https://reference.langchain.com/python/langchain-text-splitters).
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -57,7 +63,7 @@ These chunks need to be embedded into vectors for the database. This is done wit
 
 Use the [NVIDIAEmbeddings](https://build.nvidia.com/nvidia/llama-nemotron-embed-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'embeddings = ');"><i class="fas fa-code"></i> embeddings</button>. The API Key has already been configured, it does not need to be specified. Set truncate to `END`.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -87,7 +93,7 @@ LangChain allows us to easily create a basic retrieval chain from our Vector Dat
 
 <center>
 
-![Simple Retrieval Chain](img/simple_retrieval_chain.png)
+![Simple Retrieval Chain](img/simple_retrieval_chain_dark.svg)
 
 </center>
 
@@ -97,7 +103,7 @@ LangChain allows us to easily create a basic retrieval chain from our Vector Dat
 
 NVIDIA offers a Reranker model to improve the relevance and order of retrieved documents. Use the [NVIDIARerank](https://build.nvidia.com/nvidia/llama-nemotron-rerank-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'reranker = ');"><i class="fas fa-code"></i> reranker</button>.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -114,27 +120,34 @@ LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.p
 
 <center>
 
-![Retrieval Chain](img/retrieval_chain.png)
+![Retrieval Chain](img/retrieval_chain_dark.svg)
 
 </center>
 
-We expose this enhanced retrieval pipeline as a tool for the agent using LangGraph’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= create_retriever_tool');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` fields help the agent decide when to use this tool during multi-step reasoning.
+We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= create_retriever_tool');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` fields help the agent decide when to use this tool during multi-step reasoning.
 
 <!-- fold:break -->
 
 ## Create the Agent
 
-<img src="_static/robots/gitfu.png" alt="Graphs!" style="float:right;max-width:300px;margin:25px;" />
-
 With our vector database and retriever chain in place, we're ready to construct the agent graph. Think of this graph as a flowchart that maps out the possible steps the model can take to solve a task. In traditional, step-by-step LLM applications, these are called "chains." When the workflow involves more dynamic, non-linear decision-making, like with agents, we refer to them as "graphs."
+
+<div class="dx-bento dx-reveal">
+  <div class="dx-cell"><h4>MODEL</h4>NVIDIA Nemotron Super via ChatNVIDIA - the agent's reasoning and language.</div>
+  <div class="dx-cell"><h4>RETRIEVER TOOL</h4>The reranking retrieval chain, exposed as a tool the agent can choose to call.</div>
+  <div class="dx-cell"><h4>SYSTEM PROMPT</h4>Instructions that shape when and how the agent uses its tools.</div>
+  <div class="dx-cell"><h4>GRAPH</h4>create_react_agent wires model + tools + prompt into a ReAct loop.</div>
+</div>
 
 <!-- fold:break -->
 
 ### Define the Model
 
+<img src="_static/robots/gitfu.png" alt="Graphs!" style="float:right;max-width:300px;margin:25px;" />
+
 Every agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Super model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```
@@ -159,11 +172,11 @@ A system prompt has been defined in the code. Feel free to review it at <button 
 
 ### Create the Graph
 
-Because the ReAct architecture is so common, LangGraph provides a function that will create ReAct agent graphs. Plug `llm`, `RETRIEVER_TOOL`, and `SYSTEM_PROMPT` into LangGraph's [`create_react_agent`](https://langchain-ai.github.io/langgraph/agents/agents/#2-create-an-agent). Assign the resulting value to <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button>.
+Because the ReAct architecture is so common, LangGraph provides a function that will create ReAct agent graphs. Plug `llm`, `RETRIEVER_TOOL`, and `SYSTEM_PROMPT` into LangGraph's [`create_react_agent`](https://langchain-ai.github.io/langgraph/reference/prebuilt/). Assign the resulting value to <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'AGENT =');"><i class="fas fa-code"></i> AGENT</button>.
 
 > **Note:** We'll update the `AGENT` definition as we add more capabilities in later sections. Each section builds on the last — by the end of this module, your agent will have multiple tools.
 
-<details>
+<details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```

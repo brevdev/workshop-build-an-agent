@@ -158,7 +158,7 @@ FastAPI Backend (Python)
 
 1. **UI** builds specs: `{ model_id, skill_ids, hitl_enabled, sandbox_map }`
 2. **Frontend** sends `POST /api/agent` with the specs
-3. **Backend** (`server.py`) calls `create_agent()` in `agent.py`
+3. **Backend** (`server.py`) calls `create_agent()`, re-exported by `agent.py` from `code/5-deep-agents/deep_agent.py`
 4. **Agent factory** resolves each spec into real components:
    - `model_id` → NVIDIA NIM model
    - `skill_ids` → tools (Tavily, file ops, shell) + skill files (markdown → system prompt)
@@ -171,7 +171,8 @@ FastAPI Backend (Python)
 | File | Purpose |
 |---|---|
 | `server.py` | FastAPI routes, SSE streaming, session management |
-| `agent.py` | Agent factory — builds models, tools, backends, prompts |
+| `agent.py` | Adapter — re-exports `create_agent()` from `code/5-deep-agents/deep_agent.py` (or `.answers.py` while its exercises are unfinished) |
+| `code/5-deep-agents/deep_agent.py` | The agent factory — builds models, tools, backends, prompts |
 | `docker_sandbox.py` | Docker-based sandbox backend (implements `SandboxBackendProtocol`) |
 | `skills/` | Markdown skill files injected into system prompts |
 
@@ -179,7 +180,7 @@ FastAPI Backend (Python)
 
 Drop a `.md` file in `backend/skills/`, then:
 
-1. Add the mapping in `backend/agent.py` → `_load_skill_content()`:
+1. Add the mapping in `code/5-deep-agents/deep_agent.py` → `skill_files` (and mirror it in `deep_agent.answers.py`):
    ```python
    skill_files = {
        "superpowers": "superpowers.md",

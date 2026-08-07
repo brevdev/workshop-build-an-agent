@@ -1,4 +1,4 @@
-# Introduction to RAG
+<div class="dx-hero" data-eyebrow="MODULE 02 / 01 - CONCEPTS" data-title="Introduction to RAG" data-meta="READ::12 min|CONCEPTS::5"></div>
 
 <img src="_static/robots/bluegrass.png" alt="The tall tale of RAG" style="float:right;max-width:300px;margin:25px;" />
 
@@ -14,7 +14,7 @@ The simplest method for interacting with LLMs is directly prompting them and all
 
 <center>
 
-![Basic LLM Diagram](img/basic_llm.png)
+![Basic LLM Diagram](img/basic_llm_dark.svg)
 
 </center>
 
@@ -28,19 +28,20 @@ Unstructured documents can be indexed and saved into the Vector Database. They a
 
 <center>
 
-![Basic RAG Architecture](img/basic_rag.png)
+![Basic RAG Architecture](img/basic_rag_dark.svg)
 
 </center>
 
 <!-- fold:break -->
 
-## Upscale with Agents
-
-<img src="_static/robots/supervisor.png" alt="The tall tale of RAG" style="float:right;max-width:300px;margin:25px;" />
-
-RAG works well, but it has limits. The LLM can't control how data is retrieved or choose between different data sources. It always runs the same retrieval step, making it hard to scale or support multiple datasets.
-
-Agentic RAG solves these problems by letting the model decide when and how to use retrieval as a tool. The model can choose to look up information only when it needs more context to answer a question.
+<div class="dx-island dx-reveal">
+  <p class="dx-island-title">WHERE TRADITIONAL RAG HITS LIMITS</p>
+  <p>RAG works well, but the LLM has no say in how retrieval happens:</p>
+  <p><span class="dx-chip">NO CONTROL</span> The LLM can't control how data is retrieved or choose between different data sources.</p>
+  <p><span class="dx-chip">ALWAYS RETRIEVES</span> It runs the same retrieval step every time, whether the query needs it or not.</p>
+  <p><span class="dx-chip">HARD TO SCALE</span> Supporting multiple datasets or sources gets unwieldy.</p>
+  <p><b>Agentic RAG</b> fixes this by letting the model decide <i>when and how</i> to use retrieval as a tool - looking things up only when it needs more context to answer a question.</p>
+</div>
 
 <!-- fold:break -->
 
@@ -52,7 +53,7 @@ The prompt is provided to the LLM. If the model requests any tool calls, those t
 
 <center>
 
-![ReAct Agent](img/react_agent.png)
+![ReAct Agent](img/react_agent_dark.svg)
 
 </center>
 
@@ -66,9 +67,17 @@ You can also add more tools for different data sources if needed. This makes you
 
 <center>
 
-![Agentic RAG](img/agentic_rag.png)
+![Agentic RAG](img/agentic_rag_dark.svg)
 
 </center>
+
+<div class="dx-island dx-quiz dx-reveal">
+  <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
+  <p class="dx-quiz-q">A user sends your agentic RAG system a simple greeting like "Hi there!". What happens?</p>
+  <button class="dx-quiz-opt" data-fb="That's traditional RAG - it runs the same retrieval step for every query. The whole point of agentic RAG is that the model decides whether retrieval is even needed.">It runs the knowledge-base retrieval step, as it does for every query</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. In agentic RAG the model treats retrieval as a tool and only invokes it when the query needs outside context - a greeting doesn't, so it just responds.">The model can skip retrieval entirely and just respond, since no lookup is needed</button>
+  <button class="dx-quiz-opt" data-fb="Embeddings are computed to store documents during ingestion, not to answer a greeting. At query time the model decides whether to call the retrieval tool at all.">It must embed the greeting and search the vector database before replying</button>
+</div>
 
 <!-- fold:break -->
 

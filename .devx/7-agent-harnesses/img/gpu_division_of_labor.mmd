@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant U as 👤 You
+    participant H as 🔧 Harness (local)
+    participant M as ☁️ LLM (cloud)
+    participant G as ⚡ Your GPU (local)
+    U->>H: "Aggregate this 10M-row dataset"
+    H->>M: context + cuDF skill description
+    M->>H: "Run this cudf.pandas code"
+    H->>G: executes locally — GPU lights up 🔥
+    G->>H: results in milliseconds
+    H->>M: results
+    M->>U: analysis, GPU-fast

@@ -15,6 +15,20 @@ from pydantic import BaseModel
 
 _LOGGER = logging.getLogger(__name__)
 
+# NVIDIA's hosted endpoints can transiently return 503 (ResourceExhausted) under
+# concurrent load. Wrap judge chains so a transient rate-limit backs off and
+# retries (exponential jitter) instead of scoring the row 0.0 or crashing the run.
+_JUDGE_MAX_ATTEMPTS = 5
+
+
+def _with_retry(chain):
+    """Add exponential-backoff retry to an LLM chain for transient 5xx / rate limits."""
+    return chain.with_retry(
+        retry_if_exception_type=(Exception,),
+        stop_after_attempt=_JUDGE_MAX_ATTEMPTS,
+        wait_exponential_jitter=True,
+    )
+
 # Model Configuration
 JUDGE_MODEL = "nvidia/nemotron-3-super-120b-a12b"
 EMBEDDING_MODEL = "nvidia/llama-nemotron-embed-1b-v2"
@@ -235,7 +249,7 @@ def evaluate_faithfulness(
     if judge_llm is None:
         judge_llm = create_judge_llm()
 
-    chain = FAITHFULNESS_PROMPT | judge_llm
+    chain = _with_retry(FAITHFULNESS_PROMPT | judge_llm)
 
     try:
         result = chain.invoke({
@@ -305,7 +319,7 @@ def evaluate_relevancy(
     if judge_llm is None:
         judge_llm = create_judge_llm()
 
-    chain = RELEVANCY_PROMPT | judge_llm
+    chain = _with_retry(RELEVANCY_PROMPT | judge_llm)
 
     try:
         result = chain.invoke({
@@ -370,7 +384,7 @@ def evaluate_helpfulness(
     if judge_llm is None:
         judge_llm = create_judge_llm()
 
-    chain = HELPFULNESS_PROMPT | judge_llm
+    chain = _with_retry(HELPFULNESS_PROMPT | judge_llm)
 
     try:
         result = chain.invoke({
@@ -450,7 +464,7 @@ def evaluate_report_quality(
         if parts:
             quality_criteria_text = "\nQuality criteria:\n" + "\n".join(f"- {p}" for p in parts)
 
-    chain = REPORT_QUALITY_PROMPT | judge_llm
+    chain = _with_retry(REPORT_QUALITY_PROMPT | judge_llm)
 
     result = chain.invoke({
         "topic": topic,

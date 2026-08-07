@@ -182,7 +182,7 @@ A correct implementation prints exactly this:
 Minimal harness:     400 tokens/turn
 Maximal harness:   3,922 tokens/turn   (9.8x tax)
 2 eager skills: +516 tokens/turn
-2 lazy skills:  +41 tokens/turn   (13x savings)
+2 lazy skills:  +59 tokens/turn   (9x savings)
 ```
 
 The savings scale with the catalog: at 30 installed skills, eager loading costs ~45,000 tokens per turn while the lazy index stays a few hundred. Rerun this after Exercises 3–5 and watch the skill lines grow.
@@ -278,12 +278,12 @@ watch -n 0.5 nvidia-smi
 cd code/7-agent-harnesses && python harness_lab.py --exercise 4
 ```
 
-Your minimal harness — armed with the verified skill — gets asked to aggregate a large dataset. Watch the model choose `cudf.pandas`, and watch your GPU light up in `nvidia-smi`.
+Your minimal harness gets asked to aggregate a large dataset ten times over, fast — the task never names the GPU; the skill's index line supplies the how. Watch the agent load the verified skill, reach for cuDF, and light up `nvidia-smi`; the closing 🧾 receipt says whether the skill was actually consulted.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
-If GPU utilization stays at zero: check the dataset actually crossed the 100K-row size gate the skill teaches (the generator script makes 1M rows by default), and confirm cuDF imported GPU-side with `python -c "import cudf; print(cudf.__version__)"` — if that fails, `pip install cudf-cu12`. No GPU on your machine? The exercise warns you up front and the agent falls back to pandas; the same aggregation still completes, just CPU-slow.
+If GPU utilization stays at zero: check the dataset actually crossed the 100K-row size gate the skill teaches (the generator script makes 1M rows by default), and confirm cuDF imported GPU-side with `python -c "import cudf; print(cudf.__version__)"` — if that fails, `pip install cudf-cu12`. If the 🧾 receipt says the skill was never consulted, rerun — the load decision is the model's. No GPU on your machine? The exercise warns you up front and the agent falls back to pandas; the same aggregation still completes, just CPU-slow.
 
 </details>
 
@@ -320,14 +320,13 @@ The `parse_frontmatter()` call is the line to internalize: validate *before* any
 
 </details>
 
-**Run it:** open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run the exercise **twice**:
+**Run it:** open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i>terminal</button> and run:
 
 ```bash
-cd code/7-agent-harnesses && python harness_lab.py --exercise 5   # run 1 — the agent writes itself a skill
-python harness_lab.py --exercise 5                                # run 2 — starts with that skill
+cd code/7-agent-harnesses && python harness_lab.py --exercise 5
 ```
 
-The second run starts with the skill the agent wrote for itself the first time — fewer steps, fewer tokens, same result. That's **memory**, **skills**, **self-evolution**, and **token efficiency** — four of the five harness responsibilities — collapsing into a single loop.
+One invocation plays both halves of the loop: run 1 completes the task bare and distills a skill from its own transcript; run 2 starts with that skill — a closing 🧾 line compares the two runs. That's **memory**, **skills**, **self-evolution**, and **token efficiency** — four of the five harness responsibilities — collapsing into a single loop.
 
 > This is exactly the approach Hermes takes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
 

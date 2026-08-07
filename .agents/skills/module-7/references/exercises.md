@@ -123,8 +123,10 @@ Guide the install → **verify** → run → watch loop; let them run it.
    — clones `NVIDIA/skills`, checks the `skill.oms.sig` signature, shows the skill card, installs into the lab `skills/`.
    Reinforce the Module 6 lesson: *verify the signature before trusting injected instructions.*
 2. **Watch the GPU:** open a terminal, `watch -n 0.5 nvidia-smi`.
-3. **Run:** `python harness_lab.py --exercise 4` — the minimal harness, armed with the skill,
-   aggregates a ~1M-row CSV; watch the model choose `cudf.pandas` and the GPU light up.
+3. **Run:** `python harness_lab.py --exercise 4` — the task asks for speed but never names the
+   GPU; the skill supplies the how. Watch the agent load it, reach for cuDF, and light the GPU
+   up; the closing 🧾 receipt says whether the skill was consulted (if not, rerun — loading is
+   the model's call).
 - **If util stays at 0 / no GPU:** check the data crossed the 100K-row gate; confirm cuDF
   imported GPU-side; on a no-GPU box the exercise prints a skip message and the answers
   notebook shows expected output (it's a clean fallback, not a failure). See `troubleshooting.md`.
@@ -148,8 +150,9 @@ Guide the install → **verify** → run → watch loop; let them run it.
 - **Target:** invoke → strip fences → `parse_frontmatter` (validate) → save to
   `skills_dir/<name>/SKILL.md` → return the path.
 
-> They run `--exercise 5` **twice**: run 1 writes the skill; run 2 starts with it (fewer
-> steps/tokens, same result). This is the pi/Hermes "grows with you" mechanism, by hand.
+> They run `--exercise 5` **once** — the demo plays both halves (run 1 solves the task bare and
+> distills a skill; run 2 starts with it) and ends with a 🧾 line comparing the runs. This is
+> the pi/Hermes "grows with you" mechanism, by hand.
 
 ---
 ## Escalation protocol

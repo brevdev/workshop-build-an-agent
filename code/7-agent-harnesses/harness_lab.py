@@ -127,6 +127,23 @@ def invoke_with_retry(model, messages, attempts=3):
             time.sleep(2 * (attempt + 1))
 
 
+def tool_call_count(messages=None) -> int:
+    """Tool calls in a recorded run — how hard the harness worked."""
+    msgs = LAST_RUN_MESSAGES if messages is None else messages
+    return sum(len(getattr(m, "tool_calls", None) or []) for m in msgs)
+
+
+def skills_consulted(messages=None) -> list:
+    """Which skills a recorded run load_skill-ed — the Exercise 4/5 receipts."""
+    msgs = LAST_RUN_MESSAGES if messages is None else messages
+    return [
+        call["args"].get("name", "?")
+        for m in msgs
+        for call in (getattr(m, "tool_calls", None) or [])
+        if call["name"] == "load_skill"
+    ]
+
+
 def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
     """Exercise 1: a complete harness in ~20 lines.
 
@@ -225,7 +242,9 @@ def load_skills_lazily(skills_dir: Path = SKILLS_DIR):
         raise NotImplementedError("Complete Exercise 2b(i)")
 
     index_text = (
-        "Installed skills (load one with the load_skill tool when relevant):\n"
+        "Installed skills — before starting a task, load any skill that covers "
+        "it with the load_skill tool and follow its instructions. When in "
+        "doubt, load it:\n"
         + "\n".join(index_lines)
     )
 
@@ -266,7 +285,8 @@ def run_with_skills(task: str) -> str:
 # ---------------------------------------------------------------------------
 
 def run_gpu_task() -> str:
-    """Aggregate a 1M-row CSV; the cuDF skill steers the model to the GPU.
+    """Aggregate a 1M-row CSV ×10; the cuDF skill — not the task — steers the
+    model to the GPU.
 
     Install + verify the skill first:
       bash scripts/install_nvidia_skill.sh accelerated-computing-cudf
@@ -284,12 +304,20 @@ def run_gpu_task() -> str:
         print("⚠️  cuDF isn't importable — run `pip install cudf-cu12`, "
               "or the agent will fall back to pandas.")
 
-    return run_with_skills(
+    # The task asks for speed but never names the GPU — the skill supplies
+    # the how; the receipt below catches the model skipping it.
+    result = run_with_skills(
         f"Load {TEST_DATA} (about 1M rows) and compute the mean, max, and count "
-        "of `reading` per `device_id`, sorted by mean descending. Use GPU "
-        "acceleration if the hardware supports it. Save the result to "
+        "of `reading` per `device_id`, sorted by mean descending. Repeat the "
+        "full load-and-aggregate 10 times in a loop — don't hoist the CSV read "
+        "out of the loop — and make it fast: use the best-performing DataFrame "
+        "stack available on this machine. Save the final result to "
         f"{LAB_DIR / 'test_data' / 'aggregates.csv'} and show the top 5 rows."
     )
+    if "accelerated-computing-cudf" in skills_consulted():
+        return f"{result}\n\n🧾 Receipt: the agent loaded the verified skill before computing."
+    return (f"{result}\n\n🧾 Receipt: the agent never loaded the verified skill "
+            "this run — rerun and watch for load_skill.")
 
 
 # ---------------------------------------------------------------------------
@@ -359,12 +387,17 @@ def run_self_evolution_demo():
 
     print("=== Run 1 (no skill) ===")
     print(run(task))
+    run1_calls = tool_call_count()
     # The agent reviews the REAL transcript of run 1 — every tool call and
     # result the harness recorded — and distills the reusable procedure.
     self_evolve_skill(format_transcript(LAST_RUN_MESSAGES))
 
     print("\n=== Run 2 (with the skill the agent just wrote) ===")
     print(run_with_skills(task))
+    run2_calls = tool_call_count()
+    loaded = skills_consulted()
+    print(f"\n🧾 Run 1: {run1_calls} tool calls · Run 2: {run2_calls} tool calls "
+          + (f"(consulted: {', '.join(loaded)})" if loaded else "(no skill loaded this run)"))
 
 
 # ---------------------------------------------------------------------------

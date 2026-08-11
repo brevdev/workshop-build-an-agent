@@ -12,8 +12,9 @@ description: >-
   sandbox-native path: uv venv + pinned CPU deps, an LD_PRELOAD netlink shim
   to get Jupyter kernels past the seccomp AF_NETLINK block, a hand-built
   labextension bridge, launcher path rewrites, %pip-cell neutralization, and
-  single-server discipline. Modules 1-3 (CPU) work end-to-end; modules 4 & 6
-  (GPU: torch/unsloth/cudf) do not run here by design.
+  single-server discipline. Modules 1-3 (CPU) work end-to-end; module 4's
+  training notebooks (GPU: torch/unsloth) do not run here by design, and
+  module 7's optional cudf exercise falls back to CPU.
 disable-model-invocation: false
 user-invocable: true
 ---
@@ -129,8 +130,9 @@ the hard way (full rationale + diagnostics in `references/sandbox-internals.md`)
    repo's `requirements.txt` needs for the UI that early attempts missed:
    `jupyter-app-launcher` (zero tiles without it), `voila`, `jupyterlab-git`,
    `streamlit` + `langgraph-sdk` (client tiles), and `ziglang` (shim compiler).
-   **Never** install torch/unsloth/cudf — modules 4 & 6 need a GPU this
-   sandbox doesn't have, and installing them hangs voila.
+   **Never** install torch/unsloth/cudf — they are GPU-only (module-4
+   training; module-7's optional cudf exercise, which falls back to CPU
+   without them), this sandbox has no GPU, and installing them hangs voila.
 
 3. **Netlink LD_PRELOAD shim** (`templates/netlink-stub.c`). The sandbox
    seccomp filter denies `socket(AF_NETLINK,…)` → EPERM, so `getifaddrs()`
@@ -271,6 +273,10 @@ the token. Once `start-jupyter.sh` succeeds, send the user/operator:
 > `tsh ls`; `-N` is SILENT when it works); **(3)** open the token URL from
 > `/sandbox/workshop-url.txt` (readable on the host via
 > `docker exec <container> cat /sandbox/workshop-url.txt`).
+> FYI: keep step (1)'s command handy — the forward dies silently with the
+> shell or agent session that spawned it (`openshell forward list` does not
+> track it). If the URL ever stops responding, re-run that same command on
+> the host to restore access.
 
 Agent processes live in an inner network namespace — a server bound even to
 0.0.0.0 is unreachable at the container IP. The gRPC forward + SSH hop is the
@@ -314,7 +320,8 @@ only inbound path. Details live in the operator skill.
   duplicate tiles.
 - Any `type: url` tile without `args: {}` → frontend crash
   (`Cannot read properties of undefined (reading 'createNewWindow')`).
-- Installing torch/unsloth/cudf → hangs, wasted egress; GPU-only (mods 4 & 6).
+- Installing torch/unsloth/cudf → hangs, wasted egress; GPU-only (mod-4
+  training; mod-7's cudf exercise).
 - More than one Jupyter server on 8888 → tiles vanish / stale server without
   the shim answers. `kill -9`; SIGTERM is trapped.
 - `curl` through `/proxy/absolute/<port>/` appears to hang (chunked stream)

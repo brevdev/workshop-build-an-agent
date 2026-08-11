@@ -45,8 +45,9 @@ if [ ! -x "$VENV/bin/python" ]; then
   uv venv "$VENV"
 fi
 # Install the exact pinned set proven to work (modules 1-3 + tiles + tooling).
-# GPU-only deps (torch/unsloth/cudf) are intentionally OMITTED — modules 4 & 6
-# need a GPU we don't have and installing them hangs voila.
+# GPU-only deps (torch/unsloth/cudf) are intentionally OMITTED — module-4
+# training and module-7's cudf exercise need a GPU we don't have (module 7
+# falls back to pandas without it) and installing them hangs voila.
 uv pip install -p "$VENV/bin/python" -r "$SKILL_DIR/templates/requirements-sandbox.txt"
 
 # ---- 2. netlink LD_PRELOAD shim (build with zig cc; no system gcc) ----------

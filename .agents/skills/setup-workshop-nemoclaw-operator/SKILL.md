@@ -68,7 +68,7 @@ C=$(docker ps --filter 'label=openshell.ai/managed-by=openshell' \
               --filter "label=openshell.ai/sandbox-name=$SANDBOX" --format '{{.Names}}')
 [ "$(printf '%s\n' "$C" | grep -c .)" -eq 1 ] || echo "FATAL: not exactly one container for '$SANDBOX': ${C:-none}"
 # NemoClaw community example: policy files + .env live in the project dir, e.g.
-cd <nemoclaw-community>/examples/personal-community-sentiment-triage
+cd <nemoclaw-community>/examples/recipes/nvidia/developer-community-chief-of-staff
 ```
 
 Policy ownership: the deployment's `policy.yaml` template belongs to the

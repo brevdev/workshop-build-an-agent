@@ -122,9 +122,10 @@ retry backoff hangs agent tool calls for minutes.
    redacted in your chat output — that's why the file exists). Host-side read:
    `docker exec <container> cat /sandbox/workshop-url.txt`.
 2. The two access commands (see SKILL.md "Report back to the user").
-3. State restrictions honestly: modules 1–3 + clients work; modules 4 & 6
-   need a GPU and do not run here; Tavily/LangSmith optional and off unless
-   staged.
+3. State restrictions honestly: modules 1–3, 6, 7 + clients work; module 4's
+   training notebooks need a GPU and do not run here (its SDG half works;
+   module-7's cudf exercise falls back to CPU); Docker-only demos are
+   read-through; Tavily/LangSmith optional and off unless staged.
 
 ## If the operator relays wrong guidance
 

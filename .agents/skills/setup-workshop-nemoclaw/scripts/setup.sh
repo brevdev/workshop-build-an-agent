@@ -36,7 +36,7 @@ say "0. preflight"
   echo "  git clone --branch $BRANCH https://github.com/$REPO_SLUG $REPO"; exit 1; }
 command -v uv >/dev/null || { echo "FATAL: uv not on PATH"; exit 1; }
 [ -f "$SSL_CERT_FILE" ] || { echo "FATAL: CA bundle missing at $SSL_CERT_FILE"; exit 1; }
-[ -f "$REPO/secrets.env" ] || echo "WARN: $REPO/secrets.env missing — notebooks will lack NVIDIA_API_KEY (operator must stage it; see references/operator-contract.md)."
+[ -f "$REPO/secrets.env" ] || echo "WARN: $REPO/secrets.env missing — notebooks will lack NVIDIA_API_KEY (the learner sets it in the Secrets Manager tile after launch; see references/operator-contract.md)."
 mkdir -p "$RUNTIME_DIR"
 
 # ---- 1. venv + deps ---------------------------------------------------------
@@ -45,8 +45,9 @@ if [ ! -x "$VENV/bin/python" ]; then
   uv venv "$VENV"
 fi
 # Install the exact pinned set proven to work (modules 1-3 + tiles + tooling).
-# GPU-only deps (torch/unsloth/cudf) are intentionally OMITTED — modules 4 & 6
-# need a GPU we don't have and installing them hangs voila.
+# GPU-only deps (torch/unsloth/cudf) are intentionally OMITTED — module-4
+# training and module-7's cudf exercise need a GPU we don't have (module 7
+# falls back to pandas without it) and installing them hangs voila.
 uv pip install -p "$VENV/bin/python" -r "$SKILL_DIR/templates/requirements-sandbox.txt"
 
 # ---- 2. netlink LD_PRELOAD shim (build with zig cc; no system gcc) ----------

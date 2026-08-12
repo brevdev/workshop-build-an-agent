@@ -67,8 +67,9 @@ SANDBOX=hermes-direct                                    # the sandbox name (adj
 C=$(docker ps --filter 'label=openshell.ai/managed-by=openshell' \
               --filter "label=openshell.ai/sandbox-name=$SANDBOX" --format '{{.Names}}')
 [ "$(printf '%s\n' "$C" | grep -c .)" -eq 1 ] || echo "FATAL: not exactly one container for '$SANDBOX': ${C:-none}"
-# NemoClaw community example: policy files + .env live in the project dir, e.g.
-cd <nemoclaw-community>/examples/recipes/nvidia/developer-community-chief-of-staff
+# NemoClaw community example: the deployment (scripts + policy.yaml + .env)
+# and the workshop skills ship together in
+cd <nemoclaw-community>/examples/recipes/nvidia/agentic-ai-learning-path
 ```
 
 Policy ownership: the deployment's `policy.yaml` template belongs to the
@@ -78,8 +79,8 @@ applies live + the additions from `references/policy-blocks.md`, and the
 live policy is thereafter the source of truth. Captures
 (`openshell policy get "$SANDBOX" --full | sed '1,/^---$/d'`) are scratch
 artifacts — regenerate on demand, do not track them. Consequence: a recreate
-through the recipe's own machinery (e.g. `bring-up.sh`/`03-sandbox.sh`, an
-autoheal `watchdog.sh`) re-renders the STOCK template, silently reverting
+through the deployment's own machinery (e.g. its `scripts/bring-up.sh` /
+`scripts/03-sandbox.sh`) re-renders the STOCK template, silently reverting
 every workshop grant (network AND filesystem) and wiping the workshop
 filesystem — after such a recreate, re-run Phase 1, then 1b, then Phase 3
 (all idempotent).
@@ -348,6 +349,14 @@ tsh ssh -N -L 8888:localhost:8888 <user>@<node-name>         # Teleport: NODE NA
 browser before assuming a hang. Finally open the token URL:
 `http://localhost:8888/lab?token=…`.
 
+If the deployment's `.env` configured Slack (or Outlook), hand the user an
+optional pointer alongside the URL — the resident agent carries the workshop
+tutor skills on every channel it serves:
+
+> Optional: your deployment's Slack bot is the same sandboxed agent — DM it
+> a workshop question (e.g. "quiz me on module 1") to meet your tutor
+> outside JupyterLab.
+
 ## Phase 5 — When something is denied
 
 The L7 proxy/OCSF audit log names the exact process path and rule for every
@@ -390,13 +399,13 @@ Two verdict patterns that are NOT policy gaps (both observed live):
   than its token window bricks exactly as above (observed live during the
   0.0.53 → 0.0.96 upgrade). Plan sandbox recreates around gateway upgrades.
 - **A container restart does NOT relaunch the agent stack** (`nemoclaw-start`:
-  agent, relay, bridges — and JupyterLab). Relaunch the stack (e.g. the
-  community repo's autoheal `watchdog.sh`), then have the agent re-run
-  `start-jupyter.sh`.
+  agent, relay, bridges — and JupyterLab). Relaunch the stack per
+  references/access-and-lifecycle.md § Recovering lost create-time env, then
+  have the agent re-run `start-jupyter.sh`.
 - **A sandbox recreate wipes the container filesystem** (venv, shim,
   `secrets.env`, the server), and the sanctioned recreate path is the
-  deployment recipe's own machinery (`bring-up.sh`/`03-sandbox.sh`, autoheal
-  `watchdog.sh`) — it re-renders the STOCK template, so every workshop grant
+  deployment's own machinery (its `scripts/bring-up.sh` /
+  `scripts/03-sandbox.sh`) — it re-renders the STOCK template, so every workshop grant
   (network AND filesystem) reverts by design. Afterwards re-run Phase 1, the
   Phase 1b restart (fresh sandbox — inside the token window), and Phase 2 if
   a key was pre-seeded, then have the agent re-run `setup.sh` +
@@ -427,3 +436,6 @@ Two verdict patterns that are NOT policy gaps (both observed live):
 - [ ] Terminal tile opens a shell (`POST /api/terminals` with token → 200) —
       needs the `/dev/pts` grant BOOTED. An auto-hidden tile means the Phase
       1b restart was skipped; on a fresh sandbox run it before setup.
+- [ ] (if a Slack/Outlook channel is configured) a DM to the deployment's bot
+      with a workshop question routes to the tutor skills — surface this
+      option to the user alongside the JupyterLab URL (Phase 4).

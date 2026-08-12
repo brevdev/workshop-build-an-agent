@@ -16,11 +16,11 @@ differ.
 - Success output: `✓ Policy version N submitted (hash: …)` then
   `✓ Policy version N loaded (active version: N)`. The hash from
   `openshell policy get <sandbox>` changing is your confirmation it landed.
-- The deployment's `policy.yaml` template belongs to the deployment recipe
-  and is NOT edited by this flow; the sandbox's LIVE policy is the source of
+- The deployment's `policy.yaml` template (in the NemoClaw community repo:
+  the agentic-ai-learning-path example's root) is NOT edited by this flow; the sandbox's LIVE policy is the source of
   truth for workshop grants. Captures are scratch artifacts — regenerate via
   the workflow below, do not track them. Consequence: a recreate through the
-  recipe's own machinery re-renders the stock template and silently reverts
+  deployment's own machinery re-renders the stock template and silently reverts
   every workshop grant — re-run SKILL.md Phase 1 + 1b afterwards.
 - OpenShell ≥ 0.0.53 also ships `openshell policy update` for incremental
   changes — prefer it for one-block additions if available.

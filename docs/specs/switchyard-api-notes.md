@@ -458,6 +458,14 @@ measured on the learner's own traffic; `classifier.total_tokens` + `routing_over
 **router tax** (the M7 context-tax sequel) already itemised and *separated* from the routed spend.
 `GET /health` → `{"status":"ok"}` for the client's health strip.
 
+**`tiers` is also the health signal for the router itself.** A request the classifier could not decide
+(no parseable verdict) is served **without a tier label**, so `tiers` stays `{}` while `models` and the
+response `model` field still look perfectly normal. That makes an empty `tiers` map the one
+deterministic tell for *both* silent-collapse modes below (Deviations 5 and 6) — `smoke_switchyard.sh`
+asserts on it. The server also logs the cause: `WARN libsy: judge verdict unavailable; routing without
+one … reason="parse_error"`. A Routing Client that renders tiers should treat "no tier" as a visible
+degraded state, not as a missing datum.
+
 **2. The server's own trace line** (stderr, one per request):
 
 ```

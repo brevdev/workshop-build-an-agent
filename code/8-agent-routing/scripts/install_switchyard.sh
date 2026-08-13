@@ -38,8 +38,10 @@ SHA256_win_amd64="4641d19c6e7fd6d64d05bd8354f409e9f6a80a1472f7f0518a5ecc9c4347db
 SHA256_win_arm64="5ea9e65a751da540e7231d39f28ecf66af06e90ffccec36a05ca755875430c05"
 SHA256_sdist="da76a59ea88563d12828a439ae51475b4ffef2f231a6f44bde47eb2eda5e3648"
 
-# Hosted model ids the lab routes between (single-source; see also routes.toml).
-# Recorded here so a pin bump and a model-id drift are reviewed in the same place.
+# Hosted model ids the lab routes between. THE single source -- smoke_switchyard.sh
+# reads these three names straight out of this file (see its `pin()` helper), so they
+# must never be re-typed anywhere else. Recorded here so a pin bump and a model-id
+# drift are reviewed in the same diff.
 MODEL_EFFICIENT="nvidia/nemotron-3.5-lightning-30b-a3b"
 MODEL_CAPABLE="nvidia/nemotron-3-super-120b-a12b"
 MODEL_JUDGE="nvidia/nemotron-3-nano-30b-a3b"

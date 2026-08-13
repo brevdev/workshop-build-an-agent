@@ -47,7 +47,9 @@ else
 fi
 PBS_URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_DATE}/cpython-${PY_VERSION}%2B${PBS_DATE}-${PBS_TRIPLE}-install_only.tar.gz"
 echo "Downloading Python ${PY_VERSION} from python-build-standalone..."
-curl -fsSL "$PBS_URL" | sudo tar -xz -C /opt/
+curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors -o /tmp/python-pbs.tar.gz "$PBS_URL"
+sudo tar -xzf /tmp/python-pbs.tar.gz -C /opt/
+rm /tmp/python-pbs.tar.gz
 sudo ln -sf /opt/python/bin/python3.12 /usr/local/bin/python3.12
 sudo ln -sf /opt/python/bin/pip3.12 /usr/local/bin/pip3.12
 sudo ln -sf /opt/python/bin/python3.12 /usr/local/bin/python

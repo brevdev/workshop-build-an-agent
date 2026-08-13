@@ -80,8 +80,8 @@ Only if the operator explicitly wants a key baked into an unattended image:
 > currently denies. Please make sure `/dev/pts` is in
 > `filesystem_policy.read_write` of the APPLIED live policy (the operator
 > skill's Phase 1 includes it), then run that skill's Phase 1b
-> token-window-guarded container restart — do not edit the deployment
-> recipe's template. Note it only takes effect at a container
+> token-window-guarded container restart — do not edit the deployment's
+> `policy.yaml` template. Note it only takes effect at a container
 > **boot** — filesystem policy is parsed at container boot; a live
 > `policy set` won't activate it even for new processes (network rules
 > hot-reload, fs rules don't). After the restart I'll re-run setup and

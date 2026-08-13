@@ -81,15 +81,15 @@ older than its token window bricks as above — observed live during the
 **After any container restart** (including a Phase 1b grant-boot restart):
 the supervisor comes back (token window permitting) but the agent stack
 (`nemoclaw-start`: agent, relay, bridges) stays down — and so does
-JupyterLab. Relaunch the stack with the recipe-derived env file
+JupyterLab. Relaunch the stack with the deployment-derived env file
 (§ Recovering lost create-time env below, which doubles as the post-restart
-relaunch procedure) or the community repo's autoheal `watchdog.sh`, then
-have the in-sandbox agent re-run `start-jupyter.sh`.
+relaunch procedure), then have the in-sandbox agent re-run
+`start-jupyter.sh`.
 
 **Sandbox recreate wipes the container filesystem** — venv, netlink shim,
 `secrets.env`, `.launcher-config`, the running server, `/sandbox/workshop-url.txt`.
-The sanctioned recreate path is the recipe's own machinery
-(`bring-up.sh`/`03-sandbox.sh`, autoheal `watchdog.sh`); it re-renders the
+The sanctioned recreate path is the deployment's own machinery
+(the example's `scripts/bring-up.sh` / `scripts/03-sandbox.sh`); it re-renders the
 STOCK `policy.yaml` template, so every workshop grant (network AND
 filesystem) reverts by design. After a recreate:
 
@@ -136,7 +136,7 @@ Fix WITHOUT another recreate (which would wipe the built workshop):
 ```bash
 # 1. Rebuild the values exactly as scripts/03-sandbox.sh does, from the
 #    deployment's .env (values never echoed):
-cd <deployment-recipe-dir>
+cd <nemoclaw-community>/examples/recipes/nvidia/agentic-ai-learning-path
 (
   set -a; source ./.env; set +a
   mapfile -t B64 < <(python3 scripts/lib/build-channels.py)
@@ -182,8 +182,7 @@ never spawning); the plain foreground `exec` form starts immediately.
 
 Durability: `nemoclaw-start` re-emits the restored vars into
 `/tmp/nemoclaw-proxy-env.sh` (sourced by later `bash -l` sessions), so
-profile-based relaunches — e.g. the autoheal watchdog's — keep them from then
-on. JupyterLab daemonizes outside the stack: token, URL, and the host forward
+profile-based relaunches keep them from then on. JupyterLab daemonizes outside the stack: token, URL, and the host forward
 all survive this surgery.
 
 **Persona/SOUL gating (NemoClaw).** The agent's `SOUL.md` may prohibit

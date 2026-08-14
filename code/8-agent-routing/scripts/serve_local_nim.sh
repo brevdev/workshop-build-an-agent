@@ -14,11 +14,16 @@
 
 set -euo pipefail
 
+# secrets.env lives at the repo root; this script runs from wherever the learner is.
+# Resolve it from THIS script's location so the remediation line below is copy-pasteable
+# from any directory.
+SECRETS="$(cd "$(dirname "$0")/../../.." && pwd)/secrets.env"
+
 command -v docker >/dev/null 2>&1 || {
     echo "Docker required — Ex4b is optional; Ex4a is the full exercise." >&2; exit 1; }
 [ -n "${NVIDIA_API_KEY:-}" ] || {
     echo "ERROR: NVIDIA_API_KEY is not set (it is also the NGC pull secret)." >&2
-    echo "       Run:  set -a; source secrets.env; set +a" >&2; exit 1; }
+    echo "       Run:  set -a; source ${SECRETS}; set +a" >&2; exit 1; }
 
 NIM_IMAGE="${NIM_IMAGE:-nvcr.io/nim/nvidia/nemotron-3-nano:latest}"
 NIM_NAME="${NIM_NAME:-nemotron}"

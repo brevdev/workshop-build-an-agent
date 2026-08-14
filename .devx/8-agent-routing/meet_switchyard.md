@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 08 / 03 - MEET NEMO SWITCHYARD" data-title="Three nouns and a config file." data-sub="NVIDIA's open-source router - embed it in your process, or stand it in front of your app. Your agent code does not change either way." data-meta="LICENSE::Apache-2.0|SURFACES::library, gateway, launcher|TESTED::0.2.0"></div>
+<div class="dx-hero" data-eyebrow="MODULE 08 / 03 - MEET NEMO SWITCHYARD" data-title="Three nouns and a config file." data-sub="NVIDIA's open-source router - embed it in your process, or stand it in front of your models. Either way, the routing policy stops living in your code." data-meta="LICENSE::Apache-2.0|SURFACES::library, gateway, launcher|TESTED::0.2.0"></div>
 
 Five algorithm families, one open-source implementation. [NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) is Apache-2.0, it shipped alongside Nemotron 3.5 Lightning — the model your lab uses as its efficient tier — and it's what the rest of this module runs on.
 
@@ -18,11 +18,13 @@ It comes in three sizes: same routing core, three places to put it.
 
 Read it left to right and the product is one pipeline: your agent names a **route**, the route's algorithm picks a **target**, the target names the **client** that carries the call, and the client points at whoever actually makes the tokens.
 
-The two brackets are the only real decision. **In-process**, you construct the targets and the algorithm in Python and hand each target a client object you wrote; libsy takes the decision and your code makes the HTTP call. **At the gateway**, those same three nouns come out of a `routes.toml` and your application knows exactly one string — a model id — with no idea which model answered.
+The two brackets are the only real decision. **In-process**, you construct the targets and the algorithm in Python and hand each target a client object you wrote; libsy takes the decision and your code makes the HTTP call. **At the gateway**, those same three nouns come out of a `routes.toml` and your application sends exactly one string — a model id. It never has to choose which model answers; the yard does.
+
+The algorithm drawn inside the core is the gateway's, from Exercise 4. Exercise 3 runs the same in-process placement with `stage_router` and two targets — no judge, and no router tax.
 
 <img src="_static/robots/blueprint.png" alt="Blueprint Robot" style="float:right;max-width:240px;margin:20px;" />
 
-Both route identically; they differ in who owns the transport, and in how the decision comes back. The library reports the **target name** you chose (`weak`); the gateway reports the **upstream model id**, on the standard `model` field of the response. The lab prints both.
+Either placement can run any of the algorithms. What differs is who owns the transport, and how the decision comes back: the library reports the **target name** you chose (`weak`), while the gateway reports the **upstream model id**, on the standard `model` field of the response. The lab prints both.
 
 <!-- fold:break -->
 

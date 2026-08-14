@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 446" width="820" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 482" width="820" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
   <!-- Hand-authored dark "Switchyard architecture" diagram for the DevX dark theme
        (module 8, meet_switchyard.md). NO mermaid source and no .mmd sidecar: this box is
        aarch64 with no headless Chrome, so mermaid cannot render here and the SVG IS the
@@ -20,6 +20,13 @@
          agent 22..118 | route 142..284 | targets 308..436 | llm_clients 460..592 |
          providers 616..798.  Both brackets span the router core, 142..592.
 
+       The core is drawn with EXERCISE 4's algorithm (llm_classifier / escalation / a judge
+       target), because that is the config this page tears down. Exercise 3 uses the SAME
+       in-process placement with algorithms.stage_router and two targets (capable/efficient,
+       no judge, no router tax) - so the in-process bracket is NOT labelled with an exercise,
+       and the last two legend lines say which exercise runs which. The page prose beside the
+       diagram says the same thing; keep the two surfaces in agreement if either changes.
+
        Ground truth for every string on this canvas: docs/specs/switchyard-api-notes.md
        (nemo-switchyard 0.2.0) and code/8-agent-routing/routes.toml.answers. In particular
        there is NO standalone server binary to install - the gateway is the same Rust server
@@ -30,12 +37,12 @@
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="820" height="446" fill="#0e1116"/>
+  <rect x="0" y="0" width="820" height="482" fill="#0e1116"/>
 
   <text x="22" y="30" fill="#f2f2f2" font-size="13" font-weight="700" letter-spacing="2">SWITCHYARD, END TO END</text>
 
   <!-- ===================== BRACKET 1 - in-process ===================== -->
-  <text x="367" y="58" fill="#f2f2f2" fill-opacity="0.62" font-size="11" text-anchor="middle">in-process (switchyard.libsy &#8212; Exercise 3)</text>
+  <text x="367" y="58" fill="#f2f2f2" fill-opacity="0.62" font-size="11" text-anchor="middle">in-process (switchyard.libsy)</text>
   <path d="M142,80 V70 H592 V80" fill="none" stroke="#6e6e6e" stroke-width="1.5"/>
 
   <!-- ===================== 1 - your agent ===================== -->
@@ -119,4 +126,6 @@
   <text x="22" y="392" fill="#f2f2f2" fill-opacity="0.62" font-size="11">solid = what the lab ships &#183; dashed = the same llm_client with a different base_url</text>
   <text x="22" y="410" fill="#f2f2f2" fill-opacity="0.62" font-size="11">in-process, your code supplies the clients &#183; at the gateway all three nouns come from routes.toml</text>
   <text x="22" y="428" fill="#f2f2f2" fill-opacity="0.62" font-size="11">green = the cheap tier &#183; amber = what costs: the strong answer, and the judge&#39;s own call</text>
+  <text x="22" y="446" fill="#f2f2f2" fill-opacity="0.62" font-size="11">the algorithm shown is Exercise 4&#39;s; Exercise 3 runs this same in-process placement with</text>
+  <text x="22" y="464" fill="#f2f2f2" fill-opacity="0.62" font-size="11">stage_router and two targets &#8212; no judge, no router tax</text>
 </svg>

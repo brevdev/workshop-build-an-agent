@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" width="820" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark "routing signals" diagram for the DevX dark theme (module 8,
+       routing_decisions.md). NO mermaid source and no .mmd sidecar: this box is aarch64
+       with no headless Chrome, so mermaid cannot render here and the SVG IS the source.
+       Edit this file directly.
+
+       Palette - the component contract's dark set, and nothing else:
+         #0e1116 page bg  |  #161616 panel fill  |  #3a3a3a panel stroke
+         #f2f2f2 text     |  #6e6e6e rules/ticks |  #76b900 green  |  #e8a33d amber
+       Secondary text is #f2f2f2 at reduced fill-opacity rather than a second grey, so the
+       file stays inside the contract palette while small text keeps its contrast.
+       All text is >= 11px at the authored width (820), which is inside the 56em column.
+
+       Semantics: green = the decision itself is free, amber = the decision costs something.
+       Left to right the evidence gets richer and the cost of obtaining it goes up.
+
+       CALIBRATE: "~700 ms per turn" (llm_classifier cost) and the 21%-of-routed-spend line
+       in the legend are LangChain's published measurements from its 145-task deep-agent
+       routing benchmark. Denominator for the 21% is the ROUTED configuration's own total
+       spend - not the frontier-only baseline, and not a token share. Re-check both against
+       the source at the calibration pass; the lab prints the learner's own numbers. -->
+  <defs>
+    <marker id="rs8-arrow" markerWidth="10" markerHeight="9" refX="9" refY="4.5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L10,4.5 L0,9 Z" fill="#6e6e6e"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="820" height="400" fill="#0e1116"/>
+
+  <text x="22" y="32" fill="#f2f2f2" font-size="13" font-weight="700" letter-spacing="2">WHAT EVIDENCE, AT WHAT COST</text>
+
+  <!-- ===================== THE AXIS ===================== -->
+  <text x="22" y="64" fill="#f2f2f2" fill-opacity="0.62" font-size="11">evidence used</text>
+  <text x="798" y="64" fill="#f2f2f2" fill-opacity="0.62" font-size="11" text-anchor="end">cost of deciding</text>
+  <line x1="22" y1="76" x2="792" y2="76" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#rs8-arrow)"/>
+  <line x1="110" y1="76" x2="110" y2="86" stroke="#6e6e6e" stroke-width="1.5"/>
+  <line x1="310" y1="76" x2="310" y2="86" stroke="#6e6e6e" stroke-width="1.5"/>
+  <line x1="510" y1="76" x2="510" y2="86" stroke="#6e6e6e" stroke-width="1.5"/>
+  <line x1="710" y1="76" x2="710" y2="86" stroke="#6e6e6e" stroke-width="1.5"/>
+
+  <!-- ===================== 1 - random ===================== -->
+  <rect x="22" y="92" width="176" height="214" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="36" y="120" fill="#f2f2f2" font-size="13" font-weight="700">random</text>
+  <line x1="36" y1="131" x2="184" y2="131" stroke="#6e6e6e" stroke-width="1"/>
+  <text x="36" y="152" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">EVIDENCE</text>
+  <text x="36" y="170" fill="#f2f2f2" font-size="12">none at all</text>
+  <text x="36" y="186" fill="#f2f2f2" font-size="12">(a weighted coin)</text>
+  <text x="36" y="212" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">COST OF DECIDING</text>
+  <text x="36" y="230" fill="#76b900" font-size="12" font-weight="700">free</text>
+  <text x="36" y="246" fill="#f2f2f2" fill-opacity="0.62" font-size="11">no call, no signals</text>
+  <text x="36" y="272" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">GOOD FOR</text>
+  <text x="36" y="290" fill="#f2f2f2" font-size="12">the A/B baseline</text>
+
+  <!-- ===================== 2 - stage_router ===================== -->
+  <rect x="222" y="92" width="176" height="214" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="236" y="120" fill="#f2f2f2" font-size="13" font-weight="700">stage_router</text>
+  <line x1="236" y1="131" x2="384" y2="131" stroke="#6e6e6e" stroke-width="1"/>
+  <text x="236" y="152" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">EVIDENCE</text>
+  <text x="236" y="170" fill="#f2f2f2" font-size="12">tool results your</text>
+  <text x="236" y="186" fill="#f2f2f2" font-size="12">loop already emits</text>
+  <text x="236" y="212" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">COST OF DECIDING</text>
+  <text x="236" y="230" fill="#76b900" font-size="12" font-weight="700">free</text>
+  <text x="236" y="246" fill="#f2f2f2" fill-opacity="0.62" font-size="11">no second round trip</text>
+  <text x="236" y="272" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">GOOD FOR</text>
+  <text x="236" y="290" fill="#f2f2f2" font-size="12">tool-heavy sessions</text>
+
+  <!-- ===================== 3 - llm_classifier ===================== -->
+  <rect x="422" y="92" width="176" height="214" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="436" y="120" fill="#f2f2f2" font-size="13" font-weight="700">llm_classifier</text>
+  <line x1="436" y1="131" x2="584" y2="131" stroke="#6e6e6e" stroke-width="1"/>
+  <text x="436" y="152" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">EVIDENCE</text>
+  <text x="436" y="170" fill="#f2f2f2" font-size="12">the request text</text>
+  <text x="436" y="186" fill="#f2f2f2" font-size="12">+ the recent turns</text>
+  <text x="436" y="212" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">COST OF DECIDING</text>
+  <text x="436" y="230" fill="#e8a33d" font-size="12" font-weight="700">one small LLM call</text>
+  <text x="436" y="246" fill="#f2f2f2" fill-opacity="0.62" font-size="11">~700 ms per turn</text>
+  <text x="436" y="272" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">GOOD FOR</text>
+  <text x="436" y="290" fill="#f2f2f2" font-size="12">content decides</text>
+
+  <!-- ===================== 4 - prefill (learned) ===================== -->
+  <rect x="622" y="92" width="176" height="214" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="636" y="120" fill="#f2f2f2" font-size="13" font-weight="700">prefill (learned)</text>
+  <line x1="636" y1="131" x2="784" y2="131" stroke="#6e6e6e" stroke-width="1"/>
+  <text x="636" y="152" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">EVIDENCE</text>
+  <text x="636" y="170" fill="#f2f2f2" font-size="12">the model&#39;s own</text>
+  <text x="636" y="186" fill="#f2f2f2" font-size="12">residual stream</text>
+  <text x="636" y="212" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">COST OF DECIDING</text>
+  <text x="636" y="230" fill="#e8a33d" font-size="12" font-weight="700">a training run</text>
+  <text x="636" y="246" fill="#f2f2f2" fill-opacity="0.62" font-size="11">then free per call</text>
+  <text x="636" y="272" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">GOOD FOR</text>
+  <text x="636" y="290" fill="#f2f2f2" font-size="12">tuning-free plateaus</text>
+
+  <!-- ===================== LEGEND ===================== -->
+  <line x1="22" y1="326" x2="798" y2="326" stroke="#6e6e6e" stroke-width="1"/>
+  <text x="22" y="346" fill="#f2f2f2" fill-opacity="0.62" font-size="11">escalation is a MODE of llm_classifier, not a fifth algorithm &#183; same evidence, cheap-first default, one-way</text>
+  <text x="22" y="364" fill="#f2f2f2" fill-opacity="0.62" font-size="11">LangChain measured the classifier tax at ~700 ms/turn and 21% of the ROUTED run&#39;s spend</text>
+  <text x="22" y="382" fill="#f2f2f2" fill-opacity="0.62" font-size="11">prefill is the tunable family - taught on this page, not exercised in the lab</text>
+</svg>

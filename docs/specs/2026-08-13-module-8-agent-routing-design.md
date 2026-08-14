@@ -136,7 +136,7 @@ Restructured (Rev 5) around the Routing Client unlock arc: the page opens with t
 
 Click the **Routing Client** tile. The yard renders dormant: strategy chips greyed out (each naming the exercise that unlocks it), the bill meter dark, `systems online: 0/5`. The learner sees the whole build before writing a line. The client doubles as the env check: it verifies `NVIDIA_API_KEY` and shows a red banner with the exact fix if it's missing — failures surface here, in minute five, not mid-exercise.
 
-**The shared harness:** the lab ships a ~60-line `build_lab_agent()` — a pared copy of the M7 minimal harness (ChatNVIDIA + 4 tools + the loop), *provided, not blanked* (they built it last module; the page says exactly that). All exercises route *this* agent, so the module stands alone while feeling like a direct sequel.
+**The shared harness:** the lab ships a ~60-line `build_lab_agent()` — a pared copy of the M7 minimal harness (ChatNVIDIA + 4 tools + the loop), *provided, not blanked* (they built it last module; the page says exactly that). All exercises route *this* agent, so the module stands alone while feeling like a direct sequel. *(Dropped in implementation — the lab routes bare model calls + canned trajectories; no shared agent ships; noted at Task 17 review.)*
 
 **The shared workload:** `routing_tasks.jsonl` — 12 tasks: 6 "commodity" (extraction, reformatting, single-tool lookups — **verifiably checkable** with exact/contains assertions) and 6 "frontier" (multi-step tool use, synthesis, tricky reasoning — checked by rubric). Verifiable checks are a deliberate **M4 callback** (RLVR: "verifiable rewards, now verifiable routing") and keep Ex5 fast, cheap, and mostly deterministic.
 

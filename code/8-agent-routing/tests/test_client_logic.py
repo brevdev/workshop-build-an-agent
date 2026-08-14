@@ -190,6 +190,68 @@ def test_race_rows_stream_in_canonical_strategy_order(monkeypatch, fake_chat):
     assert "$1.00 vs $10.00" in receipt
 
 
+def test_race_rejects_an_unsupported_strategy_before_spending_a_token(monkeypatch, fake_chat):
+    """`gateway` is a headline strategy and a member of STRATEGIES, but run_suite
+    raises on it -- and canonical order puts it last, so discovering that by running
+    it would mean two suites (~24 live calls) already paid for, then an error and no
+    verdict. The race must refuse before the first call."""
+    c = _client(monkeypatch, fake_chat)
+    calls = []
+    monkeypatch.setattr(answers, "run_suite", lambda *a, **kw: calls.append(a))
+
+    r = c.post("/api/race", json={"strategies": ["strong_only", "manual_classifier", "gateway"]})
+
+    message = dict(_events(r.text))["error"]["message"]
+    assert "gateway" in message                                  # names the offender
+    assert "strong_only, efficient_only, manual_classifier, switchyard_stage" in message
+    assert calls == []                                           # nothing was spent
+    assert "race_row" not in r.text
+
+
+def test_race_rejects_an_empty_selection(monkeypatch, fake_chat):
+    c = _client(monkeypatch, fake_chat)
+    calls = []
+    monkeypatch.setattr(answers, "run_suite", lambda *a, **kw: calls.append(a))
+    r = c.post("/api/race", json={"strategies": []})
+    assert "no strategies selected" in dict(_events(r.text))["error"]["message"]
+    assert calls == []
+
+
+def test_race_collapses_a_duplicated_strategy_to_one_row(monkeypatch, fake_chat):
+    """A double-clicked chip must not buy the same suite twice."""
+    c = _client(monkeypatch, fake_chat)
+    calls = []
+    monkeypatch.setattr(answers, "run_suite",
+                        lambda strategy, bill=None: calls.append(strategy) or _canned(10.0, STRONG_MODEL))
+
+    r = c.post("/api/race", json={"strategies": ["strong_only", "strong_only"]})
+
+    assert calls == ["strong_only"]
+    assert [name for name, _ in _events(r.text)] == ["race_row", "race_receipt"]
+
+
+def test_race_renders_the_receipt_it_already_paid_for_before_reporting_the_break(monkeypatch, fake_chat):
+    """Defense in depth: if a suite blows up mid-race, the strategies that finished
+    were still charged for, so their verdict ships before the error does."""
+    c = _client(monkeypatch, fake_chat)
+    canned = {"strong_only": _canned(10.0, STRONG_MODEL),
+              "manual_classifier": _canned(1.0, EFFICIENT_MODEL, tax=0.1)}
+
+    def flaky(strategy, bill=None):
+        if strategy not in canned:
+            raise RuntimeError("upstream 503")
+        return canned[strategy]
+    monkeypatch.setattr(answers, "run_suite", flaky)
+
+    r = c.post("/api/race", json={"strategies": ["strong_only", "manual_classifier",
+                                                 "switchyard_stage"]})
+    events = _events(r.text)
+
+    assert [name for name, _ in events] == ["race_row", "race_row", "race_receipt", "error"]
+    assert "$1.00 vs $10.00" in events[2][1]["receipt"]      # the two that finished
+    assert events[3][1]["message"] == "RuntimeError: upstream 503"
+
+
 def test_race_reports_a_locked_suite_instead_of_dying_mid_stream(monkeypatch):
     monkeypatch.setattr(srv, "_load_lab", _blank_lab)
     r = TestClient(srv.app).post("/api/race", json={"strategies": ["strong_only"]})

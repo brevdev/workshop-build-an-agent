@@ -173,27 +173,60 @@ def _canonical_rank(strategy):
     return order.index(strategy) if strategy in order else len(order)
 
 
+# THE /api/race CONTRACT: run_suite answers the 12-task workload under these four
+# and raises ValueError on anything else, so these four are all the race accepts.
+# `gateway` and `mock_demo` are /api/query strategies only -- they are in
+# constants.STRATEGIES, so the UI must not offer them as race chips.
+RACE_STRATEGIES = ["strong_only", "efficient_only", "manual_classifier", "switchyard_stage"]
+
+
 @app.post("/api/race")
 def race(body: dict):
-    """Ex5's leaderboard: the 12-task suite under each strategy, one row at a time."""
+    """Ex5's leaderboard: the 12-task suite under each strategy, one row at a time.
+    Accepts RACE_STRATEGIES only (see above)."""
     requested = body.get("strategies") or []
 
     def gen():
+        # Validate BEFORE the first suite runs. A race is ~12 live calls per strategy,
+        # so a bad entry discovered at strategy three has already spent real money on
+        # a run that ends in an error instead of a verdict. Rejection is all-or-
+        # nothing rather than "run the valid subset": silently dropping a chip the
+        # learner selected would hand back a verdict comparing less than they asked
+        # for, and the receipt would not say so.
+        unsupported = list(dict.fromkeys(s for s in requested if s not in RACE_STRATEGIES))
+        if unsupported or not requested:
+            problem = (f"unsupported {', '.join(unsupported)}" if unsupported
+                       else "no strategies selected")
+            yield _sse("error", {"message": f"Race: {problem}. "
+                                            f"Supported: {', '.join(RACE_STRATEGIES)}."})
+            return
+        results = {}
         try:
             lab = _load_lab()
-            results = {}
             # routing_verdict picks the routed row by dict INSERTION order, so results
             # go in in constants.STRATEGIES order however the UI listed them --
             # otherwise the receipt would compare against whichever chip came first.
-            for strategy in sorted(requested, key=_canonical_rank):
+            # dict.fromkeys also collapses a chip sent twice into one suite run.
+            for strategy in dict.fromkeys(sorted(requested, key=_canonical_rank)):
                 results[strategy] = lab.run_suite(strategy, lab.RunningBill())
                 rows = lab.routing_verdict(results)["rows"]
                 yield _sse("race_row", next(r for r in rows if r["strategy"] == strategy))
             yield _sse("race_receipt", {"receipt": lab.routing_verdict(results)["receipt"]})
-        except NotImplementedError as blank:
-            yield _sse("error", {"message": _locked(blank)})
         except Exception as exc:
-            yield _sse("error", {"message": f"{type(exc).__name__}: {exc}"})
+            # Whatever finished has already been paid for: render its verdict before
+            # saying what broke. (If the verdict itself is the blank that broke, there
+            # is nothing to render -- say so once, in the error.)
+            receipt = None
+            if results:
+                try:
+                    receipt = lab.routing_verdict(results)["receipt"]
+                except Exception:
+                    receipt = None
+            if receipt is not None:
+                yield _sse("race_receipt", {"receipt": receipt})
+            yield _sse("error", {"message": _locked(exc)
+                                 if isinstance(exc, NotImplementedError)
+                                 else f"{type(exc).__name__}: {exc}"})
 
     return StreamingResponse(gen(), media_type="text/event-stream")
 

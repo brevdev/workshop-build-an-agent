@@ -1,0 +1,6 @@
+* [Setting up Secrets](secrets.md)
+* [The Tokenomics Problem](intro_agent_routing.md)
+* [How Routers Decide](routing_decisions.md)
+* [Meet NeMo Switchyard](meet_switchyard.md)
+* [The Routing Lab](routing_lab.md)
+* [Wrapping Up](evaluating_routing.md)

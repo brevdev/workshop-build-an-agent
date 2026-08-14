@@ -208,7 +208,7 @@ def gateway_stats():
 # ---------------------------------------------------------------------------
 # Exercise 5 — the verdict. Suite results in, scoreboard out: accuracy, spend,
 # the open/frontier mix, and what the router itself cost. Three accounting rules,
-# both easy to get backwards:
+# all easy to get backwards:
 #   · The tax is already IN the cost. run_suite's per-task `cost` is a meter
 #     delta covering the classifier call AND the answer; `router_tax` repeats
 #     the classifier's share so a row can show it. So tax and cost make a
@@ -227,8 +227,8 @@ def routing_verdict(results_by_strategy):
     Returns {"rows": [...], "savings_pct": float, "monthly": {...}, "receipt": str}."""
     # TODO: Exercise 5 — one row per strategy, each with: strategy, accuracy (how many
     # passed), cost (the sum), frontier_pct (STRONG_MODEL's share of the `models` calls)
-    # and router_tax_pct (the tax as a share of cost — a RATIO, never a sum: read the two
-    # accounting rules above). Project every strategy out to
+    # and router_tax_pct (the tax as a share of cost — a RATIO, never a sum: read the
+    # three accounting rules above). Project every strategy out to
     # monthly[strategy] = cost / max(len(results), 1) * AT_SCALE_TASKS_PER_DAY * 30 — the
     # multiplier counts TASKS per day, so divide the suite cost by the number of tasks in
     # it first — work out savings_pct for the routed row against strong_only, and build the

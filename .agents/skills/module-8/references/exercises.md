@@ -190,8 +190,9 @@ Everything in Python is provided. What they write is `routes.toml`, from
   each result's `models` dict count?"
 - **L2:** "Per strategy: cost = the sum of per-task `cost`; accuracy = how many `passed`;
   frontier share = 100 × the `STRONG_MODEL` count in `models` ÷ all model counts; router tax % =
-  100 × summed `router_tax` ÷ that same cost. Monthly = cost × `AT_SCALE_TASKS_PER_DAY` × 30.
-  Savings compares the routed row against `strong_only`. **Guard both divisions.**"
+  100 × summed `router_tax` ÷ that same cost. Monthly is **per task** — cost ÷ the number of
+  results × `AT_SCALE_TASKS_PER_DAY` × 30 — because the multiplier counts *tasks* per day, not
+  suites. Savings compares the routed row against `strong_only`. **Guard both divisions.**"
 - **Common mistakes:** **adding** `router_tax` to `cost` — the per-task cost is a meter delta
   that already covers the classifier *and* the answer, so summing double-bills the router, and
   the bug ships green because the number still looks plausible; counting the router's own calls

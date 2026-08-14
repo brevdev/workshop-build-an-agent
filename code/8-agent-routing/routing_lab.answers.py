@@ -195,7 +195,7 @@ def gateway_stats():
 # ---------------------------------------------------------------------------
 # Exercise 5 — the verdict. Suite results in, scoreboard out: accuracy, spend,
 # the open/frontier mix, and what the router itself cost. Three accounting rules,
-# both easy to get backwards:
+# all easy to get backwards:
 #   · The tax is already IN the cost. run_suite's per-task `cost` is a meter
 #     delta covering the classifier call AND the answer; `router_tax` repeats
 #     the classifier's share so a row can show it. So tax and cost make a

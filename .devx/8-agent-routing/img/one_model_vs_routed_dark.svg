@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 360" width="820" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark "one model vs routed" diagram for the DevX dark theme (module 8).
+       No mermaid source: this box cannot render mermaid (ARM64, no headless Chrome), so the
+       SVG IS the source. Palette: dx dark #0e1116 bg / #76b900 green / #e8a33d frontier amber.
+       All text is >= 11px at the authored width (820), which is inside the 56em content column. -->
+  <!-- CALIBRATE: percentages - "~93% of calls" / "~7% of calls" are LangChain's published
+       CALL shares (145-task deep-agent benchmark), not token shares. Re-check at the
+       calibration pass; the learner's own gateway meter reports TOKEN share. -->
+  <!-- CALIBRATE: dollars + accuracy - $11.45 / $3.00 per task and 86.0% / 80.0% are from the
+       same published benchmark; the annualized lines are those figures x 1,000 tasks/day. -->
+  <defs>
+    <marker id="r8-gray" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#6e7681"/>
+    </marker>
+    <marker id="r8-amber" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#e8a33d"/>
+    </marker>
+    <marker id="r8-green" markerWidth="11" markerHeight="10" refX="10" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L11,5 L0,10 Z" fill="#76b900"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="820" height="360" fill="#0e1116"/>
+
+  <!-- ===================== LEFT PANEL - TODAY ===================== -->
+  <rect x="8" y="8" width="394" height="316" rx="10" fill="#12161c" stroke="#262b33" stroke-width="1.5"/>
+  <text x="28" y="42" fill="#f2f2f2" font-size="13" font-weight="700" letter-spacing="2">TODAY</text>
+  <text x="28" y="62" fill="#9aa3ad" font-size="11">one model. every call.</text>
+
+  <!-- agent loop -->
+  <rect x="28" y="132" width="118" height="62" rx="7" fill="#161b22" stroke="#313842" stroke-width="1.5"/>
+  <text x="87" y="156" fill="#f2f2f2" font-size="12" text-anchor="middle">agent loop</text>
+  <text x="87" y="176" fill="#9aa3ad" font-size="11" text-anchor="middle">~6.3 calls/task</text>
+
+  <!-- 6 calls, all to the frontier model -->
+  <text x="204" y="96" fill="#e8a33d" font-size="11" text-anchor="middle">100% of calls</text>
+  <path d="M146,137 C200,137 208,118 258,118" fill="none" stroke="#e8a33d" stroke-width="1.5" marker-end="url(#r8-amber)"/>
+  <path d="M146,147 C200,147 208,137 258,137" fill="none" stroke="#e8a33d" stroke-width="1.5" marker-end="url(#r8-amber)"/>
+  <path d="M146,157 C200,157 208,156 258,156" fill="none" stroke="#e8a33d" stroke-width="1.5" marker-end="url(#r8-amber)"/>
+  <path d="M146,167 C200,167 208,175 258,175" fill="none" stroke="#e8a33d" stroke-width="1.5" marker-end="url(#r8-amber)"/>
+  <path d="M146,177 C200,177 208,194 258,194" fill="none" stroke="#e8a33d" stroke-width="1.5" marker-end="url(#r8-amber)"/>
+  <path d="M146,187 C200,187 208,210 258,210" fill="none" stroke="#e8a33d" stroke-width="1.5" marker-end="url(#r8-amber)"/>
+
+  <!-- the one engine -->
+  <rect x="262" y="108" width="124" height="110" rx="7" fill="#e8a33d" fill-opacity="0.07" stroke="#e8a33d" stroke-width="1.6"/>
+  <text x="324" y="155" fill="#e8a33d" font-size="13" font-weight="700" text-anchor="middle">120B &#183; $$$</text>
+  <text x="324" y="177" fill="#9aa3ad" font-size="11" text-anchor="middle">frontier tier</text>
+
+  <line x1="28" y1="252" x2="386" y2="252" stroke="#262b33" stroke-width="1"/>
+  <text x="205" y="278" fill="#f2f2f2" font-size="12" text-anchor="middle">86.0% accurate &#183; $11.45 / task</text>
+  <text x="205" y="300" fill="#9aa3ad" font-size="11" text-anchor="middle">~$4.2M / yr at 1,000 tasks/day</text>
+
+  <!-- ===================== RIGHT PANEL - ROUTED ===================== -->
+  <rect x="418" y="8" width="394" height="316" rx="10" fill="#12161c" stroke="#262b33" stroke-width="1.5"/>
+  <text x="438" y="42" fill="#76b900" font-size="13" font-weight="700" letter-spacing="2">ROUTED</text>
+  <text x="438" y="62" fill="#9aa3ad" font-size="11">same agent. one engine per call.</text>
+
+  <!-- the same agent loop -->
+  <rect x="430" y="132" width="96" height="62" rx="7" fill="#161b22" stroke="#313842" stroke-width="1.5"/>
+  <text x="478" y="156" fill="#f2f2f2" font-size="12" text-anchor="middle">agent loop</text>
+  <text x="478" y="176" fill="#9aa3ad" font-size="11" text-anchor="middle">same code</text>
+
+  <line x1="526" y1="163" x2="544" y2="163" stroke="#6e7681" stroke-width="1.6" marker-end="url(#r8-gray)"/>
+
+  <!-- dispatcher -->
+  <path d="M578,137 L608,163 L578,189 L548,163 Z" fill="#161b22" stroke="#76b900" stroke-width="1.8"/>
+  <text x="578" y="163" fill="#76b900" font-size="15" text-anchor="middle" dominant-baseline="central">?</text>
+  <text x="578" y="212" fill="#76b900" font-size="11" text-anchor="middle">dispatcher</text>
+
+  <!-- most calls ride the cheap track -->
+  <text x="640" y="112" fill="#76b900" font-size="11" text-anchor="middle">~93% of calls</text>
+  <line x1="612" y1="157" x2="684" y2="133" stroke="#76b900" stroke-width="5.5" marker-end="url(#r8-green)"/>
+  <rect x="692" y="104" width="104" height="54" rx="7" fill="#76b900" fill-opacity="0.08" stroke="#76b900" stroke-width="1.6"/>
+  <text x="744" y="126" fill="#76b900" font-size="13" font-weight="700" text-anchor="middle">30B &#183; $</text>
+  <text x="744" y="145" fill="#9aa3ad" font-size="11" text-anchor="middle">open, efficient</text>
+
+  <!-- a few escalate -->
+  <line x1="612" y1="171" x2="684" y2="212" stroke="#e8a33d" stroke-width="1.6" marker-end="url(#r8-amber)"/>
+  <text x="640" y="238" fill="#e8a33d" font-size="11" text-anchor="middle">~7% of calls</text>
+  <rect x="692" y="196" width="104" height="54" rx="7" fill="#e8a33d" fill-opacity="0.07" stroke="#e8a33d" stroke-width="1.6"/>
+  <text x="744" y="218" fill="#e8a33d" font-size="13" font-weight="700" text-anchor="middle">120B &#183; $$$</text>
+  <text x="744" y="237" fill="#9aa3ad" font-size="11" text-anchor="middle">frontier tier</text>
+
+  <line x1="434" y1="252" x2="796" y2="252" stroke="#262b33" stroke-width="1"/>
+  <text x="615" y="278" fill="#f2f2f2" font-size="12" text-anchor="middle">80.0% accurate &#183; $3.00 / task</text>
+  <text x="615" y="300" fill="#9aa3ad" font-size="11" text-anchor="middle">~$1.1M / yr at 1,000 tasks/day</text>
+
+  <text x="410" y="348" fill="#6f7883" font-size="11" text-anchor="middle">LangChain deep-agent benchmark, 145 multi-step tasks &#183; shares are of CALLS, not tokens</text>
+</svg>

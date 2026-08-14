@@ -4,11 +4,12 @@ from constants import STRONG_MODEL, EFFICIENT_MODEL, PRICING
 
 def test_bill_call_prices_and_counterfactuals():
     bill = lab.RunningBill()
-    chat = FakeChat([FakeResponse("hi", in_tok=1_000_000, out_tok=1_000_000)])
+    # Asymmetric on purpose: 1M/1M would price the same even if in/out rates swapped.
+    chat = FakeChat([FakeResponse("hi", in_tok=2_000_000, out_tok=1_000_000)])
     resp, receipt = lab.bill_call(EFFICIENT_MODEL, chat, "prompt", bill)
     p = PRICING[EFFICIENT_MODEL]; pf = PRICING[STRONG_MODEL]
-    assert abs(receipt["cost"] - (p["in"] + p["out"])) < 1e-9
-    assert abs(receipt["counterfactual_cost"] - (pf["in"] + pf["out"])) < 1e-9
+    assert abs(receipt["cost"] - (2 * p["in"] + p["out"])) < 1e-9
+    assert abs(receipt["counterfactual_cost"] - (2 * pf["in"] + pf["out"])) < 1e-9
     assert bill.total_cost == receipt["cost"]
 
 def test_running_bill_accumulates_by_model():

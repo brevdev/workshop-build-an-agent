@@ -25,7 +25,7 @@ Before you write anything, look at what you're building. Open the <button onclic
 
 The yard renders, and almost nothing works. Every strategy chip but one is greyed out and titled with the exercise that unlocks it, the receipt rail is empty, the race drawer won't run, and the header reads `systems online: 0/5`. That's the syllabus: five systems, five exercises, in order.
 
-The exception is the **demo (mock)** chip, which is never locked — but send it a query now and it answers with the name of the first blank it reached. That's the design contract in one interaction: **the client is a window, not a wizard.** It holds no routing logic of its own; every lane, price and receipt you'll see below comes out of your file.
+The exception is the `mock_demo` chip (the demo router — the one strategy that needs no SDK), which is never locked — but send it a query now and it answers with the name of the first blank it reached. That's the design contract in one interaction: **the client is a window, not a wizard.** It holds no routing logic of its own; every lane, price and receipt you'll see below comes out of your file.
 
 It's also your environment check, done at minute five instead of mid-exercise. The client polls your lab file and reports three things as persistent banners — not toasts, because these don't go away by themselves:
 
@@ -142,17 +142,15 @@ The latency column moves around a lot between runs; the cost column barely does.
 
 </div>
 
-Now stretch those two rows. Twelve tasks is a rounding error; the same ratio at production volume is a line item, and that's the table a platform team actually presents. Exercise 5 does the arithmetic for you — `AT_SCALE_TASKS_PER_DAY` in `constants.py` is the multiplier, and the closing receipt prints both tiers in dollars per month.
+Now stretch those two rows. Twelve tasks is a rounding error; the same ratio at production volume is a line item, and that's the table a platform team actually presents. Exercise 5 does the arithmetic for you — `AT_SCALE_TASKS_PER_DAY` in `constants.py` is the multiplier, and it counts **tasks** per day, so the projection runs off each strategy's *per-task* cost, not off the suite total. The closing receipt prints both tiers in dollars per month.
 
-<!-- CALIBRATE + DENOMINATOR CONFLICT for Task 20: routing_verdict computes
-     monthly = SUITE cost * AT_SCALE_TASKS_PER_DAY * 30, so Ex5's printed "$610/mo" is the
-     12-task suite run 1,000x/day, while the receipt's label reads "at 1000/day" (tasks).
-     Per-TASK arithmetic on the same run gives ~$51/mo - a 12x gap. This page deliberately
-     prints NO monthly dollars here so it cannot contradict the lab's own output; Task 20
-     should reconcile the code's label and denominator, then decide whether an Ex1 dollar
-     figure returns. -->
+<!-- CALIBRATE: routing_verdict computes monthly = (suite cost / len(results)) *
+     AT_SCALE_TASKS_PER_DAY * 30 - a PER-TASK projection, which is what the receipt's
+     "at 1000/day" label claims. (It used to multiply the whole 12-task suite, a 12x
+     overstatement; fixed in the final-review wave.) This page still prints NO monthly
+     dollars here, so the only monthly figures a learner sees are their own run's. -->
 
-> **Client unlock (1/5).** The **strong-only** and **efficient-only** chips go live, and the meter starts running: session bill, per-query receipts, and the counterfactual line — *would-have-been*, the same tokens re-priced at the frontier tier. Ask it something, then ask the other tier the same thing, and watch the gap accrue. `systems online: 1/5`.
+> **Client unlock (1/5).** The `strong_only` and `efficient_only` chips (every task at the frontier tier; every task on the open model) go live, and the meter starts running: session bill, per-query receipts, and the counterfactual line — *would-have-been*, the same tokens re-priced at the frontier tier. Ask it something, then ask the other tier the same thing, and watch the gap accrue. `systems online: 1/5`.
 
 <!-- fold:break -->
 
@@ -244,7 +242,7 @@ The vocabulary starts here too: `COMMODITY` and `FRONTIER` are the classifier's 
 <!-- CAPTURE at Task 20: the client mid-route - manual_classifier chip on, a query card at the
      dispatcher with its verdict showing, and a receipt carrying the verdict + router tax lines. -->
 
-> **Client unlock (2/5).** The **manual classifier** chip lights up and the yard starts switching tracks: the query card pauses at the dispatcher, the verdict appears, and the card rides the lane it picked. Receipts grow two lines — the verdict, and the router tax. Use the **commodity** and **frontier** example chips under the input to send divergent traffic on purpose. `systems online: 2/5`.
+> **Client unlock (2/5).** The `manual_classifier` chip (a cheap model picks the lane) lights up and the yard starts switching tracks: the query card pauses at the dispatcher, the verdict appears, and the card rides the lane it picked. Receipts grow two lines — the verdict, and the router tax. Use the **commodity** and **frontier** example chips under the input to send divergent traffic on purpose. `systems online: 2/5`.
 
 <!-- fold:break -->
 
@@ -346,6 +344,12 @@ The installer prefers your ambient environment and falls back to a dedicated ven
 cd code/8-agent-routing && bash scripts/install_switchyard.sh --print-python
 ```
 
+If that path is a venv rather than your ambient `python3`, **run the lab with it** — the installer puts the lab's own runtime dependencies in there too, so it runs `routing_lab.py` as well as it imports the SDK:
+
+```bash
+cd code/8-agent-routing && "$(bash scripts/install_switchyard.sh --print-python)" routing_lab.py --exercise 3
+```
+
 The degraded path still teaches — `MockRouter` is deterministic and the trace still prints — but it decides with a heuristic, not the stage scorer, and it says so on every run. If you're in the client, relaunch the tile after installing: the SDK flag is read once at startup.
 
 </details>
@@ -357,7 +361,7 @@ You built the source of these signals last module: a loop that appends `ToolMess
 
 </details>
 
-> **Client unlock (3/5).** The **Switchyard: stage router** chip lights up, and the dispatcher starts showing stage signals instead of a classifier verdict. If the SDK isn't installed, the **demo (mock)** chip covers the same panel with a deterministic router — SDK-less, not key-less. `systems online: 3/5`.
+> **Client unlock (3/5).** The `switchyard_stage` chip (the SDK reads the trajectory) lights up, and the dispatcher starts showing stage signals instead of a classifier verdict. If the SDK isn't installed, the `mock_demo` chip covers the same panel with a deterministic router — SDK-less, not key-less. `systems online: 3/5`.
 
 <!-- fold:break -->
 
@@ -507,7 +511,7 @@ Copy your working config to a second file, switch that route to `mode = "capabil
 
 </details>
 
-> **Client unlock (4/5).** The **gateway** chip goes live the moment the client can reach `:4000` — no blank to fill, because your blank was a file. The dispatcher relabels itself as the external server, and a stats line appears under the yard with the tier split and the judge's spend: the numbers a receipt structurally cannot show. On the 4b path a **your GPU** locomotive joins the yard with a live utilization badge. `systems online: 4/5`.
+> **Client unlock (4/5).** The `gateway` chip (`routes.toml` decides, out of process) goes live the moment the client can reach `:4000` — no blank to fill, because your blank was a file. The dispatcher relabels itself as the external server, and a stats line appears under the yard with the tier split and the judge's spend: the numbers a receipt structurally cannot show. On the 4b path a **your GPU** locomotive joins the yard with a live utilization badge. `systems online: 4/5`.
 
 <!-- fold:break -->
 
@@ -530,7 +534,7 @@ for strategy, results in results_by_strategy.items():
     rows.append({"strategy": strategy, "accuracy": sum(r["passed"] for r in results),
                  "cost": cost, "frontier_pct": 100.0 * strong_calls / max(total_calls, 1),
                  "router_tax_pct": 100.0 * tax / max(cost, 1e-12)})
-    monthly[strategy] = cost * AT_SCALE_TASKS_PER_DAY * 30
+    monthly[strategy] = cost / max(len(results), 1) * AT_SCALE_TASKS_PER_DAY * 30
 strong = next((r for r in rows if r["strategy"] == "strong_only"), None)
 routed = next((r for r in rows if r["strategy"] in ("manual_classifier", "switchyard_stage", "gateway")), None)
 savings = (1 - routed["cost"] / strong["cost"]) * 100 if strong and routed and strong["cost"] else 0.0
@@ -542,7 +546,7 @@ receipt = (f"routed: {100 - routed['frontier_pct']:.0f}/{routed['frontier_pct']:
 return {"rows": rows, "savings_pct": savings, "monthly": monthly, "receipt": receipt}
 ```
 
-Divide, never add. `run_suite`'s per-task `cost` is a meter delta that already covers the classifier call *and* the answer, and `router_tax` repeats the classifier's share so a row can display it — so the two make a ratio (`100 * tax / cost`); summing them bills the router twice, and the bug ships green because the number still looks plausible. The other rule is what `models` counts: **answer calls only**, so `frontier_pct` is the share of answers that bought frontier tokens and the router's own calls surface in the tax column, never in the mix. Guard both divisions (`max(total_calls, 1)`, `max(cost, 1e-12)`) — `routing_verdict` is called with empty result lists by the Routing Client's unlock probe.
+Divide twice. The monthly projection divides first: `AT_SCALE_TASKS_PER_DAY` counts **tasks** per day, so the suite's cost has to become a per-task cost before it's multiplied — project the whole twelve-task suite 1,000×/day and you overstate the bill twelve-fold under a label that says "at 1000/day". And divide, never add, for the tax. `run_suite`'s per-task `cost` is a meter delta that already covers the classifier call *and* the answer, and `router_tax` repeats the classifier's share so a row can display it — so the two make a ratio (`100 * tax / cost`); summing them bills the router twice, and the bug ships green because the number still looks plausible. The other rule is what `models` counts: **answer calls only**, so `frontier_pct` is the share of answers that bought frontier tokens and the router's own calls surface in the tax column, never in the mix. Guard both divisions (`max(total_calls, 1)`, `max(cost, 1e-12)`) — `routing_verdict` is called with empty result lists by the Routing Client's unlock probe.
 
 </details>
 
@@ -558,16 +562,18 @@ cd code/8-agent-routing && python3 routing_lab.py --exercise 5
    efficient_only     12/12    $0.0062        0%          0%
 manual_classifier     12/12    $0.0117       17%          4%
 
-🧾 routed: 83/17 open/frontier mix · $0.01 vs $0.02 (−43%) · at 1000/day: $350 vs $610/mo · accuracy 12/12 vs 12/12 · router tax 4% of spend
+🧾 routed: 83/17 open/frontier mix · $0.01 vs $0.02 (−43%) · at 1000/day: $29 vs $51/mo · accuracy 12/12 vs 12/12 · router tax 4% of spend
 ```
 
 <!-- CALIBRATE: verbatim from the primary calibration run (Task 7, 2026-08-13, exit 0, 3m44s,
-     ~51 calls). A second full run (Task 9, in-notebook) printed -58%, a 92/8 mix, $249 vs $587/mo
-     and a 6% tax, and scored efficient_only 11/12 while the same notebook's Ex1 scored it 12/12.
-     PUBLISH RANGES: savings 40-60%, mix 83/17 to 92/8, tax 4-6%. DENOMINATORS: frontier % is a
-     share of ANSWER calls; router tax % is a share of the routed row's own spend; the monthly
-     figures are the SUITE cost x AT_SCALE_TASKS_PER_DAY x 30 (see the Exercise 1 note - the
-     receipt labels that "at 1000/day" but the multiplicand is a 12-task suite, not a task). -->
+     ~51 calls), with ONE post-hoc correction: routing_verdict now projects PER TASK, so that
+     run's "$350 vs $610/mo" is restated as $29 vs $51/mo (the same run's numbers / 12). A second
+     full run (Task 9, in-notebook) printed -58%, a 92/8 mix, $249 vs $587/mo (restated: $21 vs
+     $49/mo) and a 6% tax, and scored efficient_only 11/12 while the same notebook's Ex1 scored it
+     12/12. PUBLISH RANGES: savings 40-60%, mix 83/17 to 92/8, tax 4-6%. DENOMINATORS: frontier %
+     is a share of ANSWER calls; router tax % is a share of the routed row's own spend; the
+     monthly figures are the PER-TASK cost (suite cost / len(results)) x AT_SCALE_TASKS_PER_DAY
+     x 30, which is what the receipt's "at 1000/day" label claims. -->
 
 **Two tiers, six names.** The receipt reconciles the vocabulary this module has been rotating through: `strong` (Exercise 2's lane) = `capable` (Exercise 3's stage) = **frontier**; `efficient` (the lane) = `weak` (Exercise 4's tier in `routes.toml`) = **open**. Three exercises, three vocabularies, the same two models.
 
@@ -580,7 +586,7 @@ Read the accuracy column honestly. On this twelve-task suite all three strategie
 <!-- CAPTURE at Task 20: race mode open at 5/5 - leaderboard filled for all four strategies, the
      accuracy-vs-cost Pareto scatter populated, and the closing receipt line. -->
 
-> **Client unlock (5/5).** **Race mode** opens in the bottom drawer — the same twelve-task suite under each strategy you select, with the leaderboard and the accuracy-vs-cost scatter filling in live as rows stream back. The chips are the four suite strategies only (`strong_only`, `efficient_only`, `manual_classifier`, `switchyard_stage`); gateway and demo answer single queries, not suites. All four is **≈48 live calls and several minutes**, there's no cancel button, and closing the tab won't stop a suite that's already started. Run fewer if you're in a hurry. `systems online: 5/5`.
+> **Client unlock (5/5).** **Race mode** opens in the bottom drawer — the same twelve-task suite under each strategy you select, with the leaderboard and the accuracy-vs-cost scatter filling in live as rows stream back. The chips are the four suite strategies only (`strong_only`, `efficient_only`, `manual_classifier`, `switchyard_stage`); gateway and demo answer single queries, not suites. All four is **≈64 live calls and several minutes** (13 per suite — twelve answers plus the LLM judge — and 25 for `manual_classifier`, which pays the router tax on every task), there's no cancel button, and closing the tab won't stop a suite that's already started. Run fewer if you're in a hurry. `systems online: 5/5`.
 
 One honest note on the receipt: `insufficient data` is a real state, not a bug. Race a single strategy and there's no baseline to divide by, so the verdict says so instead of inventing a percentage.
 

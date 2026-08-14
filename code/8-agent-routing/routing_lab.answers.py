@@ -142,8 +142,9 @@ def switchyard_call(query, pool, bill, router=None, tool_events=None):
 
 # ---------------------------------------------------------------------------
 # Exercise 4 — the same decision, moved OUT of the application. routes.toml
-# owns the policy; the app asks for one model id ("switchyard") and is never
-# told which model answered. The blank here is a config file, not Python:
+# owns the policy; the app asks for one model id ("switchyard") and never has to
+# choose which model answers — the yard does, and it reports the upstream model
+# id back on the response. The blank here is a config file, not Python:
 # everything below is provided. The gateway is the Rust server embedded in the
 # pip wheel — start it with scripts/serve_gateway.sh (there is no separate
 # binary to install; docs/specs/switchyard-api-notes.md § Server install).
@@ -193,7 +194,7 @@ def gateway_stats():
 
 # ---------------------------------------------------------------------------
 # Exercise 5 — the verdict. Suite results in, scoreboard out: accuracy, spend,
-# the open/frontier mix, and what the router itself cost. Two accounting rules,
+# the open/frontier mix, and what the router itself cost. Three accounting rules,
 # both easy to get backwards:
 #   · The tax is already IN the cost. run_suite's per-task `cost` is a meter
 #     delta covering the classifier call AND the answer; `router_tax` repeats
@@ -202,6 +203,10 @@ def gateway_stats():
 #   · `models` counts ANSWER calls only, by design (run_suite records the model
 #     that answered). frontier_pct is therefore the share of answers that bought
 #     frontier tokens; the router's own calls surface only as router_tax_pct.
+#   · The monthly projection is PER TASK. AT_SCALE_TASKS_PER_DAY counts tasks per
+#     day, so divide the suite's cost by the number of tasks in it before you
+#     multiply — projecting the whole 12-task suite 1,000x/day overstates the
+#     bill by 12x, and the receipt's "at 1000/day" label would be a lie.
 # ---------------------------------------------------------------------------
 
 def routing_verdict(results_by_strategy):
@@ -215,7 +220,7 @@ def routing_verdict(results_by_strategy):
         rows.append({"strategy": strategy, "accuracy": sum(r["passed"] for r in results),
                      "cost": cost, "frontier_pct": 100.0 * strong_calls / max(total_calls, 1),
                      "router_tax_pct": 100.0 * tax / max(cost, 1e-12)})
-        monthly[strategy] = cost * AT_SCALE_TASKS_PER_DAY * 30
+        monthly[strategy] = cost / max(len(results), 1) * AT_SCALE_TASKS_PER_DAY * 30
     strong = next((r for r in rows if r["strategy"] == "strong_only"), None)
     routed = next((r for r in rows if r["strategy"] in ("manual_classifier", "switchyard_stage", "gateway")), None)
     savings = (1 - routed["cost"] / strong["cost"]) * 100 if strong and routed and strong["cost"] else 0.0

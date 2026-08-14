@@ -1,6 +1,6 @@
 ---
 name: module-8
-description: This skill should be used when a learner is working through Module 8 ("Agent Routing") of the Build-an-Agent workshop and wants help understanding model routing, the routing algorithms, NeMo Switchyard, the lab code, or the economics — e.g. "/module-8 what is model routing?", "/module-8 why route between models?", "explain tokenomics", "explain the router tax", "escalation vs capability mode", "which way does base_threshold point?", "help me with classify_difficulty", "my classifier routes everything to strong", "the Routing Client shows everything locked", "the race button is greyed out", "why am I seeing a MockRouter banner?", "my switchyard install fails", "gateway won't start / port 4000 in use", "curl /v1/stats says no tiers", "my receipt says insufficient data", "is this lab spending real money?", "is Super 120B really a frontier model?", "how is this different from Module 6's Privacy Router?". It turns the agent into a Module 8 learning assistant (tutor) that explains routing concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises or revealing the answer keys, interprets the learner's own measured numbers, and troubleshoots the lab, the Switchyard SDK, the gateway, and the Routing Client. Module 8 puts a meter on every model call and then routes each call to the model that should answer it — a hand-written classifier, Switchyard's in-process stage router, and a `routes.toml` gateway the application never reads — finishing with a scoreboard of accuracy, cost, frontier share, and router tax.
+description: This skill should be used when a learner is working through Module 8 ("Agent Routing") of the Build-an-Agent workshop and wants help with model routing, the routing algorithms, NeMo Switchyard, the lab code, or the economics — e.g. "/module-8 what is model routing?", "/module-8 why route between models?", "explain tokenomics", "explain the router tax", "escalation vs capability mode", "which way does base_threshold point?", "help me with classify_difficulty", "my classifier routes everything to strong", "the Routing Client shows everything locked", "the race button is greyed out", "why am I seeing a MockRouter banner?", "my switchyard install fails", "gateway won't start / port 4000 in use", "curl /v1/stats says no tiers", "my receipt says insufficient data", "is this lab spending real money?", "is Super 120B really a frontier model?", "how is this different from Module 6's Privacy Router?". It turns the agent into a Module 8 learning assistant (tutor) that explains routing concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises or revealing the answer keys, interprets the learner's measured numbers, and troubleshoots the lab, the Switchyard SDK, the gateway, and the Routing Client. Module 8 meters every model call, then routes it to the model that should answer it — a hand-written classifier, Switchyard's in-process stage router, and a `routes.toml` gateway the application never reads — finishing with a scoreboard of accuracy, cost, frontier share, and router tax.
 user-invocable: true
 disable-model-invocation: false
 ---
@@ -104,9 +104,12 @@ Full versions, with sources, in **`references/concepts.md`**. The ⚠️ items a
 - **Five families, one axis (evidence vs cost of deciding)** — `random`/`passthrough`/`noop` ·
   `llm_classifier` (capability) · `stage_router` · `llm_classifier` escalation **mode** ·
   learned/prefill (taught, not exercised). Nothing says *go right*: the cheapest decision that's
-  good enough wins.
+  good enough wins. ⚠️ **Five families, four algorithm ids** — if a learner counts the figure's
+  four cards and gets a different number, that's the reconciliation: escalation is a **mode**, and
+  it earns a family of its own because it's a different policy on the same evidence.
 - **Router tax** — the per-turn cost of *deciding*: **~4–6%** of the routed run's own spend in
-  this lab (the taxonomy page's bar reads ~2–5%), **21% + ~700 ms/turn** in LangChain's run. ⚠️ At
+  this lab (the taxonomy page's bar reads the same band), **21% + ~700 ms/turn** in LangChain's
+  run. ⚠️ At
   the **gateway** it lives in `/v1/stats`, so Ex4 receipts read `router_tax: 0.0` *structurally
   and truthfully*; Ex3's `0.0` is different — there is genuinely no second call.
 - ⚠️ **`base_threshold` polarity** — the judge scores **P(the *efficient* model succeeds)**:
@@ -184,7 +187,8 @@ works. **Needs:** `NVIDIA_API_KEY` only (one key covers both tiers *and* the jud
 spends real money — a few cents:** roughly **150 live calls** end to end. Budget/time per run:
 **Ex1 ≈26 calls, 2–5 min · Ex2 ≈51 calls, 4–6 min · Ex3 ≈18 calls, 1–3 min · Ex4 7 routed
 requests plus the judge calls behind them, ~2 min · Ex5 ≈51 calls, 4–12 min** (the longest); the
-client's **race ≈48 calls**; a full notebook **Run-All is ~25 minutes**, mostly waiting on live
+client's **race ≈64 calls** (13/suite — 12 answers + the judge — and 25 for
+`manual_classifier`); a full notebook **Run-All is ~25 minutes**, mostly waiting on live
 suites. The page budgets the whole lab at **~95 minutes**. The Switchyard install needs **Python
 ≥ 3.12** and PyPI reachability. **Exercise 4b is the only GPU/Docker step** and it is explicitly
 optional — a local NIM serving the weak tier on your own silicon; without Docker or a GPU, skip

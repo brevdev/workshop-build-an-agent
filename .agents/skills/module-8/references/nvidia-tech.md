@@ -105,7 +105,7 @@ each client declares outbound — inbound and outbound are independent.
 NVIDIA's launch coverage named who was already building on Switchyard:
 - **LiteLLM** — adding it as a plug-in to its proxy layer.
 - **Kong** — delivering it natively through Kong AI Gateway.
-- **Cognition** — running the staged router inside **Devin Desktop** (FrontierCode Main:
+- **Cognition** — running a Switchyard router inside **Devin Desktop** (FrontierCode Main:
   50.6% accuracy at $3.11 mean cost/run, ~28% below the frontier-only baseline, routing between
   Opus 5 and Kimi K2.7 — neither of them NVIDIA's).
 - **LangChain** — published the **145-task deep-agent routing benchmark** this module quotes

@@ -40,7 +40,8 @@ is often a closed frontier model at a steeper price, which makes routing pay off
 
 ## The five algorithm families — evidence vs cost of deciding
 Sorted by *what the router may look at before it picks, and what looking costs*
-(`routing_decisions.md`):
+(`routing_decisions.md`). **Five families, four algorithm ids** — escalation is a **mode** of
+`llm_classifier`, not a separate algorithm, which is why the page's figure carries four cards:
 
 1. **Static splits** — `random` (weighted coin; indefensible as policy, excellent as an **A/B
    instrument**: *you can't credit the router if you never ran the split*), `passthrough` (one
@@ -60,8 +61,9 @@ workload wins.** That's why there are five and not one.
 ## Router tax
 The permanent per-turn overhead of *deciding* — M7's context tax pointed at dollars and
 milliseconds. It is real, and this module puts it **on the receipt**.
-- **This lab, Exercise 2:** ~**4–6%** of the routed run's own spend (`routing_lab.md`'s measured
-  runs; the taxonomy page's bar reads **~2–5%** — cite both until Task 20 reconciles them).
+- **This lab, Exercise 2:** ~**4–6%** of the routed run's own spend — the band actually measured
+  across the lab's full runs, and the one `routing_decisions.md`'s bar and `routing_lab.md`'s
+  published ranges both print.
 - **LangChain's benchmark:** **21%** of the routed run's own spend and **~700 ms per turn**, on
   much heavier work (long multi-step trajectories vs this lab's one short prompt).
 - It's a **ratio**, so it swings with how expensive the work underneath it is. Always name the

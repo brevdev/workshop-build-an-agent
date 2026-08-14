@@ -60,6 +60,17 @@
   var RACE_STRATEGIES = ["strong_only", "efficient_only", "manual_classifier", "switchyard_stage"];
   var TASKS_PER_SUITE = 12;
 
+  // What one suite actually costs in LIVE calls — twelve tasks is not twelve calls.
+  // Every suite adds one LLM-judge call (the single unverifiable task is graded by a
+  // model, not a string check), and manual_classifier pays the router tax: a second
+  // call per task before any work happens. 13 + 13 + 25 + 13 = 64 for all four.
+  var SUITE_CALLS = { strong_only: TASKS_PER_SUITE + 1, efficient_only: TASKS_PER_SUITE + 1,
+                      manual_classifier: TASKS_PER_SUITE * 2 + 1,
+                      switchyard_stage: TASKS_PER_SUITE + 1 };
+  function raceCalls(picks) {
+    return picks.reduce(function (n, id) { return n + (SUITE_CALLS[id] || TASKS_PER_SUITE); }, 0);
+  }
+
   // First unlocked wins; the learner's own pick is sticky from then on. Routed
   // before flat-rate: the client defaults to the cheap lane, like the module argues.
   var AUTO_DEFAULTS = ["switchyard_stage", "manual_classifier", "efficient_only", "mock_demo"];
@@ -718,10 +729,10 @@
       var chip = el("button", "chip" + (open ? "" : " locked") + (state.raceSel[id] ? " on" : ""));
       chip.type = "button";
       chip.disabled = !open || state.racing;
-      chip.title = open ? TASKS_PER_SUITE + " live model calls" : lockNote(id);
+      chip.title = open ? SUITE_CALLS[id] + " live model calls" : lockNote(id);
       chip.setAttribute("aria-pressed", state.raceSel[id] ? "true" : "false");
       chip.appendChild(el("span", "id", id));
-      chip.appendChild(el("span", "sub", open ? TASKS_PER_SUITE + " live calls" : lockNote(id)));
+      chip.appendChild(el("span", "sub", open ? SUITE_CALLS[id] + " live calls" : lockNote(id)));
       chip.addEventListener("click", function () {
         if (state.raceSel[id]) delete state.raceSel[id];
         else state.raceSel[id] = true;
@@ -745,7 +756,7 @@
     if (state.racing) {
       btn.disabled = true;
       btn.textContent = "racing " + picks.length + " strategies — " +
-                        (picks.length * TASKS_PER_SUITE) + " live calls, no cancel …";
+                        raceCalls(picks) + " live calls, no cancel …";
       return;
     }
     btn.disabled = !ready || picks.length === 0;
@@ -758,7 +769,7 @@
     } else {
       btn.title = "";
       btn.textContent = "Run the 12-task suite × " + picks.length + " — ≈" +
-                        (picks.length * TASKS_PER_SUITE) + " live model calls, several minutes, " +
+                        raceCalls(picks) + " live model calls, several minutes, " +
                         "no cancel" + (picks.length === RACE_STRATEGIES.length ? " (all four)" : "");
     }
   }

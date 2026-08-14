@@ -37,7 +37,11 @@ gateway or a failed install is *environment* (fix it). All commands run from
   for it**, so it lights the moment the client can reach `:4000`.
 - **A "`routing_lab.py` didn't execute" banner** is a *different* failure: the file itself is
   broken (syntax/import), which is not the same as a blank exercise. Unfilled blanks never
-  produce this banner. Run `python3 routing_lab.py --exercise 1` and read the traceback.
+  produce this banner. Run `python3 routing_lab.py --exercise 1` and read the traceback. If the
+  traceback is a **missing import** rather than their own code, check the interpreter: the client
+  runs on the Switchyard venv when one exists, so ask them to re-run
+  `bash scripts/install_switchyard.sh` (it now installs the lab's runtime deps into that venv) and
+  **relaunch the tile**.
 - **The race button is greyed out** — race mode is gated on **Exercise 5** (`routing_verdict`);
   the button's title says so. Race chips are the four *suite* strategies only (`strong_only`,
   `efficient_only`, `manual_classifier`, `switchyard_stage`); `gateway` and `mock_demo` answer
@@ -66,7 +70,13 @@ gateway or a failed install is *environment* (fix it). All commands run from
 - ⚠️ **Never `pip install switchyard`** — that's an unrelated networking-course package (and
   `switchyard-dev` is unrelated too). The right one is **`nemo-switchyard[cli]==0.2.0`**.
 - **"It installed but the lab still can't import it"** — wrong interpreter. Ask which Python the
-  lab is running under; the installer's `--print-python` names the one it used.
+  lab is running under; the installer's `--print-python` names the one it used. When that path is
+  the fallback **venv**, tell them to run the lab *with it* —
+  `"$(bash scripts/install_switchyard.sh --print-python)" routing_lab.py --exercise 3`. The
+  installer also puts the lab's own runtime deps (`langchain-nvidia-ai-endpoints`,
+  `python-dotenv`) in that venv precisely so this works; `start_client.sh` prefers the same
+  interpreter, which is why a venv that could import the SDK but not the lab used to leave the
+  client dark at `0/5`.
 
 ## The gateway (Exercise 4)
 - ⚠️ **There is no `switchyard-server` binary and no `--dry-run` flag.** The same Rust gateway is
@@ -117,7 +127,9 @@ your GPU, hard turns escalate to the hosted 120B and leave it idle.
   them again — deliberately: a routed row means nothing without its controls on the same screen.
   It happens even when 2a/2b are still blank, once Ex1 is filled.
 - **`--exercise 5` is the longest run in the lab** (≈51 calls, 4–12 min).
-- **The client's race is ≈48 live calls** for all four strategies, has **no cancel button**, and
+- **The client's race is ≈64 live calls** for all four strategies (13 per suite — 12 answers plus
+  the LLM judge — and 25 for `manual_classifier`, which pays the router tax per task), has **no
+  cancel button**, and
   closing the tab won't stop a suite that's already started. Run fewer strategies if in a hurry.
 - **A suite that looks hung is usually just a suite** — each exercise prints its own call count
   and expected duration.

@@ -1,6 +1,6 @@
 <div class="dx-hero" data-eyebrow="MODULE 08 / 02 - HOW ROUTERS DECIDE" data-title="Five algorithms. One question." data-sub="What evidence does the router look at before it picks a model - and what does looking at it cost?" data-meta="FAMILIES::5|AXIS::evidence vs cost of deciding"></div>
 
-A router is a decision, and every decision runs on evidence. That's the whole taxonomy: the five families below differ mainly in *what they're allowed to look at* before they pick a model, and in what looking costs.
+A router is a decision, and every decision runs on evidence. That's the whole taxonomy: the five families below differ mainly in *what they're allowed to look at* before they pick a model, and in what looking costs. Five families, four algorithms on the figure — because escalation is a **mode** of `llm_classifier`, not a separate algorithm, and it earns its own family here because it's a genuinely different policy on the same evidence.
 
 Some evidence is already lying around — the request text, the tool result that just came back, how the session has gone so far. Some has to be manufactured: a second model call to read the request, or a training run to learn what each model is genuinely good at. Sort the algorithms that way and the ecosystem stops being a list of names. The names in backticks are NeMo Switchyard's algorithm ids; you'll configure two of them by hand before this module is over.
 
@@ -34,15 +34,17 @@ And then there's the bill. **The judge is itself an LLM call**, on every turn, b
      145-task deep-agent routing benchmark (measured Aug 2026). DENOMINATOR for the 21% is the
      ROUTED configuration's own total spend - not the frontier-only baseline, and not a token
      share. Re-verify against the source post at the calibration pass. -->
-<!-- CALIBRATE: ~2-5% is this module's own Exercise 2 classifier tax, as a share of the ROUTED
-     12-task suite's total spend on the lab workload. Shape-only: the learner measures their own
-     and it moves with answer length, model pricing, and task mix. -->
+<!-- CALIBRATE: ~4-6% is this module's own Exercise 2 classifier tax, as a share of the ROUTED
+     12-task suite's total spend on the lab workload - the band actually observed across the
+     lab's full runs (4% Task 7, 6% Task 9); the earlier band's 2% floor was never observed. Same
+     band as routing_lab.md's PUBLISH RANGES - move them together. Shape-only: the learner
+     measures their own and it moves with answer length, model pricing, and task mix. -->
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">ROUTER TAX - THE CLASSIFIER'S SHARE OF THE ROUTED BILL</p>
   <div class="dx-tax">
     <div class="dx-tax-row" data-tier="max" style="--dx-w:70"><span class="dx-tax-name">LangChain benchmark</span><div class="dx-tax-track"><div class="dx-tax-fill">21%</div></div><span class="dx-tax-note">~700 ms/turn</span></div>
-    <div class="dx-tax-row" style="--dx-w:12"><span class="dx-tax-name">this lab, Exercise 2</span><div class="dx-tax-track"><div class="dx-tax-fill">~2-5%</div></div><span class="dx-tax-note">12-task suite</span></div>
+    <div class="dx-tax-row" style="--dx-w:17"><span class="dx-tax-name">this lab, Exercise 2</span><div class="dx-tax-track"><div class="dx-tax-fill">~4-6%</div></div><span class="dx-tax-note">12-task suite</span></div>
   </div>
 
 Same quantity, two workloads, bars to scale. Both percentages share one denominator: **the routed run's own total spend** — what the judge cost, out of everything that run cost. LangChain's judge read long multi-step trajectories across [145 tasks](https://www.langchain.com/blog/switchyard-agent-routing-benchmark) and added roughly **700 ms to every turn**; this lab's judge reads one short prompt and replies with a single token, against work that's cheap to begin with. Router tax is a *ratio*, so it swings with how expensive the work underneath it is.

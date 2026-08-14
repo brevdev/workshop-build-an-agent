@@ -45,6 +45,15 @@ SHA256_sdist="da76a59ea88563d12828a439ae51475b4ffef2f231a6f44bde47eb2eda5e3648"
 MODEL_EFFICIENT="nvidia/nemotron-3.5-lightning-30b-a3b"
 MODEL_CAPABLE="nvidia/nemotron-3-super-120b-a12b"
 MODEL_JUDGE="nvidia/nemotron-3-nano-30b-a3b"
+
+# The lab's own runtime imports (routing_lab.py line 1). They matter here because the
+# fallback venv is not just "where the SDK lives": routing_client/start_client.sh PREFERS
+# this interpreter when it exists, and the client imports routing_lab. A venv that can
+# import switchyard but not the lab leaves the client permanently dark ("routing_lab.py
+# didn't execute", 0/5). Installed explicitly rather than via `venv --system-site-packages`
+# so the result is deterministic on PEP-668 hosts, where the ambient environment may not
+# carry them either.
+LAB_RUNTIME_PINS=("langchain-nvidia-ai-endpoints>=1.4,<2" "python-dotenv")
 # ---------------------------------------------------------------------------
 
 PRINT_ONLY=0
@@ -66,6 +75,16 @@ has_pin() {
 import sys, switchyard, switchyard_rust.server
 sys.exit(0 if switchyard.__version__ == '${SWITCHYARD_VERSION}' else 1)
 " >/dev/null 2>&1
+}
+
+# Make sure $1 (our venv's python) can run routing_lab.py, not just import the SDK.
+# Idempotent, and only ever called for the venv we own -- never for the ambient env.
+ensure_lab_runtime() {
+    if ! "$1" -c 'import langchain_nvidia_ai_endpoints, dotenv' >/dev/null 2>&1; then
+        say "==> Adding the lab's runtime deps (routing_lab.py imports them)..."
+        "$1" -m pip install --quiet "${LAB_RUNTIME_PINS[@]}"
+    fi
+    "$1" -c 'import langchain_nvidia_ai_endpoints, dotenv' >/dev/null
 }
 
 # Is $1 a python >= SWITCHYARD_MIN_PY?
@@ -147,6 +166,13 @@ else
     fi
 fi
 
+# Whenever the answer is our venv -- freshly built above, or found by the idempotency
+# probe on a re-run -- it also has to be able to run the lab. (Checked here, outside the
+# install branch, so a venv made by an earlier version of this script gets repaired too.)
+case "$PY" in
+    "$SWITCHYARD_VENV"/*) ensure_lab_runtime "$PY" ;;
+esac
+
 # ------------------------------------------------------------ verify ----
 VERSION="$("$PY" -c 'import switchyard; print(switchyard.__version__)')"
 if [ "$VERSION" != "$SWITCHYARD_VERSION" ]; then
@@ -167,7 +193,7 @@ if [ "$PRINT_ONLY" -eq 1 ]; then
 fi
 
 echo "✅ nemo-switchyard ${VERSION} ready"
-echo "   interpreter        : ${PY}"
+echo "   interpreter        : ${PY}   (runs routing_lab.py too — use it if it is a venv)"
 echo "   in-process router  : switchyard.libsy (LlmTarget / algorithms.*)"
 echo "   embedded gateway   : switchyard_rust.server.Server('routes.toml', port=4000)"
 echo "   model pool         : ${MODEL_EFFICIENT} (efficient) | ${MODEL_CAPABLE} (capable) | ${MODEL_JUDGE} (judge)"

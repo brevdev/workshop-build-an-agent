@@ -58,9 +58,9 @@ that's environment, route to the module's `troubleshooting.md`).
   `1b` (`bill_call`), `2a` (`classify_difficulty`), `2b` (`route_call`), `3a` (`make_lab_router`),
   `3b` (`switchyard_call`), `5` (`routing_verdict`).
 - **The learner's own progress signal is the Routing Client's `systems online: N/5` strip** — it
-  is `probe_unlocks(module)` in `routing_lab.py` rendered as chips: Ex1 lights the
-  **strong-only / efficient-only** chips + the meter, Ex2 the **manual classifier**, Ex3
-  **Switchyard: stage router**, Ex4 the **gateway** chip (when `:4000` answers), Ex5 **race mode**.
+  is `probe_unlocks(module)` in `routing_lab.py` rendered as chips (the UI labels them with their
+  canonical ids): Ex1 lights `strong_only` / `efficient_only` + the meter, Ex2 `manual_classifier`,
+  Ex3 `switchyard_stage`, Ex4 the `gateway` chip (when `:4000` answers), Ex5 **race mode**.
   Asking "what does your header say?" is faster than any grep.
 - Exercise 4's blank is a config file, so it isn't probed: `ls code/8-agent-routing/routes.toml`
   (git-ignored copy of `routes.toml.template` — absent = Ex4 not started) and gateway liveness

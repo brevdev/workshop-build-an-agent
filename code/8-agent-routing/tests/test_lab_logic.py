@@ -245,7 +245,10 @@ def test_routing_verdict_math():
     assert routed["accuracy"] == 11 and abs(routed["frontier_pct"] - 25.0) < 0.1
     assert abs(v["savings_pct"] - (1 - 0.41 / 1.55) * 100) < 0.1
     assert "$" in v["receipt"] and "%" in v["receipt"]
-    assert abs(v["monthly"]["strong_only"] - 1.55 * lab.AT_SCALE_TASKS_PER_DAY * 30) < 1e-6
+    # PER TASK: AT_SCALE_TASKS_PER_DAY counts tasks/day, so the suite total is divided by
+    # the 12 tasks in it before it is projected. Multiplying the whole suite instead reads
+    # 12x high under a label that says "at 1000/day".
+    assert abs(v["monthly"]["strong_only"] - 1.55 / 12 * lab.AT_SCALE_TASKS_PER_DAY * 30) < 1e-6
 
 def test_router_tax_pct_is_a_share_of_spend_not_of_cost_plus_tax():
     # The tax is already INSIDE cost (run_suite's per-task cost is a meter delta that
@@ -262,7 +265,7 @@ def test_routing_verdict_receipt_clauses_are_pinned_in_order():
     assert lab.routing_verdict(_sample_results())["receipt"].split(" · ") == [
         "routed: 75/25 open/frontier mix",
         "$0.41 vs $1.55 (−74%)",
-        f"at {lab.AT_SCALE_TASKS_PER_DAY}/day: $12,300 vs $46,500/mo",
+        f"at {lab.AT_SCALE_TASKS_PER_DAY}/day: $1,025 vs $3,875/mo",
         "accuracy 11/12 vs 12/12",
         "router tax 10% of spend",
     ]

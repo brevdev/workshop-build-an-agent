@@ -173,7 +173,7 @@
 # exactly as before. See the header of that script for the full rationale.
 #
 # cwd MUST stay /project: that is what makes this repo's tutor skills load, so a
-# learner can type /workshop or /module-1..7 straight after authenticating.
+# learner can type /workshop or /module-1..8 straight after authenticating.
 # Claude Code reads .claude/skills/, Codex reads .agents/skills/.
 #
 # Deliberately no `args: {reuse: true}` — on a second click reuse reconnects to the
@@ -188,7 +188,7 @@
 # "N" would push these tiles above the learning path.
 
 - title: "Claude Code"
-  description: "Anthropic's agentic CLI, preloaded with this workshop's tutor skills. Authenticate on first run, then use /workshop or /module-1..7 — or just ask."
+  description: "Anthropic's agentic CLI, preloaded with this workshop's tutor skills. Authenticate on first run, then use /workshop or /module-1..8 — or just ask."
   source: "bash /project/.devx/bin/start-assistant.sh claude"
   cwd: /project
   type: terminal
@@ -197,7 +197,7 @@
   catalog: Workshop Assistants
 
 - title: "Codex CLI"
-  description: "OpenAI's agentic CLI, preloaded with this workshop's tutor skills. Authenticate on first run, then use $workshop or $module-1..7 — or just ask."
+  description: "OpenAI's agentic CLI, preloaded with this workshop's tutor skills. Authenticate on first run, then use $workshop or $module-1..8 — or just ask."
   source: "bash /project/.devx/bin/start-assistant.sh codex"
   cwd: /project
   type: terminal

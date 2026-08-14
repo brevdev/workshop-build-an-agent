@@ -103,7 +103,7 @@ the fourth is the **live** yard inside the Routing Client, which animates as que
   - *"The client is doing the routing."* **Window, not wizard.** It contains zero routing logic;
     it re-reads `routing_lab.py` from disk per request and renders whatever the learner's file
     returns. A dark panel means an unfilled blank, not a broken client.
-  - *"The demo (mock) chip means it's not calling a model."* **Mock = SDK-less, not key-less.**
+  - *"The `mock_demo` chip means it's not calling a model."* **Mock = SDK-less, not key-less.**
     The mock replaces the *decision*; the answering call is real and billed.
   - *"The GPU lane is missing/idle."* It only exists on the optional 4b path; on 4a there is no
     local locomotive, and that's correct.

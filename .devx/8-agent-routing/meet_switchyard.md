@@ -1,6 +1,6 @@
 <div class="dx-hero" data-eyebrow="MODULE 08 / 03 - MEET NEMO SWITCHYARD" data-title="Three nouns and a config file." data-sub="NVIDIA's open-source router - embed it in your process, or stand it in front of your models. Either way, the routing decision stops being logic you write." data-meta="LICENSE::Apache-2.0|SURFACES::library, gateway, launcher|TESTED::0.2.0"></div>
 
-Five algorithm families, one open-source implementation. [NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) is Apache-2.0, it shipped alongside Nemotron 3.5 Lightning — the model your lab uses as its efficient tier — and it's what the rest of this module runs on.
+Five algorithm families — four algorithm ids, because escalation is a **mode** of `llm_classifier` rather than an algorithm of its own — and one open-source implementation. [NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) is Apache-2.0, it shipped alongside Nemotron 3.5 Lightning — the model your lab uses as its efficient tier — and it's what the rest of this module runs on.
 
 It comes in three sizes: same routing core, three places to put it.
 
@@ -145,7 +145,7 @@ llm_client = "anthropic"
 
 Switchyard is the dispatcher in a stack you've used all workshop: **Nemotron** models to route *to*, **NIM** to serve them wherever you want them served, and NVIDIA's inference layer under both. The router doesn't serve models and the serving stack doesn't pick them.
 
-At launch NVIDIA named who was already building on it: **LiteLLM** adding it as a plug-in to its proxy layer, **Kong** delivering it natively through Kong AI Gateway, **Cognition** running the staged router inside Devin Desktop, **LangChain** publishing the 145-task routing evaluation this module keeps quoting, and Nous Research wiring it into **Hermes** — the harness you toured in Module 7 — as an easy-to-configure routing system ([NVIDIA's launch post](https://blogs.nvidia.com/blog/nemotron-lightning-switchyard-rtx-dgx/)).
+At launch NVIDIA named who was already building on it: **LiteLLM** adding it as a plug-in to its proxy layer, **Kong** delivering it natively through Kong AI Gateway, **Cognition** running a Switchyard router inside Devin Desktop, **LangChain** publishing the 145-task routing evaluation this module keeps quoting, and Nous Research wiring it into **Hermes** — the harness you toured in Module 7 — as an easy-to-configure routing system ([NVIDIA's launch post](https://blogs.nvidia.com/blog/nemotron-lightning-switchyard-rtx-dgx/)).
 
 Read that as direction, not as a shopping list. Some of it is announced-and-arriving: there's no LangChain or LiteLLM Switchyard middleware to `pip install` today, and searching PyPI for "switchyard" turns up two unrelated projects that will install happily and teach you nothing. The package this module pins is **`nemo-switchyard`**, installed by `scripts/install_switchyard.sh`; the lab's in-process path is `switchyard.libsy`, reached through the module's own `switchyard_shim.py`.
 
@@ -167,9 +167,9 @@ One specific, so it doesn't cost you an afternoon: the published package needs *
 
 ## What It Bought Somebody Else
 
-<div class="dx-island dx-bet" data-answer="~28% lower mean cost per run" data-explain="Cognition ran a Switchyard staged router in Devin Desktop and measured it on FrontierCode Main: 50.6% accuracy at $3.11 mean cost per run, about 28% below the frontier-only baseline and within 2.8 accuracy points of it. Two numbers, two denominators - the 28% is cost per run against that baseline, the 50.6% is an absolute score on the benchmark.">
+<div class="dx-island dx-bet" data-answer="~28% lower mean cost per run" data-explain="Cognition ran a Switchyard router in Devin Desktop and measured it on FrontierCode Main: 50.6% accuracy at $3.11 mean cost per run, about 28% below the frontier-only baseline and within 2.8 accuracy points of it. Two numbers, two denominators - the 28% is cost per run against that baseline, the 50.6% is an absolute score on the benchmark.">
   <p class="dx-island-title">PLACE YOUR BET</p>
-  <p class="dx-quiz-q">Cognition put a Switchyard staged router inside Devin Desktop and measured it on its own production-coding benchmark. How much did the routed mix cut mean cost per run, against sending every request to the frontier model?</p>
+  <p class="dx-quiz-q">Cognition put a Switchyard router inside Devin Desktop and measured it on its own production-coding benchmark. How much did the routed mix cut mean cost per run, against sending every request to the frontier model?</p>
   <div class="dx-bet-opts">
     <button class="dx-bet-opt">~5%</button>
     <button class="dx-bet-opt">~15%</button>

@@ -31,7 +31,7 @@ Seven TODOs across five exercises, in order: `--exercise 1` → `5`. Every exerc
 | 1 | The model pool and the bill meter | Two models, one meter: what the same 12 tasks cost on each | `python3 routing_lab.py --exercise 1` |
 | 2 | A hand-rolled classifier router | A cheap model reads the request first and picks the lane — and that call is the **router tax** | `python3 routing_lab.py --exercise 2` |
 | 3 | The same decision, from a library | Switchyard's stage router reads the trajectory the agent already produced, so the decision costs no extra call | `python3 routing_lab.py --exercise 3` |
-| 4 | The same decision, out of the app | `routes.toml` owns the policy; the app asks for one route id and is never told which model answered | `python3 routing_lab.py --exercise 4` |
+| 4 | The same decision, out of the app | `routes.toml` owns the policy; the app asks for one route id and never has to choose which model answers — the yard does, and reports the upstream model id back | `python3 routing_lab.py --exercise 4` |
 | 5 | The verdict | Accuracy, spend, the open/frontier mix, and what the router itself cost | `python3 routing_lab.py --exercise 5` |
 
 Exercise 4's blank is a **config file, not Python**, and it needs the gateway running in a second terminal:

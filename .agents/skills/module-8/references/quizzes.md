@@ -56,7 +56,7 @@ module teaches.
   identical to an easy one. That's why Exercise 3's twelve single-shot prompts produce **zero
   escalations, correctly**.
 
-### 4. `meet_switchyard.md` (PLACE YOUR BET) — "Cognition put a Switchyard staged router inside Devin Desktop… how much did the routed mix cut mean cost per run?"
+### 4. `meet_switchyard.md` (PLACE YOUR BET) — "Cognition put a Switchyard router inside Devin Desktop… how much did the routed mix cut mean cost per run?"
 - **Options:** ~5% · ~15% · **~28%** · ~70%. **Correct: ~28% lower mean cost per run.**
 - **Why:** on FrontierCode Main (Cognition's own production-coding benchmark) the routed mix
   scored **50.6% accuracy at $3.11 mean cost per run** — about **28% below the frontier-only

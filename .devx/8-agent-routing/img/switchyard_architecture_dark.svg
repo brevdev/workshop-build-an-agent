@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 446" width="820" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
+  <!-- Hand-authored dark "Switchyard architecture" diagram for the DevX dark theme
+       (module 8, meet_switchyard.md). NO mermaid source and no .mmd sidecar: this box is
+       aarch64 with no headless Chrome, so mermaid cannot render here and the SVG IS the
+       source. Edit this file directly.
+
+       Palette - the component contract's dark set, and nothing else:
+         #0e1116 page bg  |  #161616 panel fill  |  #3a3a3a panel stroke
+         #f2f2f2 text     |  #6e6e6e rules/arrows |  #76b900 green  |  #e8a33d amber
+       Secondary text is #f2f2f2 at reduced fill-opacity rather than a second grey, so the
+       file stays inside the contract palette while small text keeps its contrast.
+       All text is >= 11px at the authored width (820), which is inside the 56em column.
+       ASCII bytes only: the em dash is &#8212; and the middot is &#183;.
+
+       Semantics: green = the cheap tier, amber = the calls that cost (the strong answer and
+       the judge's own call). Solid arrow = what the lab ships; dashed = the same llm_client
+       pointed at a different base_url.
+
+       Geometry (columns, left to right, 24px gutters):
+         agent 22..118 | route 142..284 | targets 308..436 | llm_clients 460..592 |
+         providers 616..798.  Both brackets span the router core, 142..592.
+
+       Ground truth for every string on this canvas: docs/specs/switchyard-api-notes.md
+       (nemo-switchyard 0.2.0) and code/8-agent-routing/routes.toml.answers. In particular
+       there is NO standalone server binary to install - the gateway is the same Rust server
+       embedded in the pip wheel, started by scripts/serve_gateway.sh. -->
+  <defs>
+    <marker id="sa8-arrow" markerWidth="10" markerHeight="9" refX="9" refY="4.5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L10,4.5 L0,9 Z" fill="#6e6e6e"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="820" height="446" fill="#0e1116"/>
+
+  <text x="22" y="30" fill="#f2f2f2" font-size="13" font-weight="700" letter-spacing="2">SWITCHYARD, END TO END</text>
+
+  <!-- ===================== BRACKET 1 - in-process ===================== -->
+  <text x="367" y="58" fill="#f2f2f2" fill-opacity="0.62" font-size="11" text-anchor="middle">in-process (switchyard.libsy &#8212; Exercise 3)</text>
+  <path d="M142,80 V70 H592 V80" fill="none" stroke="#6e6e6e" stroke-width="1.5"/>
+
+  <!-- ===================== 1 - your agent ===================== -->
+  <rect x="22" y="158" width="96" height="86" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="32" y="186" fill="#f2f2f2" font-size="12" font-weight="700">your agent</text>
+  <text x="32" y="210" fill="#f2f2f2" fill-opacity="0.55" font-size="11">model =</text>
+  <text x="32" y="226" fill="#f2f2f2" font-size="11" font-weight="700">switchyard</text>
+
+  <line x1="118" y1="201" x2="142" y2="201" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+
+  <!-- ===================== 2 - the route (algorithm) ===================== -->
+  <rect x="142" y="126" width="142" height="150" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="156" y="152" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">ROUTE</text>
+  <text x="156" y="172" fill="#f2f2f2" font-size="11" font-weight="700">id = &#34;switchyard&#34;</text>
+  <text x="156" y="196" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">ALGORITHM</text>
+  <text x="156" y="216" fill="#f2f2f2" font-size="12">llm_classifier</text>
+  <text x="156" y="232" fill="#f2f2f2" fill-opacity="0.62" font-size="11">mode = escalation</text>
+  <text x="156" y="248" fill="#f2f2f2" fill-opacity="0.62" font-size="11">confirmations = 2</text>
+  <text x="156" y="266" fill="#f2f2f2" fill-opacity="0.45" font-size="11">the dispatcher</text>
+
+  <!-- the dispatcher fans out to the three targets -->
+  <line x1="284" y1="201" x2="308" y2="127" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+  <line x1="284" y1="201" x2="308" y2="201" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+  <line x1="284" y1="201" x2="308" y2="275" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+
+  <!-- ===================== 3 - targets ===================== -->
+  <text x="308" y="88" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">TARGETS</text>
+
+  <rect x="308" y="96" width="128" height="62" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="320" y="122" fill="#f2f2f2" font-size="12" font-weight="700">weak</text>
+  <text x="320" y="140" fill="#76b900" font-size="11">Lightning 30B</text>
+
+  <rect x="308" y="170" width="128" height="62" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="320" y="196" fill="#f2f2f2" font-size="12" font-weight="700">strong</text>
+  <text x="320" y="214" fill="#e8a33d" font-size="11">Super 120B</text>
+
+  <rect x="308" y="244" width="128" height="62" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="320" y="270" fill="#f2f2f2" font-size="12" font-weight="700">judge</text>
+  <text x="320" y="288" fill="#e8a33d" font-size="11">Nano 30B</text>
+
+  <line x1="436" y1="127" x2="460" y2="127" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+  <line x1="436" y1="201" x2="460" y2="201" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+  <line x1="436" y1="275" x2="460" y2="275" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+
+  <!-- ===================== 4 - llm_clients ===================== -->
+  <rect x="460" y="110" width="132" height="182" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="472" y="136" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">LLM_CLIENTS</text>
+  <text x="472" y="156" fill="#f2f2f2" font-size="12" font-weight="700">[nvidia]</text>
+  <text x="472" y="180" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">WIRE FORMAT</text>
+  <text x="472" y="196" fill="#f2f2f2" font-size="11">openai_chat</text>
+  <text x="472" y="220" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">ENDPOINT</text>
+  <text x="472" y="236" fill="#f2f2f2" font-size="11">one base_url</text>
+  <text x="472" y="260" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">CREDENTIAL</text>
+  <text x="472" y="276" fill="#f2f2f2" font-size="11">NVIDIA_API_KEY</text>
+
+  <line x1="592" y1="201" x2="616" y2="127" stroke="#6e6e6e" stroke-width="1.5" marker-end="url(#sa8-arrow)"/>
+  <line x1="592" y1="201" x2="616" y2="201" stroke="#6e6e6e" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#sa8-arrow)"/>
+  <line x1="592" y1="201" x2="616" y2="275" stroke="#6e6e6e" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#sa8-arrow)"/>
+
+  <!-- ===================== 5 - providers ===================== -->
+  <text x="616" y="88" fill="#f2f2f2" fill-opacity="0.55" font-size="11" letter-spacing="1.2">WHERE THE TOKENS ARE MADE</text>
+
+  <rect x="616" y="96" width="182" height="62" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="628" y="122" fill="#f2f2f2" font-size="12" font-weight="700">build.nvidia.com</text>
+  <text x="628" y="140" fill="#f2f2f2" fill-opacity="0.62" font-size="11">hosted, your API key</text>
+
+  <rect x="616" y="170" width="182" height="62" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="628" y="196" fill="#f2f2f2" font-size="12" font-weight="700">local NIM</text>
+  <text x="628" y="214" fill="#f2f2f2" fill-opacity="0.62" font-size="11">your own GPU (Ex 4b)</text>
+
+  <rect x="616" y="244" width="182" height="62" rx="8" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="628" y="270" fill="#f2f2f2" font-size="12" font-weight="700">any OpenAI-compatible</text>
+  <text x="628" y="288" fill="#f2f2f2" fill-opacity="0.62" font-size="11">vLLM, Ollama, anything</text>
+
+  <!-- ===================== BRACKET 2 - gateway ===================== -->
+  <path d="M142,326 V336 H592 V326" fill="none" stroke="#6e6e6e" stroke-width="1.5"/>
+  <text x="367" y="356" fill="#f2f2f2" fill-opacity="0.62" font-size="11" text-anchor="middle">gateway (embedded server, scripts/serve_gateway.sh &#8212; Exercise 4)</text>
+
+  <!-- ===================== LEGEND ===================== -->
+  <line x1="22" y1="372" x2="798" y2="372" stroke="#6e6e6e" stroke-width="1"/>
+  <text x="22" y="392" fill="#f2f2f2" fill-opacity="0.62" font-size="11">solid = what the lab ships &#183; dashed = the same llm_client with a different base_url</text>
+  <text x="22" y="410" fill="#f2f2f2" fill-opacity="0.62" font-size="11">in-process, your code supplies the clients &#183; at the gateway all three nouns come from routes.toml</text>
+  <text x="22" y="428" fill="#f2f2f2" fill-opacity="0.62" font-size="11">green = the cheap tier &#183; amber = what costs: the strong answer, and the judge&#39;s own call</text>
+</svg>

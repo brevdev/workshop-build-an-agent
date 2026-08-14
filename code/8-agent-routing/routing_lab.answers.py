@@ -84,9 +84,16 @@ CLASSIFY_PROMPT = (
     "Reply with exactly one word: COMMODITY or FRONTIER.\n\nRequest:\n{query}"
 )
 
+# Thinking OFF is load-bearing here. A one-word contract plus a reasoning model is a trap:
+# with thinking on, the classifier spends the whole 8-token budget deliberating ("Here's a
+# thinking process: 1."), never says the word, and the fail-up rule below quietly routes 100%
+# of traffic to the strong model — a router that looks healthy and routes nothing. The library's
+# `with_thinking_mode()` does not cover this model id; the knob is the `chat_template_kwargs`
+# key `thinking`, passed through `model_kwargs`.
 def build_classifier():
     return ChatNVIDIA(model=CLASSIFIER_MODEL, temperature=0.0,
-                      max_completion_tokens=8, timeout=60)
+                      max_completion_tokens=8, timeout=60,
+                      model_kwargs={"chat_template_kwargs": {"thinking": False}})
 
 def classify_difficulty(query, classifier_chat, bill):
     # === Exercise 2a (answer) ===

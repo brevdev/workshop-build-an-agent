@@ -54,6 +54,20 @@ def test_run_suite_bills_every_task_under_a_passthrough_strategy(monkeypatch):
 
 # --- Exercise 2: the hand-rolled classifier router ---------------------------
 
+def test_classifier_is_built_with_thinking_off(monkeypatch):
+    # Load-bearing knob, not a style choice: with thinking ON the classifier spends its whole
+    # 8-token budget deliberating, never says COMMODITY, and fail-up routes 100% to the strong
+    # model -- a router that looks healthy and routes nothing. Recorded, not constructed for
+    # real: building a ChatNVIDIA hits the network and warns.
+    seen = {}
+    def recorder(**kwargs):
+        seen.update(kwargs)
+        return "client"
+    monkeypatch.setattr(lab, "ChatNVIDIA", recorder)
+    assert lab.build_classifier() == "client"
+    assert seen["model"] == CLASSIFIER_MODEL
+    assert seen["model_kwargs"] == {"chat_template_kwargs": {"thinking": False}}
+
 def test_classifier_parses_and_fails_up(fake_chat):
     bill = lab.RunningBill()
     assert lab.classify_difficulty("q", fake_chat("COMMODITY"), bill)[0] == "COMMODITY"

@@ -69,6 +69,18 @@ where it's central; for depth, see that module's `concepts.md`.
 - **NVIDIA Verified Skills** — signed, security-scanned skills (`github.com/NVIDIA/skills`) teaching agents to use NVIDIA software (cuDF, cuOpt, NeMo…); capability governance via SkillSpector, skill cards, and OpenSSF Model Signing.
 - **The harness landscape** — pi (minimal) · OpenCode · LangChain Deep Agents · Hermes (curated, the M7 lab harness) · OpenClaw (maximal, M6) · Claude Code / Codex (subscription, maximal).
 
+## Model routing & economics (M8)
+- **Tokenomics** — the unit economics of LLM work: dollars and seconds per call, per task, per user, per month. M7 taught every token has a *cost* (the context tax); M8 that every token has a *price*, set by **who generates it**.
+- **Model portfolio / model mix** — treating models as a portfolio rather than a pick: commodity calls to open models (most), genuinely hard calls to a frontier model (few). The workshop's answer to the frontier-vs-open false binary: *use both, efficiently.* Rebalancing = a config edit + an eval run.
+- **Model routing (performance routing)** — choosing *which model answers this call* on difficulty and cost. Distinct from M1's control-flow routing (which step) and M6's policy routing (which backend the operator permits).
+- **Route / target / `llm_client`** — Switchyard's three nouns, in dependency order: an **`llm_client`** is *where requests go* (endpoint + wire format + the **name** of the key's env var); a **target** is *which model* (an upstream model id on a client, under a short name); a **route** is *what your app asks for* (a public model id + the algorithm that picks among targets). Only the route id is visible to your application.
+- **Capability mode vs escalation mode** (`llm_classifier`) — **capability**: a judge scores each request for *how likely the efficient model is to succeed*; **above `base_threshold`** rides efficient, **below** escalates (raising the dial escalates *more*). **Escalation**: no threshold — every session starts on the weak target and moves up after N consecutive escalate verdicts (`confirmations`), **one-way**, never back down.
+- **Session affinity** — pinning a session to the tier it started on so the agent doesn't flap between brains mid-conversation. At the gateway, sessions are grouped by the `x-switchyard-session-id` header; `message_hash_fallback` is the backstop for clients that send none (and requires session affinity).
+- **Router tax** — the permanent per-turn cost of *deciding* (a judge call's tokens + latency). Real, and measured as a **ratio of the routed run's own spend**: ~4–6% in the M8 lab, 21% and ~700 ms/turn in LangChain's benchmark. `stage_router` has none (its evidence was free); at the gateway it lives in `/v1/stats`, not on your receipt.
+- **Pareto frontier (cost vs accuracy)** — the set of routing configurations where you can't get cheaper without getting worse. Sweeping `base_threshold` traces it on *your* workload; the Routing Client's race plots accuracy against cost so the learner can see it.
+- **Frontier stand-in** — in the M8 lab, Nemotron Super 120B *plays* the expensive tier so the module runs on one free key. Not literally a frontier model.
+- **NeMo Switchyard** — NVIDIA's open-source (Apache-2.0) router: an in-process library (`switchyard.libsy`), an OpenAI-compatible gateway embedded in the pip wheel (`routes.toml`), and a launcher for M7's harnesses. Pre-alpha; the module pins `nemo-switchyard[cli]==0.2.0`.
+
 ## NVIDIA platform (all modules)
 - **NIM (NVIDIA Inference Microservices)** — the serving layer; hosted at `integrate.api.nvidia.com`, or run locally as a container.
 - **NGC (NVIDIA GPU Cloud)** — registry + where API keys live.

@@ -328,6 +328,11 @@ Agent processes live in an inner network namespace — a server bound even to
 #    forward list`/`stop` do NOT track `forward service` tunnels — stop it
 #    with Ctrl-C or pkill -f "forward service $SANDBOX".
 openshell forward service "$SANDBOX" --target-port 8888 --local 8888
+# Agent-driven runs (e.g. Claude Code): a session-tied background task dies
+# with the session, silently cutting the user's access (happened live).
+# Start it detached instead, so it outlives the session:
+#   setsid nohup openshell forward service "$SANDBOX" \
+#     --target-port 8888 --local 8888 >/tmp/forward-"$SANDBOX".log 2>&1 </dev/null &
 
 # 2. Sanity check from another host shell (302 = alive, auth redirect):
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8888/lab
@@ -347,6 +352,20 @@ tsh ssh -N -L 8888:localhost:8888 <user>@<node-name>         # Teleport: NODE NA
 **`-N` is silent when it works** — no output means the tunnel is UP; open the
 browser before assuming a hang. Finally open the token URL:
 `http://localhost:8888/lab?token=…`.
+
+**Hand-off rule — the final access-steps message ALWAYS includes the
+host-side forward command,** even when a forward is already up and serving.
+The forward is the one leg the user cannot see: `forward list` does not
+track it, and it dies silently with whatever shell or agent session spawned
+it (a Claude Code exit cut a user's access exactly this way). Alongside the
+laptop tunnel + token URL, hand the user something like:
+
+> FYI — the JupyterLab URL depends on a port-forward running on the sandbox
+> host. If the URL stops responding, restart it there:
+> `openshell forward service <sandbox> --target-port 8888 --local 8888`
+> (leave it running; stop with `pkill -f "forward service <sandbox>"`), then
+> reload the page. Re-read the token URL any time with:
+> `docker exec <container> cat /sandbox/workshop-url.txt`.
 
 ## Phase 5 — When something is denied
 

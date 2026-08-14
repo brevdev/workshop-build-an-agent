@@ -1,6 +1,6 @@
 ---
 name: workshop
-description: This skill should be used when a learner wants to navigate or understand the Build-an-Agent workshop as a whole — e.g. "$workshop where do I start?", "what order should I do the modules in?", "what does Module 3 need before I start?", "which module covers RAG / evaluation / training / safety?", "how do the modules connect?", "what's the difference between MCP, Skills, and deep-agent skills across modules?", "what have I finished and what's next?", "am I ready for the next module?". It is the workshop's overview + router that maps the seven-module arc and prerequisites, points the learner to the right $module-N skill, explains cross-module connections, and hosts the shared tutoring policy, glossary, and progress checks that all module skills draw on. For installing/launching the environment it points to the setup-workshop skill.
+description: This skill should be used when a learner wants to navigate or understand the Build-an-Agent workshop as a whole — e.g. "$workshop where do I start?", "what order should I do the modules in?", "what does Module 3 need before I start?", "which module covers RAG / evaluation / training / safety / routing?", "how do the modules connect?", "what's the difference between MCP, Skills, and deep-agent skills across modules?", "what have I finished and what's next?", "am I ready for the next module?". It is the workshop's overview + router that maps the eight-module arc and prerequisites, points the learner to the right $module-N skill, explains cross-module connections, and hosts the shared tutoring policy, glossary, and progress checks that all module skills draw on. For installing/launching the environment it points to the setup-workshop skill.
 user-invocable: true
 disable-model-invocation: false
 ---
@@ -16,13 +16,13 @@ handles the *whole journey* and hosts the resources shared across all of them.
 
 **Invoking the tutor:** the learner reaches these skills by running `codex` (in a DevX-Lab
 JupyterLab terminal, or against a local clone) and typing `$workshop` for this overview or
-`$module-N` (1–7) for a specific module (or run `/skills` to pick one from a menu); setup is in the README's *Learn with an AI tutor*
+`$module-N` (1–8) for a specific module (or run `/skills` to pick one from a menu); setup is in the README's *Learn with an AI tutor*
 section. Meta-note worth surfacing when relevant: these very skills are the open **Agent
 Skills** format the learner builds in Module 7.
 
 **The learner asked:** $ARGUMENTS
 
-## The seven-module arc
+## The eight-module arc
 Each module adds a capability *and* a matching discipline. Detailed version in `references/map.md`.
 
 | # | Module | What you build | Skill | Needs first | ~Time | Hardware |
@@ -34,6 +34,7 @@ Each module adds a capability *and* a matching discipline. Detailed version in `
 | 5 | Deep Agents | a sandboxed deep agent | `$module-5` | M1–M2 concepts | 1–2 h | Docker (no GPU) |
 | 6 | Agent Safety | a NemoClaw-hardened OpenClaw agent | `$module-6` | M4–M5 concepts; extends M3 | 2–2.5 h | Docker + kernel ≥ 5.13 |
 | 7 | Harnesses & Skills | a pi-style harness + portable skills | `$module-7` | M1–M6 | 2–3 h | none main; opt. GPU (Ex4) |
+| 8 | Agent Routing | a metered, routed agent + the Routing Client | `$module-8` | M1 + M7 concepts | 2–3 h | none main; opt. GPU (Ex4b) |
 
 > **Hard prerequisite:** Module 3 *evaluates the M1 and M2 agents*, so those must be built
 > first (the workshop sanctions pasting the M2 answer key to get a runnable agent-under-test).
@@ -48,6 +49,7 @@ Map the learner's intent to the right skill, then hand off (or invoke it):
 - "deep agent, planning, sub-agents, sandboxing, deepagents" → **module-5**
 - "safety, NemoClaw, OpenShell, Landlock, Privacy Router, red-team" → **module-6**
 - "harness, context tax, lazy skills, pi/Hermes/Claude Code, Verified Skills, GPU skills" → **module-7**
+- "model routing, Switchyard, tokenomics, cost/price per call, router tax, escalation vs capability, `routes.toml`" → **module-8**
 - "install / set up / spin up the workshop, can't open DevX-Lab" → the **setup-workshop** skill
 - overview / order / prerequisites / "how do X and Y connect" / "what's next" → **stay here**
 

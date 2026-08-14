@@ -8,7 +8,7 @@ user-invocable: true
 # Set Up & Run the Build-an-Agent Workshop Locally
 
 Bring a local Linux NVIDIA GPU machine from bare to a browser-accessible
-**DevX-Lab** — the workshop's JupyterLab environment for all seven modules. This
+**DevX-Lab** — the workshop's JupyterLab environment for all eight modules. This
 reproduces the Brev cloud deployment *minus* its cloud-only plumbing: no
 cloud-user detection, and the nginx single-port router + systemd auto-start are
 optional rather than default (local users reach the app directly via the

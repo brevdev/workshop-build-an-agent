@@ -52,12 +52,35 @@ that's environment, route to the module's `troubleshooting.md`).
 - Authored skill (Ex3): `ls code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`. Verified skill (Ex4): `ls code/7-agent-harnesses/skills/accelerated-computing-cudf/SKILL.md` (run `scripts/install_nvidia_skill.sh` first).
 - GPU (Ex4 speedup only): `nvidia-smi` — absent is fine (the exercise falls back to pandas + prints a skip message). "Done" = `python harness_lab.py --exercise N` runs for each completed exercise.
 
+### Module 8
+- Remaining blanks: `grep -nE 'raise NotImplementedError\("Exercise' code/8-agent-routing/routing_lab.py` —
+  any hits → that blank is still a stub. Seven of them, in order: `1a` (`build_model_pool`),
+  `1b` (`bill_call`), `2a` (`classify_difficulty`), `2b` (`route_call`), `3a` (`make_lab_router`),
+  `3b` (`switchyard_call`), `5` (`routing_verdict`).
+- **The learner's own progress signal is the Routing Client's `systems online: N/5` strip** — it
+  is `probe_unlocks(module)` in `routing_lab.py` rendered as chips: Ex1 lights the
+  **strong-only / efficient-only** chips + the meter, Ex2 the **manual classifier**, Ex3
+  **Switchyard: stage router**, Ex4 the **gateway** chip (when `:4000` answers), Ex5 **race mode**.
+  Asking "what does your header say?" is faster than any grep.
+- Exercise 4's blank is a config file, so it isn't probed: `ls code/8-agent-routing/routes.toml`
+  (git-ignored copy of `routes.toml.template` — absent = Ex4 not started) and gateway liveness
+  `curl -s localhost:4000/v1/models` (returns the one route id `switchyard`);
+  `curl -s localhost:4000/v1/stats` is the gateway's own meter (tier split + router tax).
+- Switchyard SDK present (Ex3 runs a loud `MockRouter` without it — degraded, not broken):
+  `python3 -c 'import switchyard; print(switchyard.__version__)'` or
+  `ls ~/.local/share/module8-switchyard-venv/bin/python`. ⚠️ Don't "check" with
+  `install_switchyard.sh --print-python` — on a cold box that call performs the install.
+- Optional Ex4b only: `docker ps` + `nvidia-smi` (absent is fine — 4a is the full exercise).
+- "Done" = each completed exercise runs (`python3 routing_lab.py --exercise N`). ⚠️ **Never run
+  one to check** — the suites cost real money (~26–51 live calls each).
+
 ## Readiness gates (for "am I ready for module N?")
 - **→ M3:** M1 + M2 agents built (or paste the M2 answer key — sanctioned).
 - **→ M4:** a capable NVIDIA GPU (else do SDG + concepts only; the training run needs the GPU).
 - **→ M5:** Docker (for sandbox mode).
 - **→ M6:** Docker + Linux kernel ≥ 5.13 for the live hardening (the eval code works without).
-- **→ M7:** M1–M6 concepts (the capstone — it names the harness layer used throughout). NVIDIA key only; a GPU helps *only* for Exercise 4's cuDF speedup (skips cleanly without). No successor module.
+- **→ M7:** M1–M6 concepts (it names the harness layer used throughout). NVIDIA key only; a GPU helps *only* for Exercise 4's cuDF speedup (skips cleanly without).
+- **→ M8:** M1 + M7 concepts (the four components; the harness loop whose tool results a stage router reads); M2's local-NIM runbook only for the optional Ex4b. NVIDIA key only, Python ≥ 3.12 for the Switchyard install, and a network path to PyPI + `integrate.api.nvidia.com`. Budget a few cents of live calls. **Last module — no successor.**
 
 ## Reminder
 Read-only only. If a blank is unfilled → it's an *exercise* (guide, don't fill it). If it's

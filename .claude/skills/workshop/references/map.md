@@ -47,6 +47,13 @@ Teaching narrative for module N is in `.devx/<N>-<slug>/`; code in `code/<N>-<sl
 - **Code:** `harness_lab.py` / `.ipynb` (5 exercises — `build_bare_agent`, `harness_overhead`, `load_skills_lazily`, `self_evolve_skill`, + author a `SKILL.md`) (+ `.answers.*`); `scripts/install_nvidia_skill.sh`.
 - **Prereq:** M1–M6 concepts — the **capstone**; it names the harness layer used in every prior module.  **Time:** 2–3 h.  **Hardware:** none for the main path (hosted Nemotron + `tiktoken`, CPU); **Exercise 4's GPU speedup needs an NVIDIA GPU** (cuDF) — clean fallback + skip message without one.
 
+## Module 8 — Agent Routing  (`/module-8`, `8-agent-routing`)
+- **Build:** a metered, routed agent — a bill meter on every call, a hand-written classifier router, Switchyard's in-process `stage_router`, a `routes.toml` gateway the app never reads, and a scoreboard — plus the **Routing Client** tile that comes alive panel by panel (`systems online: 0/5 → 5/5`).
+- **Concepts:** **tokenomics** (price vs M7's cost), the frontier-vs-open false binary → *use both, efficiently*, the model **portfolio**, the routing taxonomy (`passthrough`/`random`/`llm_classifier`/`stage_router`/escalation mode/learned), the **router tax**, capability vs escalation mode, session affinity, policy-vs-performance routing (M6's Privacy Router is **not** content classification), NeMo Switchyard's three nouns + three surfaces, the Pareto/cost-accuracy trade.
+- **Code:** `routing_lab.py` / `.ipynb` (7 blanks across 5 exercises — `build_model_pool` 1a, `bill_call` 1b, `classify_difficulty` 2a, `route_call` 2b, `make_lab_router` 3a, `switchyard_call` 3b, `routing_verdict` 5) (+ `.answers.*`); `constants.py`, `switchyard_shim.py` (the **only** SDK import), `routes.toml.template` (+ `.answers`), `test_data/routing_tasks.jsonl`, `scripts/{install_switchyard,serve_gateway,serve_local_nim,smoke_switchyard}.sh`, `routing_client/`.
+- **Prereq:** M1 + M7 concepts (the four components; the harness/loop that emits the tool signals a stage router reads); M2's local-NIM runbook only for the optional Ex4b. **Time:** 2–3 h (the lab itself ~95 min).  **Hardware:** none for the main path (hosted Nemotron, CPU, `NVIDIA_API_KEY` only — Ex4's gateway is a localhost process); **Ex4b optional: Docker + an NVIDIA GPU** (skip it — 4a is the full exercise). Spends real money: ~150 live calls, cents.
+
 ## Routing shorthand
 RAG → M2 · evaluation/metrics → M3 · training/GRPO/GPU → M4 · deep agents/planning/sandbox → M5 ·
-safety/NemoClaw/kernel → M6 · harnesses/skills/context-tax/Verified-Skills → M7 · install/launch → setup-workshop · overview/order/connections → this skill.
+safety/NemoClaw/kernel → M6 · harnesses/skills/context-tax/Verified-Skills → M7 ·
+model routing/switchyard/tokenomics/cost → M8 · install/launch → setup-workshop · overview/order/connections → this skill.

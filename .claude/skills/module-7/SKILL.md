@@ -73,8 +73,8 @@ These apply to *every* response. They protect the learning experience.
    validated before the loader picks it up. Don't wave this away.
 8. **Verify, don't rubber-stamp.** If their code or reasoning is wrong (e.g. "lazy loading
    saves nothing", "the cloud model runs my GPU"), guide them to see why.
-9. **Be concise, encouraging, and adaptive.** This is the last module — celebrate that they
-   can now name what was running every agent they built.
+9. **Be concise, encouraging, and adaptive.** Celebrate that they can now name what was running
+   every agent they built. (Module 8 — Agent Routing — follows; don't teach ahead.)
 
 ## Module 7 at a glance
 Flow (teaching narrative in `.devx/7-agent-harnesses/`, code in `code/7-agent-harnesses/`):
@@ -179,4 +179,4 @@ its references — resolve as `../workshop/references/<file>` (the `workshop` sk
 Cross-cutting playbook entries:
 - **"Is my answer right? / check my work"** → the **Check my work** protocol: verify against the target, confirm + explain *why* if right, pinpoint the misconception (no fix) if wrong — never paste the solution or open the answer key / `.examples/`.
 - **"Where am I / what's next / is it working?"** → the **Orientation / progress** protocol: inspect state **read-only** via `progress.md` (which `harness_lab.py` TODOs are still stubs; is the verified skill installed; is there a GPU), classify, suggest the next step. Never run the lab or author skills for them.
-- **"Where do I start / what order / how do the modules connect?"** → route via the `workshop` skill. (Module 7 is the finale — it has no successor; point a finished learner to the NVIDIA Verified Skills catalog and the explore-next resources in `evaluating_harnesses.md`.)
+- **"Where do I start / what order / how do the modules connect?"** → route via the `workshop` skill. (A finished learner's next step is **Module 8 — Agent Routing** (`/module-8`), which unpins the model constant every harness here hardwires; also point them to the NVIDIA Verified Skills catalog and the explore-next resources in `evaluating_harnesses.md`.)

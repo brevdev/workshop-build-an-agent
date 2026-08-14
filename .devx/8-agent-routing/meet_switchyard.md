@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 08 / 03 - MEET NEMO SWITCHYARD" data-title="Three nouns and a config file." data-sub="NVIDIA's open-source router - embed it in your process, or stand it in front of your models. Either way, the routing policy stops living in your code." data-meta="LICENSE::Apache-2.0|SURFACES::library, gateway, launcher|TESTED::0.2.0"></div>
+<div class="dx-hero" data-eyebrow="MODULE 08 / 03 - MEET NEMO SWITCHYARD" data-title="Three nouns and a config file." data-sub="NVIDIA's open-source router - embed it in your process, or stand it in front of your models. Either way, the routing decision stops being logic you write." data-meta="LICENSE::Apache-2.0|SURFACES::library, gateway, launcher|TESTED::0.2.0"></div>
 
 Five algorithm families, one open-source implementation. [NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) is Apache-2.0, it shipped alongside Nemotron 3.5 Lightning — the model your lab uses as its efficient tier — and it's what the rest of this module runs on.
 
@@ -24,7 +24,7 @@ The algorithm drawn inside the core is the gateway's, from Exercise 4. Exercise 
 
 <img src="_static/robots/blueprint.png" alt="Blueprint Robot" style="float:right;max-width:240px;margin:20px;" />
 
-Either placement can run any of the algorithms. What differs is who owns the transport, and how the decision comes back: the library reports the **target name** you chose (`weak`), while the gateway reports the **upstream model id**, on the standard `model` field of the response. The lab prints both.
+Both placements run the same routing core; what differs is who owns the transport, and how the decision comes back: the library reports the **target name** you chose (`weak`), while the gateway reports the **upstream model id**, on the standard `model` field of the response. The lab prints both.
 
 <!-- fold:break -->
 

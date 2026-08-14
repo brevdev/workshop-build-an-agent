@@ -201,3 +201,7 @@ secrets.env
 # Workbench Project Layout
 workspace
 .claude/scheduled_tasks.lock
+
+# Module 8 — the gateway config the learner copies from routes.toml.template
+# (the .template and .answers files are the tracked ones)
+code/8-agent-routing/routes.toml

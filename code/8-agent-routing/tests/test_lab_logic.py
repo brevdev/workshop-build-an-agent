@@ -232,14 +232,61 @@ def _mk(strategy, passed, cost, strong_calls, tax):
              "latency": 1.0, "models": {lab.STRONG_MODEL if i < strong_calls else lab.EFFICIENT_MODEL: 1},
              "router_tax": tax / 12} for i in range(12)]
 
+def _sample_results():
+    """One source of truth for the three verdict tests: strong 12/12 @ $1.55 ·
+    efficient 9/12 @ $0.10 · routed 11/12 @ $0.41 with 3 frontier answers and $0.04 tax."""
+    return {"strong_only": _mk("strong_only", 12, 1.55, 12, 0.0),
+            "efficient_only": _mk("efficient_only", 9, 0.10, 0, 0.0),
+            "manual_classifier": _mk("manual_classifier", 11, 0.41, 3, 0.04)}
+
 def test_routing_verdict_math():
-    v = lab.routing_verdict({
-        "strong_only": _mk("strong_only", 12, 1.55, 12, 0.0),
-        "efficient_only": _mk("efficient_only", 9, 0.10, 0, 0.0),
-        "manual_classifier": _mk("manual_classifier", 11, 0.41, 3, 0.04),
-    })
+    v = lab.routing_verdict(_sample_results())
     routed = next(r for r in v["rows"] if r["strategy"] == "manual_classifier")
     assert routed["accuracy"] == 11 and abs(routed["frontier_pct"] - 25.0) < 0.1
     assert abs(v["savings_pct"] - (1 - 0.41 / 1.55) * 100) < 0.1
     assert "$" in v["receipt"] and "%" in v["receipt"]
     assert abs(v["monthly"]["strong_only"] - 1.55 * lab.AT_SCALE_TASKS_PER_DAY * 30) < 1e-6
+
+def test_router_tax_pct_is_a_share_of_spend_not_of_cost_plus_tax():
+    # The tax is already INSIDE cost (run_suite's per-task cost is a meter delta that
+    # covers the classifier call AND the answer), so the ratio is tax/cost. The tempting
+    # tax/(cost+tax) bills the router twice and reads 8.89% on these numbers.
+    routed = next(r for r in lab.routing_verdict(_sample_results())["rows"]
+                  if r["strategy"] == "manual_classifier")
+    assert abs(routed["router_tax_pct"] - 9.76) < 0.1        # 0.04 / 0.41
+
+def test_routing_verdict_receipt_clauses_are_pinned_in_order():
+    # The 🧾 receipt is the module's closing line -- the docs quote it and the client
+    # renders it, so clause ORDER and shape are the contract, not loose formatting.
+    # Reordering, dropping, or truncating any clause fails here.
+    assert lab.routing_verdict(_sample_results())["receipt"].split(" · ") == [
+        "routed: 75/25 open/frontier mix",
+        "$0.41 vs $1.55 (−74%)",
+        f"at {lab.AT_SCALE_TASKS_PER_DAY}/day: $12,300 vs $46,500/mo",
+        "accuracy 11/12 vs 12/12",
+        "router tax 10% of spend",
+    ]
+
+# --- The unlock probe: what the Routing Client polls -------------------------
+
+def test_probe_distinguishes_blank_from_solved():
+    # The client's `systems online: N/5` strip is this dict. It has to read the
+    # LEARNER file (blanks raise NotImplementedError -> locked) and the answers file
+    # (everything runs -> unlocked) from the same provided code, offline.
+    import importlib.util, pathlib
+    p = pathlib.Path(lab.__file__).parent / "routing_lab.py"
+    spec = importlib.util.spec_from_file_location("routing_lab_blank", p)
+    blank = importlib.util.module_from_spec(spec); spec.loader.exec_module(blank)
+    assert lab.probe_unlocks(blank) == {"ex1": False, "ex2": False, "ex3": False, "ex5": False}
+    assert lab.probe_unlocks(lab) == {"ex1": True, "ex2": True, "ex3": True, "ex5": True}
+    assert blank.probe_unlocks(lab) == {"ex1": True, "ex2": True, "ex3": True, "ex5": True}
+
+def test_probe_never_constructs_a_real_model_client(monkeypatch):
+    # Constructing a ChatNVIDIA calls the hosted model catalog over the network, and
+    # Ex2's router builds its own classifier. The client polls this probe, so a socket
+    # here would be a per-poll round trip -- the probe swaps the class it builds from.
+    def exploding(*args, **kwargs):
+        raise AssertionError("probe_unlocks constructed a real ChatNVIDIA")
+    monkeypatch.setattr(lab, "ChatNVIDIA", exploding)
+    assert lab.probe_unlocks(lab)["ex2"] is True
+    assert lab.ChatNVIDIA is exploding          # and it puts the real class back

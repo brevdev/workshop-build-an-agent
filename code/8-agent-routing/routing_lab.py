@@ -1,6 +1,17 @@
-"""Module 8 answers — complete implementations. The learner copy, routing_lab.py,
-is this file with seven bodies replaced by TODOs; everything else is identical.
-Structure: constants import, suite, Ex1..Ex5 sections, provided harness, CLI runner."""
+"""Module 8 Lab — Agent Routing.
+
+Five exercises that put every call on a meter and then route it to the right model:
+
+  1. The model pool and the bill meter  (build_model_pool, bill_call)
+  2. The hand-rolled classifier router  (classify_difficulty, route_call)
+  3. The same decision, from a library  (make_lab_router, switchyard_call)
+  4. The same decision, out of the app  (routes.toml — a config file, not Python)
+  5. The verdict                        (routing_verdict)
+
+Complete the TODOs, then run a single exercise:
+  python3 routing_lab.py --exercise 1
+
+Answer key: routing_lab.answers.py"""
 import json, pathlib, time
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from constants import *  # model ids, PRICING, STRATEGIES, AT_SCALE_TASKS_PER_DAY
@@ -33,10 +44,13 @@ def check_task(task, output, judge=None):
 # ---------------------------------------------------------------------------
 
 def build_model_pool():
-    # === Exercise 1a (answer) ===
-    make = lambda mid: ChatNVIDIA(model=mid, temperature=0.2,
-                                  max_completion_tokens=2048, timeout=180)
-    return {"strong": make(STRONG_MODEL), "efficient": make(EFFICIENT_MODEL)}
+    """The two-model portfolio every strategy draws from.
+    Returns {"strong": <frontier stand-in>, "efficient": <open model>}."""
+    # TODO: Exercise 1a — return that dict, both values ChatNVIDIA clients: "strong"
+    # runs STRONG_MODEL, "efficient" runs EFFICIENT_MODEL. Give them identical settings
+    # (temperature=0.2, max_completion_tokens=2048, timeout=180) so the only thing that
+    # differs between the two lanes is the model itself.
+    raise NotImplementedError("Exercise 1a")
 
 class RunningBill:
     """Provided. The session meter behind every receipt, gauge, and race row."""
@@ -56,19 +70,13 @@ def _price(model_id, usage):
     return usage.get("input_tokens", 0) / 1e6 * p["in"] + usage.get("output_tokens", 0) / 1e6 * p["out"]
 
 def bill_call(model_id, chat, messages, bill, why="passthrough"):
-    # === Exercise 1b (answer) ===
-    t0 = time.perf_counter()
-    response = chat.invoke(messages)
-    latency = time.perf_counter() - t0
-    usage = getattr(response, "usage_metadata", None) or {}
-    cost = _price(model_id, usage)
-    bill.add(model_id, usage, cost, latency)
-    return response, {
-        "model": model_id, "input_tokens": usage.get("input_tokens", 0),
-        "output_tokens": usage.get("output_tokens", 0), "cost": cost,
-        "latency": latency, "counterfactual_cost": _price(STRONG_MODEL, usage),
-        "why": why, "router_tax": 0.0,
-    }
+    """One priced, timed model call. Returns (response, receipt)."""
+    # TODO: Exercise 1b — time the call, read response.usage_metadata, price it
+    # against PRICING[model_id], bill.add(...) it, and return (response, receipt)
+    # with ALL receipt keys: model, input_tokens, output_tokens, cost, latency,
+    # counterfactual_cost (same tokens at STRONG_MODEL rates), why, router_tax
+    # (0.0 here — Exercise 2's router is what fills that one in).
+    raise NotImplementedError("Exercise 1b")
 
 # ---------------------------------------------------------------------------
 # Exercise 2 — the hand-rolled router. A cheap model reads the request first
@@ -96,23 +104,24 @@ def build_classifier():
                       model_kwargs={"chat_template_kwargs": {"thinking": False}})
 
 def classify_difficulty(query, classifier_chat, bill):
-    # === Exercise 2a (answer) ===
-    response, receipt = bill_call(CLASSIFIER_MODEL, classifier_chat,
-                                  CLASSIFY_PROMPT.format(query=query), bill, why="router-tax")
-    raw = response.content if hasattr(response, "content") else str(response)
-    words = (raw or "").strip().upper().split()
-    token = words[0].strip(".,!:;") if words else ""
-    verdict = token if token in ("COMMODITY", "FRONTIER") else "FRONTIER"   # misroutes fail UP
-    return verdict, receipt["cost"]
+    """Ask the cheap model which lane this request belongs in.
+    Returns (verdict, tax): verdict is "COMMODITY" or "FRONTIER", tax is what asking cost."""
+    # TODO: Exercise 2a — bill_call the classifier (model id CLASSIFIER_MODEL,
+    # why="router-tax") with CLASSIFY_PROMPT.format(query=query), then read its reply:
+    # first word, punctuation stripped, upper-cased. Anything that is not exactly
+    # COMMODITY or FRONTIER must fail UP to FRONTIER — a blank or rambling verdict is
+    # not evidence of an easy task. Return (verdict, receipt["cost"]).
+    raise NotImplementedError("Exercise 2a")
 
 def route_call(query, pool, bill):
-    # === Exercise 2b (answer) ===
-    verdict, tax = classify_difficulty(query, build_classifier(), bill)
-    lane = "efficient" if verdict == "COMMODITY" else "strong"
-    model_id = EFFICIENT_MODEL if lane == "efficient" else STRONG_MODEL
-    resp, receipt = bill_call(model_id, pool[lane], query, bill, why=f"classifier: {verdict}")
-    receipt["router_tax"] = tax          # already in the bill; recorded so the row can show it
-    return resp, receipt
+    """Classify first, then answer in the lane the classifier picked.
+    Returns (response, receipt) — the same receipt shape bill_call produces."""
+    # TODO: Exercise 2b — classify_difficulty(query, build_classifier(), bill), send a
+    # COMMODITY verdict to pool["efficient"] (EFFICIENT_MODEL) and a FRONTIER one to
+    # pool["strong"] (STRONG_MODEL) via bill_call with why=f"classifier: {verdict}",
+    # then record the classifier's cost on the receipt as receipt["router_tax"]. That
+    # money is already ON the bill — this is for the row to display, not a second charge.
+    raise NotImplementedError("Exercise 2b")
 
 # ---------------------------------------------------------------------------
 # Exercise 3 — the same decision, from a library. Switchyard's stage router
@@ -126,19 +135,23 @@ def route_call(query, pool, bill):
 import switchyard_shim as shim
 
 def make_lab_router():
-    # === Exercise 3a (answer) ===
-    return shim.make_router({"id": STRONG_MODEL}, {"id": EFFICIENT_MODEL})
+    """The Switchyard stage router, wired to this lab's two models."""
+    # TODO: Exercise 3a — return shim.make_router(...) with the capable target FIRST and
+    # the efficient one second; each target is a {"id": <model id>} dict. Get that order
+    # backwards and every routing decision silently inverts.
+    raise NotImplementedError("Exercise 3a")
 
 def switchyard_call(query, pool, bill, router=None, tool_events=None):
-    # === Exercise 3b (answer) ===
-    router = router or make_lab_router()
-    lane = shim.pick_target(router, [query], tool_events or [])
-    lane_key = "strong" if lane == "capable" else "efficient"
-    model_id = STRONG_MODEL if lane == "capable" else EFFICIENT_MODEL
-    why = ("mock" if isinstance(router, shim.MockRouter)
-           else f"stage: {'synthesis' if lane == 'capable' else 'exploration'}")
-    print(f"  [route → {lane}] {why}")          # the stage transition, visible per turn
-    return bill_call(model_id, pool[lane_key], query, bill, why=why)
+    """One call routed by the library instead of by a classifier of your own.
+    Returns (response, receipt)."""
+    # TODO: Exercise 3b — default `router` to make_lab_router(); ask
+    # shim.pick_target(router, [query], tool_events or []) for the lane, which comes back
+    # as "capable" or "efficient"; map that to pool["strong"]/pool["efficient"] and
+    # STRONG_MODEL/EFFICIENT_MODEL; print a `  [route → <lane>] <why>` trace so the stage
+    # transition is visible per turn; and bill_call it. `why` is "mock" for a
+    # shim.MockRouter, otherwise "stage: synthesis" (capable) or "stage: exploration".
+    # There is no second model call here, so router_tax stays 0.0 — leave it alone.
+    raise NotImplementedError("Exercise 3b")
 
 # ---------------------------------------------------------------------------
 # Exercise 4 — the same decision, moved OUT of the application. routes.toml
@@ -205,26 +218,15 @@ def gateway_stats():
 # ---------------------------------------------------------------------------
 
 def routing_verdict(results_by_strategy):
-    # === Exercise 5 (answer) ===
-    rows, monthly = [], {}
-    for strategy, results in results_by_strategy.items():
-        cost = sum(r["cost"] for r in results)
-        strong_calls = sum(r["models"].get(STRONG_MODEL, 0) for r in results)
-        total_calls = sum(sum(r["models"].values()) for r in results)
-        tax = sum(r["router_tax"] for r in results)
-        rows.append({"strategy": strategy, "accuracy": sum(r["passed"] for r in results),
-                     "cost": cost, "frontier_pct": 100.0 * strong_calls / max(total_calls, 1),
-                     "router_tax_pct": 100.0 * tax / max(cost, 1e-12)})
-        monthly[strategy] = cost * AT_SCALE_TASKS_PER_DAY * 30
-    strong = next((r for r in rows if r["strategy"] == "strong_only"), None)
-    routed = next((r for r in rows if r["strategy"] in ("manual_classifier", "switchyard_stage", "gateway")), None)
-    savings = (1 - routed["cost"] / strong["cost"]) * 100 if strong and routed and strong["cost"] else 0.0
-    receipt = (f"routed: {100 - routed['frontier_pct']:.0f}/{routed['frontier_pct']:.0f} open/frontier mix · "
-               f"${routed['cost']:.2f} vs ${strong['cost']:.2f} (−{savings:.0f}%) · "
-               f"at {AT_SCALE_TASKS_PER_DAY}/day: ${monthly[routed['strategy']]:,.0f} vs ${monthly['strong_only']:,.0f}/mo · "
-               f"accuracy {routed['accuracy']}/12 vs {strong['accuracy']}/12 · "
-               f"router tax {routed['router_tax_pct']:.0f}% of spend") if strong and routed else "insufficient data"
-    return {"rows": rows, "savings_pct": savings, "monthly": monthly, "receipt": receipt}
+    """Suite results in, scoreboard out.
+    Returns {"rows": [...], "savings_pct": float, "monthly": {...}, "receipt": str}."""
+    # TODO: Exercise 5 — one row per strategy, each with: strategy, accuracy (how many
+    # passed), cost (the sum), frontier_pct (STRONG_MODEL's share of the `models` calls)
+    # and router_tax_pct (the tax as a share of cost — a RATIO, never a sum: read the two
+    # accounting rules above). Project every strategy out to
+    # monthly[strategy] = cost * AT_SCALE_TASKS_PER_DAY * 30, work out savings_pct for the
+    # routed row against strong_only, and build the one-line 🧾 receipt that says it all.
+    raise NotImplementedError("Exercise 5")
 
 # ---------------------------------------------------------------------------
 # Provided harness — the LLM judge behind the one unverifiable task, and the
@@ -300,7 +302,7 @@ def probe_unlocks(module):
 
 # ---------------------------------------------------------------------------
 # CLI runner — one branch per exercise:
-# `python3 routing_lab.answers.py --exercise 1`.
+# `python3 routing_lab.py --exercise 1`.
 # ---------------------------------------------------------------------------
 
 def _print_exercise_1():
@@ -493,9 +495,15 @@ def _print_exercise_5():
     print(f"\n🧾 {verdict['receipt']}")
 
 if __name__ == "__main__":
-    import argparse
+    import argparse, sys
     ap = argparse.ArgumentParser(description="Module 8 routing lab")
     ap.add_argument("--exercise", type=int, required=True, choices=range(1, 6))
     ex = ap.parse_args().exercise
-    {1: _print_exercise_1, 2: _print_exercise_2, 3: _print_exercise_3,
-     4: _print_exercise_4, 5: _print_exercise_5}[ex]()
+    try:
+        {1: _print_exercise_1, 2: _print_exercise_2, 3: _print_exercise_3,
+         4: _print_exercise_4, 5: _print_exercise_5}[ex]()
+    except NotImplementedError as blank:      # an unfilled TODO is not a crash
+        label = str(blank).replace("Exercise ", "")
+        print(f'\n❌ Exercise {label} not implemented yet — open routing_lab.py '
+              f'and search for "TODO: Exercise {label}"')
+        sys.exit(1)

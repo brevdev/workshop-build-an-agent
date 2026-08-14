@@ -453,10 +453,42 @@ routing_fallbacks`. Observed after two routed requests:
 "routing_fallbacks": {"context_window": 0, "unavailable": 0}
 ```
 
-This is a **gift** for the module's tokenomics thread: `tiers.*.request_pct` is the 93/7 split
-measured on the learner's own traffic; `classifier.total_tokens` + `routing_overhead.avg_ms` are the
+This is a **gift** for the module's tokenomics thread: `tiers.*.token_pct` is the 93/7 split
+measured on the learner's own traffic (**`token_pct`, not `request_pct`** — see the counter caveat
+right below this block); `classifier.total_tokens` + `routing_overhead.avg_ms` are the
 **router tax** (the M7 context-tax sequel) already itemised and *separated* from the routed spend.
 `GET /health` → `{"status":"ok"}` for the client's health strip.
+
+#### ⚠️ `tiers.*.calls` is not a reliable counter — meter on `token_pct` (Tasks 6 + 12)
+
+The sample above credits **`calls: 1` to each tier**, and it is accurate for the config it was taken
+from: a per-prompt `llm_classifier` route where the judge names a tier on every request (one prompt
+went weak, one went strong). Two later live runs, on the config the module actually ships
+(`routes.toml.answers`: `type = "llm_classifier"`, **`mode = "escalation"`**, every session starting on
+`weak_target`), disagree — for the **default** tier:
+
+- **Task 6** (2026-08-13, 5 turns of an escalating session) recorded the split as `weak 58% / strong 42%`
+  **by tokens** and ledgered the quirk: `tiers.*.calls` reads 0 for the default tier.
+- **Task 12** (2026-08-14, one single-shot request served entirely by `weak`):
+
+  ```jsonc
+  "total_requests": 1,                                          // top level: the request happened
+  "models": { "nvidia/nemotron-3.5-lightning-30b-a3b":
+              {"calls": 1, "request_pct": 100.0, "tiers": ["weak"]} },   // per MODEL: correct
+  "tiers":  { "weak": {"calls": 0, "request_pct": 0.0,          // per TIER: both zero…
+                       "prompt_tokens": 27, "completion_tokens": 175,
+                       "total_tokens": 202, "token_pct": 100.0} }        // …while the tokens are right
+  ```
+
+Note that **`request_pct` is derived from `calls` and is wrong with it** (0.0 % for a tier that served
+100 % of the traffic), while `total_tokens` / `token_pct` are correct in every capture. Likeliest
+explanation (**hypothesis, not verified**): the tier counter is incremented only where a routing
+decision explicitly names a tier, and escalation's pre-escalation default is not that path.
+
+**Rule for anything that renders this: meter on `tiers.*.token_pct` (or `total_tokens`), never on
+`calls`/`request_pct`.** `routing_client/server.py`'s `/api/gateway_stats` and `client.js`'s meter line
+both cite this section for exactly that reason; the lab's `_gateway_meter()` prints tokens for the same
+reason. If a future release fixes the counter, this block — not the sample above — is what to update.
 
 **`tiers` is also the health signal for the router itself.** A request the classifier could not decide
 (no parseable verdict) is served **without a tier label**, so `tiers` stays `{}` while `models` and the

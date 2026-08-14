@@ -426,17 +426,34 @@
       " — spent server-side, which is why every receipt above reads $0.0000 of it.");
   }
 
+  // One read at a time, on the gpu.inFlight discipline. This one earns the guard
+  // twice over: the request re-executes the lab file server-side AND opens a socket
+  // to the gateway, and /api/status's liveness probe only proves a TCP connect (0.3s)
+  // while the read behind it may take 30 — so a gateway that accepts and then stalls
+  // would otherwise stack a fresh request every POLL_MS, each holding a server worker,
+  // with an older answer free to paint over a newer one.
+  var statsInFlight = false;
+
   function refreshGatewayStats() {
+    if (statsInFlight) return;
     if (!gatewayMode()) { renderGatewayStats(null); return; }
+    statsInFlight = true;
     fetch("api/gateway_stats", { cache: "no-store" }).then(function (res) {
       return res.json();          // 503 carries {available:false, error} — same shape
-    }).then(renderGatewayStats).catch(function () { renderGatewayStats(null); });
+    }).then(renderGatewayStats).catch(function () {
+      renderGatewayStats(null);
+    }).then(function () { statsInFlight = false; });
   }
 
-  // Both gateway-only panels move together whenever the picked strategy does.
+  // Both gateway-only panels move together whenever the picked strategy does — but
+  // only ONE of them fetches from here. The meter's single fetch site is
+  // refreshStatus's own tick (below), so a status change that reaches both paths
+  // cannot fire two reads: leaving gateway mode hides the line immediately, entering
+  // it fills the line on the next status tick, and the numbers stay fresh after a
+  // query because ask() ends in refreshStatus().
   function syncGatewayPanels() {
     syncGpuPolling();
-    refreshGatewayStats();
+    if (!gatewayMode()) renderGatewayStats(null);
   }
 
   // ---------------------------------------------------------------- receipts
@@ -662,7 +679,9 @@
     }).then(function (s) {
       statusDown = false;
       renderStatus(s);
-      refreshGatewayStats();      // the gateway's numbers, on the same slow cadence
+      // THE meter's one fetch site — after renderStatus, so a tick that just switched
+      // the pick to gateway mode fills the line on that same tick.
+      refreshGatewayStats();
     }).catch(function (err) {
       if (!statusDown) {
         statusDown = true;

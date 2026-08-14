@@ -129,6 +129,8 @@ Pins are single-sourced. Package version, sha256s and the three model ids live i
 4. **Recalibrate the printed numbers** if the outputs moved. The costs, the routing split and the 🧾 receipt are quoted in the lab page and in the module's close — stale numbers there are the failure this step exists to catch.
 5. **Update the version stamp** in the `meet_switchyard.md` aside, so the page names the version that is actually installed.
 
+One constraint lives in the *maintainer* test env only, so it is deliberately absent from the repo's `requirements.txt`: `test_client_logic.py` drives `fastapi.testclient`, and starlette 1.6.0 already emits `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead`. The suite is green as a warning on **starlette <2 with httpx 0.28** (verified). When a venv bump pulls starlette 2.x and that warning turns into an error, install `httpx2` into the venv — or hold it at `starlette<2` — but do **not** pin either in `requirements.txt`: the learner image never imports `TestClient`.
+
 If the SDK's *surface* changed rather than just its version, `switchyard_shim.py` is the only file that imports it — fix it there and nothing else moves. Its fallback is deliberate: an unusable SDK degrades to `MockRouter` behind a loud banner, so the exercise still teaches while you catch up.
 
 Built on NVIDIA Nemotron + [NVIDIA NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard).

@@ -1,6 +1,6 @@
 # Build An Agent Workshop  [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-32kC34ErT9wsqTcJyaKMxBEuhr2) [![Open In AI Workbench](https://img.shields.io/badge/Open_In-AI_Workbench-76B900)](https://ngc.nvidia.com/open-ai-workbench/aHR0cHM6Ly9naXRodWIuY29tL2JyZXZkZXYvd29ya3Nob3AtYnVpbGQtYW4tYWdlbnQ=)
 
-The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through seven progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating, improving, and securing agent performance.
+The Build An Agent Workshop is a comprehensive, hands-on learning experience that teaches you how to create, deploy, and evaluate AI agents using NVIDIA technology. Through eight progressive modules, you'll build intelligent systems that can perform complex tasks, learn to implement Retrieval Augmented Generation (RAG), and master the art of evaluating, improving, and securing agent performance.
 
 This workshop provides everything you need to become proficient in agentic AI development:
 
@@ -11,17 +11,18 @@ This workshop provides everything you need to become proficient in agentic AI de
 * **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation.
 * **Module 6 - Agent Safety**: Secure autonomous agents with kernel-level enforcement (via OpenShell) and privacy routing using NVIDIA's NemoClaw stack.
 * **Module 7 - Agent Harnesses & Skills**: Separate the harness layer from the LLM, survey harness architectures from OpenClaw to pi to Claude Code, and supercharge any of them with portable, GPU-accelerated NVIDIA Verified Skills.
+* **Module 8 - Agent Routing**: Tame agent tokenomics with NVIDIA NeMo Switchyard — route every call to the right model (frontier or open), visualized live in the Routing Client.
 
 At the end of this workshop, you will take home:
 
 * Deep understanding of agent architecture and design patterns
-* Seven working agents demonstrating different capabilities
+* Eight working agents demonstrating different capabilities
 * Knowledge of NVIDIA NIM, NeMo models, and evaluation tools
 * Comprehensive evaluation framework for production agents
 * A turn-key, portable development environment
 * Best practices for continuous agent improvement
 
-The entire workshop can take anywhere from 14 to 21 hours to complete, depending on depth of exploration.
+The entire workshop can take anywhere from 16 to 24 hours to complete, depending on depth of exploration.
 
 ## 🤖 Learn with an AI tutor (optional)
 
@@ -34,7 +35,7 @@ The skills work in **either harness** — use whichever you prefer. Same content
 
 In **both**, you can also just describe what you need (e.g. "help me with Module 3") and the matching skill loads automatically.
 
-**Available skills:** `workshop` (overview + router), `module-1` … `module-7` (one per module), and `setup-workshop` (local install helper) — prefix with `/` in Claude Code or `$` in Codex.
+**Available skills:** `workshop` (overview + router), `module-1` … `module-8` (one per module), and `setup-workshop` (local install helper) — prefix with `/` in Claude Code or `$` in Codex.
 
 **Two ways to use it — pick whichever fits how you're running the workshop:**
 
@@ -143,6 +144,20 @@ Understand the harness layer that turns a stateless LLM into a capable agent —
 - NVIDIA Verified Skills (github.com/NVIDIA/skills): signature verification, skill cards, and capability governance
 - Driving your local GPU from inside any harness — open source or closed
 
+### Module 8: Agent Routing (2-3 hours)
+
+Tame agent tokenomics — send every call to the model that should answer it, and prove the savings.
+
+**What you'll build**: A routing policy for your agent using NVIDIA NeMo Switchyard — a hand-rolled classifier router first, then Switchyard in-process, then the gateway (a `routes.toml` policy your application code never reads) — all visualized live in the Routing Client.
+
+**Key concepts**:
+- Agent tokenomics, and why frontier vs. open is a false binary — use both, efficiently
+- The routing-algorithm families, on the evidence-vs-cost-of-deciding axis
+- NVIDIA NeMo Switchyard (Apache-2.0): targets, routes, and its library and gateway surfaces
+- Router tax, escalation, and the misroute asymmetry (fail up, never down)
+- Routing the easy tier to a local NIM on your own GPU
+- Proving the policy with an eval suite: accuracy vs. cost, and the at-scale receipt
+
 ## Learning Objectives
 
 By the end of this workshop, you'll know how to:
@@ -154,6 +169,7 @@ By the end of this workshop, you'll know how to:
 - **Build deep agents** with planning, delegation, and sandboxed execution
 - **Secure agents** with kernel-level enforcement, data classification, and red-team evaluation
 - **Choose and extend agent harnesses** using the context-tax framework and portable, NVIDIA-verified skills
+- **Route agent traffic** across a model portfolio with NeMo Switchyard, and defend the cost/quality trade with an eval suite
 - **Deploy and monitor** agents in production environments
 - **Continuously improve** agent performance through systematic evaluation
 

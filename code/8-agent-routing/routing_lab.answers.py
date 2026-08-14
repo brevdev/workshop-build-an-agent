@@ -229,13 +229,20 @@ _DEMO_TURNS = [("turn 1 · no tool calls yet",       []),
                ("turn 5 · failing plus an error",   [_READ, _GREP, _FAIL1, _FAIL2, _FAIL3])]
 
 def _print_stage_transition():
-    bill, pool, router = RunningBill(), build_model_pool(), make_lab_router()
+    # Only the routing decision is on show here — the five answers are discarded — so
+    # the demo runs its own pool with a tiny completion cap. Identical bill_call,
+    # receipts and traces; a fraction of the tokens. The demo keeps its own meter, and
+    # prints it: every call this file makes has to land on a meter somebody can read.
+    pool = {lane: ChatNVIDIA(model=mid, temperature=0.2, max_completion_tokens=64, timeout=180)
+            for lane, mid in (("strong", STRONG_MODEL), ("efficient", EFFICIENT_MODEL))}
+    bill, router = RunningBill(), make_lab_router()
     print("stage transition — one task, five turns, the trajectory accumulating:")
     lanes = []
     for label, tool_events in _DEMO_TURNS:
         print(f"  {label:36}", end="")            # switchyard_call prints the [route → …] trace
         _, receipt = switchyard_call(_DEMO_TASK, pool, bill, router=router, tool_events=tool_events)
         lanes.append("capable" if receipt["model"] == STRONG_MODEL else "efficient")
+    print(bill.summary())
     split = lanes.count("efficient")
     if lanes == ["efficient"] * split + ["capable"] * (len(lanes) - split) and 0 < split < len(lanes):
         print(f"  turns 1–{split} → efficient · turns {split + 1}–{len(lanes)} → capable "

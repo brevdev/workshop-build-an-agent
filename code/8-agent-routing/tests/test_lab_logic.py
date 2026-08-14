@@ -132,6 +132,40 @@ def test_shim_request_carries_tool_events_as_the_verified_block_shapes():
     assert result["tool_call_id"] == "t0"
     assert result["content"] == [{"type": "text", "text": "FAILED tests/test_a.py"}]
 
+def test_make_router_falls_back_loudly_when_the_sdk_is_missing(monkeypatch, capsys):
+    # The spec's churn armor: an unusable SDK must degrade to a router that still
+    # teaches, and it must say so. Silence here is the failure mode we are guarding.
+    monkeypatch.setattr(shim, "SDK_AVAILABLE", False)
+    router = shim.make_router({"id": STRONG_MODEL}, {"id": EFFICIENT_MODEL})
+    out = capsys.readouterr().out
+    assert isinstance(router, shim.MockRouter)
+    assert out.startswith("⚠️") and "MockRouter" in out and "install_switchyard.sh" in out
+
+def test_make_router_falls_back_when_the_sdk_constructor_churns(monkeypatch, capsys):
+    # Pre-alpha upstream: the likelier break is not a missing import but stage_router
+    # gaining/renaming a required kwarg. Same landing: banner + MockRouter, never a
+    # traceback out of make_router.
+    def churned(*args, **kwargs):
+        raise TypeError("stage_router() missing 1 required keyword-only argument: 'picker'")
+    monkeypatch.setattr(shim, "SDK_AVAILABLE", True)
+    monkeypatch.setattr(shim, "LlmTarget", lambda name, client: (name, client), raising=False)
+    monkeypatch.setattr(shim, "algorithms",
+                        type("algorithms", (), {"stage_router": staticmethod(churned)}), raising=False)
+    router = shim.make_router({"id": STRONG_MODEL}, {"id": EFFICIENT_MODEL})
+    out = capsys.readouterr().out
+    assert isinstance(router, shim.MockRouter)
+    assert out.startswith("⚠️") and "picker" in out and "MockRouter" in out
+
+def test_switchyard_call_traces_every_turn(capsys, fake_chat):
+    # The [route → …] line is the exercise's visible payload (spec §4 Ex3b): it is how
+    # the learner watches the stage transition happen.
+    bill = lab.RunningBill()
+    pool = {"strong": fake_chat("deep answer"), "efficient": fake_chat("quick answer")}
+    lab.switchyard_call("short prompt", pool, bill, router=shim.MockRouter())
+    lab.switchyard_call("x" * 500, pool, bill, router=shim.MockRouter())
+    traced = capsys.readouterr().out
+    assert "[route → efficient]" in traced and "[route → capable]" in traced
+
 def test_make_lab_router_passes_the_pinned_ids_in_the_documented_order(monkeypatch):
     # stage_router(capable, efficient) -- the argument order is easy to get
     # backwards, and swapping it silently inverts every routing decision.

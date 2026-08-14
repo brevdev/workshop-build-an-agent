@@ -40,7 +40,9 @@
     { id: "manual_classifier", sub: "a cheap model picks the lane" },
     { id: "switchyard_stage",  sub: "the SDK reads the trajectory" },
     { id: "gateway",           sub: "routes.toml decides, out of process" },
-    { id: "mock_demo",         sub: "no key, no SDK — the demo path" }
+    // MockRouter replaces the routing DECISION, not the answering call — mock_demo
+    // needs NVIDIA_API_KEY like every other strategy. What it does not need is the SDK.
+    { id: "mock_demo",         sub: "no SDK needed — deterministic demo router" }
   ];
 
   // MIRRORS `RACE_STRATEGIES` in routing_client/server.py: run_suite answers the
@@ -437,7 +439,8 @@
         "client — the server reads the key once, at startup — then relaunch the tile:",
         "set -a; source /project/secrets.env; set +a",
         "(/project is the repo root inside JupyterLab; outside it, use your clone's path.) " +
-        "The mock_demo strategy still works with no key."));
+        "mock_demo is not a way around this: its router is a mock, but the call that " +
+        "answers is a real one."));
     }
     if (s.lab_error) {
       box.appendChild(banner("warn",

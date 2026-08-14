@@ -26,10 +26,9 @@
 # Every volatile string (pinned version, model ids) is read out of
 # scripts/install_switchyard.sh -- THE single pin record. Nothing is hardcoded here.
 #
-# TEMPORARY (remove in Task 6): `routes.toml.answers` does not exist yet, so step 2
-# falls back to a probe config this script writes into a temp dir -- the same config
-# the Task 1 verification spike used. Once Task 6 lands routes.toml.answers, delete
-# the fallback branch and this note.
+# Steps 2 and 3 run against `routes.toml.answers` -- Exercise 4's reference config.
+# This canary therefore certifies the file the module ships: if it fails here, the
+# config is wrong, not the smoke.
 #
 # Requires NVIDIA_API_KEY in the environment:
 #   set -a; source secrets.env; set +a
@@ -66,53 +65,22 @@ echo "==> [1/5] Pinned install"
 bash scripts/install_switchyard.sh
 PY="$(bash scripts/install_switchyard.sh --print-python)"
 
-TMPD="$(mktemp -d)"
-trap 'rm -rf "$TMPD"' EXIT
-
 CONFIG="${LAB_DIR}/routes.toml.answers"
-if [ -f "$CONFIG" ]; then
-    echo "==> [2/5] Validating routes.toml.answers"
-else
-    CONFIG="${TMPD}/routes-probe.toml"
-    echo "==> [2/5] routes.toml.answers not present yet (Task 6) — validating the Task 1 probe config"
-    # Unquoted heredoc: the three model ids come from the pin record above.
-    cat > "$CONFIG" <<TOML
-schema_version = 1
-
-[llm_clients.nvidia]
-format = "openai_chat"
-base_url = "https://integrate.api.nvidia.com/v1"
-api_key_env = "NVIDIA_API_KEY"
-
-# The judge needs its own model id: two targets sharing an id on one llm_client are
-# silently deduped and routing collapses to the strong tier. And it must not "think" --
-# chain-of-thought eats the whole structured-output budget and the classifier falls
-# through to strong on every request. (api-notes Deviations 5 and 6.)
-[targets.judge]
-id = "${MODEL_JUDGE}"
-llm_client = "nvidia"
-extra_body = { chat_template_kwargs = { thinking = false } }
-
-[targets.weak]
-id = "${MODEL_EFFICIENT}"
-llm_client = "nvidia"
-
-[targets.strong]
-id = "${MODEL_CAPABLE}"
-llm_client = "nvidia"
-
-[routes.switchyard]
-id = "switchyard"
-type = "llm_classifier"
-mode = "capability"
-classifier_target = "judge"
-strong_target = "strong"
-weak_target = "weak"
-base_threshold = 0.5
-max_output_tokens = 4096
-TOML
+if [ ! -f "$CONFIG" ]; then
+    echo "ERROR: ${CONFIG} is missing -- it is Exercise 4's reference config." >&2
+    exit 1
 fi
 
+# The config names all three model ids; the pin record is the only place they may be
+# edited, so a silent drift between the two files fails the canary here.
+for MODEL in "$MODEL_EFFICIENT" "$MODEL_CAPABLE" "$MODEL_JUDGE"; do
+    grep -q "\"${MODEL}\"" "$CONFIG" || {
+        echo "ERROR: ${MODEL} is pinned in scripts/install_switchyard.sh but absent from" >&2
+        echo "       routes.toml.answers -- bump both in the same diff." >&2
+        exit 1; }
+done
+
+echo "==> [2/5] Validating routes.toml.answers"
 "$PY" - "$CONFIG" <<'PY'
 import sys
 from switchyard_rust.server import Server

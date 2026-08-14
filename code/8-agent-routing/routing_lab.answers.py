@@ -141,6 +141,57 @@ def switchyard_call(query, pool, bill, router=None, tool_events=None):
     return bill_call(model_id, pool[lane_key], query, bill, why=why)
 
 # ---------------------------------------------------------------------------
+# Exercise 4 — the same decision, moved OUT of the application. routes.toml
+# owns the policy; the app asks for one model id ("switchyard") and is never
+# told which model answered. The blank here is a config file, not Python:
+# everything below is provided. The gateway is the Rust server embedded in the
+# pip wheel — start it with scripts/serve_gateway.sh (there is no separate
+# binary to install; docs/specs/switchyard-api-notes.md § Server install).
+# ---------------------------------------------------------------------------
+
+import urllib.request
+
+def _local_opener():
+    """Provided. localhost is a local socket, never a proxy hop — say so explicitly,
+    because an inherited http_proxy would otherwise swallow every gateway call."""
+    return urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+def gateway_call(query, bill, *, session=None, history=None, max_tokens=None):
+    """Provided: call the route id through the local gateway; bill from the response.
+    `session` is the escalation router's memory — same id, same session, and the move
+    to the strong tier is one-way once it happens. `history` is the trajectory it reads."""
+    payload = {"model": GATEWAY_ROUTE_ID,
+               "messages": (history or []) + [{"role": "user", "content": query}]}
+    if max_tokens:
+        payload["max_tokens"] = max_tokens
+    headers = {"Content-Type": "application/json"}
+    if session:
+        headers["x-switchyard-session-id"] = session   # how the gateway groups turns
+    t0 = time.perf_counter()
+    req = urllib.request.Request(f"{GATEWAY_BASE_URL}/chat/completions",
+                                 data=json.dumps(payload).encode(), headers=headers)
+    body = json.load(_local_opener().open(req, timeout=180))
+    latency = time.perf_counter() - t0
+    served_by = body.get("model", GATEWAY_ROUTE_ID)    # attribution: the UPSTREAM model id
+    usage = {"input_tokens": body["usage"]["prompt_tokens"],
+             "output_tokens": body["usage"]["completion_tokens"]}
+    model_id = served_by if served_by in PRICING else EFFICIENT_MODEL
+    cost = _price(model_id, usage)
+    bill.add(model_id, usage, cost, latency)
+    return body["choices"][0]["message"]["content"], {
+        "model": served_by, **usage, "cost": cost, "latency": latency,
+        "counterfactual_cost": _price(STRONG_MODEL, usage),
+        # 0.0 on THIS meter, and that is the catch: the judge's tokens are spent
+        # server-side and never appear in a completion's usage. gateway_stats() has them.
+        "why": "gateway (switchyard route)", "router_tax": 0.0}
+
+def gateway_stats():
+    """Provided: GET /v1/stats — the gateway's own books. The tier split and the
+    router tax (the judge's spend) live here; a completion response shows neither."""
+    with _local_opener().open(f"{GATEWAY_BASE_URL}/stats", timeout=30) as response:
+        return json.load(response)
+
+# ---------------------------------------------------------------------------
 # Provided harness — the LLM judge behind the one unverifiable task, and the
 # runner that puts the whole 12-task suite through a single strategy.
 # ---------------------------------------------------------------------------
@@ -264,10 +315,91 @@ def _print_exercise_3():
     print()
     _print_stage_transition()
 
+_SERVE_HINT = (
+    "Start the gateway in another terminal. It reads NVIDIA_API_KEY from THAT\n"
+    "terminal's environment (`api_key_env` in routes.toml) — the #1 way this fails:\n\n"
+    "    cd code/8-agent-routing\n"
+    "    bash scripts/serve_gateway.sh routes.toml\n\n"
+    "Ask it what it serves:  curl -s localhost:4000/v1/models\n")
+
+# Exercise 3's task and its tool output again — but the turns are shaped for a
+# different reader. The stage router scores the trajectory mechanically and flips on
+# accumulated failure; the gateway's judge is an LLM with a deliberately high bar
+# ("reading the first failing test" is not trouble), so what convinces it is a run
+# that stays stuck: failures that keep arriving, and the same one twice.
+_GATEWAY_TURNS = [("turn 1 · the task, no tools yet", None),
+                  ("turn 2 · first failing test run", _FAIL1),
+                  ("turn 3 · a second failure appears", _FAIL2),
+                  ("turn 4 · and now a fixture error", _FAIL3),
+                  ("turn 5 · re-ran it; identical", _FAIL3)]
+
+def _gateway_escalation(bill):
+    """One agent session, five turns, replayed through the gateway. The decision
+    happens server-side now, inside a session it tracks by header — no tool is run
+    here, only the routing signal changes between turns."""
+    session = f"lab-{int(time.time())}"      # a fresh session: escalation is one-way
+    print(f"escalation — one task, five turns, session {session}:")
+    history, served = [], []
+    for label, tool_output in _GATEWAY_TURNS:
+        query = _DEMO_TASK if tool_output is None else (
+            f"<tool_result>\n$ pytest -q\n{tool_output}\n</tool_result>")
+        text, receipt = gateway_call(query, bill, session=session,
+                                     history=history, max_tokens=64)
+        history = history + [{"role": "user", "content": query},
+                             {"role": "assistant", "content": (text or "")[:400]}]
+        served.append(receipt["model"])
+        print(f"  {label:36}[gateway → {receipt['model']}]")
+    up = [i for i, model in enumerate(served) if model == STRONG_MODEL]
+    if up and served[up[0]:] == [STRONG_MODEL] * (len(served) - up[0]):
+        print(f"  escalated at turn {up[0] + 1} and stayed there — the judge confirmed the run"
+              "\n  was stuck as many times as routes.toml asks for, and the move is one-way")
+    else:   # never claim an escalation that did not happen
+        print("  no escalation: " + " → ".join("strong" if m == STRONG_MODEL else "weak"
+                                               for m in served) +
+              "\n  — the judge is deliberately reluctant to spend frontier money")
+
+def _gateway_meter():
+    """The gateway's own books, including the part the receipts above cannot see."""
+    stats = gateway_stats()
+    print("the gateway's own meter — /v1/stats, cumulative since it started:")
+    tiers = stats.get("tiers") or {}
+    if not tiers:
+        print("  ⚠️  /v1/stats reports no tiers — the split collapsed and every request is\n"
+              "      being served without a routing decision. Check the judge target in\n"
+              "      routes.toml: the two traps commented there are exactly this failure.")
+    for name, tier in sorted(tiers.items()):
+        print(f"  tier {name:>6}: {tier['total_tokens']:>6} tokens "
+              f"({tier['token_pct']:.0f}% of routed spend)")
+    classifier, overhead = stats.get("classifier") or {}, stats.get("routing_overhead") or {}
+    print(f"  router tax: {classifier.get('total_requests', 0)} judge calls · "
+          f"{(classifier.get('total_tokens') or {}).get('total', 0)} tokens · "
+          f"{overhead.get('avg_ms', 0.0):.0f} ms avg per request\n"
+          "  — spent server-side, so none of it shows up in the receipts above")
+
+def _print_exercise_4():
+    print(_SERVE_HINT)
+    try:
+        gateway_stats()                      # is anything actually listening?
+    except OSError as exc:
+        print(f"No gateway on {GATEWAY_BASE_URL} yet ({exc}) — start it, then re-run.")
+        return
+    bill = RunningBill()
+    print("two single-shot requests — the app names the route, never the model:")
+    for query in ("Convert 2 hours to minutes. Just the number.",
+                  "Plan a 5-step rollout for migrating a service to a routed model pool."):
+        _, receipt = gateway_call(query, bill)
+        print(f"  [gateway → {receipt['model']}] ${receipt['cost']:.4f} · {receipt['latency']:.1f}s")
+    print("  escalation mode starts every session cheap: a hard-LOOKING prompt is not\n"
+          "  evidence of a hard run, so neither of those bought frontier tokens.\n")
+    _gateway_escalation(bill)
+    print(bill.summary())
+    print()
+    _gateway_meter()
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Module 8 routing lab")
     ap.add_argument("--exercise", type=int, required=True, choices=range(1, 6))
     ex = ap.parse_args().exercise
-    {1: _print_exercise_1, 2: _print_exercise_2,
-     3: _print_exercise_3}[ex]()                        # dict grows: 4..5 added in Tasks 6–7
+    {1: _print_exercise_1, 2: _print_exercise_2, 3: _print_exercise_3,
+     4: _print_exercise_4}[ex]()                        # dict grows: 5 added in Task 7

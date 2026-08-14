@@ -1,0 +1,83 @@
+# Exercise 4 — the gateway's entire routing policy, in one file.
+#
+# Three nouns, in dependency order:
+#   llm_clients  WHERE requests go   (endpoint + wire format + which env var holds the key)
+#   targets      WHICH model         (an upstream model id, on one of those clients)
+#   routes       WHAT your app asks for (a public model id) and the algorithm behind it
+#
+# The app only ever sees the route id. Swapping a model, a provider, or the whole
+# algorithm is an edit here — not a code change.
+#
+#   cp routes.toml.template routes.toml      # then fill in every TODO below
+#
+# Validate before you serve (there is no `--dry-run` flag; the embedded gateway
+# validates a config when you construct it — port 0 binds and releases at once):
+#   "$(bash scripts/install_switchyard.sh --print-python)" -c \
+#     "from switchyard_rust.server import Server; Server('routes.toml', port=0).close()"
+# Then serve it:
+#   bash scripts/serve_gateway.sh routes.toml
+
+schema_version = 1
+
+# --------------------------------------------------------------- llm_clients --
+[llm_clients.nvidia]
+# TODO: Exercise 4 — format: the wire protocol this endpoint speaks (openai_chat)
+# TODO: Exercise 4 — base_url: the OpenAI-compatible endpoint (constants.NVIDIA_BASE_URL)
+# TODO: Exercise 4 — api_key_env: the NAME of the env var holding the key, never the key
+
+# ------------------------------------------------------------------- targets --
+
+# The judge — the model that reads each turn and decides whether the run is in trouble.
+# Provided, and both lines below are load-bearing:
+#
+# TRAP 1 (its own model id). The judge cannot reuse the weak target's model id: two
+# targets sharing an id on one llm_client are deduplicated, one is dropped, and the
+# tier split silently collapses — every request lands on `strong` while /v1/stats
+# reports no tiers at all. Give it a distinct id (here: Nano), or a second llm_client.
+#
+# TRAP 2 (it must not think). With thinking on, the judge spends its whole verdict
+# budget deliberating, never emits the required JSON, and the router does not raise —
+# it quietly falls through to `strong`. Both traps look like a healthy router and bill
+# like a frontier-only one. See docs/specs/switchyard-api-notes.md, Deviations 5 and 6.
+[targets.judge]
+id = "nvidia/nemotron-3-nano-30b-a3b"
+llm_client = "nvidia"
+extra_body = { chat_template_kwargs = { thinking = false } }
+
+[targets.weak]
+# TODO: Exercise 4 — id: the efficient model this route falls back to (constants.EFFICIENT_MODEL)
+llm_client = "nvidia"
+
+[targets.strong]
+# TODO: Exercise 4 — id: the frontier model it escalates to (constants.STRONG_MODEL)
+llm_client = "nvidia"
+
+# -------------------------------------------------------------------- routes --
+# `id` is the public model id: what your app puts in `model`. It never changes when
+# the policy underneath it does — that is the whole point of the gateway.
+[routes.switchyard]
+id = "switchyard"
+# TODO: Exercise 4 — type: which algorithm serves this route (llm_classifier)
+# TODO: Exercise 4 — mode: "capability" judges every request on its own merits;
+#                          "escalation" starts every session cheap and moves up
+#                          only when the run is in trouble. Pick escalation.
+# TODO: Exercise 4 — classifier_target: which target does the judging
+# TODO: Exercise 4 — weak_target: the tier every session starts on
+# TODO: Exercise 4 — strong_target: the tier it escalates to
+# TODO: Exercise 4 — escalation = { confirmations = N }: how many consecutive
+#                    escalate verdicts before the one-way move to strong.
+#                    One bad turn is noise; two in a row is a pattern.
+
+# ---- Exercise 4b (optional GPU path): a local NIM as the weak target ----------
+# Launch it with `bash scripts/serve_local_nim.sh`, then uncomment both blocks below
+# and delete the hosted [targets.weak] above. Nothing else in this file — or in your
+# app — changes: same route id, same algorithm, a different place the tokens are made.
+#
+# [llm_clients.local_nim]
+# format = "openai_chat"
+# base_url = "http://nemotron:8000/v1"   # http://localhost:8000/v1 outside the workbench network
+#                                        # (no api_key_env: it is your GPU, not a vendor's)
+#
+# [targets.weak]
+# id = "nvidia/nemotron-3-nano"          # the id the NIM serves — see scripts/serve_local_nim.sh
+# llm_client = "local_nim"

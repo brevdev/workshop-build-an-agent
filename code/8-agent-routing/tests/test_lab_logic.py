@@ -224,3 +224,22 @@ def test_run_suite_routes_the_whole_suite_through_the_stage_router(monkeypatch):
     results = lab.run_suite("switchyard_stage", bill, judge=lambda rubric, out: True)
     assert len(results) == 12 and len(chat.calls) == 12     # one billed call per task, no tax call
     assert all(r["router_tax"] == 0.0 for r in results)
+
+# --- Exercise 5: the verdict ------------------------------------------------
+
+def _mk(strategy, passed, cost, strong_calls, tax):
+    return [{"id": f"t{i}", "kind": "commodity", "passed": i < passed, "cost": cost / 12,
+             "latency": 1.0, "models": {lab.STRONG_MODEL if i < strong_calls else lab.EFFICIENT_MODEL: 1},
+             "router_tax": tax / 12} for i in range(12)]
+
+def test_routing_verdict_math():
+    v = lab.routing_verdict({
+        "strong_only": _mk("strong_only", 12, 1.55, 12, 0.0),
+        "efficient_only": _mk("efficient_only", 9, 0.10, 0, 0.0),
+        "manual_classifier": _mk("manual_classifier", 11, 0.41, 3, 0.04),
+    })
+    routed = next(r for r in v["rows"] if r["strategy"] == "manual_classifier")
+    assert routed["accuracy"] == 11 and abs(routed["frontier_pct"] - 25.0) < 0.1
+    assert abs(v["savings_pct"] - (1 - 0.41 / 1.55) * 100) < 0.1
+    assert "$" in v["receipt"] and "%" in v["receipt"]
+    assert abs(v["monthly"]["strong_only"] - 1.55 * lab.AT_SCALE_TASKS_PER_DAY * 30) < 1e-6

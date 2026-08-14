@@ -192,6 +192,41 @@ def gateway_stats():
         return json.load(response)
 
 # ---------------------------------------------------------------------------
+# Exercise 5 — the verdict. Suite results in, scoreboard out: accuracy, spend,
+# the open/frontier mix, and what the router itself cost. Two accounting rules,
+# both easy to get backwards:
+#   · The tax is already IN the cost. run_suite's per-task `cost` is a meter
+#     delta covering the classifier call AND the answer; `router_tax` repeats
+#     the classifier's share so a row can show it. So tax and cost make a
+#     RATIO, never a sum — add them and you bill the router twice.
+#   · `models` counts ANSWER calls only, by design (run_suite records the model
+#     that answered). frontier_pct is therefore the share of answers that bought
+#     frontier tokens; the router's own calls surface only as router_tax_pct.
+# ---------------------------------------------------------------------------
+
+def routing_verdict(results_by_strategy):
+    # === Exercise 5 (answer) ===
+    rows, monthly = [], {}
+    for strategy, results in results_by_strategy.items():
+        cost = sum(r["cost"] for r in results)
+        strong_calls = sum(r["models"].get(STRONG_MODEL, 0) for r in results)
+        total_calls = sum(sum(r["models"].values()) for r in results)
+        tax = sum(r["router_tax"] for r in results)
+        rows.append({"strategy": strategy, "accuracy": sum(r["passed"] for r in results),
+                     "cost": cost, "frontier_pct": 100.0 * strong_calls / max(total_calls, 1),
+                     "router_tax_pct": 100.0 * tax / max(cost, 1e-12)})
+        monthly[strategy] = cost * AT_SCALE_TASKS_PER_DAY * 30
+    strong = next((r for r in rows if r["strategy"] == "strong_only"), None)
+    routed = next((r for r in rows if r["strategy"] in ("manual_classifier", "switchyard_stage", "gateway")), None)
+    savings = (1 - routed["cost"] / strong["cost"]) * 100 if strong and routed and strong["cost"] else 0.0
+    receipt = (f"routed: {100 - routed['frontier_pct']:.0f}/{routed['frontier_pct']:.0f} open/frontier mix · "
+               f"${routed['cost']:.2f} vs ${strong['cost']:.2f} (−{savings:.0f}%) · "
+               f"at {AT_SCALE_TASKS_PER_DAY}/day: ${monthly[routed['strategy']]:,.0f} vs ${monthly['strong_only']:,.0f}/mo · "
+               f"accuracy {routed['accuracy']}/12 vs {strong['accuracy']}/12 · "
+               f"router tax {routed['router_tax_pct']:.0f}% of spend") if strong and routed else "insufficient data"
+    return {"rows": rows, "savings_pct": savings, "monthly": monthly, "receipt": receipt}
+
+# ---------------------------------------------------------------------------
 # Provided harness — the LLM judge behind the one unverifiable task, and the
 # runner that puts the whole 12-task suite through a single strategy.
 # ---------------------------------------------------------------------------
@@ -396,10 +431,32 @@ def _print_exercise_4():
     print()
     _gateway_meter()
 
+def _print_exercise_5():
+    """The scoreboard: the same 12 tasks under three strategies, then the receipt.
+    Each row's cost IS that strategy's whole meter — run_suite's per-task cost is a
+    bill delta, so the classifier's calls are already inside the routed row's number
+    (which is why the tax is shown as a share of it, not added to it)."""
+    results = {}
+    for strategy in ("strong_only", "efficient_only", "manual_classifier"):
+        print(f"  running {strategy} …", flush=True)
+        results[strategy] = run_suite(strategy)
+    verdict = routing_verdict(results)
+    print(f"\n{'strategy':>17}  {'accuracy':>8}  {'cost':>9}  {'frontier':>8}  {'router tax':>10}")
+    for row in verdict["rows"]:
+        accuracy, cost = f"{row['accuracy']}/12", f"${row['cost']:.4f}"
+        print(f"{row['strategy']:>17}  {accuracy:>8}  {cost:>9}  "
+              f"{row['frontier_pct']:>7.0f}%  {row['router_tax_pct']:>9.0f}%")
+    # One tier, three names — the receipt reconciles the vocabulary this module
+    # has been using: Ex2 routed to a lane, Ex3 named a stage, both meant this.
+    print("  frontier = Ex2's 'strong' lane = Ex3's 'capable' stage (one tier, three names);\n"
+          "  'open' is the efficient model. The % is the share of ANSWER calls — the router's\n"
+          "  own calls are the tax column, never the mix.")
+    print(f"\n🧾 {verdict['receipt']}")
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Module 8 routing lab")
     ap.add_argument("--exercise", type=int, required=True, choices=range(1, 6))
     ex = ap.parse_args().exercise
     {1: _print_exercise_1, 2: _print_exercise_2, 3: _print_exercise_3,
-     4: _print_exercise_4}[ex]()                        # dict grows: 5 added in Task 7
+     4: _print_exercise_4, 5: _print_exercise_5}[ex]()

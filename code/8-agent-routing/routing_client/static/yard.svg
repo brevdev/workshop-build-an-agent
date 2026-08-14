@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <!-- The switchyard. Loaded by index.html in an <object>, so this file is its own
+       document: the styles below live here, not in client.css, and client.js reaches
+       the ids through the object's contentDocument.
+
+       THE CONTRACT WITH client.js — these ids: #dispatcher, #dispatcher-why,
+       #rail-in, #rail-efficient, #rail-capable, #loco-efficient, #loco-capable, #card.
+       Classes are prefixed y- so they cannot collide with client.css if this file is
+       ever inlined into the parent document (client.js's fallback path). -->
+  <style>
+    .y-rail  { fill: none; stroke: #3a4657; stroke-width: 4; stroke-linecap: round;
+               transition: stroke .25s ease-out; }
+    .y-rail.y-hot-efficient { stroke: #76b900; }
+    .y-rail.y-hot-capable   { stroke: #e8a33d; }
+    .y-loco rect { transition: stroke-width .25s ease-out, fill .25s ease-out; }
+    .y-loco.y-lit rect { stroke-width: 3; }
+    #loco-efficient.y-lit rect { fill: #16351d; }
+    #loco-capable.y-lit rect   { fill: #3a2113; }
+    .y-eyebrow { fill: #76b900; font-size: 11px; letter-spacing: .18em; }
+    .y-note    { fill: #6d7b8d; font-size: 11px; }
+  </style>
+
+  <rect width="900" height="320" fill="#0e1116"/>
+  <!-- the dx hero's engineering dot grid, dimmed to a backdrop -->
+  <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1" fill="#76b900" opacity=".13"/>
+  </pattern>
+  <rect width="900" height="320" fill="url(#dots)"/>
+
+  <text class="y-eyebrow" x="22" y="30">SWITCHYARD</text>
+  <text class="y-note" x="22" y="146">QUERY IN</text>
+
+  <!-- rails: in from the left, then one branch per tier -->
+  <path id="rail-in"        class="y-rail" d="M40 160 H320"/>
+  <path id="rail-efficient" class="y-rail" d="M480 160 C570 160 570 80 660 80 H700"/>
+  <path id="rail-capable"   class="y-rail" d="M480 160 C570 160 570 240 660 240 H700"/>
+
+  <!-- Task 12 adds the third locomotive (Ex4b, the local NIM on your own GPU). The
+       rail mirrors the efficient branch one lane further out; the group carries a
+       live `NN% util` badge fed by GET /api/gpu.
+  <path id="rail-gpu" class="y-rail" d="M480 160 C570 160 570 300 660 300 H700"/>
+  <g id="loco-gpu" class="y-loco">
+    <rect x="700" y="272" width="160" height="56" rx="8" fill="#0f2430" stroke="#4aa8c0"/>
+    <text x="780" y="296" fill="#e6edf3" text-anchor="middle" font-size="11">YOUR GPU</text>
+    <text id="gpu-badge" x="780" y="314" fill="#4aa8c0" text-anchor="middle" font-size="11">nano 30B local</text>
+  </g>
+  -->
+
+  <g id="dispatcher">
+    <rect x="320" y="128" width="160" height="64" rx="8" fill="#1a2230" stroke="#76b900"/>
+    <text x="400" y="154" fill="#e6edf3" text-anchor="middle" font-size="13">DISPATCHER</text>
+    <text id="dispatcher-why" x="400" y="174" fill="#8b98a9" text-anchor="middle" font-size="11"></text>
+  </g>
+
+  <text class="y-note" x="780" y="42" text-anchor="middle">commodity lane</text>
+  <g id="loco-efficient" class="y-loco">
+    <rect x="700" y="52" width="160" height="56" rx="8" fill="#12281a" stroke="#76b900"/>
+    <text x="780" y="76" fill="#e6edf3" text-anchor="middle" font-size="12">LIGHTNING 30B</text>
+    <text x="780" y="94" fill="#76b900" text-anchor="middle" font-size="11">efficient · open</text>
+  </g>
+
+  <text class="y-note" x="780" y="204" text-anchor="middle">frontier lane</text>
+  <g id="loco-capable" class="y-loco">
+    <rect x="700" y="212" width="160" height="56" rx="8" fill="#2b1a12" stroke="#e8a33d"/>
+    <text x="780" y="236" fill="#e6edf3" text-anchor="middle" font-size="12">SUPER 120B</text>
+    <text x="780" y="254" fill="#e8a33d" text-anchor="middle" font-size="11">strong · frontier stand-in</text>
+  </g>
+
+  <!-- the query card. A group, so client.js moves ONE transform along the path
+       (getPointAtLength) and the halo rides with it. -->
+  <g id="card" opacity="0" transform="translate(40 160)">
+    <circle r="17" fill="#76b900" opacity=".16"/>
+    <circle r="9" fill="#76b900"/>
+  </g>
+</svg>

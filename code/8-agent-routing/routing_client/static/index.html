@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" class="dx-dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routing Client</title>
+<link rel="stylesheet" href="client.css">
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <h1>ROUTING CLIENT</h1>
+    <p class="tagline">a window on <code>routing_lab.py</code> — every lane, price and receipt below was
+      decided by your file, not by this app</p>
+  </div>
+  <div id="strategies" aria-label="strategy picker"><!-- chips injected by client.js from /api/status --></div>
+  <div id="meters">
+    <span class="meter">session <b id="bill">$0.0000</b></span>
+    <span class="meter save">saved vs frontier-only <b id="saved">$0.0000 (0%)</b></span>
+    <span class="meter" id="online">systems online: 0/5</span>
+  </div>
+</header>
+
+<!-- key / lab / SDK health. Persistent, never a toast: these do not go away by themselves. -->
+<div id="banners" role="status" aria-live="polite"></div>
+
+<main>
+  <section id="yard-wrap">
+    <object id="yard" data="yard.svg" type="image/svg+xml" aria-label="the switchyard"></object>
+  </section>
+  <aside id="receipts">
+    <h2>RECEIPTS</h2>
+    <p class="hint">newest first · <b>would-have-been</b> re-prices the same tokens at the frontier
+      tier — an estimate, since a different model writes a different number of them</p>
+    <ol id="receipt-log"></ol>
+  </aside>
+</main>
+
+<footer>
+  <div id="chips">
+    <span class="chips-label">try one:</span>
+    <button class="ex commodity" data-tag="commodity">Convert 2 hours to minutes.</button>
+    <button class="ex commodity" data-tag="commodity">Extract the email from: "mail ada@example.com now".</button>
+    <button class="ex frontier" data-tag="frontier">Plan a 5-step LLM migration with an eval gate.</button>
+    <button class="ex frontier" data-tag="frontier">A ships 3 features/sprint, 2 reviews each at 45min — review-hours per 4-sprint quarter?</button>
+  </div>
+
+  <form id="ask" autocomplete="off">
+    <input id="q" placeholder="Ask anything — watch it route" aria-label="your query">
+    <button id="send" type="submit">Send</button>
+  </form>
+
+  <div id="reply" hidden>
+    <p class="reply-q"></p>
+    <div class="reply-a"></div>
+  </div>
+
+  <details id="race">
+    <summary>🏁 Race mode (Exercise 5)</summary>
+
+    <p id="race-note">The same 12-task suite under each strategy you pick — <b>12 live model calls
+      per strategy</b>. All four is ≈48 calls and several minutes. There is no cancel button, and
+      closing this tab will not stop a suite that has already started.</p>
+
+    <div id="race-strats" aria-label="race strategies"><!-- chips injected by client.js --></div>
+    <button id="run-race" disabled>Run the 12-task suite</button>
+
+    <div id="race-out">
+      <table id="race-table">
+        <thead><tr><th>strategy</th><th>accuracy</th><th>cost</th><th>frontier %</th><th>tax %</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <figure id="pareto-wrap">
+        <figcaption>accuracy vs cost — <b>up and to the left is better</b></figcaption>
+        <div class="legend">
+          <span><i class="sw dot green"></i>routed / open</span>
+          <span><i class="sw diamond amber"></i>frontier baseline</span>
+        </div>
+        <!-- points drawn by client.js as each race_row streams in -->
+        <svg id="pareto" viewBox="0 0 460 260" role="img" aria-label="accuracy versus cost scatter"></svg>
+      </figure>
+    </div>
+
+    <p id="race-receipt"></p>
+  </details>
+</footer>
+
+<div id="toasts" aria-live="assertive"></div>
+
+<script src="client.js"></script>
+</body>
+</html>

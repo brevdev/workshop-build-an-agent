@@ -1,6 +1,6 @@
 from routing_lab_answers_import_helper import answers as lab
 from conftest import FakeResponse, FakeChat
-from constants import STRONG_MODEL, EFFICIENT_MODEL, PRICING
+from constants import STRONG_MODEL, EFFICIENT_MODEL, CLASSIFIER_MODEL, PRICING
 
 def test_bill_call_prices_and_counterfactuals():
     bill = lab.RunningBill()
@@ -51,3 +51,46 @@ def test_run_suite_bills_every_task_under_a_passthrough_strategy(monkeypatch):
     assert set(results[0]) == {"id", "kind", "passed", "cost", "latency", "models", "router_tax"}
     assert bill.by_model[EFFICIENT_MODEL]["calls"] == 12
     assert abs(sum(r["cost"] for r in results) - bill.total_cost) < 1e-9
+
+# --- Exercise 2: the hand-rolled classifier router ---------------------------
+
+def test_classifier_parses_and_fails_up(fake_chat):
+    bill = lab.RunningBill()
+    assert lab.classify_difficulty("q", fake_chat("COMMODITY"), bill)[0] == "COMMODITY"
+    assert lab.classify_difficulty("q", fake_chat("frontier."), bill)[0] == "FRONTIER"
+    assert lab.classify_difficulty("q", fake_chat("dunno maybe hard?"), bill)[0] == "FRONTIER"  # fail UP
+
+def test_classifier_survives_an_empty_completion(fake_chat):
+    # A truncated/thinking-mode reply can come back blank -- parse it, don't crash on it.
+    bill = lab.RunningBill()
+    assert lab.classify_difficulty("q", fake_chat("   "), bill)[0] == "FRONTIER"
+    assert lab.classify_difficulty("q", FakeChat([FakeResponse(None)]), bill)[0] == "FRONTIER"
+
+def test_route_call_dispatches_and_taxes(fake_chat, monkeypatch):
+    bill = lab.RunningBill()
+    pool = {"strong": fake_chat("strong answer"), "efficient": fake_chat("easy answer")}
+    monkeypatch.setattr(lab, "build_classifier", lambda: fake_chat("COMMODITY"))
+    resp, receipt = lab.route_call("reformat this", pool, bill)
+    assert receipt["model"] == lab.EFFICIENT_MODEL
+    assert receipt["router_tax"] > 0
+    assert "COMMODITY" in receipt["why"]
+
+def test_route_call_sends_frontier_verdicts_to_the_strong_lane(fake_chat, monkeypatch):
+    bill = lab.RunningBill()
+    strong, efficient = fake_chat("strong answer"), fake_chat("easy answer")
+    monkeypatch.setattr(lab, "build_classifier", lambda: fake_chat("FRONTIER"))
+    resp, receipt = lab.route_call("plan the migration", {"strong": strong, "efficient": efficient}, bill)
+    assert receipt["model"] == STRONG_MODEL and receipt["why"] == "classifier: FRONTIER"
+    assert resp.content == "strong answer"
+    assert len(strong.calls) == 1 and len(efficient.calls) == 0   # FakeChat replays: count, don't peek
+
+def test_router_tax_is_real_money_on_the_meter(fake_chat, monkeypatch):
+    bill = lab.RunningBill()
+    classifier, efficient = fake_chat("COMMODITY"), fake_chat("easy answer")
+    monkeypatch.setattr(lab, "build_classifier", lambda: classifier)
+    _, receipt = lab.route_call("reformat this", {"strong": fake_chat("strong"), "efficient": efficient}, bill)
+    # Two billed calls, one meter: the answer plus its tax, counted once each.
+    assert bill.by_model[CLASSIFIER_MODEL]["calls"] == 2   # classifier IS the efficient model, by design
+    assert abs(bill.total_cost - (receipt["cost"] + receipt["router_tax"])) < 1e-9
+    assert len(classifier.calls) == 1 and len(efficient.calls) == 1
+    assert "reformat this" in classifier.calls[0]          # the query reaches the classify prompt

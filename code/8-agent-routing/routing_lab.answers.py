@@ -71,6 +71,43 @@ def bill_call(model_id, chat, messages, bill, why="passthrough"):
     }
 
 # ---------------------------------------------------------------------------
+# Exercise 2 — the hand-rolled router. A cheap model reads the request first
+# and picks the lane; that extra call is the router tax, and it goes on the
+# same meter as the work. Unreadable verdicts fail UP: a misrouted hard task
+# costs an outage, a misrouted easy one costs pennies.
+# ---------------------------------------------------------------------------
+
+CLASSIFY_PROMPT = (
+    "You are a routing dispatcher. Classify this request as COMMODITY "
+    "(extraction, reformatting, single-fact lookup, simple transforms) or FRONTIER "
+    "(multi-step reasoning, planning, synthesis, ambiguity). "
+    "Reply with exactly one word: COMMODITY or FRONTIER.\n\nRequest:\n{query}"
+)
+
+def build_classifier():
+    return ChatNVIDIA(model=CLASSIFIER_MODEL, temperature=0.0,
+                      max_completion_tokens=8, timeout=60)
+
+def classify_difficulty(query, classifier_chat, bill):
+    # === Exercise 2a (answer) ===
+    response, receipt = bill_call(CLASSIFIER_MODEL, classifier_chat,
+                                  CLASSIFY_PROMPT.format(query=query), bill, why="router-tax")
+    raw = response.content if hasattr(response, "content") else str(response)
+    words = (raw or "").strip().upper().split()
+    token = words[0].strip(".,!:;") if words else ""
+    verdict = token if token in ("COMMODITY", "FRONTIER") else "FRONTIER"   # misroutes fail UP
+    return verdict, receipt["cost"]
+
+def route_call(query, pool, bill):
+    # === Exercise 2b (answer) ===
+    verdict, tax = classify_difficulty(query, build_classifier(), bill)
+    lane = "efficient" if verdict == "COMMODITY" else "strong"
+    model_id = EFFICIENT_MODEL if lane == "efficient" else STRONG_MODEL
+    resp, receipt = bill_call(model_id, pool[lane], query, bill, why=f"classifier: {verdict}")
+    receipt["router_tax"] = tax          # already in the bill; recorded so the row can show it
+    return resp, receipt
+
+# ---------------------------------------------------------------------------
 # Provided harness — the LLM judge behind the one unverifiable task, and the
 # runner that puts the whole 12-task suite through a single strategy.
 # ---------------------------------------------------------------------------
@@ -118,9 +155,25 @@ def _print_exercise_1():
         print(f"{strategy:>16}: {acc}/12 correct · ${bill.total_cost:.4f} · p50 {p50:.1f}s")
         print(bill.summary())
 
+def _print_exercise_2():
+    for strategy in ("strong_only", "efficient_only", "manual_classifier"):
+        bill = RunningBill()
+        results = run_suite(strategy, bill)
+        acc = sum(r["passed"] for r in results)
+        p50 = sorted(r["latency"] for r in results)[len(results) // 2]
+        row = f"{strategy:>17}: {acc}/12 correct · ${bill.total_cost:.4f} · p50 {p50:.1f}s"
+        if strategy != "manual_classifier":
+            print(row); continue
+        strong = sum(1 for r in results if STRONG_MODEL in r["models"])
+        tax = sum(r["router_tax"] for r in results)
+        share = 100 * tax / bill.total_cost if bill.total_cost else 0.0
+        print(f"{row}  ({strong} → strong / {len(results) - strong} → efficient)")
+        print(f"  router tax: ${tax:.4f} ({share:.0f}% of spend)")
+        print(bill.summary())   # the meter, not the receipts: it counts the classifier's calls too
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Module 8 routing lab")
     ap.add_argument("--exercise", type=int, required=True, choices=range(1, 6))
     ex = ap.parse_args().exercise
-    {1: _print_exercise_1}[ex]()   # dict grows: 2..5 added in Tasks 4–7
+    {1: _print_exercise_1, 2: _print_exercise_2}[ex]()   # dict grows: 3..5 added in Tasks 5–7

@@ -204,6 +204,45 @@ def _print_exercise_2():
         print(f"  router tax: ${tax:.4f} ({share:.0f}% of spend)")
         print(bill.summary())   # the meter, not the receipts: it counts the classifier's calls too
 
+# The suite is 12 single-turn prompts, so the stage router has no trajectory to
+# read and every task lands on its default tier — true, and worth seeing. The
+# demo below is the other half: one task over five turns, with the tool results
+# an agent loop would already be producing. The scorer reads the tool-result
+# TEXT, not just the count — five terse "FAILED" strings escalate nothing, while
+# the realistic pytest output below flips the router at turn 4. Synthetic
+# strings: no tool is run, only the routing signal changes between turns.
+_READ  = "routing_lab.py: 214 lines read"
+_GREP  = "3 matches for 'lane' in routing_lab.py"
+_FAIL1 = ("FAILED tests/test_router.py::test_split - AssertionError: 3 != 6\n"
+          "1 failed, 11 passed in 0.5s")
+_FAIL2 = ("FAILED tests/test_router.py::test_split - AssertionError: 0 != 6\n"
+          "FAILED tests/test_router.py::test_tax - KeyError: 'router_tax'\n"
+          "2 failed, 10 passed in 0.6s")
+_FAIL3 = ("FAILED tests/test_router.py::test_split - AssertionError: 0 != 6\n"
+          "ERROR tests/test_router.py::test_tax - fixture 'bill' not found\n"
+          "1 failed, 1 error, 10 passed in 0.6s")
+_DEMO_TASK = "The router sends every task to the same lane. Diagnose it and propose a fix."
+_DEMO_TURNS = [("turn 1 · no tool calls yet",       []),
+               ("turn 2 · read + grep (exploring)", [_READ, _GREP]),
+               ("turn 3 · first failing test run",  [_READ, _GREP, _FAIL1]),
+               ("turn 4 · still failing, wider",    [_READ, _GREP, _FAIL1, _FAIL2]),
+               ("turn 5 · failing plus an error",   [_READ, _GREP, _FAIL1, _FAIL2, _FAIL3])]
+
+def _print_stage_transition():
+    bill, pool, router = RunningBill(), build_model_pool(), make_lab_router()
+    print("stage transition — one task, five turns, the trajectory accumulating:")
+    lanes = []
+    for label, tool_events in _DEMO_TURNS:
+        print(f"  {label:36}", end="")            # switchyard_call prints the [route → …] trace
+        _, receipt = switchyard_call(_DEMO_TASK, pool, bill, router=router, tool_events=tool_events)
+        lanes.append("capable" if receipt["model"] == STRONG_MODEL else "efficient")
+    split = lanes.count("efficient")
+    if lanes == ["efficient"] * split + ["capable"] * (len(lanes) - split) and 0 < split < len(lanes):
+        print(f"  turns 1–{split} → efficient · turns {split + 1}–{len(lanes)} → capable "
+              f"— the trajectory escalated the router, not the prompt")
+    else:   # never claim a transition that did not happen (a MockRouter has no trajectory to read)
+        print(f"  no stage transition: {' → '.join(lanes)} — stage signals need trajectories")
+
 def _print_exercise_3():
     bill = RunningBill()
     results = run_suite("switchyard_stage", bill)   # the [route → …] traces print as it runs
@@ -215,6 +254,8 @@ def _print_exercise_3():
     print(f"  router tax: ${sum(r['router_tax'] for r in results):.4f} "
           f"— the stage signal is already in the trajectory, so there is no second call")
     print(bill.summary())
+    print()
+    _print_stage_transition()
 
 if __name__ == "__main__":
     import argparse

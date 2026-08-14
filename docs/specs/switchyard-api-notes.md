@@ -588,6 +588,56 @@ justified — if anything, understated.
 
 ---
 
+## Task 5 addendum (verified in-process libsy behaviors)
+
+Executed 2026-08-13 while building `code/8-agent-routing/switchyard_shim.py` — the module's only SDK
+importer, and a working reference for everything below. Same pinned `nemo-switchyard==0.2.0`. Nothing
+above needed correcting; this **extends** the [Python surface](#switchyardlibsy--the-in-process-router-exercise-3--task-5s-shim)
+section with behavior the signatures do not show. **Tasks 10 and 12 read this file as ground truth.**
+
+1. **`stage_router`'s two keyword args are required.** `picker` and `confidence_threshold` have no
+   defaults in the Python binding. `picker` names the **default tier** — the tier returned when the
+   scorer finds no signal or is not confident — so it is a real policy dial: `"efficient_first"` =
+   cheap by default, escalate on evidence; `"capable_first"` = fail up. Module 8 ships
+   `efficient_first` / `0.5` (`switchyard_shim.PICKER`, `CONFIDENCE_THRESHOLD`).
+   `confidence_threshold=1.0` disables the scorer (everything falls through to the default tier).
+
+2. **`LlmTarget(name, client)` wants a client OBJECT, not a model id**, and `Algorithm` has exactly one
+   public method — `run`. There is **no synchronous `select`/`decide`**. To take a routing decision
+   *without* letting libsy make the upstream call (which the lab must own, so the call lands on its own
+   meter), give each target a **decision-only client**: an `LlmClient` whose `call` returns a canned
+   zero-token neutral response. `decisions[0]["selected_model"]` is then the target *name* and nothing
+   touched the network — measured **0.32 ms per decision**, i.e. genuinely free on both the cost and
+   latency axes.
+
+3. **Loop discipline, twice.** Build `router.run(...)` inside an `async def`, never as an
+   `asyncio.run()` argument (trap recorded above). A *synchronous* wrapper needs one more step: under
+   ipykernel or uvicorn a bare `asyncio.run` raises `cannot be called from a running event loop`, so
+   detect a running loop and run the coroutine on a one-shot worker thread. Verified to return
+   identical decisions both ways. **Task 10's async SSE handlers and the Task 13 notebook twin both hit
+   this**; `switchyard_shim.pick_target` is the pattern.
+
+4. **No trajectory ⇒ no routing.** The signal is the tool-result trajectory (`ToolResultSignal`:
+   severity, turn depth, write/edit/read counts, error and bash streaks, `tests_passed`), so a
+   single-turn chat request carries nothing to score and returns the picker's default tier every time
+   (`fall-through selected … (confidence 0.000)`). Measured on the lab's 12-prompt suite: **12/12 to the
+   default tier.** A single-shot chat UI will therefore show a 100/0 split unless it feeds tool events —
+   design the client's stage-router view around a trajectory, not a prompt.
+
+5. **Tool events must be tagged blocks.** `tool_call` requires `id`, `name`, `arguments`; `tool_result`
+   requires `tool_call_id` plus `content`. Anthropic's `tool_use`/`tool_use_id` spelling raises
+   (`unknown variant`, `missing field`). Full variant list, from the deserializer itself: `text,
+   reasoning, image, audio, video, file, tool_call, tool_result, refusal, unknown`.
+
+6. **The scorer reads the tool-result TEXT, not just the counts — and failing to feed it real text fails
+   silently** (same class as [Deviation 5](#5-the-judge-must-not-think-load-bearing)). `["FAILED"] × 6`
+   escalates nothing; realistic pytest output (`FAILED …::test_x - AssertionError …` + a
+   `1 failed, 11 passed` summary line) escalates at ~4 accumulated results under **both** pickers
+   (`confidence 0.762`). Clean results never escalate, at any depth (tested to 10 turns). Any authored
+   demo trajectory must use realistic failure text or it produces no routing at all while looking fine.
+
+---
+
 ## Reproducing this
 
 ```bash

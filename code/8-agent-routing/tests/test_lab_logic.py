@@ -1,6 +1,7 @@
 from routing_lab_answers_import_helper import answers as lab
 from conftest import FakeResponse, FakeChat
 from constants import STRONG_MODEL, EFFICIENT_MODEL, CLASSIFIER_MODEL, PRICING
+import switchyard_shim as shim
 
 def test_bill_call_prices_and_counterfactuals():
     bill = lab.RunningBill()
@@ -108,3 +109,84 @@ def test_router_tax_is_real_money_on_the_meter(fake_chat, monkeypatch):
     assert abs(bill.total_cost - (receipt["cost"] + receipt["router_tax"])) < 1e-9
     assert len(classifier.calls) == 1 and len(efficient.calls) == 1
     assert "reformat this" in classifier.calls[0]          # the query reaches the classify prompt
+
+# --- Exercise 3: the Switchyard stage router --------------------------------
+# SDK-independent by design: the mock path plus dependency injection cover the
+# wiring, and the real SDK is proven by the live smoke, not by pytest.
+
+def test_mock_router_is_deterministic():
+    r = shim.MockRouter()
+    assert r.pick(["short prompt"], []) == "efficient"
+    assert r.pick(["x" * 500], []) == "capable"
+    assert r.pick(["x" * 500], ["tool_result"]) == "efficient"
+    assert r.pick([], []) == "efficient"      # empty history must not IndexError
+
+def test_shim_request_carries_tool_events_as_the_verified_block_shapes():
+    # libsy's Rust deserializer accepts `tool_call`/`tool_result` with a
+    # `tool_call_id`; the Anthropic spelling (`tool_use`/`tool_use_id`) raises
+    # `unknown variant`/`missing field`. Pinned here so a rename fails loudly.
+    req = shim._request(["do the thing"], ["FAILED tests/test_a.py"])
+    assert [b["type"] for m in req["messages"] for b in m["content"]] == \
+           ["text", "tool_call", "tool_result"]
+    result = req["messages"][-1]["content"][0]
+    assert result["tool_call_id"] == "t0"
+    assert result["content"] == [{"type": "text", "text": "FAILED tests/test_a.py"}]
+
+def test_make_lab_router_passes_the_pinned_ids_in_the_documented_order(monkeypatch):
+    # stage_router(capable, efficient) -- the argument order is easy to get
+    # backwards, and swapping it silently inverts every routing decision.
+    seen = {}
+    monkeypatch.setattr(shim, "make_router",
+                        lambda cap, eff: seen.update(capable=cap, efficient=eff) or "router")
+    assert lab.make_lab_router() == "router"
+    assert seen == {"capable": {"id": STRONG_MODEL}, "efficient": {"id": EFFICIENT_MODEL}}
+
+def test_switchyard_call_routes_via_router(fake_chat):
+    bill = lab.RunningBill()
+    pool = {"strong": fake_chat("deep answer"), "efficient": fake_chat("quick answer")}
+    resp, receipt = lab.switchyard_call("short prompt", pool, bill, router=shim.MockRouter())
+    assert receipt["model"] == lab.EFFICIENT_MODEL
+    assert receipt["router_tax"] == 0.0        # stage routing: no extra LLM call
+    assert receipt["why"].startswith(("stage:", "mock"))
+    assert resp.content == "quick answer"
+
+def test_switchyard_call_sends_the_capable_stage_to_the_strong_lane(fake_chat):
+    bill = lab.RunningBill()
+    strong, efficient = fake_chat("deep answer"), fake_chat("quick answer")
+    _, receipt = lab.switchyard_call("x" * 500, {"strong": strong, "efficient": efficient},
+                                     bill, router=shim.MockRouter())
+    assert receipt["model"] == STRONG_MODEL and receipt["why"] == "mock"
+    assert len(strong.calls) == 1 and len(efficient.calls) == 0   # count, don't peek
+
+def test_switchyard_call_names_the_stage_when_the_sdk_decides(monkeypatch, fake_chat):
+    # The SDK path's receipt vocabulary, exercised without the SDK: anything that
+    # is not a MockRouter takes the `stage:` branch.
+    monkeypatch.setattr(shim, "pick_target", lambda router, messages, tool_events: router)
+    bill = lab.RunningBill()
+    pool = {"strong": fake_chat("deep answer"), "efficient": fake_chat("quick answer")}
+    _, capable = lab.switchyard_call("q", pool, bill, router="capable")
+    _, efficient = lab.switchyard_call("q", pool, bill, router="efficient")
+    assert (capable["model"], capable["why"]) == (STRONG_MODEL, "stage: synthesis")
+    assert (efficient["model"], efficient["why"]) == (EFFICIENT_MODEL, "stage: exploration")
+
+def test_stage_routing_bills_one_call_and_charges_no_tax(fake_chat):
+    # Honest by construction: the stage signal is already in the trajectory, so
+    # there is no second call to bill and no hidden latency to hide.
+    bill = lab.RunningBill()
+    strong, efficient = fake_chat("deep answer"), fake_chat("quick answer")
+    _, receipt = lab.switchyard_call("short prompt", {"strong": strong, "efficient": efficient},
+                                     bill, router=shim.MockRouter())
+    assert (len(efficient.calls), len(strong.calls)) == (1, 0)
+    assert list(bill.by_model) == [EFFICIENT_MODEL] and bill.by_model[EFFICIENT_MODEL]["calls"] == 1
+    assert receipt["router_tax"] == 0.0 and abs(bill.total_cost - receipt["cost"]) < 1e-9
+
+def test_run_suite_routes_the_whole_suite_through_the_stage_router(monkeypatch):
+    # run_suite's provided branch calls switchyard_call(prompt, pool, bill) -- the
+    # router has to come from make_lab_router(), which is the seam patched here.
+    chat = FakeChat([FakeResponse("1969")])
+    monkeypatch.setattr(lab, "build_model_pool", lambda: {"strong": chat, "efficient": chat})
+    monkeypatch.setattr(lab, "make_lab_router", lambda: shim.MockRouter())
+    bill = lab.RunningBill()
+    results = lab.run_suite("switchyard_stage", bill, judge=lambda rubric, out: True)
+    assert len(results) == 12 and len(chat.calls) == 12     # one billed call per task, no tax call
+    assert all(r["router_tax"] == 0.0 for r in results)

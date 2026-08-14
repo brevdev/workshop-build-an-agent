@@ -115,6 +115,32 @@ def route_call(query, pool, bill):
     return resp, receipt
 
 # ---------------------------------------------------------------------------
+# Exercise 3 — the same decision, from a library. Switchyard's stage router
+# reads the tool-result trajectory the agent already produces, so the routing
+# decision costs no extra call: router_tax stays 0.0 and, unlike Ex2, that is
+# honest on BOTH axes — there is no second round trip hiding in the latency
+# either. The SDK is touched only through switchyard_shim (spec §8b.3): if
+# upstream renames something, one file changes and this exercise does not.
+# ---------------------------------------------------------------------------
+
+import switchyard_shim as shim
+
+def make_lab_router():
+    # === Exercise 3a (answer) ===
+    return shim.make_router({"id": STRONG_MODEL}, {"id": EFFICIENT_MODEL})
+
+def switchyard_call(query, pool, bill, router=None, tool_events=None):
+    # === Exercise 3b (answer) ===
+    router = router or make_lab_router()
+    lane = shim.pick_target(router, [query], tool_events or [])
+    lane_key = "strong" if lane == "capable" else "efficient"
+    model_id = STRONG_MODEL if lane == "capable" else EFFICIENT_MODEL
+    why = ("mock" if isinstance(router, shim.MockRouter)
+           else f"stage: {'synthesis' if lane == 'capable' else 'exploration'}")
+    print(f"  [route → {lane}] {why}")          # the stage transition, visible per turn
+    return bill_call(model_id, pool[lane_key], query, bill, why=why)
+
+# ---------------------------------------------------------------------------
 # Provided harness — the LLM judge behind the one unverifiable task, and the
 # runner that puts the whole 12-task suite through a single strategy.
 # ---------------------------------------------------------------------------
@@ -178,9 +204,22 @@ def _print_exercise_2():
         print(f"  router tax: ${tax:.4f} ({share:.0f}% of spend)")
         print(bill.summary())   # the meter, not the receipts: it counts the classifier's calls too
 
+def _print_exercise_3():
+    bill = RunningBill()
+    results = run_suite("switchyard_stage", bill)   # the [route → …] traces print as it runs
+    acc = sum(r["passed"] for r in results)
+    p50 = sorted(r["latency"] for r in results)[len(results) // 2]
+    capable = sum(1 for r in results if STRONG_MODEL in r["models"])
+    print(f"{'switchyard_stage':>17}: {acc}/12 correct · ${bill.total_cost:.4f} · p50 {p50:.1f}s"
+          f"  ({capable} → capable / {len(results) - capable} → efficient)")
+    print(f"  router tax: ${sum(r['router_tax'] for r in results):.4f} "
+          f"— the stage signal is already in the trajectory, so there is no second call")
+    print(bill.summary())
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Module 8 routing lab")
     ap.add_argument("--exercise", type=int, required=True, choices=range(1, 6))
     ex = ap.parse_args().exercise
-    {1: _print_exercise_1, 2: _print_exercise_2}[ex]()   # dict grows: 3..5 added in Tasks 5–7
+    {1: _print_exercise_1, 2: _print_exercise_2,
+     3: _print_exercise_3}[ex]()                        # dict grows: 4..5 added in Tasks 6–7

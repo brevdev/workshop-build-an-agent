@@ -6,7 +6,9 @@
  *
  * The API it consumes (routing_client/server.py):
  *   GET  /api/status  -> {unlocks:{ex1,ex2,ex3,ex5}, gateway_alive, key_present,
- *                         sdk_available, lab_error}
+ *                         sdk_available, lab_error, repo_root}
+ *   GET  /api/gpu     -> {available, utilization_pct, memory_used_mb}   (gateway mode only)
+ *   GET  /api/gateway_stats -> {available, stats} | 503 {available:false, error}
  *   POST /api/query   -> SSE: route_decision {lane,model,why} · receipt (+counterfactual_saved)
  *                             · answer {text} · error {message}
  *   POST /api/race    -> SSE: race_row {strategy,accuracy,cost,frontier_pct,router_tax_pct}
@@ -25,9 +27,15 @@
   // on purpose. It also stops entirely while the tab is hidden (see startPolling).
   var POLL_MS = 5000;
 
+  // /api/gpu is one short-lived subprocess, so the GPU badge can be a live reading
+  // instead of a stale one. Same discipline as the status poll, plus a third gate:
+  // it runs only while gateway mode is on (see syncGpuPolling).
+  var GPU_POLL_MS = 2000;
+
   // Which exercise powers which strategy. `gateway` has no probe — Ex4's blank is a
-  // TOML file, so server.py's gateway_alive stands in for it; `mock_demo` needs
-  // nothing (that is its whole point).
+  // TOML file, so server.py's gateway_alive stands in for it; `mock_demo` needs no
+  // exercise filled at all (its router is the shim's mock — it still buys its answer
+  // with the key, like every other strategy).
   var UNLOCK_OF = {
     strong_only: "ex1", efficient_only: "ex1",
     manual_classifier: "ex2", switchyard_stage: "ex3"
@@ -186,6 +194,10 @@
 
   function bindYard() {
     var obj = $("#yard");
+    // Already inlined: the <object> is gone from the page, and re-deriving yardDoc
+    // from it would drop the SVG that IS on the page (the object's load event can
+    // still fire after inlineYard has replaced the node).
+    if (!obj && $(".yard-inline svg")) return true;
     try { yardDoc = (obj && obj.contentDocument) || null; } catch (err) { yardDoc = null; }
     if (yardDoc && yardDoc.getElementById("card")) return true;
     yardDoc = null;
@@ -212,23 +224,40 @@
     setTimeout(function () { if (!bindYard()) inlineYard(); }, 1500);
   }
 
-  function railOf(lane) { return yEl(lane === "capable" ? "rail-capable" : "rail-efficient"); }
+  // Three lanes in the SVG, three lanes on the wire (server.py derives them from the
+  // receipt's model id). The names match so nothing has to translate twice.
+  var RAIL_OF = { efficient: "rail-efficient", capable: "rail-capable", local: "rail-gpu" };
+  var LOCO_OF = { efficient: "loco-efficient", capable: "loco-capable", local: "loco-gpu" };
+  var HOT_OF = { efficient: "y-hot-efficient", capable: "y-hot-capable", local: "y-hot-local" };
+
+  // Which rail a decision actually drives down. `local` means the gateway named a
+  // model neither constant covers — Ex4b's NIM, or an upstream rename — so it goes
+  // to the GPU rail when that lane is on the page and to the efficient one when it
+  // is not. The receipt shows the raw id either way, which is what keeps the
+  // fallback honest: the yard is short a rail, not wrong about the model.
+  function slotFor(lane) {
+    if (lane === "capable") return "capable";
+    if (lane === "local" && gpu.shown) return "local";
+    return "efficient";
+  }
+
+  function railOf(lane) { return yEl(RAIL_OF[slotFor(lane)]); }
 
   function paintLanes(lane) {
-    ["rail-in", "rail-efficient", "rail-capable"].forEach(function (id) {
+    ["rail-in", "rail-efficient", "rail-capable", "rail-gpu"].forEach(function (id) {
       var rail = yEl(id);
-      if (rail) rail.classList.remove("y-hot-efficient", "y-hot-capable");
+      if (rail) rail.classList.remove("y-hot-efficient", "y-hot-capable", "y-hot-local");
     });
-    ["loco-efficient", "loco-capable"].forEach(function (id) {
+    ["loco-efficient", "loco-capable", "loco-gpu"].forEach(function (id) {
       var loco = yEl(id);
       if (loco) loco.classList.remove("y-lit");
     });
     if (!lane) return;
-    var hot = lane === "capable" ? "y-hot-capable" : "y-hot-efficient";
-    var railIn = yEl("rail-in"), branch = railOf(lane);
+    var slot = slotFor(lane), hot = HOT_OF[slot];
+    var railIn = yEl("rail-in"), branch = yEl(RAIL_OF[slot]);
     if (railIn) railIn.classList.add(hot);
     if (branch) branch.classList.add(hot);
-    var loco = yEl(lane === "capable" ? "loco-capable" : "loco-efficient");
+    var loco = yEl(LOCO_OF[slot]);
     if (loco) loco.classList.add("y-lit");
   }
 
@@ -273,16 +302,149 @@
   }
 
   function onDecision(d) {
-    state.lane = d.lane === "capable" ? "capable" : "efficient";
+    state.lane = LANE_WORDS[d.lane] ? d.lane : "efficient";
     var why = yEl("dispatcher-why");
     if (why) why.textContent = trunc(d.why || d.model || "", 26);
     paintLanes(state.lane);
     runCard(state.lane);
   }
 
+  // ------------------------------------------------- the local lane (Ex4b)
+
+  // The third locomotive is hidden until there is something true to say with it:
+  // gateway mode on (a local NIM is a gateway target — off gateway mode a GPU
+  // reading explains nothing on this page) AND /api/gpu reporting a GPU.
+  var gpu = { shown: false, timer: 0, inFlight: false };
+
+  function gatewayMode() { return state.strategy === "gateway"; }
+
+  function showGpuLane(on) {
+    var lane = yEl("lane-gpu");
+    if (!lane || gpu.shown === on) return;      // yard not bound yet, or already there
+    gpu.shown = on;
+    lane.style.display = on ? "" : "none";
+    // The lane is drawn below the 900x320 frame, so the drawing AND the box holding
+    // it have to grow together — a taller viewBox alone just shrinks itself to fit.
+    var svg = yEl("yard-svg"), host = $("#yard");
+    if (svg) svg.setAttribute("viewBox", on ? "0 0 900 360" : "0 0 900 320");
+    if (host) host.classList.toggle("with-gpu", on);          // null on the inline path
+    if (!on && state.lane === "local") resetCard();           // no rail left to park on
+  }
+
+  function setGpu(g) {
+    var available = !!(g && g.available);
+    if (available) {
+      var util = Number(g.utilization_pct);
+      var reading = isFinite(util) ? util.toFixed(0) : "—";
+      var badge = yEl("gpu-badge");
+      if (badge) badge.textContent = reading + "% util";
+      // memory.used reads [N/A] on unified-memory parts, so it rides in the hover
+      // title: the badge is one live number and must never render a blank one.
+      var title = yEl("gpu-title");
+      if (title) {
+        title.textContent = "nvidia-smi · " + reading + "% utilization · " +
+          (g.memory_used_mb == null ? "memory used not reported by this driver"
+                                    : g.memory_used_mb + " MiB used");
+      }
+    }
+    showGpuLane(available && gatewayMode());
+  }
+
+  function pollGpu() {
+    if (gpu.inFlight || document.visibilityState === "hidden") return;
+    if (!gatewayMode()) { showGpuLane(false); return; }
+    gpu.inFlight = true;
+    fetch("api/gpu", { cache: "no-store" }).then(function (res) {
+      return res.ok ? res.json() : { available: false };
+    }).then(setGpu).catch(function () {
+      showGpuLane(false);     // our own server is down; the status poll does the toast
+    }).then(function () { gpu.inFlight = false; });
+  }
+
+  function syncGpuPolling() {
+    clearInterval(gpu.timer);
+    gpu.timer = 0;
+    if (!gatewayMode()) { showGpuLane(false); return; }   // no lane, and nothing to poll
+    if (document.visibilityState === "hidden") return;    // paused; the lane stays as it is
+    pollGpu();
+    gpu.timer = setInterval(pollGpu, GPU_POLL_MS);
+  }
+
+  // ------------------------------------------------ the gateway's own meter
+
+  function count(v) { return Math.round(num(v)).toLocaleString(); }
+
+  // One write, and only when the words actually changed: this line is polled every
+  // POLL_MS and it is aria-live, so rebuilding identical text would have a screen
+  // reader announce the same meter every five seconds.
+  function paintStats(node, cls, head, rest) {
+    if (!node.hidden && node.className === cls && node.textContent === head + rest) return;
+    clear(node);
+    node.className = cls;
+    node.hidden = false;
+    node.appendChild(el("b", null, head));
+    node.appendChild(document.createTextNode(rest));
+  }
+
+  function renderGatewayStats(payload) {
+    var node = $("#gateway-stats");
+    var stats = payload && payload.available && payload.stats;
+    if (!stats) {           // no gateway mode, no gateway, or no stats from it
+      clear(node);
+      node.className = "";
+      node.hidden = true;
+      return;
+    }
+
+    // Same three figures the lab's Exercise 4 prints, in the same order.
+    var classifier = stats.classifier || {};
+    var overhead = stats.routing_overhead || {};
+    var calls = num(classifier.total_requests);
+    var tax = count(calls) + (calls === 1 ? " judge call · " : " judge calls · ") +
+              count((classifier.total_tokens || {}).total) + " tokens · " +
+              count(overhead.avg_ms) + " ms added per request";
+
+    // METER ON TOKENS, NEVER ON CALLS: the gateway's `tiers.*.calls` reads 0 for its
+    // default tier however much traffic that tier served (a verified upstream quirk —
+    // docs/specs/switchyard-api-notes.md). token_pct is the honest share.
+    var tiers = stats.tiers || {};
+    var names = Object.keys(tiers).sort();
+    if (!names.length) {
+      // An unlabelled tier is not a missing datum: it is the router having failed to
+      // decide, with every request served anyway. The lab's Ex4 print says the same.
+      paintStats(node, "degraded", "⚠ the gateway reports no tier labels",
+        " — requests are being served without a routing decision. Check the judge " +
+        "target in routes.toml (both traps are commented there). Router tax so far: " +
+        tax + ".");
+      return;
+    }
+    var split = names.map(function (name) {
+      return name + " " + num(tiers[name].token_pct).toFixed(0) + "%";
+    }).join(" / ");
+    paintStats(node, "", "the gateway's own meter",
+      " · tokens by tier: " + split + " · router tax: " + tax +
+      " — spent server-side, which is why every receipt above reads $0.0000 of it.");
+  }
+
+  function refreshGatewayStats() {
+    if (!gatewayMode()) { renderGatewayStats(null); return; }
+    fetch("api/gateway_stats", { cache: "no-store" }).then(function (res) {
+      return res.json();          // 503 carries {available:false, error} — same shape
+    }).then(renderGatewayStats).catch(function () { renderGatewayStats(null); });
+  }
+
+  // Both gateway-only panels move together whenever the picked strategy does.
+  function syncGatewayPanels() {
+    syncGpuPolling();
+    refreshGatewayStats();
+  }
+
   // ---------------------------------------------------------------- receipts
 
-  var LANE_WORDS = { efficient: "efficient · open", capable: "capable · frontier" };
+  // Also the set of lanes this client knows: onDecision falls back to `efficient` for
+  // anything else, rather than rendering a lane with no word for it.
+  var LANE_WORDS = { efficient: "efficient · open", capable: "capable · frontier",
+                     local: "local · your GPU" };
 
   function onReceipt(r) {
     var cost = num(r.cost);
@@ -429,18 +591,23 @@
     return node;
   }
 
+  // The server sends its own absolute repo root, and it shares a filesystem with the
+  // learner's terminal: /project inside JupyterLab, the clone's path outside it.
+  function repoRoot(s) { return (s && s.repo_root) || "/project"; }
+
   function renderBanners(s) {
     var box = $("#banners");
     clear(box);
     if (!s.key_present) {
       box.appendChild(banner("bad",
         "NVIDIA_API_KEY is not set for this client.",
-        "Every live query will fail until it is. Set it in the terminal that started the " +
-        "client — the server reads the key once, at startup — then relaunch the tile:",
-        "set -a; source /project/secrets.env; set +a",
-        "(/project is the repo root inside JupyterLab; outside it, use your clone's path.) " +
-        "mock_demo is not a way around this: its router is a mock, but the call that " +
-        "answers is a real one."));
+        "Every live query will fail until it is — except gateway, whose answer is bought " +
+        "with the key exported in the terminal running the gateway. Set it in the terminal " +
+        "that started the client — the server reads the key once, at startup — then " +
+        "relaunch the tile:",
+        "set -a; source " + repoRoot(s) + "/secrets.env; set +a",
+        "mock_demo is not a way around this either: its router is a mock, but the call " +
+        "that answers is a real one."));
     }
     if (s.lab_error) {
       box.appendChild(banner("warn",
@@ -472,13 +639,16 @@
     // Repaint the chips/banners only when something actually moved: this runs every
     // POLL_MS, and rebuilding the header on every tick flickers and eats hover.
     var sig = JSON.stringify([s.unlocks, s.gateway_alive, s.key_present, s.sdk_available,
-                              s.lab_error, state.strategy]);
+                              s.lab_error, s.repo_root, state.strategy]);
     if (sig === state.sig) return;
     state.sig = sig;
     renderStrategies(s);
     renderBanners(s);
     renderRaceChips();
     updateRaceControls();
+    // Only when the pick actually moved: the GPU poll runs at 2s, and restarting its
+    // interval on every 5s status tick would quietly stretch it.
+    syncGatewayPanels();
   }
 
   var statusInFlight = false, statusDown = false;
@@ -492,6 +662,7 @@
     }).then(function (s) {
       statusDown = false;
       renderStatus(s);
+      refreshGatewayStats();      // the gateway's numbers, on the same slow cadence
     }).catch(function (err) {
       if (!statusDown) {
         statusDown = true;
@@ -514,6 +685,7 @@
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "hidden") clearInterval(pollTimer);
     else { refreshStatus(); startPolling(); }
+    syncGpuPolling();       // stops the 2s GPU poll too, and restarts it on return
   });
 
   // ------------------------------------------------------------- race mode

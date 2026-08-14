@@ -136,6 +136,17 @@
   icon: /project/.devx/_static/img/chatbot.svg
   catalog: NVIDIA DevX Learning Path
 
+- title: "Routing Client"
+  source: http://localhost:$PORT/
+  cwd: /project/code/8-agent-routing
+  type: local-server
+  args:
+    - bash
+    - -c
+    - bash routing_client/start_client.sh $PORT
+  icon: /project/.devx/_static/img/chatbot.svg
+  catalog: NVIDIA DevX Learning Path
+
 # Coding-assistant tiles. `type: terminal` opens a JupyterLab terminal and sends
 # `source` as the initial command (the frontend appends a carriage return, so it
 # auto-runs). Both CLIs are installed globally by postBuild.bash.

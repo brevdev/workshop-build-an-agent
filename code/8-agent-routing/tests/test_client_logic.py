@@ -7,7 +7,7 @@ Two gateway-receipt tests ride along at the bottom. They exercise the LAB's
 gateway_call with the socket stubbed out; the client reads that receipt, so its
 shape is pinned here next to the reader.
 """
-import importlib.util, io, json, pathlib
+import importlib.util, io, json, pathlib, subprocess, types
 import pytest
 from fastapi.testclient import TestClient
 
@@ -37,6 +37,23 @@ def _blank_lab():
     blank = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(blank)
     return blank
+
+
+class _FakeOpener:
+    """Stands in for the lab's urllib opener: no gateway, no network. Serves both
+    surfaces the client reads -- POST /chat/completions and GET /stats."""
+
+    def __init__(self, body):
+        self.body, self.requests = body, []
+
+    def open(self, req, timeout=None):
+        self.requests.append(req)
+        return io.BytesIO(json.dumps(self.body).encode())
+
+
+def _gateway_body(served_by, prompt=100, completion=20):
+    return {"model": served_by, "usage": {"prompt_tokens": prompt, "completion_tokens": completion},
+            "choices": [{"message": {"content": "42"}}]}
 
 
 def _events(body):
@@ -90,6 +107,16 @@ def test_status_survives_a_lab_that_will_not_import(monkeypatch):
     assert "SyntaxError" in body["lab_error"]
 
 
+def test_status_carries_the_repo_root_the_key_banner_prints(monkeypatch, fake_chat):
+    """The missing-key banner tells the learner which secrets.env to source. It used
+    to hardcode /project (true only inside the Workbench container), so the path now
+    comes from the server, which is on the same filesystem as their terminal."""
+    c = _client(monkeypatch, fake_chat)
+    root = pathlib.Path(c.get("/api/status").json()["repo_root"])
+    assert root.is_absolute()
+    assert (root / "code" / "8-agent-routing" / "routing_client").is_dir()
+
+
 def test_routing_lab_module_env_selects_another_lab_file(monkeypatch):
     """How a demo (and the answer-key smoke test) points the client at the completed
     implementation without editing the learner's copy."""
@@ -115,6 +142,40 @@ def test_query_streams_decision_then_receipt(monkeypatch, fake_chat):
     assert named["receipt"]["counterfactual_saved"] == pytest.approx(
         named["receipt"]["counterfactual_cost"] - named["receipt"]["cost"])
     assert named["answer"]["text"] == "small"
+
+
+# The lane is the ONE thing the server derives rather than forwards, so all three of
+# its arms are pinned. It is a mapping of the receipt's model id, never a second
+# opinion about routing: capable == the strong constant, efficient == the efficient
+# one, local == anything else the gateway named.
+
+def test_lane_is_capable_when_the_strong_model_answered(monkeypatch, fake_chat):
+    c = _client(monkeypatch, fake_chat)
+    r = c.post("/api/query", json={"text": "x", "strategy": "strong_only"})
+    decision = dict(_events(r.text))["route_decision"]
+    assert (decision["lane"], decision["model"]) == ("capable", STRONG_MODEL)
+
+
+def test_gateway_lane_is_efficient_when_the_upstream_was_the_open_model(monkeypatch, fake_chat):
+    c = _client(monkeypatch, fake_chat)
+    monkeypatch.setattr(answers, "_local_opener", lambda: _FakeOpener(_gateway_body(EFFICIENT_MODEL)))
+    decision = dict(_events(c.post("/api/query", json={
+        "text": "x", "strategy": "gateway"}).text))["route_decision"]
+    assert (decision["lane"], decision["model"]) == ("efficient", EFFICIENT_MODEL)
+
+
+def test_gateway_lane_is_local_when_the_upstream_is_a_model_no_constant_names(monkeypatch, fake_chat):
+    """Ex4b's local NIM (and any upstream rename) comes back as an id PRICING has
+    never heard of. The lab bills it at the open tier as a fallback -- that is a
+    price, not an attribution, so it must not paint the commodity lane. It gets its
+    own lane, and the receipt keeps showing the raw id the gateway reported."""
+    c = _client(monkeypatch, fake_chat)
+    monkeypatch.setattr(answers, "_local_opener",
+                        lambda: _FakeOpener(_gateway_body("nvidia/nemotron-3-nano")))
+    named = dict(_events(c.post("/api/query", json={"text": "x", "strategy": "gateway"}).text))
+    assert named["route_decision"]["lane"] == "local"
+    assert named["route_decision"]["model"] == "nvidia/nemotron-3-nano"
+    assert named["receipt"]["model"] == "nvidia/nemotron-3-nano"
 
 
 def test_locked_strategy_yields_error(monkeypatch):
@@ -258,24 +319,68 @@ def test_race_reports_a_locked_suite_instead_of_dying_mid_stream(monkeypatch):
     assert "Exercise" in dict(_events(r.text))["error"]["message"]
 
 
+# ------------------------------------------------------------------ /api/gpu ---
+# Ex4b's badge. The client polls this every 2s while gateway mode is on, so every
+# way it can fail has to come back as a quiet {"available": false} -- a 500 here
+# would toast the learner twice a second, and a hang would freeze the poll.
+
+def _smi(monkeypatch, stdout=None, error=None):
+    """Stand in for the nvidia-smi subprocess; record how it was invoked."""
+    seen = []
+
+    def run(argv, **kwargs):
+        seen.append((argv, kwargs))
+        if error is not None:
+            raise error
+        return types.SimpleNamespace(stdout=stdout, returncode=0)
+
+    monkeypatch.setattr(srv.subprocess, "run", run)
+    return seen
+
+
+def test_gpu_reports_utilization_and_memory(monkeypatch):
+    seen = _smi(monkeypatch, stdout="37 %, 1234 MiB\n")
+    body = TestClient(srv.app).get("/api/gpu").json()
+    assert body == {"available": True, "utilization_pct": 37, "memory_used_mb": 1234}
+    argv, kwargs = seen[0]
+    assert argv[:2] == ["nvidia-smi", "--query-gpu=utilization.gpu,memory.used"]
+    assert kwargs["timeout"] <= 5              # a wedged driver must not stall the poll
+
+
+def test_gpu_still_reports_utilization_when_the_driver_has_no_memory_figure(monkeypatch):
+    """Verbatim output from this workshop's GB10 box: unified memory, so memory.used
+    reads [N/A] while utilization is a perfectly good number. The badge shows the
+    utilization, so losing the whole panel over the other column is the wrong trade."""
+    _smi(monkeypatch, stdout="0 %, [N/A]\n")
+    assert TestClient(srv.app).get("/api/gpu").json() == {
+        "available": True, "utilization_pct": 0, "memory_used_mb": None}
+
+
+def test_gpu_reads_the_first_gpu_on_a_multi_gpu_box(monkeypatch):
+    """One line per GPU. The badge is a liveness cue for the local-NIM lane, not a
+    monitoring product: it reports GPU 0 rather than inventing an aggregate."""
+    _smi(monkeypatch, stdout="12 %, 512 MiB\n88 %, 40960 MiB\n")
+    body = TestClient(srv.app).get("/api/gpu").json()
+    assert (body["utilization_pct"], body["memory_used_mb"]) == (12, 512)
+
+
+@pytest.mark.parametrize("failure", [
+    {"error": FileNotFoundError("nvidia-smi")},                 # no driver tools at all
+    {"error": subprocess.TimeoutExpired("nvidia-smi", 2)},      # a wedged driver
+    {"error": subprocess.CalledProcessError(9, "nvidia-smi")},  # ran, exited non-zero
+    {"stdout": "No devices were found\n"},                      # ran, said nothing useful
+    {"stdout": "[N/A], [N/A]\n"},                               # ran, no utilization figure
+    {"stdout": ""},                                             # ran, said nothing at all
+])
+def test_gpu_reports_unavailable_on_every_failure(monkeypatch, failure):
+    _smi(monkeypatch, **failure)
+    assert TestClient(srv.app).get("/api/gpu").json() == {"available": False}
+
+
 # ------------------------------------------------- the lab's gateway receipt ---
 # Exercise 4 answers out of process, so its receipt is assembled from the gateway's
 # JSON rather than from a chat client. Same eight keys, or the client's receipt log
-# and race rows quietly lose a column. Stub the opener: no gateway, no network.
-
-class _FakeOpener:
-    def __init__(self, body):
-        self.body, self.requests = body, []
-
-    def open(self, req, timeout=None):
-        self.requests.append(req)
-        return io.BytesIO(json.dumps(self.body).encode())
-
-
-def _gateway_body(served_by, prompt=100, completion=20):
-    return {"model": served_by, "usage": {"prompt_tokens": prompt, "completion_tokens": completion},
-            "choices": [{"message": {"content": "42"}}]}
-
+# and race rows quietly lose a column.
 
 def test_gateway_receipt_carries_every_key_the_client_reads(monkeypatch):
     opener = _FakeOpener(_gateway_body(EFFICIENT_MODEL))
@@ -311,3 +416,57 @@ def test_gateway_prices_an_unpriced_upstream_model_at_the_efficient_tier(monkeyp
     assert receipt["cost"] == pytest.approx(answers._price(EFFICIENT_MODEL,
                                                            {"input_tokens": 100, "output_tokens": 20}))
     assert list(bill.by_model) == [EFFICIENT_MODEL]
+
+
+# --------------------------------------------------------- /api/gateway_stats ---
+# A gateway receipt's router_tax is structurally 0.0: the judge's tokens are spent
+# server-side and never reach a completion's usage block. /v1/stats is where they
+# are, so the client reads them THROUGH this server -- the browser must not have to
+# reach a second origin to see the tax the module spends a whole exercise on.
+
+def test_gateway_stats_serves_the_gateways_own_books(monkeypatch, fake_chat):
+    c = _client(monkeypatch, fake_chat)
+    monkeypatch.setattr(srv, "_gateway_alive", lambda: True)
+    stats = {"tiers": {"weak": {"total_tokens": 500, "token_pct": 58.0},
+                       "strong": {"total_tokens": 362, "token_pct": 42.0}},
+             "classifier": {"total_requests": 5, "total_tokens": {"total": 11940}},
+             "routing_overhead": {"count": 5, "avg_ms": 1586.0}}
+    opener = _FakeOpener(stats)
+    monkeypatch.setattr(answers, "_local_opener", lambda: opener)
+
+    body = c.get("/api/gateway_stats").json()
+
+    assert body["available"] is True
+    assert body["stats"] == stats                              # forwarded whole, nothing derived
+    assert opener.requests[0] == f"{GATEWAY_BASE_URL}/stats"   # the gateway's meter, not ours
+
+
+def test_gateway_stats_answers_json_when_nothing_is_listening(monkeypatch, fake_chat):
+    """Polled while gateway mode is on, so a gateway that is not up is an ordinary
+    state rather than an exception: JSON out, and the lab is never asked to open a
+    socket that is going to time out."""
+    c = _client(monkeypatch, fake_chat)
+    monkeypatch.setattr(srv, "_gateway_alive", lambda: False)
+    monkeypatch.setattr(answers, "gateway_stats",
+                        lambda: pytest.fail("asked a gateway the probe said was down"))
+
+    r = c.get("/api/gateway_stats")
+
+    assert r.status_code == 503
+    assert r.json()["available"] is False
+    assert GATEWAY_BASE_URL in r.json()["error"]
+
+
+def test_gateway_stats_reports_a_gateway_that_dies_between_probe_and_read(monkeypatch, fake_chat):
+    c = _client(monkeypatch, fake_chat)
+    monkeypatch.setattr(srv, "_gateway_alive", lambda: True)
+
+    def gone():
+        raise OSError("connection reset by peer")
+    monkeypatch.setattr(answers, "gateway_stats", gone)
+
+    r = c.get("/api/gateway_stats")
+
+    assert r.status_code == 503
+    assert r.json()["available"] is False
+    assert "connection reset by peer" in r.json()["error"]

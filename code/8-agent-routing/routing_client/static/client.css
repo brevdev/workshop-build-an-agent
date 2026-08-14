@@ -4,11 +4,14 @@
    routing_client/static/, so a path across directories would 404 the moment the
    tile is launched. Copied, not invented — the values must stay in step with the
    shared theme when it moves.
-   Two deviations, both deliberate:
+   Three deviations, all deliberate:
      · the surface ladder is the yard's (#0e1116 / #161b22 / #2a3441), matching
        yard.svg and start_client.sh's setup page rather than the docs' #000/#161616;
      · --dx-red is new. The shared theme is green+amber only and has no danger
-       token, and the missing-key banner has to read as broken, not as a hint. */
+       token, and the missing-key banner has to read as broken, not as a hint;
+     · --dx-local is new for the same reason: the local-NIM lane is a THIRD tier,
+       and painting it green would say "the open hosted model" — which is exactly
+       the claim Ex4b's receipt cannot make. */
 
 :root {
   color-scheme: dark;
@@ -36,6 +39,7 @@
   --edge-hot: #4a5a6e;
   --dx-red: #e5484d;
   --dx-red-dim: rgba(229, 72, 77, 0.12);
+  --dx-local: #4aa8c0;      /* the local lane — MIRRORS .y-hot-local in yard.svg */
 }
 
 * { box-sizing: border-box; }
@@ -178,9 +182,27 @@ main {
   padding: 8px;
 }
 #yard { display: block; width: 100%; aspect-ratio: 900 / 320; border: 0; }
+/* The <object> box is sized here, but the local lane only exists in the SVG's own
+   document — so when client.js grows that viewBox to 900x360 it adds this class,
+   or the taller drawing would letterbox itself inside a 900x320 frame. */
+#yard.with-gpu { aspect-ratio: 900 / 360; }
 /* client.js's fallback when <object>.contentDocument is unreachable: the same SVG,
-   inlined into this document. It needs the sizing the <object> had. */
+   inlined into this document. It needs the sizing the <object> had (height: auto
+   follows the viewBox, so the inline path needs no class). */
 .yard-inline svg { display: block; width: 100%; height: auto; }
+
+/* The gateway's own meter. Present only in gateway mode, and only while /v1/stats
+   answers: these are the numbers a receipt structurally cannot carry. */
+#gateway-stats[hidden] { display: none; }
+#gateway-stats {
+  margin: 8px 2px 2px;
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  color: var(--dx-fg-mute);
+}
+#gateway-stats b { color: var(--dx-fg-dim); font-weight: 400; }
+#gateway-stats.degraded { color: var(--dx-amber); }
+#gateway-stats.degraded b { color: var(--dx-amber); }
 
 #receipts {
   background: var(--panel);
@@ -228,9 +250,11 @@ main {
 }
 .receipt.efficient { border-left-color: var(--dx-green); }
 .receipt.capable { border-left-color: var(--dx-amber); }
+.receipt.local { border-left-color: var(--dx-local); }
 .receipt .lane { float: right; font-size: 11px; }
 .receipt.efficient .lane { color: var(--dx-green); }
 .receipt.capable .lane { color: var(--dx-amber); }
+.receipt.local .lane { color: var(--dx-local); }
 .receipt .model { color: var(--dx-fg); }
 .receipt .why { color: var(--dx-fg-dim); margin-top: 2px; }
 .receipt .nums { margin-top: 4px; }

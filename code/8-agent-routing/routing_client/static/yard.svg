@@ -1,31 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+<svg id="yard-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
   <!-- The switchyard. Loaded by index.html in an <object>, so this file is its own
        document: the styles below live here, not in client.css, and client.js reaches
        the ids through the object's contentDocument.
 
-       THE CONTRACT WITH client.js — these ids: #dispatcher, #dispatcher-why,
-       #rail-in, #rail-efficient, #rail-capable, #loco-efficient, #loco-capable, #card.
-       Classes are prefixed y- so they cannot collide with client.css if this file is
-       ever inlined into the parent document (client.js's fallback path). -->
+       THE CONTRACT WITH client.js — these ids: #yard-svg, #dispatcher,
+       #dispatcher-why, #rail-in, #rail-efficient, #rail-capable, #loco-efficient,
+       #loco-capable, #card, and the local lane's #lane-gpu, #rail-gpu, #loco-gpu,
+       #gpu-badge, #gpu-title. Classes are prefixed y- so they cannot collide with
+       client.css if this file is ever inlined into the parent document (client.js's
+       fallback path).
+
+       The backdrop is painted to 360 but the viewBox is 320: the local lane below is
+       hidden until there is a GPU to name, and client.js grows the viewBox to 360
+       (and the <object>'s aspect-ratio with it) only when it shows that lane. -->
   <style>
     .y-rail  { fill: none; stroke: #3a4657; stroke-width: 4; stroke-linecap: round;
                transition: stroke .25s ease-out; }
     .y-rail.y-hot-efficient { stroke: #76b900; }
     .y-rail.y-hot-capable   { stroke: #e8a33d; }
+    .y-rail.y-hot-local     { stroke: #4aa8c0; }   /* mirrored by --dx-local in client.css */
     .y-loco rect { transition: stroke-width .25s ease-out, fill .25s ease-out; }
     .y-loco.y-lit rect { stroke-width: 3; }
     #loco-efficient.y-lit rect { fill: #16351d; }
     #loco-capable.y-lit rect   { fill: #3a2113; }
+    #loco-gpu.y-lit rect       { fill: #16394a; }
     .y-eyebrow { fill: #76b900; font-size: 11px; letter-spacing: .18em; }
     .y-note    { fill: #6d7b8d; font-size: 11px; }
   </style>
 
-  <rect width="900" height="320" fill="#0e1116"/>
+  <rect width="900" height="360" fill="#0e1116"/>
   <!-- the dx hero's engineering dot grid, dimmed to a backdrop -->
   <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
     <circle cx="1" cy="1" r="1" fill="#76b900" opacity=".13"/>
   </pattern>
-  <rect width="900" height="320" fill="url(#dots)"/>
+  <rect width="900" height="360" fill="url(#dots)"/>
 
   <text class="y-eyebrow" x="22" y="30">SWITCHYARD</text>
   <text class="y-note" x="22" y="146">QUERY IN</text>
@@ -35,16 +43,20 @@
   <path id="rail-efficient" class="y-rail" d="M480 160 C570 160 570 80 660 80 H700"/>
   <path id="rail-capable"   class="y-rail" d="M480 160 C570 160 570 240 660 240 H700"/>
 
-  <!-- Task 12 adds the third locomotive (Ex4b, the local NIM on your own GPU). The
-       rail mirrors the efficient branch one lane further out; the group carries a
-       live `NN% util` badge fed by GET /api/gpu.
-  <path id="rail-gpu" class="y-rail" d="M480 160 C570 160 570 300 660 300 H700"/>
-  <g id="loco-gpu" class="y-loco">
-    <rect x="700" y="272" width="160" height="56" rx="8" fill="#0f2430" stroke="#4aa8c0"/>
-    <text x="780" y="296" fill="#e6edf3" text-anchor="middle" font-size="11">YOUR GPU</text>
-    <text id="gpu-badge" x="780" y="314" fill="#4aa8c0" text-anchor="middle" font-size="11">nano 30B local</text>
+  <!-- The third locomotive (Ex4b): a local NIM on the learner's own GPU. The rail
+       mirrors the efficient branch one lane further out. Hidden until gateway mode
+       is on AND /api/gpu reports a GPU — this is the only label on the page that is
+       a live number, refreshed every 2s into #gpu-badge. -->
+  <g id="lane-gpu" style="display: none">
+    <path id="rail-gpu" class="y-rail" d="M480 160 C570 160 570 324 660 324 H700"/>
+    <text class="y-note" x="780" y="288" text-anchor="middle">local lane</text>
+    <g id="loco-gpu" class="y-loco">
+      <title id="gpu-title">the GPU under this box, read from nvidia-smi</title>
+      <rect x="700" y="296" width="160" height="56" rx="8" fill="#0f2430" stroke="#4aa8c0"/>
+      <text x="780" y="320" fill="#e6edf3" text-anchor="middle" font-size="11">YOUR GPU · local NIM</text>
+      <text id="gpu-badge" x="780" y="338" fill="#4aa8c0" text-anchor="middle" font-size="11">util …</text>
+    </g>
   </g>
-  -->
 
   <g id="dispatcher">
     <rect x="320" y="128" width="160" height="64" rx="8" fill="#1a2230" stroke="#76b900"/>

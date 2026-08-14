@@ -9,14 +9,18 @@ away from the module answering live queries.
 
 Launched by routing_client/start_client.sh (the JupyterLab tile's entry point).
 """
-import importlib.util, json, os, pathlib, socket, sys, threading, urllib.parse
+import importlib.util, json, os, pathlib, socket, subprocess, sys, threading, urllib.parse
 
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 HERE = pathlib.Path(__file__).resolve().parent
 LAB_DIR = HERE.parent
+# code/8-agent-routing/routing_client -> the repo root. The UI prints this in the
+# missing-key banner: the server shares a filesystem with the learner's terminal,
+# so a path derived here is right both inside JupyterLab (/project) and outside it.
+REPO_ROOT = LAB_DIR.parent.parent
 sys.path.insert(0, str(LAB_DIR))          # constants / switchyard_shim / routing_lab
 
 import constants                          # noqa: E402  -- needs LAB_DIR on sys.path
@@ -109,6 +113,7 @@ def status():
     file rather than Python, so it is not probed -- gateway_alive stands in for it."""
     body = {"gateway_alive": _gateway_alive(),
             "key_present": bool(os.environ.get("NVIDIA_API_KEY")),
+            "repo_root": str(REPO_ROOT),   # the banner's `source <root>/secrets.env`
             # Read once at startup: reloading the shim mid-session would swap the
             # MockRouter class out from under an in-flight query. Install the SDK,
             # then restart the tile.
@@ -122,6 +127,58 @@ def status():
         unlocks = {"ex1": False, "ex2": False, "ex3": False, "ex5": False}
         body["lab_error"] = f"{type(exc).__name__}: {exc}"
     return {"unlocks": unlocks, **body}
+
+
+def _memory_mb(field):
+    """`1234 MiB` -> 1234. `[N/A]` -> None: unified-memory parts (GB10) report no
+    per-process figure, and that is not a reason to hide a live GPU."""
+    head = field.strip().split()
+    return int(head[0]) if head and head[0].isdigit() else None
+
+
+@app.get("/api/gpu")
+def gpu():
+    """Ex4b's badge: is there a GPU under this box, and how busy is it right now?
+    Polled every 2s while gateway mode is on, so every way this can fail -- no
+    nvidia-smi, no driver, a wedged one, a line this parser does not recognise --
+    has to be the same quiet answer instead of a 500 twice a second. nvidia-smi
+    prints one line per GPU; the badge is a liveness cue for the local lane, not a
+    monitoring product, so it reports GPU 0 rather than inventing an aggregate."""
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=utilization.gpu,memory.used", "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=2, check=True).stdout
+        utilization, memory = out.strip().splitlines()[0].split(",")
+        return {"available": True,
+                "utilization_pct": int(utilization.strip().split()[0]),
+                "memory_used_mb": _memory_mb(memory)}
+    except Exception:
+        return {"available": False}
+
+
+@app.get("/api/gateway_stats")
+def gateway_stats():
+    """Ex4's REAL router tax. A gateway receipt's `router_tax` is structurally 0.0 --
+    the judge's tokens are spent server-side and never reach a completion's usage
+    block -- so the tier split and the tax have to come from the gateway's own books.
+    The numbers are still the lab's (gateway_stats() is its function, pointed at the
+    gateway's /v1/stats); this only forwards them, so the page never has to reach a
+    second origin. Two guards, because this is polled: the same connect probe
+    /api/status uses, and a JSON answer rather than a stack trace if the gateway goes
+    away between the probe and the read.
+
+    One quirk the renderer must respect (docs/specs/switchyard-api-notes.md): read
+    `tiers.*.token_pct`, never `tiers.*.calls` -- the default tier's call counter
+    reads 0 no matter how much traffic it served."""
+    if not _gateway_alive():
+        return JSONResponse(status_code=503, content={
+            "available": False,
+            "error": f"no gateway listening on {constants.GATEWAY_BASE_URL}"})
+    try:
+        return {"available": True, "stats": _load_lab().gateway_stats()}
+    except Exception as exc:
+        return JSONResponse(status_code=503, content={
+            "available": False, "error": f"{type(exc).__name__}: {exc}"})
 
 
 @app.post("/api/query")
@@ -148,11 +205,26 @@ def query(body: dict):
                     response, receipt = lab.route_call(text, pool, bill)
                 elif strategy == "switchyard_stage":
                     response, receipt = lab.switchyard_call(text, pool, bill)
-                else:                          # mock_demo: routed with no SDK and no key
+                else:                          # mock_demo: routed with no SDK -- but the
+                    # MockRouter replaces the routing DECISION only. The call that
+                    # answers is a live one, so this path needs the key like every other.
                     response, receipt = lab.switchyard_call(text, pool, bill,
                                                             router=shim.MockRouter())
                 answer = response.content
-            lane = "capable" if receipt["model"] == lab.STRONG_MODEL else "efficient"
+            # The lane is the one thing this file derives rather than forwards, and it
+            # is a mapping of the id the receipt already carries -- never a second
+            # opinion about routing. Three arms, because the gateway can name a model
+            # neither constant covers: a local NIM (Ex4b) or an upstream rename. The
+            # lab prices those at the efficient tier as a FALLBACK, so calling them
+            # "efficient" here would have the yard claim a lane the receipt cannot
+            # back up. `local` gets its own rail (or the efficient one with the raw id
+            # showing, when there is no GPU lane to park on).
+            if receipt["model"] == lab.STRONG_MODEL:
+                lane = "capable"
+            elif receipt["model"] == lab.EFFICIENT_MODEL:
+                lane = "efficient"
+            else:
+                lane = "local"
             yield _sse("route_decision", {"lane": lane, "model": receipt["model"],
                                           "why": receipt["why"]})
             # The one number the receipt does not carry: what this query would have

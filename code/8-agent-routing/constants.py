@@ -20,6 +20,6 @@ GATEWAY_BASE_URL = "http://localhost:4000/v1"
 GATEWAY_ROUTE_ID = "switchyard"
 
 STRATEGIES = ["strong_only", "efficient_only", "manual_classifier",
-              "switchyard_stage", "gateway", "mock_demo"]
+              "switchyard_stage", "gateway"]
 
 AT_SCALE_TASKS_PER_DAY = 1000   # the tokenomics extrapolation everyone sees

@@ -29,10 +29,12 @@ Seven TODOs across five exercises, in order: `--exercise 1` → `5`. Every exerc
 | # | You build | In one line | Run it |
 |---|-----------|-------------|--------|
 | 1 | The model pool and the bill meter | Two models, one meter: what the same 12 tasks cost on each | `python3 routing_lab.py --exercise 1` |
-| 2 | A hand-rolled classifier router | A cheap model reads the request first and picks the lane — and that call is the **router tax** | `python3 routing_lab.py --exercise 2` |
+| 2 | A classifier router you write yourself | A cheap model reads the request first and picks the lane — and that call is the **router tax** | `python3 routing_lab.py --exercise 2` |
 | 3 | The same decision, from a library | Switchyard's stage router reads the trajectory the agent already produced, so the decision costs no extra call | `python3 routing_lab.py --exercise 3` |
 | 4 | The same decision, out of the app | `routes.toml` owns the policy; the app asks for one route id and never has to choose which model answers — the yard does, and reports the upstream model id back | `python3 routing_lab.py --exercise 4` |
 | 5 | The verdict | Accuracy, spend, the open/frontier mix, and what the router itself cost | `python3 routing_lab.py --exercise 5` |
+
+The exercises climb the routing taxonomy in order: in 1–2 you build the first two families yourself (what Switchyard ships as `passthrough` and `llm_classifier` in capability mode), 3–4 hand the next two to Switchyard itself (`stage_router` in-process, then `llm_classifier` in escalation mode behind the gateway). "Switchyard" isn't one of the strategies — it implements all of them.
 
 Exercise 4's blank is a **config file, not Python**, and it needs the gateway running in a second terminal:
 
@@ -80,7 +82,7 @@ Your copied `routes.toml` is git-ignored — the `.template` and `.answers` file
 
 `probe_unlocks(module)` in `routing_lab.py` is this module's unlock check. It calls each exercise's entry point with fake inputs — never a token, never a socket — and returns `{"ex1": …, "ex2": …, "ex3": …, "ex5": …}`, `False` for any exercise whose blank still raises `NotImplementedError`. Exercise 4's blank is a config file rather than Python, so it is not probed; gateway liveness stands in for it.
 
-The **Routing Client** reads that dict: a JupyterLab launcher tile positioned as the module's **end-of-lab recap and playground** — the exercises live in `routing_lab.py`/`.ipynb` alone, and once they're done the client renders the result live: pick any strategy (including the gateway and the SDK-less `mock_demo`), ask anything, and read the receipts, the session meters, and the gateway's own books. It is a window, not a wizard — it holds no routing logic of its own, it imports yours. The strategy chips stay gated on `probe_unlocks`, so a finished lab reads `systems online: 5/5` the moment the tile opens, and a half-finished one says exactly which exercise each grey chip is waiting on.
+The **Routing Client** reads that dict: a JupyterLab launcher tile positioned as the module's **end-of-lab recap and playground** — the exercises live in `routing_lab.py`/`.ipynb` alone, and once they're done the client renders the result live: pick any strategy, ask anything, and read the receipts, the session meters, and the gateway's own books. It is a window, not a wizard — it holds no routing logic of its own, it imports yours. The strategy chips render in three groups by who runs the decision — **no router** (Ex 1), **your code** (Ex 2), **NeMo Switchyard** (Ex 3–4) — each labeled by its algorithm and stamped with its taxonomy family, with the canonical strategy id (what the lab's tables print) in the hover. They stay gated on `probe_unlocks`, so a finished lab reads `systems online: 5/5` the moment the tile opens, and a half-finished one says exactly which exercise each grey chip is waiting on. When NOTHING is runnable (fresh workshop: no exercise solved, no gateway), the client shows a **welcome card** instead of a dead yard — do the module for the full experience, or take the **express lane**: `bash scripts/serve_gateway.sh routes.toml.answers` lights the `gateway` chip with zero exercises done, because `gateway_call` is provided code.
 
 Two things the tile resolves for itself, because a tile has no terminal to inherit from:
 

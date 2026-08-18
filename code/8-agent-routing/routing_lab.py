@@ -3,7 +3,7 @@
 Five exercises that put every call on a meter and then route it to the right model:
 
   1. The model pool and the bill meter  (build_model_pool, bill_call)
-  2. The hand-rolled classifier router  (classify_difficulty, route_call)
+  2. The classifier you write yourself  (classify_difficulty, route_call)
   3. The same decision, from a library  (make_lab_router, switchyard_call)
   4. The same decision, out of the app  (routes.toml — a config file, not Python)
   5. The verdict                        (routing_verdict)
@@ -79,7 +79,7 @@ def bill_call(model_id, chat, messages, bill, why="passthrough"):
     raise NotImplementedError("Exercise 1b")
 
 # ---------------------------------------------------------------------------
-# Exercise 2 — the hand-rolled router. A cheap model reads the request first
+# Exercise 2 — the router you write. A cheap model reads the request first
 # and picks the lane; that extra call is the router tax, and it goes on the
 # same meter as the work. Unreadable verdicts fail UP: a misrouted hard task
 # costs an outage, a misrouted easy one costs pennies.

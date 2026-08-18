@@ -11,9 +11,9 @@ Every module here ends the same way — by pointing at where the lab lives in th
 | Lab exercise | Production counterpart |
 |---|---|
 | **1. The bill meter** | Cost observability: per-call token accounting, priced and attributed by model, next to latency |
-| **2. Hand-rolled classifier** | The internals of Switchyard's `llm_classifier` — judge model, verdict parsing, fail-up defaults, session affinity |
+| **2. The classifier you wrote** | The internals of Switchyard's `llm_classifier`, capability mode — judge model, verdict parsing, fail-up defaults, session affinity |
 | **3. libsy stage router** | In-process routing inside an agent framework: the middleware surfaces LangChain and LiteLLM named at launch, and the shape your own loop takes today |
-| **4. `routes.toml` gateway** | The deployed pattern — Kong AI Gateway serving it natively, Cognition running a Switchyard router inside Devin Desktop, Nous wiring it into Hermes |
+| **4. `routes.toml` gateway** | The deployed pattern (`llm_classifier`, escalation mode, behind Switchyard's gateway) — Kong AI Gateway serving it natively, Cognition running a Switchyard router inside Devin Desktop, Nous wiring it into Hermes |
 | **5. The scoreboard** | LangChain's 145-task benchmark method: matched configurations, one workload, cost and accuracy reported together |
 
 <!-- fold:break -->
@@ -37,7 +37,7 @@ And in every case: **the router is a choice, so measure it like one.**
 
 <img src="_static/robots/party.png" alt="Celebration Robot" style="float:right;max-width:240px;margin:20px;" />
 
-Four things this module can't promise you, said plainly.
+Four things this module can't promise you.
 
 <!-- CALIBRATE: every benchmark figure below is LangChain's published 145-task deep-agent routing
      run (measured Aug 2026), re-verified at the calibration pass alongside the intro page's copies:
@@ -62,7 +62,7 @@ And one about the software itself: **NeMo Switchyard is young.** Upstream descri
 
 Tokenomics forced a debate — frontier **or** open — and this module's answer is *both, efficiently*. Open models where they're efficient, which is most calls. Frontier where it's genuinely necessary, which is few. Rebalanced as models improve, because open models improve monthly and a rebalance is a `routes.toml` edit plus an eval run. Always under a suite.
 
-The honest coda: sometimes the right mix **is** 100% frontier. The point was never that routing wins — it's that the router and the suite let you *know*, instead of guessing and calling it strategy.
+Sometimes the right mix **is** 100% frontier. The point was never that routing "wins" — it's that the agentic routing lets you *know*, instead of guessing and calling it strategy.
 
 <!-- fold:break -->
 
@@ -90,7 +90,7 @@ Capability that travels, now with a dispatcher.
   <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
   <div class="dx-cell"><h4>MODULE 6</h4><span class="dx-big">Hardened agent</span>Kernel enforcement + continuous evaluation</div>
   <div class="dx-cell"><h4>MODULE 7</h4><span class="dx-big">The harness layer</span>Context tax + portable, verified skills</div>
-  <div class="dx-cell is-wide"><h4>MODULE 8 - YOU ARE HERE</h4><span class="dx-big">The model portfolio</span>Every call routed to the model that should answer it - measured, not guessed</div>
+  <div class="dx-cell"><h4>MODULE 8 - YOU ARE HERE</h4><span class="dx-big">The model portfolio</span>Every call routed to the model that should answer it - measured, not guessed</div>
 </div>
 
 <!-- fold:break -->

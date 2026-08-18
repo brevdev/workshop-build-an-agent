@@ -25,6 +25,39 @@
 <!-- key / lab / SDK health. Persistent, never a toast: these do not go away by themselves. -->
 <div id="banners" role="status" aria-live="polite"></div>
 
+<!-- Shown INSTEAD of the yard when nothing is runnable (no exercise solved, no gateway
+     on :4000) — a fresh workshop lands exactly there. client.js swaps this for the yard
+     on the first status poll that finds anything alive; no relaunch, no refresh. -->
+<section id="welcome" hidden aria-label="getting started">
+  <h2>NOTHING TO DRIVE YET</h2>
+  <p>This client is a <b>window, not a wizard</b>: it renders
+    <code>code/8-agent-routing/routing_lab.py</code> live and holds no routing logic of its
+    own — so on a fresh workshop there is nothing it can run. Two ways in:</p>
+
+  <div class="welcome-path">
+    <h3>THE FULL EXPERIENCE — do the module</h3>
+    <p>Open <b>8. Agent Routing</b> from the JupyterLab launcher and work
+      <b>The Routing Lab</b>'s five exercises. Every solved exercise lights its strategy chips
+      here within a few seconds — a finished lab reads <code>systems online: 5/5</code>, and this
+      page becomes the playground for the router you wrote.</p>
+  </div>
+
+  <div class="welcome-path">
+    <h3>THE EXPRESS LANE — route through the reference policy</h3>
+    <p>No exercises required: serve the module's completed <code>routes.toml.answers</code> and
+      the <code>gateway</code> chip lights the moment <code>:4000</code> answers. In a
+      JupyterLab terminal:</p>
+    <pre id="welcome-express"></pre>
+    <p>Then ask this page anything — every query routes through NeMo Switchyard's escalation
+      policy, with live receipts, the savings meter, and the gateway's own
+      <code>/v1/stats</code> books. (The gateway buys its answers with the key exported in
+      <b>that</b> terminal.)</p>
+  </div>
+
+  <p class="welcome-foot">This card takes itself down as soon as anything is runnable — it
+    re-checks every few seconds.</p>
+</section>
+
 <main>
   <section id="yard-wrap">
     <object id="yard" data="yard.svg" type="image/svg+xml" aria-label="the switchyard"></object>

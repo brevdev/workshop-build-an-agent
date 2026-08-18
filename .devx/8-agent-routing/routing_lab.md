@@ -8,9 +8,9 @@ This page follows <button onclick="openOrCreateFileInJupyterLab('code/8-agent-ro
 
 > **Prefer notebooks?** The same lab, cell for cell, lives in <button onclick="openOrCreateFileInJupyterLab('code/8-agent-routing/routing_lab.ipynb');"><i class="fa-solid fa-flask"></i> routing_lab.ipynb</button> — identical blanks, one runnable cell per exercise, a **💡 NEED SOME HELP?** accordion under each. Work it top to bottom and skip the **Run it** commands here; everything else applies unchanged, and a full Run-All is about **25 minutes** of mostly waiting on live suites. **One thing to know up front:** the Routing Client at the end of this page reads `routing_lab.py`, not the notebook — paste each finished function back into the `.py` as you go. (Answer keys for either track: `routing_lab.answers.py` / `routing_lab.answers.ipynb`.)
 
-**This lab spends real money — a few cents of it.** The whole thing is roughly 150 live model calls; each exercise below prints its own call count and how long it takes, because a suite that looks hung is usually just a suite. Nothing here runs on your GPU unless you take the optional Exercise 4b.
+**This lab uses free API calls, but displayed results are real would-be market-rate pricing** - The whole thing is roughly 150 live model calls; the strong model is priced at $5/$15 per million input/output tokens and the efficient model is priced at $0.30/$1.20 per million input/output tokens.
 
-**What you're routing is bare model calls** — one prompt in, one answer out. There's no agent loop in this lab; where an exercise needs one, it replays canned tool results in place of the traffic your Module 7 harness would produce, so the routing signal is the only thing changing between turns. The workload is provided: `test_data/routing_tasks.jsonl`, twelve tasks split six **commodity** (extraction, reformatting, single-fact lookups) and six **frontier** (multi-step reasoning, planning, synthesis). Eleven carry a verifiable check — exact-match or contains assertions, the Module 4 RLVR reflex pointed at routing — and one is graded by an LLM judge. The judge grades off the meter: it scores the run, it isn't part of the workload.
+**What you're routing is bare model calls** — one prompt in, one answer out. There's no agent loop in this lab; where an exercise needs one, it replays canned tool results in place of the traffic your Module 7 harness would produce, so the routing signal is the only thing changing between turns. The workload is provided: `test_data/routing_tasks.jsonl`, twelve tasks split six **commodity** (extraction, reformatting, single-fact lookups) and six **frontier** (multi-step reasoning, planning, synthesis). Eleven carry a verifiable check and one is graded by an LLM judge. The judge grades off the meter: it scores the run, it isn't part of the workload.
 
 <!-- fold:break -->
 
@@ -86,12 +86,12 @@ cd code/8-agent-routing && python3 routing_lab.py --exercise 1
 A correct implementation prints two rows and two meters:
 
 ```text
-     strong_only: 12/12 correct · $0.0270 · p50 3.8s
-  nvidia/nemotron-3-super-120b-a12b: 12 calls · $0.0270
-  TOTAL $0.0270
-  efficient_only: 12/12 correct · $0.0055 · p50 2.7s
-  nvidia/nemotron-3.5-lightning-30b-a3b: 12 calls · $0.0055
-  TOTAL $0.0055
+strong_only: 12/12 correct · $0.0270 · p50 3.8s
+nvidia/nemotron-3-super-120b-a12b: 12 calls · $0.0270
+TOTAL $0.0270
+efficient_only: 12/12 correct · $0.0055 · p50 2.7s
+nvidia/nemotron-3.5-lightning-30b-a3b: 12 calls · $0.0055
+TOTAL $0.0055
 ```
 
 <!-- CALIBRATE: one measured run (Task 3, 2026-08-13, hosted): strong $0.0270 / p50 3.8s,
@@ -546,18 +546,23 @@ And the honesty beat that has to come last: **the router didn't earn that claim.
 
 Exercises done, numbers in hand — now go play with the thing you built. Open the <button onclick="launch('Routing Client');"><i class="fa-solid fa-rocket"></i> Routing Client</button> — it's also on the JupyterLab launcher, under the workshop's other client tiles.
 
+<!-- IMAGE PENDING (Task 20): img/client_routed.png does not exist yet, so the reference is
+     parked here rather than 404ing on the page. The screenshot is captured in-browser on the
+     Brev A100 pass (this aarch64 box has no headless Chrome). When it lands, restore:
+
 ![The Routing Client, live](img/client_routed.png)
 
-<!-- CAPTURE at Task 20: the finished client mid-route - systems online: 5/5, a strategy chip on,
-     the query card at the dispatcher, and a receipt carrying the would-have-been line. -->
+     CAPTURE spec: the finished client mid-route - systems online: 5/5, the three chip
+     groups visible (no router / your code / NeMo Switchyard) with a chip on, the query card
+     at the dispatcher, and a receipt carrying the would-have-been line. -->
 
 It's a **window, not a wizard**: the client holds no routing logic of its own — it re-reads *your* `routing_lab.py` from disk on every poll and every query, so every lane, price, and receipt on screen is decided by the code you just wrote. The exercises live in the lab files alone; this tile is the recap and the playground, fully open-ended:
 
-- **Pick a strategy, ask anything.** The header chips are your five systems plus the SDK-less `mock_demo` (mock means SDK-less, *not* key-less — the answering call is real and billed): flat-rate both ways, your Exercise 2 classifier, Exercise 3's stage router, and — while `serve_gateway.sh` is running — your Exercise 4 gateway. Type a question, or fire the sample **commodity**/**frontier** chips, and watch the card ride the yard to whichever lane your code picks.
+- **Pick a strategy, ask anything.** The header chips arrive in three groups, by who runs the decision: **no router** (Exercise 1's flat-rate baselines), **your code** (the Exercise 2 classifier you wrote), and **NeMo Switchyard** (Exercise 3's stage router, plus the gateway while `serve_gateway.sh` is running). Each chip is labeled by its algorithm and stamped with its taxonomy family; hover for the canonical strategy id your suite tables print. Type a question, or fire the sample **commodity**/**frontier** chips, and watch the card ride the yard to whichever lane your code picks.
 - **Read the receipts like bills.** Every answer lands with its model, tokens, price, latency, the router tax when your classifier paid one, and the *would-have-been* line — the same tokens re-priced at the frontier tier. The header meters keep the session score: total spend, and saved-vs-frontier-only. Ask the same question at both flat-rate tiers and watch the gap accrue.
 - **Interrogate your router.** Send one prompt down different strategies and compare receipts. Send a hard-*looking* one-liner through `gateway` and watch escalation refuse to bite — it judges runs, not prompts. In gateway mode the yard adds the gateway's own meter (the tier split and the judge's spend, which a per-call receipt structurally can't show), and on the 4b path a **your GPU** locomotive with a live utilization badge.
 - **The strip is your report card.** `systems online: N/5` is `probe_unlocks` over your file plus a gateway liveness check — a finished lab reads 5/5 the moment the tile opens, and the client re-reads your file every ~5 seconds, so a late fix lands without a relaunch. A greyed chip names the exercise that would light it.
 
-Two footnotes. Notebook track: the client reads **`routing_lab.py`**, not the notebook — paste your finished functions back into the `.py` and the chips light on the next poll. And environment problems (a missing key, a file that won't import, no SDK) surface as persistent banners that name their fix — the key is read straight out of `/project/secrets.env`, so the Secrets Manager reaches an already-open tile by itself. Headless with no forwarded port? You've lost nothing: the client renders numbers your `--exercise N` runs already print.
+Three footnotes. Notebook track: the client reads **`routing_lab.py`**, not the notebook — paste your finished functions back into the `.py` and the chips light on the next poll. Opening the tile on a fresh workshop? It shows a **welcome card** instead of a dead yard, with two ways in: do the module (the full experience), or the **express lane** — serve the reference policy with `bash scripts/serve_gateway.sh routes.toml.answers` and the `gateway` chip lights without touching an exercise. And environment problems (a missing key, a file that won't import, no SDK) surface as persistent banners that name their fix — the key is read straight out of `/project/secrets.env`, so the Secrets Manager reaches an already-open tile by itself. Headless with no forwarded port? You've lost nothing: the client renders numbers your `--exercise N` runs already print.
 
 > Yard driven? Head to [Wrapping Up](evaluating_routing) to connect the lab back to production — and to the other seven modules.

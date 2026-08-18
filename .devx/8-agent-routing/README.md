@@ -12,7 +12,7 @@ This module's answer is a portfolio, not a pick. You'll put a meter on every cal
     <ul>
       <li>A working definition of <b>tokenomics</b> and why "frontier vs open" is a false binary</li>
       <li>The routing taxonomy: <b>static splits, content classifiers, stage signals, escalation, and learned routers</b> - and what evidence each one pays for</li>
-      <li>A <b>hand-rolled routing classifier</b> you wrote yourself, and the fail-up discipline that keeps misroutes cheap</li>
+      <li>A <b>routing classifier you wrote yourself</b>, and the fail-up discipline that keeps misroutes cheap</li>
       <li>Hands-on <b>NeMo Switchyard</b> - the in-process library and the <code>routes.toml</code> gateway, with the two config traps every team hits</li>
       <li>The <b>router tax</b>, measured on your own runs - and where it hides when a gateway pays it</li>
       <li>A <b>scoreboard habit</b>: no routing claim without accuracy, cost, mix, and tax on one line</li>

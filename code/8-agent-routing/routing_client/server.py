@@ -308,11 +308,8 @@ def query(body: dict):
                     response, receipt = lab.route_call(text, pool, bill)
                 elif strategy == "switchyard_stage":
                     response, receipt = lab.switchyard_call(text, pool, bill)
-                else:                          # mock_demo: routed with no SDK -- but the
-                    # MockRouter replaces the routing DECISION only. The call that
-                    # answers is a live one, so this path needs the key like every other.
-                    response, receipt = lab.switchyard_call(text, pool, bill,
-                                                            router=shim.MockRouter())
+                else:                          # unreachable while the chain covers STRATEGIES
+                    raise ValueError(f"unknown strategy {strategy!r}")
                 answer = response.content
             # The lane is the one thing this file derives rather than forwards, and it
             # is a mapping of the id the receipt already carries -- never a second

@@ -86,8 +86,28 @@ h1::before {
 .tagline { margin: 0; color: var(--dx-fg-mute); font-size: 12px; }
 .tagline code { color: var(--dx-fg-dim); }
 
-/* strategy chips */
-#strategies { display: flex; flex-wrap: wrap; gap: 8px; }
+/* strategy chips — grouped by who runs the decision (client.js GROUPS): the
+   dashed box says "grouping, not control", and the NeMo Switchyard label spans
+   its two chips instead of being welded onto one of them. */
+#strategies { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+
+.chip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 8px 8px;
+  border: 1px dashed var(--edge);
+  border-radius: var(--dx-radius);
+}
+.chip-group-label {
+  font-family: var(--dx-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dx-fg-mute);
+}
+.chip-group-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .chip {
   display: flex;
@@ -105,6 +125,8 @@ h1::before {
   transition: border-color var(--dx-ease), background var(--dx-ease), color var(--dx-ease);
 }
 .chip:hover:not(:disabled) { border-color: var(--edge-hot); color: var(--dx-fg); }
+.chip .top { display: flex; gap: 8px; align-items: baseline; }
+.chip .fam { font-size: 10px; color: var(--dx-fg-mute); }
 .chip .sub { font-size: 11px; color: var(--dx-fg-mute); }
 .chip.on {
   border-color: var(--dx-green);
@@ -164,6 +186,57 @@ h1::before {
 .banner.bad b { color: var(--dx-red); }
 .banner.warn { border-left-color: var(--dx-amber); background: var(--dx-amber-dim); }
 .banner.warn b { color: var(--dx-amber); }
+
+/* ------------------------------------------------------------- welcome */
+
+#welcome {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  padding: 18px 22px 14px;
+  max-width: 880px;
+}
+#welcome[hidden] { display: none; }
+#welcome h2 {
+  margin: 0 0 8px;
+  font-family: var(--dx-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--dx-amber);
+}
+#welcome p { margin: 0 0 10px; font-size: 13px; color: var(--dx-fg-dim); }
+#welcome code { color: var(--dx-fg); font-size: 12px; }
+
+.welcome-path {
+  margin: 12px 0;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--edge);
+  border-left: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+}
+.welcome-path h3 {
+  margin: 0 0 6px;
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--dx-green);
+}
+.welcome-path pre {
+  margin: 8px 0;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  color: var(--dx-fg-dim);
+  white-space: pre-wrap;
+  user-select: all;
+}
+.welcome-foot { font-size: 11px; color: var(--dx-fg-mute); }
 
 /* ---------------------------------------------------------------- main */
 

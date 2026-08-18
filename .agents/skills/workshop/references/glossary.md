@@ -11,7 +11,7 @@ where it's central; for depth, see that module's `concepts.md`.
 - **Tool / tool calling** — a function the model *requests* (name + args); **your code runs it** ("the menu, not the kitchen"). The model never executes code.
 - **System prompt** — the message defining the agent's role, constraints, and when to use tools.
 - **Memory / state** — short-term = the conversation log; long-term = external stores (DBs/files). M1 uses short-term; M5 adds files.
-- **Routing** — the control logic orchestrating the loop (hand-rolled in M1; framework-handled by `create_*_agent`).
+- **Routing** — the control logic orchestrating the loop (written by hand in M1; framework-handled by `create_*_agent`).
 
 ## RAG & retrieval (M2)
 - **RAG** — Retrieval-Augmented Generation: fetch relevant docs, then generate with them as context.

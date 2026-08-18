@@ -53,7 +53,7 @@ def test_run_suite_bills_every_task_under_a_passthrough_strategy(monkeypatch):
     assert bill.by_model[EFFICIENT_MODEL]["calls"] == 12
     assert abs(sum(r["cost"] for r in results) - bill.total_cost) < 1e-9
 
-# --- Exercise 2: the hand-rolled classifier router ---------------------------
+# --- Exercise 2: the classifier router the learner writes --------------------
 
 def test_classifier_is_built_with_thinking_off(monkeypatch):
     # Load-bearing knob, not a style choice: with thinking ON the classifier spends its whole

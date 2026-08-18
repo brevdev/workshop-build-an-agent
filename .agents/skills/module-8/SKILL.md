@@ -77,7 +77,7 @@ Teaching narrative in `.devx/8-agent-routing/`, code in `code/8-agent-routing/`:
 | Concepts | `intro_agent_routing.md` | **tokenomics**; the false binary; *use both, efficiently*; M1's "routing" was control flow |
 | Taxonomy | `routing_decisions.md` | five families on *evidence vs cost of deciding*; **the router tax**; policy-vs-performance routing |
 | The library | `meet_switchyard.md` | Switchyard: library / gateway / launcher; the **three nouns**; the two judge traps; version stamp 0.2.0 |
-| Lab | `routing_lab.md` | **Exercises 1–5** (meter → hand-rolled classifier → libsy stage router → `routes.toml` gateway → scoreboard), then the **Routing Client** playground |
+| Lab | `routing_lab.md` | **Exercises 1–5** (meter → hand-written classifier → libsy stage router → `routes.toml` gateway → scoreboard), then the **Routing Client** playground |
 | Wrap-up | `evaluating_routing.md` | exercises → production map; the decision framework; **honest limits**; the full 8-module arc |
 
 **What they build:** `routing_lab.py` — seven blanks (**1a**, **1b**, **2a**, **2b**, **3a**,
@@ -95,7 +95,11 @@ efficient model; no third model by design) — lives in `constants.py`. ⚠️ T
 Exercise 5, never required by the exercises (those live in the lab files alone). ⚠️ **A window,
 not a wizard:** zero routing logic of its own — it re-reads `routing_lab.py` from disk per
 request and renders what that file returns; single queries only (`systems online: N/5` gates the
-strategy chips on `probe_unlocks`, so a finished lab reads 5/5 at first open).
+strategy chips on `probe_unlocks`, so a finished lab reads 5/5 at first open). Chips are
+**grouped by who runs the decision** — *no router* (Ex1) · *your code* (Ex2) · *NeMo
+Switchyard* (Ex3–4) — and **labeled by algorithm, not id**: `manual_classifier` shows as the
+"llm classifier" chip in the *your code* group, `switchyard_stage` as "stage router"; each
+carries its taxonomy-family badge and the canonical id rides in the hover.
 
 ## Key concepts (quick recall)
 Full versions, with sources, in **`references/concepts.md`**. The ⚠️ items are the ones learners
@@ -109,6 +113,9 @@ Full versions, with sources, in **`references/concepts.md`**. The ⚠️ items a
   good enough wins. ⚠️ **Five families, four algorithm ids** — if a learner counts the figure's
   four cards and gets a different number, that's the reconciliation: escalation is a **mode**, and
   it earns a family of its own because it's a different policy on the same evidence.
+  **Switchyard is the umbrella, not one strategy:** the lab climbs families 1–4 in order —
+  Ex1–2 hand-written (`passthrough` baselines, then the capability judge), Ex3–4 run Switchyard
+  itself (libsy in-process, then the gateway) — and the taxonomy figure's bottom row keeps the map.
 - **Router tax** — the per-turn cost of *deciding*: **~4–6%** of the routed run's own spend in
   this lab (the taxonomy page's bar reads the same band), **21% + ~700 ms/turn** in LangChain's
   run. ⚠️ At
@@ -131,8 +138,9 @@ Full versions, with sources, in **`references/concepts.md`**. The ⚠️ items a
   route id is the only string your application sees.
 - **Six names, two tiers** — `strong` = `capable` = **frontier**; `efficient` = `weak` = **open**
   (+ Ex2's `COMMODITY`/`FRONTIER` verdicts). Ex5's receipt reconciles them.
-- ⚠️ **`mock_demo` = SDK-less, NOT key-less** — the mock replaces the *decision*; the answering
-  call is real and billed.
+- ⚠️ **`MockRouter` is Exercise 3's SDK-missing fallback, not a client feature** — the client
+  ships no mock strategy; on a fresh lab it shows a welcome card (module = full experience;
+  express lane = serve `routes.toml.answers`, which lights the `gateway` chip with no exercises).
 - **Specialists change the game** (M4's payoff) — Boomi: 59% of production traffic on a 5× faster
   fine-tuned model. **Customize small, then route to it.**
 

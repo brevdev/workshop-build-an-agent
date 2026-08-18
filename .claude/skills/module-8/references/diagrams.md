@@ -35,10 +35,16 @@ the fourth is the **live** yard inside the Routing Client, which animates as que
   | **Evidence** | none at all (a weighted coin) | tool results your loop already emits | the request text + the recent turns | the model's own residual stream |
   | **Cost of deciding** | free — no call, no signals | free — no second round trip | one small LLM call, ~700 ms per turn | a training run, then free per call |
   | **Good for** | the A/B baseline | tool-heavy sessions | content decides | tuning-free plateaus |
-- **Footnotes on the figure (all three are load-bearing):** *escalation is a **MODE** of
+- **The exercise map (the row under the cards, "WHERE THE LAB MEETS EACH FAMILY"):**
+  `random` card → *EX 1 · your code — two passthrough baselines* · `stage_router` → *EX 3 ·
+  Switchyard — libsy, in your process* · `llm_classifier` → **two** lines, *EX 2 · your code —
+  capability* and *EX 4 · gateway — escalation* (two exercises on one card IS the
+  five-families/four-cards reconciliation, drawn) · `prefill` → *taught, not exercised*.
+  Ex 1–2 run in the learner's own code; Ex 3–4 run NeMo Switchyard — the umbrella spans the
+  menu, not one card.
+- **Footnotes on the figure (both load-bearing):** *escalation is a **MODE** of
   `llm_classifier`, not a fifth algorithm — same evidence, cheap-first default, one-way* ·
-  *LangChain measured the classifier tax at ~700 ms/turn and **21% of the ROUTED run's spend*** ·
-  *prefill is the tunable family — taught on this page, not exercised in the lab.*
+  *LangChain measured the classifier tax at ~700 ms/turn and **21% of the ROUTED run's spend**.*
 - **Takeaway:** the families differ mainly in **what they're allowed to look at before they pick,
   and what looking costs**. Some evidence is lying around (request text, tool results, session
   history); some has to be manufactured (a judge call, a training run).
@@ -94,6 +100,11 @@ the fourth is the **live** yard inside the Routing Client, which animates as que
     right on the diagram
   - **local lane → YOUR GPU · local NIM** with a live **utilization badge** ("the GPU under this
     box, read from `nvidia-smi`") — appears on the Exercise 4b path only.
+- **The strategy chips above the yard render in three dashed groups** — *no router · Ex 1*,
+  *your code · Ex 2*, *NeMo Switchyard · Ex 3–4* — each chip labeled by its **algorithm**
+  ("llm classifier", "stage router", "gateway") with a `family N/5` badge; the canonical
+  strategy id (`manual_classifier`, `switchyard_stage`, …) is in the chip's hover, matching the
+  lab's printed tables.
 - **Takeaway:** it makes the routing *decision* visible — the card pauses at the dispatcher, the
   verdict/stage signal appears, then the card takes a lane. Around it: the receipt rail
   (per-query cost, latency, the **counterfactual** "would-have-been" line, the router-tax line),
@@ -103,7 +114,8 @@ the fourth is the **live** yard inside the Routing Client, which animates as que
   - *"The client is doing the routing."* **Window, not wizard.** It contains zero routing logic;
     it re-reads `routing_lab.py` from disk per request and renders whatever the learner's file
     returns. A dark panel means an unfilled blank, not a broken client.
-  - *"The `mock_demo` chip means it's not calling a model."* **Mock = SDK-less, not key-less.**
-    The mock replaces the *decision*; the answering call is real and billed.
+  - *"There's a mock/demo chip that runs without setup."* There isn't — the client offers the
+    five real strategies only; a fresh lab gets the welcome card (module, or the express-lane
+    gateway on `routes.toml.answers`) instead of a chip that could only error.
   - *"The GPU lane is missing/idle."* It only exists on the optional 4b path; on 4a there is no
     local locomotive, and that's correct.

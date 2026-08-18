@@ -15,6 +15,10 @@ import routing_client.server as srv
 from routing_lab_answers_import_helper import answers
 from constants import EFFICIENT_MODEL, GATEWAY_BASE_URL, STRATEGIES, STRONG_MODEL
 
+assert "mock_demo" not in STRATEGIES, (
+    "mock_demo was removed with the playground repositioning — the client must never "
+    "offer a strategy that can only error on a fresh lab (see the welcome card instead)")
+
 # The eight keys bill_call/gateway_call promise; the client indexes them by name.
 RECEIPT_KEYS = {"model", "input_tokens", "output_tokens", "cost", "latency",
                 "counterfactual_cost", "why", "router_tax"}
@@ -371,8 +375,9 @@ def test_unlabelled_blank_does_not_render_an_empty_lock(monkeypatch, fake_chat):
 
 def test_unknown_strategy_is_an_error_event_not_a_broken_stream(monkeypatch, fake_chat):
     c = _client(monkeypatch, fake_chat)
-    r = c.post("/api/query", json={"text": "x", "strategy": "teleport"})
-    assert dict(_events(r.text))["error"]["message"].startswith("ValueError:")
+    for gone in ("teleport", "mock_demo"):     # mock_demo removed with the welcome card
+        r = c.post("/api/query", json={"text": "x", "strategy": gone})
+        assert dict(_events(r.text))["error"]["message"].startswith("ValueError:")
 
 
 # ------------------------------------------------------------------ /api/gpu ---
@@ -436,7 +441,7 @@ def test_gpu_reports_unavailable_on_every_failure(monkeypatch, failure):
 # ------------------------------------------------- the lab's gateway receipt ---
 # Exercise 4 answers out of process, so its receipt is assembled from the gateway's
 # JSON rather than from a chat client. Same eight keys, or the client's receipt log
-# and race rows quietly lose a column.
+# quietly loses a column.
 
 def test_gateway_receipt_carries_every_key_the_client_reads(monkeypatch):
     opener = _FakeOpener(_gateway_body(EFFICIENT_MODEL))

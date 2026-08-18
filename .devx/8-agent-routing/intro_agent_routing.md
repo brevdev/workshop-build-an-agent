@@ -6,7 +6,7 @@ Every agent in this workshop is a token machine, and not by ones: LangChain's de
 
 **Tokenomics** is the name for what that costs you: the unit economics of LLM work — dollars and seconds per call, per task, per user, per month. It's the number that decides whether an agent feature ships or dies in review, and it's why this module exists.
 
-> Module 7 taught you every token has a **cost** (the context tax). Module 8 teaches you every token has a **price** — and the price depends on who generates it.
+> Module 7 taught you every token has a harness-level **cost** (the context tax). Module 8 teaches you every token also has a **price** — and the price depends on who generates it.
 
 <!-- fold:break -->
 
@@ -23,7 +23,9 @@ How big is the gap between those prices? Big enough that someone published it. L
     <div class="dx-tax-row" style="--dx-w:25"><span class="dx-tax-name">routed</span><div class="dx-tax-track"><div class="dx-tax-fill">$3.00 / task</div></div><span class="dx-tax-note">80.0% accurate</span></div>
   </div>
 
-At 1,000 tasks a day that's **~$4.2M a year against ~$1.1M a year** — a 74% cut — bought with a **6-point accuracy giveback**, 86.0% down to 80.0%. Both halves are the deal. Source: [LangChain's agent-routing benchmark](https://www.langchain.com/blog/switchyard-agent-routing-benchmark), 145 multi-step tasks.
+At 1,000 tasks a day that's **~$4.2M a year against ~$1.1M a year** — a 74% cut — bought with a **6-point accuracy giveback**, 86.0% down to 80.0%. Both halves are the deal. 
+
+Source: [LangChain's agent-routing benchmark](https://www.langchain.com/blog/switchyard-agent-routing-benchmark)
 
 </div>
 
@@ -74,7 +76,7 @@ On the left is every agent you've built so far. On the right is the same agent �
 
 ## Wait — Module 1 Had "Routing" Too
 
-It did, and it meant something else. Module 1 gave you the four components every agent is built from, then quietly pinned one of them to a constant:
+It did, and it meant something else. Module 1 gave you the four components every agent is built from.
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>MODEL</h4>The brain that reads the conversation and decides. <b>Module 8 makes this a per-call choice.</b></div>
@@ -83,9 +85,9 @@ It did, and it meant something else. Module 1 gave you the four components every
   <div class="dx-cell"><h4>ROUTING</h4>The logic that orchestrates flow between reasoning and acting.</div>
 </div>
 
-Routing in Module 1 was **control flow**: which *step* runs next — think, act, or answer. Module 6 added a second sense, **policy** routing: the Privacy Router, where an operator decides which backend the agent is *permitted* to reach and injects the credentials outside the agent's reach. Module 8 adds the third, **model routing**: which brain answers this call, chosen on difficulty and cost.
+Routing in Module 1 was **control flow**: which *step* runs next inside of a particular query — think, act, or answer. Module 6 added a second sense, **policy** routing: the Privacy Router, where an operator decides which backend the agent is *permitted* to reach and injects the credentials outside the agent's reach. Module 8 adds the third, **model routing**: which brain answers this call, chosen on difficulty and cost.
 
-Same word, three layers, and they compose — policy decides who *may* answer, the router decides who *should*, and the agent's own loop decides what to do next. Module 1 handed you four components and hardwired the first. This module unpins it.
+Same word, three layers, and they compose — policy decides who *may* answer, the router decides who *should* answer, and the agent's own loop decides what to do next in getting that answer. 
 
 <div class="dx-island dx-quiz">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
@@ -104,8 +106,8 @@ Five exercises — and when they're done, a **Routing Client** playground that r
 
 1. **Measure the bill** — instrument every call with tokens, dollars, and latency, then run the same 12-task suite through two model tiers.
 2. **Route by hand** — write the classifier yourself, meet the misroute asymmetry, and put a number on the **router tax**.
-3. **Route with libsy** — the same decision, production-grade and in-process, reading tool signals your agent already emits.
-4. **Route at the gateway** — the routing policy becomes a config file, and your agent code doesn't change at all.
+3. **Route with NeMo Switchyard** — the same decision, production-grade and in-process, reading tool signals your agent already emits.
+4. **Route at the gateway** — the NeMo Switchyard routing policy becomes a config file, and your agent code doesn't change at all.
 5. **Prove the savings** — accuracy, cost, frontier share, and router tax on one scoreboard, at suite scale and annualized.
 
 By the last one you'll be able to say what routing cost you and what it bought you, in numbers you generated. That's the whole module: frontier quality where it's needed, open-model prices where it isn't — *use both, efficiently*.

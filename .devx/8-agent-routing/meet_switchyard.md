@@ -1,6 +1,18 @@
 <div class="dx-hero" data-eyebrow="MODULE 08 / 03 - MEET NEMO SWITCHYARD" data-title="Three nouns and a config file." data-sub="NVIDIA's open-source router - embed it in your process, or stand it in front of your models. Either way, the routing decision stops being logic you write." data-meta="LICENSE::Apache-2.0|SURFACES::library, gateway, launcher|TESTED::0.2.0"></div>
 
-Five algorithm families — four algorithm ids, because escalation is a **mode** of `llm_classifier` rather than an algorithm of its own — and one open-source implementation. [NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) is Apache-2.0, it shipped alongside Nemotron 3.5 Lightning — the model your lab uses as its efficient tier — and it's what the rest of this module runs on.
+[NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) is Apache-2.0, it shipped alongside Nemotron 3.5 Lightning — the model your lab uses as its efficient tier — and it's what the rest of this module runs on.
+
+One library implements this whole menu, though we'll start off implementing some basic strategies by hand before switching over to invoking the NeMo Switchyard library directly. 
+
+| Taxonomy family | Switchyard's algorithm | In this lab |
+|---|---|---|
+| 1 · static splits | `random` / `passthrough` / `noop` | **Ex 1** — two `passthrough` baselines, by hand |
+| 2 · read the request | `llm_classifier`, capability mode | **Ex 2** — you write the task judge yourself |
+| 3 · read the trajectory | `stage_router` | **Ex 3** — Switchyard's implementation, in-process |
+| 4 · start cheap, escalate | `llm_classifier`, escalation mode | **Ex 4** — Switchyard's gateway, via `routes.toml` |
+| 5 · trained routing | prefill routers | taught on the [taxonomy page](routing_decisions); not exercised |
+
+So "Switchyard" is never one strategy on a list — it's the implementation of the whole taxonomy: you build the first two families yourself to feel what the config keys buy, then hand the next two to the library. (Exercise 4's gateway even runs the algorithm you built in Exercise 2 — in its other mode.)
 
 It comes in three sizes: same routing core, three places to put it.
 

@@ -58,6 +58,15 @@ Sorted by *what the router may look at before it picks, and what looking costs*
 Nothing in the ordering says *go right*: **the cheapest decision that's good enough for your
 workload wins.** That's why there are five and not one.
 
+**The lab climbs this ladder in order, and Switchyard is the umbrella over all of it, not one
+rung:** Ex1 builds family 1 in the learner's own code (two `passthrough` baselines), Ex2 builds
+family 2 the same way (the capability judge), Ex3 hands family 3 to Switchyard in-process
+(libsy), Ex4 hands family 4 to
+Switchyard's gateway (`llm_classifier` escalation — the same algorithm Ex2 built, in its other
+mode). The taxonomy figure's bottom row and `meet_switchyard.md`'s menu table both carry this
+map; if a learner reads "switchyard" as one strategy among five (the old chip naming invited
+this), that's the correction.
+
 ## Router tax
 The permanent per-turn overhead of *deciding* — M7's context tax pointed at dollars and
 milliseconds. It is real, and this module puts it **on the receipt**.
@@ -172,9 +181,19 @@ exception: a **banner** above the yard is environment (key / interpreter / SDK),
 tile relaunch, and the key is read from `secrets.env` on every poll.
 - `systems online: N/5` is `probe_unlocks(module)` rendered as chips; Ex4 isn't probed (its blank
   is a config file) — **gateway liveness stands in for it**.
-- ⚠️ **`mock_demo` = SDK-less, NOT key-less.** The mock replaces the routing *decision*
-  (`MockRouter`, a deterministic heuristic); the call that answers is real and billed like any
-  other. The demo chip is never locked — and its answer names the first blank it reached.
+- **Chips are grouped by who runs the decision** — *no router · Ex 1* (strong only / efficient
+  only), *your code · Ex 2* (the "llm classifier" chip = `manual_classifier`), *NeMo
+  Switchyard · Ex 3–4* ("stage router" = `switchyard_stage`, plus "gateway") — each labeled by
+  its **algorithm** with a taxonomy-family badge (`family N/5`); the **canonical strategy id**
+  (what the lab's suite tables print) rides in the chip's hover. The point of the grouping: the
+  vendor name spans its two chips instead of being welded onto one, because Switchyard
+  implements the whole menu.
+- ⚠️ **There is no mock strategy in the client.** `MockRouter` exists only inside the lab, as
+  `switchyard_shim`'s fallback when the SDK is missing (Exercise 3's degraded path). The client
+  offers the five real strategies; on a lab where nothing is runnable it shows a **welcome
+  card** instead of a dead yard — the module for the full experience, or the **express lane**
+  (`bash scripts/serve_gateway.sh routes.toml.answers`), which lights the `gateway` chip with
+  zero exercises done because `gateway_call` is provided code.
 - **Positioning: the end-of-lab recap and playground.** The exercises live in
   `routing_lab.py`/`.ipynb` ALONE; the lab page introduces the client AFTER Exercise 5. It
   answers **single queries only** (one live call per Send — no suites, no runners in the tile):

@@ -71,7 +71,7 @@ def bill_call(model_id, chat, messages, bill, why="passthrough"):
     }
 
 # ---------------------------------------------------------------------------
-# Exercise 2 — the hand-rolled router. A cheap model reads the request first
+# Exercise 2 — the router you write. A cheap model reads the request first
 # and picks the lane; that extra call is the router tax, and it goes on the
 # same meter as the work. Unreadable verdicts fail UP: a misrouted hard task
 # costs an outage, a misrouted easy one costs pennies.

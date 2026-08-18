@@ -33,29 +33,54 @@
   var GPU_POLL_MS = 2000;
 
   // Which exercise powers which strategy. `gateway` has no probe — Ex4's blank is a
-  // TOML file, so server.py's gateway_alive stands in for it; `mock_demo` needs no
-  // exercise filled at all (its router is the shim's mock — it still buys its answer
-  // with the key, like every other strategy).
+  // TOML file, so server.py's gateway_alive stands in for it (which is also the
+  // welcome card's EXPRESS LANE: serve the reference policy and the gateway chip is
+  // the one strategy that runs on a completely blank lab, because gateway_call is
+  // provided code).
   var UNLOCK_OF = {
     strong_only: "ex1", efficient_only: "ex1",
     manual_classifier: "ex2", switchyard_stage: "ex3"
   };
   var EXERCISE_OF = { ex1: 1, ex2: 2, ex3: 3, ex5: 5 };
 
-  var STRATEGIES = [
-    { id: "strong_only",       sub: "every task at the frontier tier" },
-    { id: "efficient_only",    sub: "every task on the open model" },
-    { id: "manual_classifier", sub: "a cheap model picks the lane" },
-    { id: "switchyard_stage",  sub: "the SDK reads the trajectory" },
-    { id: "gateway",           sub: "routes.toml decides, out of process" },
-    // MockRouter replaces the routing DECISION, not the answering call — mock_demo
-    // needs NVIDIA_API_KEY like every other strategy. What it does not need is the SDK.
-    { id: "mock_demo",         sub: "no SDK needed — deterministic demo router" }
+  // The chips are the taxonomy from the "How routers decide" page, walked in
+  // exercise order (family 5, learned, is taught there and never exercised). They
+  // render GROUPED by who runs the decision — no router, the learner's own Python,
+  // or NeMo Switchyard — because the vendor name belongs to a group, not to one
+  // chip: Switchyard implements the whole menu, and two of these five run it.
+  // `id` is the canonical strategy string (constants.STRATEGIES, the lab's own
+  // rows, the /api/query wire) and never changes; `label` is what the chip shows,
+  // and the id rides in the tooltip so the lab's printed tables still map.
+  var GROUPS = [
+    { id: "none",       label: "no router · Ex 1" },
+    { id: "yours",      label: "your code · Ex 2" },
+    { id: "switchyard", label: "NeMo Switchyard · Ex 3–4" }
   ];
+
+  var STRATEGIES = [
+    { id: "strong_only",       group: "none",       label: "strong only",    fam: "family 1/5",
+      sub: "every task at the frontier tier" },
+    { id: "efficient_only",    group: "none",       label: "efficient only", fam: "family 1/5",
+      sub: "every task on the open model" },
+    { id: "manual_classifier", group: "yours",      label: "llm classifier", fam: "family 2/5",
+      sub: "your judge reads the prompt" },
+    { id: "switchyard_stage",  group: "switchyard", label: "stage router",   fam: "family 3/5",
+      sub: "reads the tool trajectory, in-process" },
+    { id: "gateway",           group: "switchyard", label: "gateway",        fam: "family 4/5",
+      sub: "routes.toml judges the run, out of process" }
+  ];
+
+  function stratLabel(id) {
+    for (var i = 0; i < STRATEGIES.length; i++) {
+      if (STRATEGIES[i].id === id) return STRATEGIES[i].label;
+    }
+    return id || "…";
+  }
 
   // First unlocked wins; the learner's own pick is sticky from then on. Routed
   // before flat-rate: the client defaults to the cheap lane, like the module argues.
-  var AUTO_DEFAULTS = ["switchyard_stage", "manual_classifier", "efficient_only", "mock_demo"];
+  // `gateway` last: it is the express lane's only chip, so it must be reachable here.
+  var AUTO_DEFAULTS = ["switchyard_stage", "manual_classifier", "efficient_only", "gateway"];
 
   // ---------------------------------------------------------------- tiny DOM
 
@@ -107,7 +132,7 @@
   function syncBusy() {
     $("#send").disabled = state.busy;
     var lamp = $("#busy-live");
-    if (state.busy) lamp.textContent = "routing via " + (state.strategy || "…") + " …";
+    if (state.busy) lamp.textContent = "routing via " + stratLabel(state.strategy) + " …";
     lamp.hidden = !state.busy;
   }
 
@@ -556,7 +581,6 @@
 
   function unlocked(strategy, s) {
     if (!s) return false;
-    if (strategy === "mock_demo") return true;
     if (strategy === "gateway") return !!s.gateway_alive;
     var key = UNLOCK_OF[strategy];
     return !!(s.unlocks && s.unlocks[key]);
@@ -573,20 +597,33 @@
   function renderStrategies(s) {
     var box = $("#strategies");
     clear(box);
-    STRATEGIES.forEach(function (spec) {
-      var open = unlocked(spec.id, s);
-      var chip = el("button", "chip" + (open ? "" : " locked") + (state.strategy === spec.id ? " on" : ""));
-      chip.type = "button";
-      chip.disabled = !open;
-      chip.setAttribute("aria-pressed", state.strategy === spec.id ? "true" : "false");
-      chip.title = open ? spec.sub : lockNote(spec.id);
-      chip.appendChild(el("span", "id", spec.id));
-      chip.appendChild(el("span", "sub", open ? spec.sub : lockNote(spec.id)));
-      chip.addEventListener("click", function () {
-        state.strategy = spec.id;
-        renderStatus(state.status);      // repaints from the same seam a poll uses
+    GROUPS.forEach(function (g) {
+      var group = el("div", "chip-group");
+      group.setAttribute("role", "group");
+      group.setAttribute("aria-label", g.label);
+      group.appendChild(el("span", "chip-group-label", g.label));
+      var row = el("div", "chip-group-row");
+      STRATEGIES.forEach(function (spec) {
+        if (spec.group !== g.id) return;
+        var open = unlocked(spec.id, s);
+        var chip = el("button", "chip" + (open ? "" : " locked") + (state.strategy === spec.id ? " on" : ""));
+        chip.type = "button";
+        chip.disabled = !open;
+        chip.setAttribute("aria-pressed", state.strategy === spec.id ? "true" : "false");
+        chip.title = open ? "strategy: " + spec.id + " — " + spec.sub : lockNote(spec.id);
+        var top = el("span", "top");
+        top.appendChild(el("span", "name", spec.label));
+        top.appendChild(el("span", "fam", spec.fam));
+        chip.appendChild(top);
+        chip.appendChild(el("span", "sub", open ? spec.sub : lockNote(spec.id)));
+        chip.addEventListener("click", function () {
+          state.strategy = spec.id;
+          renderStatus(state.status);    // repaints from the same seam a poll uses
+        });
+        row.appendChild(chip);
       });
-      box.appendChild(chip);
+      group.appendChild(row);
+      box.appendChild(group);
     });
   }
 
@@ -620,6 +657,34 @@
   // learner's terminal: /project inside JupyterLab, the clone's path outside it.
   function repoRoot(s) { return (s && s.repo_root) || "/project"; }
 
+  // ---------------------------------------------------------- the welcome card
+
+  function runnableAny(s) {
+    for (var i = 0; i < STRATEGIES.length; i++) {
+      if (unlocked(STRATEGIES[i].id, s)) return true;
+    }
+    return false;
+  }
+
+  // "Nothing to drive yet": no exercise solved AND no gateway on :4000 — a fresh
+  // workshop lands exactly here, so instead of a dead yard the card offers the two
+  // ways in (the module, or the reference gateway policy). Status is polled, so the
+  // card takes itself down on the first poll after ANYTHING becomes runnable — serve
+  // the gateway in a terminal and watch this page turn into the yard by itself.
+  function renderWelcome(s) {
+    var open = runnableAny(s);
+    $("#welcome").hidden = open;
+    document.querySelector("main").hidden = !open;
+    document.querySelector("footer").hidden = !open;
+    if (!open) {
+      $("#welcome-express").textContent =
+        "cd " + repoRoot(s) + "/code/8-agent-routing\n" +
+        "bash scripts/install_switchyard.sh\n" +
+        "set -a; source " + repoRoot(s) + "/secrets.env; set +a\n" +
+        "bash scripts/serve_gateway.sh routes.toml.answers";
+    }
+  }
+
   function renderBanners(s) {
     var box = $("#banners");
     clear(box);
@@ -631,8 +696,7 @@
       box.appendChild(banner("bad",
         "NVIDIA_API_KEY is missing — not in the client's environment, and not in " +
         repoRoot(s) + "/secrets.env.",
-        "Every live query will fail until it's set, mock_demo included (its router is a " +
-        "mock; the call that answers is real). Save it with the Secrets Manager tile on " +
+        "Every live query will fail until it's set. Save it with the Secrets Manager tile on " +
         "the JupyterLab launcher, or add this line to " + repoRoot(s) + "/secrets.env — " +
         "the client re-reads that file every few seconds, no relaunch needed:",
         "NVIDIA_API_KEY=nvapi-…",
@@ -676,6 +740,7 @@
     state.sig = sig;
     renderStrategies(s);
     renderBanners(s);
+    renderWelcome(s);
     // Only when the pick actually moved: the GPU poll runs at 2s, and restarting its
     // interval on every 5s status tick would quietly stretch it.
     syncGatewayPanels();

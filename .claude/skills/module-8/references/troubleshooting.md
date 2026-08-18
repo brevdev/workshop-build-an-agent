@@ -31,6 +31,13 @@ gateway or a failed install is *environment* (fix it). All commands run from
   the exercise that unlocks it. `probe_unlocks(module)` in `routing_lab.py` is the check — it
   calls each exercise's entry point with **fake inputs** (never a token, never a socket) and
   returns `False` for any blank still raising `NotImplementedError`.
+- **"The chip names don't match my suite's rows" / "where did `manual_classifier` go?"** — the
+  chips are labeled by **algorithm** and grouped by **who runs the decision** (*no router · Ex 1*,
+  *your code · Ex 2*, *NeMo Switchyard · Ex 3–4*); the canonical strategy ids the lab prints
+  (`strong_only`, `efficient_only`, `manual_classifier`, `switchyard_stage`, `gateway`) are
+  unchanged on the wire and shown in each chip's hover. `manual_classifier` = the "llm
+  classifier" chip in the *your code* group; `switchyard_stage` = the "stage router" chip in
+  the Switchyard group.
 - ⚠️ **Notebook-track learners:** the client reads **`routing_lab.py`**, not the notebook. Paste
   each finished function back into the `.py` or the tile stays dark no matter how green the
   notebook is.
@@ -56,6 +63,12 @@ gateway or a failed install is *environment* (fix it). All commands run from
   suite, demo, and scoreboard runs from the lab files (`python3 routing_lab.py --exercise N`
   or the notebook). A greyed strategy chip names the exercise that unlocks it; a finished lab
   reads `systems online: 5/5` at first open.
+- **The tile shows a "NOTHING TO DRIVE YET" welcome card** — correct on a fresh workshop (no
+  exercise solved, no gateway on `:4000`). It offers both ways in: the module (full
+  experience), or the **express lane** — `bash scripts/install_switchyard.sh`, export the key,
+  `bash scripts/serve_gateway.sh routes.toml.answers` — which lights the `gateway` chip with
+  zero exercises done (`gateway_call` is provided code; the gateway pays with its own
+  terminal's key). The card polls and dissolves by itself the moment anything is runnable.
 - **The tile won't open / you're headless** — the client is a window, never a requirement. Every
   exercise has a **Run it** command that prints the same numbers in a terminal, and the module is
   complete without ever opening the tile. In a sandbox with no forwarded port, that's the path.

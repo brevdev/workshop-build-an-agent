@@ -1,8 +1,10 @@
 <div class="dx-hero" data-eyebrow="MODULE 08 / 02 - HOW ROUTERS DECIDE" data-title="Five algorithms. One question." data-sub="What evidence does the router look at before it picks a model - and what does looking at it cost?" data-meta="FAMILIES::5|AXIS::evidence vs cost of deciding"></div>
 
-A router is a decision, and every decision runs on evidence. That's the whole taxonomy: the five families below differ mainly in *what they're allowed to look at* before they pick a model, and in what looking costs. Five families, four algorithms on the figure — because escalation is a **mode** of `llm_classifier`, not a separate algorithm, and it earns its own family here because it's a genuinely different policy on the same evidence.
+A router is a decision maker, and every decision runs on evidence. That's the whole taxonomy: the five families below differ mainly in *what they're allowed to look at* before they pick a model, and in what looking costs. Five families, four algorithms on the figure — because escalation is a **mode** of `llm_classifier`, not a separate algorithm, and it earns its own family here because it's a genuinely different policy on the same evidence.
 
-Some evidence is already lying around — the request text, the tool result that just came back, how the session has gone so far. Some has to be manufactured: a second model call to read the request, or a training run to learn what each model is genuinely good at. Sort the algorithms that way and the ecosystem stops being a list of names. The names in backticks are NeMo Switchyard's algorithm ids; you'll configure two of them by hand before this module is over.
+Some evidence is already lying around — the request text, the tool result that just came back, how the session has gone so far. Some has to be manufactured: a second model call to read the request, or a training run to learn what each model is genuinely good at. Sort the algorithms that way and the ecosystem stops being a list of names. 
+
+The NeMo Switchyard library implements this whole menu of strategies out-of-the-box. And the lab climbs it in order: Exercises 1–2 have you build the first two families yourself (two `passthrough` baselines, then a judge of your own) to familiarize yourself with the concepts, and Exercises 3–4 hand the next two to use the Switchyard library directly — first inside your process, then behind its gateway. The below figure's bottom row keeps that map.
 
 ![What evidence, at what cost](img/routing_signals_dark.svg)
 
@@ -16,7 +18,7 @@ The simplest router looks at nothing at all. `random` takes a list of targets an
 
 As a production strategy that's mostly indefensible. As an *instrument* it's the most useful thing on this page. A weighted split is an A/B test, and it settles the question every routing argument stalls on: is the cheap model actually worse **on my traffic**? Run 70/30 for a day and you've got two matched samples — same users, same task mix, different models — and a difference you can defend in a review. Module 3 taught you not to claim a result you didn't measure. Here's the routing version: **you can't credit the router if you never ran the split.**
 
-Two degenerate cousins round out the family. `passthrough` sends everything to one target — a router that doesn't route, which is precisely what every agent you've built so far has been. `noop` doesn't even carry an upstream; it's the offline, config-only case. Both matter, because *no router* has to be a nameable, runnable configuration before it can be the control row on a scoreboard. Exercise 1 runs two `passthrough` configs for exactly that reason.
+Two other options round out the family. `passthrough` sends everything to one target — a router that doesn't route, which is precisely what every agent you've built so far has been. `noop` doesn't even carry an upstream; it's the offline, config-only case. Both matter, because *no router* has to be a nameable, runnable configuration before it can be the control row on a scoreboard. Exercise 1 runs two `passthrough` configs for exactly that reason.
 
 <!-- fold:break -->
 
@@ -63,7 +65,7 @@ There's a whole class of evidence you're already producing and throwing away. An
 
 You built the source of those signals last module. The Module 7 minimal harness — a model, four tools, and a loop that appends `ToolMessage`s and goes around again — is exactly the thing a stage router reads. Two knobs govern it: `picker` sets which tier is the default (`efficient_first` or `capable_first`), and `confidence_threshold` sets how sure the scorer has to be before it leaves that default.
 
-The economics are why this family is the workshop's favourite. Zero router tax, no added latency, no second round trip — the decision is free because the evidence was free. The trade is that it reads *behaviour* rather than meaning: a genuinely hard question asked in one short turn with no tool history looks identical to an easy one. Long, tool-heavy sessions are where it earns its keep — the exact shape of the agents you've built since Module 5.
+The economics are why this family is the workshop's favourite. Zero router tax, no added latency, no second round trip — the decision is free because the evidence was free. The trade is that it reads *behaviour* rather than meaning: a genuinely hard question asked in one short turn with no tool history looks identical to an easy one. Long, tool-heavy sessions are where it earns its keep — the exact shape of the agents you've built since Module 5. Exercise 3 runs this family, and it's Switchyard's first invokation in your lab.
 
 <!-- fold:break -->
 
@@ -73,7 +75,7 @@ Same algorithm, different default. In escalation mode every session **starts on 
 
 Both halves earn their place. Requiring two in a row filters noise: one confused turn is a bad sentence, two in a row is a pattern. Never de-escalating avoids the pathology where a session that genuinely needed the strong model gets demoted the moment things look calm, and immediately falls over again.
 
-The analogy that sticks: **a junior engineer with a senior on call.** The junior takes every ticket. If two consecutive turns go badly, the senior takes the ticket over — and doesn't hand it back halfway through.
+Think of **a junior engineer with a senior on call.** The junior takes every ticket. If two consecutive turns go badly, the senior takes the ticket over and closes it out — and doesn't hand it back halfway through.
 
 One constraint is worth stating plainly, because it's easy to demo wrong: escalation needs **multi-turn trajectories** to read. Fire single-shot prompts at it and it never escalates — correctly, and unhelpfully. That's why Exercise 4's gateway task is deliberately two-phase: it gives the confirmations something to accumulate on, and you watch the second one land.
 
@@ -91,14 +93,14 @@ You've made this call before, one level down. Module 4 asked when to stop prompt
 
 ## Who MAY Answer vs Who SHOULD
 
-Module 6 already handed you something called a router, and it decides something else entirely. These two get conflated more than anything else in the workshop, so let's be exact.
+Module 6 already handed you something called a router, and it decides something else entirely. These two can get conflated, so let's be exact.
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell is-wide"><h4>POLICY ROUTING - MODULE 6</h4>Who <b>may</b> answer. The operator picks one inference backend per gateway; the gateway strips sandbox credentials and injects host-side ones. It never reads the request.</div>
   <div class="dx-cell is-wide"><h4>PERFORMANCE ROUTING - MODULE 8</h4>Who <b>should</b> answer. A judge or a signal scorer reads each request and picks the cheapest target that can handle it. It never decides what is permitted.</div>
 </div>
 
-NemoClaw's **Privacy Router** is an operator-chosen, credential-isolating HTTP forwarder, set with `openshell inference set`. It does **not** inspect content — it doesn't classify requests and it doesn't pick a model per query. The "keep sensitive data private" line gets misread that way constantly, and Module 6 spends a whole exercise correcting it: content-aware routing is something you build *in front of* that gateway.
+NemoClaw's **Privacy Router** is an operator-chosen, credential-isolating HTTP forwarder, set with `openshell inference set`. It does **not** inspect content — it doesn't classify requests and it doesn't pick a model per query. Content-aware routing is something you build *in front of* that gateway.
 
 Module 8's `llm_classifier` **is** that content classification — a judge model reading each request and choosing a target on what it finds there. Same English word, opposite mechanisms, which is why this gets a section instead of a footnote.
 
@@ -114,11 +116,11 @@ Everything above quietly assumed the pool is weak-versus-strong generalists. It 
      59% of their production traffic served by the fine-tuned model, ~5x faster than the
      model it replaced on that traffic. Cited + dated; re-verify at the calibration pass. -->
 
-Boomi reports **100% accuracy on its domain-routing decisions** while sending **59% of its production traffic** to a **5× faster fine-tuned model** ([Boomi, *Why Open Model Routing Matters*](https://boomi.com/blog/why-open-model-routing-matters/)). Read the middle number twice. The efficient target wasn't a smaller general model giving up quality — it was a model *customized for their domain*, which on their traffic is both faster and better. Routing to it isn't a compromise; it's an upgrade that happens to be cheaper.
+Boomi reports **100% accuracy on its domain-routing decisions** while sending **59% of its production traffic** to a **5× faster fine-tuned model** ([Boomi, *Why Open Model Routing Matters*](https://boomi.com/blog/why-open-model-routing-matters/)). The efficient target wasn't a smaller general model giving up quality — it was a model *customized for their domain*, which on their traffic is both faster and better. Routing to it isn't a compromise; it's an upgrade that happens to be cheaper.
 
 That completes an argument Module 4 started. Fine-tuning always had a capability case; what it lacked was an economic one, because "we trained a specialist" doesn't pay for itself if you still send every call to the generalist. Routing is the missing half: **customize small, then route to it.** The specialist earns back its training run on the traffic it handles better *and* cheaper, and the generalist stays on call for the rest.
 
-Which is where the module's thesis stops being abstract: you can only own a specialist if you can own the weights. That's what open models make possible, and it's what your Module 4 GRPO run produced. Teams routing only between other people's frontier APIs are picking from a menu; the open side of the portfolio is the part you get to shape.
+Which is where the module's thesis stops being abstract: you can only own a specialist if you can own the weights. That's what open models make possible, and it's what your Module 4 GRPO run produced. Teams routing only between other people's frontier APIs are picking from a menu; the open side of the portfolio is the part you get to shape for your use cases and domains.
 
 <div class="dx-island dx-quiz">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>

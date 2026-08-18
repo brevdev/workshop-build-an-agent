@@ -148,7 +148,7 @@ Understand the harness layer that turns a stateless LLM into a capable agent —
 
 Tame agent tokenomics — send every call to the model that should answer it, and prove the savings.
 
-**What you'll build**: A routing policy for your agent using NVIDIA NeMo Switchyard — a hand-rolled classifier router first, then Switchyard in-process, then the gateway (a `routes.toml` policy your application code never reads) — all visualized live in the Routing Client.
+**What you'll build**: A routing policy for your agent using NVIDIA NeMo Switchyard — a classifier router you write yourself first, then Switchyard in-process, then the gateway (a `routes.toml` policy your application code never reads) — all visualized live in the Routing Client.
 
 **Key concepts**:
 - Agent tokenomics, and why frontier vs. open is a false binary — use both, efficiently

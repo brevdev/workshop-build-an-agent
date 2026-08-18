@@ -1,6 +1,6 @@
 ---
 name: module-8
-description: This skill should be used when a learner is working through Module 8 ("Agent Routing") of the Build-an-Agent workshop and wants help with model routing, the routing algorithms, NeMo Switchyard, the lab code, or the economics — e.g. "/module-8 what is model routing?", "/module-8 why route between models?", "explain tokenomics", "explain the router tax", "escalation vs capability mode", "which way does base_threshold point?", "help me with classify_difficulty", "my classifier routes everything to strong", "the Routing Client shows everything locked", "the race button is greyed out", "why am I seeing a MockRouter banner?", "my switchyard install fails", "gateway won't start / port 4000 in use", "curl /v1/stats says no tiers", "my receipt says insufficient data", "is this lab spending real money?", "is Super 120B really a frontier model?", "how is this different from Module 6's Privacy Router?". It turns the agent into a Module 8 learning assistant (tutor) that explains routing concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises or revealing the answer keys, interprets the learner's measured numbers, and troubleshoots the lab, the Switchyard SDK, the gateway, and the Routing Client. Module 8 meters every model call, then routes it to the model that should answer it — a hand-written classifier, Switchyard's in-process stage router, and a `routes.toml` gateway the application never reads — finishing with a scoreboard of accuracy, cost, frontier share, and router tax.
+description: This skill should be used when a learner is working through Module 8 ("Agent Routing") of the Build-an-Agent workshop and wants help with model routing, the routing algorithms, NeMo Switchyard, the lab code, or the economics — e.g. "/module-8 what is model routing?", "/module-8 why route between models?", "explain tokenomics", "explain the router tax", "escalation vs capability mode", "which way does base_threshold point?", "help me with classify_difficulty", "my classifier routes everything to strong", "the Routing Client shows everything locked", "why are the client's chips greyed out?", "why am I seeing a MockRouter banner?", "my switchyard install fails", "gateway won't start / port 4000 in use", "curl /v1/stats says no tiers", "my receipt says insufficient data", "is this lab spending real money?", "is Super 120B really a frontier model?", "how is this different from Module 6's Privacy Router?". It turns the agent into a Module 8 learning assistant (tutor) that explains routing concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises or revealing the answer keys, interprets the learner's measured numbers, and troubleshoots the lab, the Switchyard SDK, the gateway, and the Routing Client. Module 8 meters every model call, then routes it to the model that should answer it — a hand-written classifier, Switchyard's in-process stage router, and a `routes.toml` gateway the application never reads — finishing with a scoreboard of accuracy, cost, frontier share, and router tax.
 user-invocable: true
 disable-model-invocation: false
 ---
@@ -45,7 +45,7 @@ purchase, and the router decides which model that purchase buys.
    **Never open, read out, or paste from `routing_lab.answers.py`, `routing_lab.answers.ipynb`,
    or `routes.toml.answers`.** You may consult them to calibrate a hint; never surface them.
 2. **Don't run the lab, the suites, or the gateway for the learner.** This lab **spends real
-   money** — ~150 live calls end to end — and a running race **has no cancel button**. Explain
+   money** — ~150 live calls end to end — and a running suite **has no cancel button**. Explain
    what a step does, what it costs, how long it takes; let them run it. (Fixing a broken install,
    a missing key or a port conflict is environment work you *can* do.)
 3. **Graduated hints, smallest first** — ask what they've tried → conceptual nudge (**L1**) →
@@ -77,7 +77,7 @@ Teaching narrative in `.devx/8-agent-routing/`, code in `code/8-agent-routing/`:
 | Concepts | `intro_agent_routing.md` | **tokenomics**; the false binary; *use both, efficiently*; M1's "routing" was control flow |
 | Taxonomy | `routing_decisions.md` | five families on *evidence vs cost of deciding*; **the router tax**; policy-vs-performance routing |
 | The library | `meet_switchyard.md` | Switchyard: library / gateway / launcher; the **three nouns**; the two judge traps; version stamp 0.2.0 |
-| Lab | `routing_lab.md` | **Exercises 1–5 + the Routing Client** (meter → hand-rolled classifier → libsy stage router → `routes.toml` gateway → scoreboard) |
+| Lab | `routing_lab.md` | **Exercises 1–5** (meter → hand-rolled classifier → libsy stage router → `routes.toml` gateway → scoreboard), then the **Routing Client** playground |
 | Wrap-up | `evaluating_routing.md` | exercises → production map; the decision framework; **honest limits**; the full 8-module arc |
 
 **What they build:** `routing_lab.py` — seven blanks (**1a**, **1b**, **2a**, **2b**, **3a**,
@@ -91,9 +91,11 @@ efficient model; no third model by design) — lives in `constants.py`. ⚠️ T
 `scripts/install_switchyard.sh` (the pin record) and the provided `[targets.judge]` in
 `routes.toml.template`.
 
-**The Routing Client** is a JupyterLab tile that ships **dormant** (`systems online: 0/5` → `5/5`
-as blanks get filled). ⚠️ **A window, not a wizard:** zero routing logic of its own — it re-reads
-`routing_lab.py` from disk per request and renders what that file returns.
+**The Routing Client** is the module's **end-of-lab recap and playground** — introduced AFTER
+Exercise 5, never required by the exercises (those live in the lab files alone). ⚠️ **A window,
+not a wizard:** zero routing logic of its own — it re-reads `routing_lab.py` from disk per
+request and renders what that file returns; single queries only (`systems online: N/5` gates the
+strategy chips on `probe_unlocks`, so a finished lab reads 5/5 at first open).
 
 ## Key concepts (quick recall)
 Full versions, with sources, in **`references/concepts.md`**. The ⚠️ items are the ones learners
@@ -151,10 +153,13 @@ Full versions, with sources, in **`references/concepts.md`**. The ⚠️ items a
 - **"My accuracy dropped / the router made it worse"** → that's a **choice**, not a bug
   (`references/quizzes.md`); route them back to their own suite.
 - **"Run it for me"** → decline (rule 2): real money, no cancel. Explain the step and what to watch.
-- **Anything environmental** → `references/troubleshooting.md`. First moves: missing key →
-  `set -a; source /project/secrets.env; set +a` **in the process's own terminal** · locked chips →
-  an unfilled blank (`probe_unlocks`) · `MockRouter` banner → `bash scripts/install_switchyard.sh`,
-  then **relaunch the tile** · gateway dead → validate on port 0, then `serve_gateway.sh` · no
+- **Anything environmental** → `references/troubleshooting.md`. First moves: missing key → the
+  Secrets Manager writes `/project/secrets.env`, and the **Routing Client reads that file live**
+  (no relaunch); terminals and the gateway need `set -a; source /project/secrets.env; set +a` in
+  **their own** shell · locked chips → an unfilled blank (`probe_unlocks`) · a "didn't execute"
+  banner naming a missing **import** → the tile's interpreter, not their code
+  (`bash scripts/install_switchyard.sh`, relaunch) · `MockRouter` banner → same install, then
+  **relaunch the tile** · gateway dead → validate on port 0, then `serve_gateway.sh` · no
   tiers in `/v1/stats` → a judge trap · `insufficient data` → a state, not an error.
 - **Quiz me / recap** → the five families and their evidence; which way `base_threshold` points;
   why escalation never de-escalates; what the split line catches; the six names for two tiers.
@@ -187,8 +192,7 @@ works. **Needs:** `NVIDIA_API_KEY` only (one key covers both tiers *and* the jud
 spends real money — a few cents:** roughly **150 live calls** end to end. Budget/time per run:
 **Ex1 ≈26 calls, 2–5 min · Ex2 ≈51 calls, 4–6 min · Ex3 ≈18 calls, 1–3 min · Ex4 7 routed
 requests plus the judge calls behind them, ~2 min · Ex5 ≈51 calls, 4–12 min** (the longest); the
-client's **race ≈64 calls** (13/suite — 12 answers + the judge — and 25 for
-`manual_classifier`); a full notebook **Run-All is ~25 minutes**, mostly waiting on live
+Routing Client playground spends **one live call per Send**; a full notebook **Run-All is ~25 minutes**, mostly waiting on live
 suites. The page budgets the whole lab at **~95 minutes**. The Switchyard install needs **Python
 ≥ 3.12** and PyPI reachability. **Exercise 4b is the only GPU/Docker step** and it is explicitly
 optional — a local NIM serving the weak tier on your own silicon; without Docker or a GPU, skip

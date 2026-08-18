@@ -7,7 +7,7 @@ Two gateway-receipt tests ride along at the bottom. They exercise the LAB's
 gateway_call with the socket stubbed out; the client reads that receipt, so its
 shape is pinned here next to the reader.
 """
-import importlib.util, io, json, pathlib, subprocess, types
+import importlib.util, io, json, os, pathlib, subprocess, types
 import pytest
 from fastapi.testclient import TestClient
 
@@ -18,6 +18,16 @@ from constants import EFFICIENT_MODEL, GATEWAY_BASE_URL, STRATEGIES, STRONG_MODE
 # The eight keys bill_call/gateway_call promise; the client indexes them by name.
 RECEIPT_KEYS = {"model", "input_tokens", "output_tokens", "cost", "latency",
                 "counterfactual_cost", "why", "router_tax"}
+
+
+@pytest.fixture(autouse=True)
+def hermetic_key(monkeypatch, tmp_path):
+    """Every test runs with NO ambient key and _SECRETS_FILE pointed away from the
+    real repo file: the key path is explicit in the tests that exercise it, and the
+    rest must not depend on the machine they run on."""
+    monkeypatch.delenv("NVIDIA_API_KEY", raising=False)
+    monkeypatch.setattr(srv, "_SECRETS_FILE", tmp_path / "no-secrets.env")
+    monkeypatch.setattr(srv, "_injected_key", None)
 
 
 def _client(monkeypatch, fake_chat):
@@ -31,11 +41,21 @@ def _client(monkeypatch, fake_chat):
 
 
 def _blank_lab():
-    """The learner's own file, every TODO still unfilled."""
+    """The learner's own file, every TODO still unfilled. On a working checkout that
+    IS its state; in a learner's workspace it may be filled in (or half-typed), and
+    a maintainer suite must not go red because somebody did the module -- so the
+    tests that need blanks skip, with the reason, when none are left."""
     path = pathlib.Path(srv.__file__).resolve().parents[1] / "routing_lab.py"
     spec = importlib.util.spec_from_file_location("blank_lab", path)
     blank = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(blank)
+    try:
+        spec.loader.exec_module(blank)
+    except Exception as exc:
+        pytest.skip(f"routing_lab.py does not execute in this workspace ({exc!r}) — "
+                    "blank-file rendering is pinned on a clean checkout")
+    if any(blank.probe_unlocks(blank).values()):
+        pytest.skip("routing_lab.py has been filled in — blank-file rendering is "
+                    "pinned on a clean checkout")
     return blank
 
 
@@ -115,6 +135,138 @@ def test_status_carries_the_repo_root_the_key_banner_prints(monkeypatch, fake_ch
     root = pathlib.Path(c.get("/api/status").json()["repo_root"])
     assert root.is_absolute()
     assert (root / "code" / "8-agent-routing" / "routing_client").is_dir()
+
+
+# ------------------------------------------------------------- the key path ---
+# A tile inherits the JupyterLab server's environment, and no learner terminal can
+# export anything into THAT -- so the server reconciles NVIDIA_API_KEY with
+# <repo_root>/secrets.env on every status poll and before every live query. These
+# pin the reconciliation rules; srv._SECRETS_FILE is the seam (the autouse fixture
+# points it at an absent tmp file, so each test writes exactly the file it means).
+
+def test_key_falls_back_to_secrets_env(monkeypatch, fake_chat, tmp_path):
+    secrets = tmp_path / "secrets.env"
+    secrets.write_text("# workshop keys\nNVIDIA_API_KEY=nvapi-from-file\n")
+    monkeypatch.setattr(srv, "_SECRETS_FILE", secrets)
+    body = _client(monkeypatch, fake_chat).get("/api/status").json()
+    assert (body["key_present"], body["key_source"]) == (True, "secrets.env")
+    assert os.environ["NVIDIA_API_KEY"] == "nvapi-from-file"   # ambient for ChatNVIDIA
+
+
+def test_key_from_the_launch_environment_wins(monkeypatch, fake_chat, tmp_path):
+    """A key exported by whoever launched the server was set deliberately; a server
+    that silently swapped it for the file's would be undebuggable."""
+    secrets = tmp_path / "secrets.env"
+    secrets.write_text("NVIDIA_API_KEY=nvapi-from-file\n")
+    monkeypatch.setattr(srv, "_SECRETS_FILE", secrets)
+    monkeypatch.setenv("NVIDIA_API_KEY", "nvapi-explicit")
+    body = _client(monkeypatch, fake_chat).get("/api/status").json()
+    assert body["key_source"] == "env"
+    assert os.environ["NVIDIA_API_KEY"] == "nvapi-explicit"
+
+
+def test_key_tracks_a_secrets_edit_without_a_relaunch(monkeypatch, fake_chat, tmp_path):
+    """The whole point: Secrets Manager writes the file while the tile is open, and
+    the next poll must pick it up -- no relaunch, no stale copy."""
+    secrets = tmp_path / "secrets.env"
+    secrets.write_text("NVIDIA_API_KEY=nvapi-first\n")
+    monkeypatch.setattr(srv, "_SECRETS_FILE", secrets)
+    c = _client(monkeypatch, fake_chat)
+    c.get("/api/status")
+    secrets.write_text("NVIDIA_API_KEY=nvapi-rotated\n")
+    body = c.get("/api/status").json()
+    assert body["key_source"] == "secrets.env"
+    assert os.environ["NVIDIA_API_KEY"] == "nvapi-rotated"
+
+
+def test_key_injection_is_retracted_when_the_file_loses_it(monkeypatch, fake_chat, tmp_path):
+    """key_present must never report a key the learner has since removed."""
+    secrets = tmp_path / "secrets.env"
+    secrets.write_text("NVIDIA_API_KEY=nvapi-first\n")
+    monkeypatch.setattr(srv, "_SECRETS_FILE", secrets)
+    c = _client(monkeypatch, fake_chat)
+    assert c.get("/api/status").json()["key_present"] is True
+    secrets.write_text("NVIDIA_API_KEY=\n")
+    body = c.get("/api/status").json()
+    assert (body["key_present"], body["key_source"]) == (False, None)
+    assert "NVIDIA_API_KEY" not in os.environ
+
+
+def test_key_reads_missing_when_it_is_nowhere(monkeypatch, fake_chat):
+    body = _client(monkeypatch, fake_chat).get("/api/status").json()
+    assert (body["key_present"], body["key_source"]) == (False, None)
+
+
+def test_secrets_parser_tolerates_export_quotes_comments_and_crlf(monkeypatch, tmp_path):
+    secrets = tmp_path / "secrets.env"
+    secrets.write_text("# comment\n"
+                       "#NVIDIA_API_KEY=commented-out\n"
+                       "OTHER_KEY=zzz\r\n"
+                       'export NVIDIA_API_KEY="nvapi-quoted"\r\n')
+    monkeypatch.setattr(srv, "_SECRETS_FILE", secrets)
+    assert srv._read_secrets_key() == "nvapi-quoted"
+
+
+def test_query_makes_the_key_ambient_before_the_lab_runs(monkeypatch, fake_chat, tmp_path):
+    """Live queries buy tokens with this key, so the file has to be reconciled on the
+    query path itself -- a learner who never opens the status poll (curl, tests)
+    still gets the key."""
+    secrets = tmp_path / "secrets.env"
+    secrets.write_text("NVIDIA_API_KEY=nvapi-late\n")
+    monkeypatch.setattr(srv, "_SECRETS_FILE", secrets)
+    c = _client(monkeypatch, fake_chat)
+    seen = {}
+    pool = {"strong": fake_chat("big"), "efficient": fake_chat("small")}
+
+    def spying_pool():
+        seen["key"] = os.environ.get("NVIDIA_API_KEY")
+        return pool
+    monkeypatch.setattr(answers, "build_model_pool", spying_pool)
+
+    r = c.post("/api/query", json={"text": "x", "strategy": "efficient_only"})
+
+    assert "event: answer" in r.text
+    assert seen["key"] == "nvapi-late"
+
+
+def test_unauthenticated_tracing_goes_quiet(monkeypatch):
+    """LANGSMITH_TRACING=true with no key means a 401 trace-upload failure printed on
+    every lab call the client makes (verified live in the Workbench container)."""
+    monkeypatch.setenv("LANGSMITH_TRACING", "true")
+    monkeypatch.delenv("LANGSMITH_API_KEY", raising=False)
+    srv._quiet_unauthenticated_tracing()
+    assert os.environ["LANGSMITH_TRACING"] == "false"
+
+
+def test_authenticated_tracing_is_left_alone(monkeypatch):
+    monkeypatch.setenv("LANGSMITH_TRACING", "true")
+    monkeypatch.setenv("LANGSMITH_API_KEY", "lsv2-test")
+    srv._quiet_unauthenticated_tracing()
+    assert os.environ["LANGSMITH_TRACING"] == "true"
+
+
+# ------------------------------------------------------------- the lab hint ---
+
+def test_lab_hint_points_at_the_interpreter_on_a_missing_module(monkeypatch):
+    """A ModuleNotFoundError from the lab is an INTERPRETER problem -- the learner's
+    file may be perfect and still not execute here -- so the hint must say that and
+    name the fix, not just echo the traceback line."""
+    def missing():
+        raise ModuleNotFoundError("No module named 'langchain_nvidia_ai_endpoints'",
+                                  name="langchain_nvidia_ai_endpoints")
+    monkeypatch.setattr(srv, "_load_lab", missing)
+    body = TestClient(srv.app).get("/api/status").json()
+    assert body["lab_error"].startswith("ModuleNotFoundError")
+    assert "install_switchyard.sh" in body["lab_hint"]
+    assert "not from your code" in body["lab_hint"]
+
+
+def test_lab_hint_points_at_the_terminal_on_learner_errors(monkeypatch):
+    def half_typed():
+        raise SyntaxError("invalid syntax (routing_lab.py, line 47)")
+    monkeypatch.setattr(srv, "_load_lab", half_typed)
+    body = TestClient(srv.app).get("/api/status").json()
+    assert "--exercise 1" in body["lab_hint"]
 
 
 def test_routing_lab_module_env_selects_another_lab_file(monkeypatch):
@@ -221,102 +373,6 @@ def test_unknown_strategy_is_an_error_event_not_a_broken_stream(monkeypatch, fak
     c = _client(monkeypatch, fake_chat)
     r = c.post("/api/query", json={"text": "x", "strategy": "teleport"})
     assert dict(_events(r.text))["error"]["message"].startswith("ValueError:")
-
-
-# ----------------------------------------------------------------- /api/race ---
-
-def _canned(cost, model, tax=0.0, passed=True, n=12):
-    return [{"id": f"t{i}", "kind": "commodity", "passed": passed, "cost": cost / n,
-             "latency": 0.1, "models": {model: 1}, "router_tax": tax / n} for i in range(n)]
-
-
-def test_race_rows_stream_in_canonical_strategy_order(monkeypatch, fake_chat):
-    """routing_verdict reads the routed row out of dict insertion order, so the race
-    must feed it constants.STRATEGIES order whatever order the chips were clicked in
-    -- otherwise the receipt compares against whichever strategy the UI listed first."""
-    c = _client(monkeypatch, fake_chat)
-    canned = {"strong_only": _canned(10.0, STRONG_MODEL),
-              "manual_classifier": _canned(1.0, EFFICIENT_MODEL, tax=0.1),
-              "switchyard_stage": _canned(2.0, EFFICIENT_MODEL)}
-    monkeypatch.setattr(answers, "run_suite", lambda strategy, bill=None: canned[strategy])
-
-    r = c.post("/api/race", json={"strategies": ["switchyard_stage", "manual_classifier",
-                                                 "strong_only"]})
-    events = _events(r.text)
-    assert [d["strategy"] for name, d in events if name == "race_row"] == [
-        "strong_only", "manual_classifier", "switchyard_stage"]
-
-    receipt = next(d["receipt"] for name, d in events if name == "race_receipt")
-    # manual_classifier outranks switchyard_stage in STRATEGIES, so it is the routed row.
-    assert "$1.00 vs $10.00" in receipt
-
-
-def test_race_rejects_an_unsupported_strategy_before_spending_a_token(monkeypatch, fake_chat):
-    """`gateway` is a headline strategy and a member of STRATEGIES, but run_suite
-    raises on it -- and canonical order puts it last, so discovering that by running
-    it would mean two suites (~24 live calls) already paid for, then an error and no
-    verdict. The race must refuse before the first call."""
-    c = _client(monkeypatch, fake_chat)
-    calls = []
-    monkeypatch.setattr(answers, "run_suite", lambda *a, **kw: calls.append(a))
-
-    r = c.post("/api/race", json={"strategies": ["strong_only", "manual_classifier", "gateway"]})
-
-    message = dict(_events(r.text))["error"]["message"]
-    assert "gateway" in message                                  # names the offender
-    assert "strong_only, efficient_only, manual_classifier, switchyard_stage" in message
-    assert calls == []                                           # nothing was spent
-    assert "race_row" not in r.text
-
-
-def test_race_rejects_an_empty_selection(monkeypatch, fake_chat):
-    c = _client(monkeypatch, fake_chat)
-    calls = []
-    monkeypatch.setattr(answers, "run_suite", lambda *a, **kw: calls.append(a))
-    r = c.post("/api/race", json={"strategies": []})
-    assert "no strategies selected" in dict(_events(r.text))["error"]["message"]
-    assert calls == []
-
-
-def test_race_collapses_a_duplicated_strategy_to_one_row(monkeypatch, fake_chat):
-    """A double-clicked chip must not buy the same suite twice."""
-    c = _client(monkeypatch, fake_chat)
-    calls = []
-    monkeypatch.setattr(answers, "run_suite",
-                        lambda strategy, bill=None: calls.append(strategy) or _canned(10.0, STRONG_MODEL))
-
-    r = c.post("/api/race", json={"strategies": ["strong_only", "strong_only"]})
-
-    assert calls == ["strong_only"]
-    assert [name for name, _ in _events(r.text)] == ["race_row", "race_receipt"]
-
-
-def test_race_renders_the_receipt_it_already_paid_for_before_reporting_the_break(monkeypatch, fake_chat):
-    """Defense in depth: if a suite blows up mid-race, the strategies that finished
-    were still charged for, so their verdict ships before the error does."""
-    c = _client(monkeypatch, fake_chat)
-    canned = {"strong_only": _canned(10.0, STRONG_MODEL),
-              "manual_classifier": _canned(1.0, EFFICIENT_MODEL, tax=0.1)}
-
-    def flaky(strategy, bill=None):
-        if strategy not in canned:
-            raise RuntimeError("upstream 503")
-        return canned[strategy]
-    monkeypatch.setattr(answers, "run_suite", flaky)
-
-    r = c.post("/api/race", json={"strategies": ["strong_only", "manual_classifier",
-                                                 "switchyard_stage"]})
-    events = _events(r.text)
-
-    assert [name for name, _ in events] == ["race_row", "race_row", "race_receipt", "error"]
-    assert "$1.00 vs $10.00" in events[2][1]["receipt"]      # the two that finished
-    assert events[3][1]["message"] == "RuntimeError: upstream 503"
-
-
-def test_race_reports_a_locked_suite_instead_of_dying_mid_stream(monkeypatch):
-    monkeypatch.setattr(srv, "_load_lab", _blank_lab)
-    r = TestClient(srv.app).post("/api/race", json={"strategies": ["strong_only"]})
-    assert "Exercise" in dict(_events(r.text))["error"]["message"]
 
 
 # ------------------------------------------------------------------ /api/gpu ---

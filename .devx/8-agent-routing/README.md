@@ -4,7 +4,7 @@
 
 Seven modules of agents, and every one of them pinned a single model for *every* call — the Module 1 report writer, the Module 2 help desk, even the Module 7 harness you built by hand. But inside a single task, calls aren't equal: "reformat this JSON" and "plan a five-step investigation" got billed and delayed like the same job. That gap is **tokenomics** — the unit economics of running agents on tokens — and it's the debate every team adopting agents is having right now, usually framed as a false binary: frontier models *or* open models.
 
-This module's answer is a portfolio, not a pick. You'll put a meter on every call, write a routing classifier by hand, then hand the decision to **NVIDIA NeMo Switchyard** — in-process with `switchyard.libsy`, and at a gateway your application code never reads. The **Routing Client** ships dormant and lights up one capability per blank you fill, until the closing scoreboard shows accuracy, cost, frontier share, and the router's own tax — measured, not marketed.
+This module's answer is a portfolio, not a pick. You'll put a meter on every call, write a routing classifier by hand, then hand the decision to **NVIDIA NeMo Switchyard** — in-process with `switchyard.libsy`, and at a gateway your application code never reads — closing on a scoreboard of accuracy, cost, frontier share, and the router's own tax, measured, not marketed. Then you take it for a drive: the **Routing Client**, a live switchyard tile that renders your finished lab file, routes any prompt you throw at it, and prices every answer against the frontier-only counterfactual.
 
 <div class="dx-bento">
   <div class="dx-cell is-wide is-tall dx-reveal" style="--i:1">
@@ -19,7 +19,7 @@ This module's answer is a portfolio, not a pick. You'll put a meter on every cal
     </ul>
   </div>
   <div class="dx-cell dx-reveal" style="--i:2"><h4>DURATION</h4><span class="dx-big">2-3 h</span>self-paced</div>
-  <div class="dx-cell dx-reveal" style="--i:3"><h4>THE LAB</h4>5 exercises + the Routing Client - a live switchyard that unlocks as you go</div>
+  <div class="dx-cell dx-reveal" style="--i:3"><h4>THE LAB</h4>5 exercises, then the Routing Client - a live switchyard playground for the router you built</div>
   <div class="dx-cell dx-reveal" style="--i:4"><h4>MODELS ROUTED</h4>Nemotron Super 120B (the frontier stand-in) and Nemotron 3.5 Lightning 30B - one hosted key, no new secrets</div>
   <div class="dx-cell dx-reveal" style="--i:5"><h4>YOUR GPU, OPTIONALLY</h4>Exercise 4b routes the easy tier to a local NIM on your own silicon</div>
   <div class="dx-cell dx-reveal" style="--i:6"><h4>SWITCHYARD</h4><a href="https://github.com/NVIDIA-NeMo/Switchyard">github.com/NVIDIA-NeMo/Switchyard</a> - open source, Apache-2.0</div>

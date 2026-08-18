@@ -100,7 +100,7 @@ Same word, three layers, and they compose — policy decides who *may* answer, t
 
 ## What You'll Build
 
-Five exercises, one Routing Client that comes alive panel by panel as you fill it in:
+Five exercises — and when they're done, a **Routing Client** playground that runs your finished lab file live:
 
 1. **Measure the bill** — instrument every call with tokens, dollars, and latency, then run the same 12-task suite through two model tiers.
 2. **Route by hand** — write the classifier yourself, meet the misroute asymmetry, and put a number on the **router tax**.

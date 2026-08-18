@@ -202,8 +202,8 @@ Everything in Python is provided. What they write is `routes.toml`, from
   data` is the honest output, and a real state).
 
 > **Run it:** `python3 routing_lab.py --exercise 5` — three suites, the longest run in the lab:
-> ≈51 live calls, 4–12 min. It also unlocks the client's **race** mode (≈64 more calls for all
-> four strategies — 13 per suite, 25 for `manual_classifier` — no cancel button).
+> ≈51 live calls, 4–12 min. With it done, the whole lab is finished — the Routing Client
+> playground at the end of the page now reads `systems online: 5/5`.
 
 ---
 ## Interpreting the run (where most of the teaching actually happens)

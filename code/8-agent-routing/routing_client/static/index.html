@@ -49,47 +49,22 @@
     <button class="ex frontier" data-tag="frontier">A ships 3 features/sprint, 2 reviews each at 45min — review-hours per 4-sprint quarter?</button>
   </div>
 
+  <!-- type="button" + keydown wiring, NEVER form submission: the JupyterLab launcher
+       renders this app in an iframe sandboxed without allow-forms, where submitting a
+       form is silently blocked (no submit event, no error). The form element stays for
+       layout and semantics; client.js drives it from click/keydown instead. -->
   <form id="ask" autocomplete="off">
     <input id="q" placeholder="Ask anything — watch it route" aria-label="your query">
-    <button id="send" type="submit">Send</button>
+    <button id="send" type="button">Send</button>
+    <!-- the yard's signal lamp: lit while a query is spending, naming the strategy
+         that carries it. -->
+    <span id="busy-live" role="status" hidden></span>
   </form>
 
   <div id="reply" hidden>
     <p class="reply-q"></p>
     <div class="reply-a"></div>
   </div>
-
-  <details id="race">
-    <summary>🏁 Race mode (Exercise 5)</summary>
-
-    <p id="race-note">The same 12-task suite under each strategy you pick — <b>13 live model calls
-      per strategy</b> (twelve answers plus the LLM judge), and <b>25</b> for
-      <code>manual_classifier</code>, which pays the router tax on every task. All four is ≈64
-      calls and several minutes. There is no cancel button, and closing this tab will not stop a
-      suite that has already started.</p>
-
-    <div id="race-strats" aria-label="race strategies"><!-- chips injected by client.js --></div>
-    <button id="run-race" disabled>Run the 12-task suite</button>
-
-    <div id="race-out">
-      <table id="race-table">
-        <thead><tr><th>strategy</th><th>accuracy</th><th>cost</th><th>frontier %</th><th>tax %</th></tr></thead>
-        <tbody></tbody>
-      </table>
-
-      <figure id="pareto-wrap">
-        <figcaption>accuracy vs cost — <b>up and to the left is better</b></figcaption>
-        <div class="legend">
-          <span><i class="sw dot green"></i>routed / open</span>
-          <span><i class="sw diamond amber"></i>frontier baseline</span>
-        </div>
-        <!-- points drawn by client.js as each race_row streams in -->
-        <svg id="pareto" viewBox="0 0 460 260" role="img" aria-label="accuracy versus cost scatter"></svg>
-      </figure>
-    </div>
-
-    <p id="race-receipt"></p>
-  </details>
 </footer>
 
 <div id="toasts" aria-live="assertive"></div>

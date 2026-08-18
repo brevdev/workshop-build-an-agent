@@ -7,22 +7,23 @@ gateway or a failed install is *environment* (fix it). All commands run from
 `--exercise N` is 18–51 live calls.
 
 ## The NVIDIA key (this module's most predictable failure)
-- **Symptom:** every live query fails; the Routing Client shows a **persistent banner** (not a
-  toast) printing the exact line with the absolute path already filled in; `serve_gateway.sh`
-  refuses to start and prints the same line.
-- **Fix:** `set -a; source /project/secrets.env; set +a`
+- **Symptom:** live queries fail; `serve_gateway.sh` refuses to start and prints the exact
+  `source` line with the absolute path filled in; the Routing Client shows a **persistent
+  banner** (not a toast) — but only when the key is missing from `secrets.env` too (see below).
+- **Fix for terminals:** `set -a; source /project/secrets.env; set +a`
 - ⚠️ **Keep the path absolute.** `secrets.env` lives at the **project root**, so sourcing it by
   bare filename fails from the lab directory. Both the script and the client banner resolve the
   absolute path for you.
-- ⚠️ **Which terminal matters.**
+- ⚠️ **Which process matters.**
   - **The gateway** reads the key from **its own process environment** via `api_key_env` — so it
     must be exported in the terminal you run `serve_gateway.sh` from. Exporting it in the lab's
-    terminal does nothing for it.
-  - **The Routing Client's server** checks `NVIDIA_API_KEY` in **its own environment on every
-    `/api/status` poll** — but a process's environment is fixed when it launches, so exporting
-    the key in another terminal (or after the tile started) never reaches it. That's what the
-    page's shorthand "reads the key once at startup" means: **launch the tile from a terminal
-    where the key is already exported, and relaunch it if you set the key afterwards.**
+    terminal does nothing for it. This is the case that still genuinely depends on the terminal.
+  - **The Routing Client's server** needs no terminal: it reconciles `NVIDIA_API_KEY` with
+    **`/project/secrets.env` on every status poll and before every live query**. Saving the key
+    with the **Secrets Manager tile** (or editing the file directly) reaches a tile that is
+    already open within a few seconds — **no relaunch**. A key exported in the launch
+    environment wins over the file; the banner appears only when the key is in **neither**
+    place, and it takes itself down once the file has one.
 - **Verify from anywhere:** `curl -s localhost:4000/v1/models`.
 
 ## The Routing Client
@@ -37,15 +38,24 @@ gateway or a failed install is *environment* (fix it). All commands run from
   for it**, so it lights the moment the client can reach `:4000`.
 - **A "`routing_lab.py` didn't execute" banner** is a *different* failure: the file itself is
   broken (syntax/import), which is not the same as a blank exercise. Unfilled blanks never
-  produce this banner. Run `python3 routing_lab.py --exercise 1` and read the traceback. If the
-  traceback is a **missing import** rather than their own code, check the interpreter: the client
-  runs on the Switchyard venv when one exists, so ask them to re-run
-  `bash scripts/install_switchyard.sh` (it now installs the lab's runtime deps into that venv) and
-  **relaunch the tile**.
-- **The race button is greyed out** — race mode is gated on **Exercise 5** (`routing_verdict`);
-  the button's title says so. Race chips are the four *suite* strategies only (`strong_only`,
-  `efficient_only`, `manual_classifier`, `switchyard_stage`); `gateway` and `mock_demo` answer
-  single queries, not suites.
+  produce this banner, and the banner now carries its own hint line. Two cases:
+  - **A missing import** (`ModuleNotFoundError`) is the **tile's interpreter**, never their code
+    — the hint says so and names the interpreter. `start_client.sh` probes its candidates
+    (`ROUTING_CLIENT_PYTHON` → the Switchyard venv → `python3.12` → `python3`) and runs the
+    first that can import the lab's deps, so this banner means **no** candidate could. Fix:
+    `bash scripts/install_switchyard.sh` (it prepares an interpreter with the SDK *and* the
+    lab's runtime deps), then **relaunch the tile** — it prefers that interpreter.
+  - **Anything else** is their file: run `python3 routing_lab.py --exercise 1` and read the
+    traceback.
+- **Chips didn't light after solving an exercise** — they should, **live**: the client re-reads
+  `routing_lab.py` every ~5 s, so no relaunch is ever needed for unlocks. If a solved exercise
+  stays locked, either the work isn't in the `.py` (notebook track — paste it back) or a banner
+  above the yard is reporting why the file can't execute.
+- **"Where do I run the exercises in the client?"** — nowhere, by design: the client is the
+  **end-of-lab recap and playground** (single queries only, one live call per Send). Every
+  suite, demo, and scoreboard runs from the lab files (`python3 routing_lab.py --exercise N`
+  or the notebook). A greyed strategy chip names the exercise that unlocks it; a finished lab
+  reads `systems online: 5/5` at first open.
 - **The tile won't open / you're headless** — the client is a window, never a requirement. Every
   exercise has a **Run it** command that prints the same numbers in a terminal, and the module is
   complete without ever opening the tile. In a sandbox with no forwarded port, that's the path.
@@ -74,9 +84,9 @@ gateway or a failed install is *environment* (fix it). All commands run from
   the fallback **venv**, tell them to run the lab *with it* —
   `"$(bash scripts/install_switchyard.sh --print-python)" routing_lab.py --exercise 3`. The
   installer also puts the lab's own runtime deps (`langchain-nvidia-ai-endpoints`,
-  `python-dotenv`) in that venv precisely so this works; `start_client.sh` prefers the same
-  interpreter, which is why a venv that could import the SDK but not the lab used to leave the
-  client dark at `0/5`.
+  `python-dotenv`) in that venv precisely so this works. `start_client.sh` probes rather than
+  assumes: a venv that could import the SDK but not the lab is skipped for an interpreter that
+  can run both, so that state no longer leaves the client dark at `0/5`.
 
 ## The gateway (Exercise 4)
 - ⚠️ **There is no `switchyard-server` binary and no `--dry-run` flag.** The same Rust gateway is
@@ -127,16 +137,13 @@ your GPU, hard turns escalate to the hosted 120B and leave it idle.
   them again — deliberately: a routed row means nothing without its controls on the same screen.
   It happens even when 2a/2b are still blank, once Ex1 is filled.
 - **`--exercise 5` is the longest run in the lab** (≈51 calls, 4–12 min).
-- **The client's race is ≈64 live calls** for all four strategies (13 per suite — 12 answers plus
-  the LLM judge — and 25 for `manual_classifier`, which pays the router tax per task), has **no
-  cancel button**, and
-  closing the tab won't stop a suite that's already started. Run fewer strategies if in a hurry.
 - **A suite that looks hung is usually just a suite** — each exercise prints its own call count
   and expected duration.
 
 ## "It ran, but the numbers look wrong"
-- **`insufficient data` on the receipt** — a **real state, not a bug**: race a single strategy and
-  there's no baseline to divide by, so the verdict says so instead of inventing a percentage.
+- **`insufficient data` from `routing_verdict`** — a **real state, not a bug**: the verdict
+  needs a `strong_only` baseline plus one routed strategy in its results; hand it fewer and it
+  says so instead of inventing a percentage.
 - **`12 → strong / 0 → efficient`** (or the reverse) — a **collapsed router** that still prints a
   plausible bill. Check the classifier's thinking-off setting and the verdict parsing before
   anything else; the split line is the health check.

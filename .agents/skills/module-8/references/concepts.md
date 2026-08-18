@@ -166,12 +166,22 @@ field. The lab prints both; the Routing Client maps them.
 ⚠️ **A window, not a wizard.** It holds **zero routing logic** (its `server.py` says so in the
 first line of its docstring) — it re-reads the learner's `routing_lab.py` from disk on every
 request and renders whatever that file returns. Every lane, price, receipt and verdict came out
-of their file. **If a panel is dark, the answer is in the lab file, not the client.**
+of their file. **If a chip is dark, the answer is in the lab file, not the client** — with one
+exception: a **banner** above the yard is environment (key / interpreter / SDK), and
+`troubleshooting.md` owns those. Unlocks are live (~5 s poll): solving an exercise never needs a
+tile relaunch, and the key is read from `secrets.env` on every poll.
 - `systems online: N/5` is `probe_unlocks(module)` rendered as chips; Ex4 isn't probed (its blank
   is a config file) — **gateway liveness stands in for it**.
 - ⚠️ **`mock_demo` = SDK-less, NOT key-less.** The mock replaces the routing *decision*
   (`MockRouter`, a deterministic heuristic); the call that answers is real and billed like any
   other. The demo chip is never locked — and its answer names the first blank it reached.
+- **Positioning: the end-of-lab recap and playground.** The exercises live in
+  `routing_lab.py`/`.ipynb` ALONE; the lab page introduces the client AFTER Exercise 5. It
+  answers **single queries only** (one live call per Send — no suites, no runners in the tile):
+  pick a strategy, ask anything, read the receipt (model, tokens, price, latency, tax,
+  *would-have-been*) and the session meters; in gateway mode it adds the yard's own
+  `/v1/stats` meter and, on the 4b path, a live GPU badge. A finished lab reads
+  `systems online: 5/5` the moment the tile opens.
 
 ## Specialists change the game (the M4 payoff)
 Everything above quietly assumes weak-vs-strong *generalists*. It doesn't have to. Boomi reports

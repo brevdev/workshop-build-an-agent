@@ -8,6 +8,8 @@ If you've already set this up in an earlier module, you're good to go — skip s
 
 Use the <button onclick="openVoila('code/secrets_management/secrets_management_8.ipynb');"><i class="fas fa-key"></i> Secrets Manager</button> to set up your API Keys. You can also launch the Secrets Manager directly from the Jupyterlab launcher.
 
+Setting it here is all this module's **Routing Client** tile needs, too: the client reads the key straight out of `secrets.env` on every poll, so it finds a key you save now — or later, with the tile already open — on its own. Terminals are the one place you still export it yourself (`set -a; source /project/secrets.env; set +a`), and the gateway you'll start in Exercise 4 is the case that actually depends on it.
+
 <details class="dx-peek is-setup">
 <summary>Still need to set up your NVIDIA API Key? Expand for details.</summary>
 

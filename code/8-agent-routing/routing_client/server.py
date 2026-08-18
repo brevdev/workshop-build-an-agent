@@ -4,8 +4,9 @@ WINDOW, NOT WIZARD: this file contains zero routing logic. It re-reads the
 learner's routing_lab.py from disk on every request and renders whatever that
 file returns -- every lane, price, receipt and verdict below was decided by the
 lab. The server's only jobs are to name the SSE event a result arrives on, to
-say which exercise is still blank when one raises, and to keep the unlock probe
-away from the module answering live queries.
+say which exercise is still blank when one raises, to keep the unlock probe
+away from the module answering live queries, and to keep NVIDIA_API_KEY current
+from <repo_root>/secrets.env (a tile has no terminal to export it in).
 
 Launched by routing_client/start_client.sh (the JupyterLab tile's entry point).
 """
@@ -30,6 +31,82 @@ app = FastAPI(title="Routing Client")
 STATIC = HERE / "static"
 _PROBE_LOCK = threading.Lock()
 _LOCKED_HINT = "fill that TODO in routing_lab.py and retry."
+
+
+# --------------------------------------------------------------------------
+# The key. The tile inherits the JupyterLab server's environment, and no learner
+# terminal ever exported anything into THAT — so "set it in a terminal" cannot
+# reach a tile. The workshop's canonical key store is <repo_root>/secrets.env
+# (the Secrets Manager tile writes it), and the lab reads the key from the
+# environment (ChatNVIDIA), so the bridge is: re-read the file on every status
+# poll and every query, and keep os.environ current.
+# --------------------------------------------------------------------------
+
+_KEY_ENV = "NVIDIA_API_KEY"
+_SECRETS_FILE = REPO_ROOT / "secrets.env"    # a seam: tests point it at a tmp file
+_injected_key = None                         # the value THIS server put in os.environ
+
+
+def _quiet_unauthenticated_tracing():
+    """The Workbench container ships LANGSMITH_TRACING=true (variables.env) but the
+    tile never sees a LangSmith key, so every lab call the client makes — in-process
+    or in an exercise subprocess — retries a 401 trace upload and prints the failure.
+    Terminals don't hit this (sourcing secrets.env loads that key too), so: tracing
+    stays exactly as configured when it is authenticated, and goes quiet when it
+    could only ever fail."""
+    if os.environ.get("LANGSMITH_TRACING", "").lower() == "true" \
+            and not os.environ.get("LANGSMITH_API_KEY"):
+        os.environ["LANGSMITH_TRACING"] = "false"
+
+
+_quiet_unauthenticated_tracing()             # once, at startup: subprocesses inherit it
+
+
+def _read_secrets_key():
+    """NVIDIA_API_KEY as secrets.env spells it right now, else None. Tolerates
+    `export K=V`, quotes, comments and CRLF; last assignment wins (source
+    semantics). An absent or unreadable file is an ordinary no, never an error —
+    this runs on every poll."""
+    try:
+        text = _SECRETS_FILE.read_text()
+    except OSError:
+        return None
+    value = None
+    for line in text.splitlines():
+        line = line.strip()
+        if line.startswith("export "):
+            line = line[len("export "):].lstrip()
+        name, sep, raw = line.partition("=")
+        if not sep or name.strip() != _KEY_ENV or name.startswith("#"):
+            continue
+        raw = raw.strip()
+        if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in "\"'":
+            raw = raw[1:-1]
+        value = raw or None
+    return value
+
+
+def _refresh_key():
+    """Reconcile os.environ with secrets.env; return where the key in effect came
+    from ("env", "secrets.env") or None. A key exported by whoever launched the
+    server always wins — it was set deliberately, and a server that silently
+    swapped it out would be undebuggable. Otherwise the environment tracks the
+    file both ways: an edit reaches a tile that is already open, and a key removed
+    from the file stops being reported as present."""
+    global _injected_key
+    current = os.environ.get(_KEY_ENV)
+    if current and current != _injected_key:
+        return "env"
+    fresh = _read_secrets_key()
+    if fresh:
+        if fresh != current:
+            os.environ[_KEY_ENV] = fresh
+        _injected_key = fresh
+        return "secrets.env"
+    if current:                              # our own stale injection — retract it
+        del os.environ[_KEY_ENV]
+    _injected_key = None
+    return None
 
 
 # --------------------------------------------------------------------------
@@ -107,26 +184,51 @@ def _gateway_alive():
 # API
 # --------------------------------------------------------------------------
 
+def _lab_hint(exc):
+    """One actionable line under the lab-didn't-execute banner. A missing module is
+    an INTERPRETER problem, not a lab problem — the learner's file may be perfect
+    and still not execute here — so that case names the interpreter and the fix.
+    Everything else points at the terminal, where the full traceback lives."""
+    if isinstance(exc, ModuleNotFoundError):
+        return (f"That import is missing from the client's interpreter "
+                f"({sys.executable}), not from your code. Run "
+                f"`bash scripts/install_switchyard.sh` — it prepares an environment "
+                f"with the lab's dependencies — then relaunch this tile: it prefers "
+                f"that environment when it exists.")
+    return ("Run `python3 routing_lab.py --exercise 1` in a terminal to see the "
+            "full traceback.")
+
+
+def _current_unlocks():
+    """The unlock probe as one seam: (unlocks dict, exception-or-None). Shared by
+    /api/status (which renders the failure) and /api/exercise (which refuses to
+    spawn on it) so the two can never disagree about what counts as solved."""
+    try:
+        probe = _probe_copy(_load_lab())
+        with _PROBE_LOCK:                      # belt and braces: one probe at a time
+            return probe.probe_unlocks(probe), None
+    except Exception as exc:                   # a half-typed lab must not 500 the UI
+        return {"ex1": False, "ex2": False, "ex3": False, "ex5": False}, exc
+
+
 @app.get("/api/status")
 def status():
     """The `systems online: N/5` strip plus the health panel. Ex4's blank is a config
     file rather than Python, so it is not probed -- gateway_alive stands in for it."""
-    body = {"gateway_alive": _gateway_alive(),
-            "key_present": bool(os.environ.get("NVIDIA_API_KEY")),
-            "repo_root": str(REPO_ROOT),   # the banner's `source <root>/secrets.env`
+    key_source = _refresh_key()                # secrets.env edits land without a relaunch
+    unlocks, lab_exc = _current_unlocks()
+    return {"unlocks": unlocks,
+            "gateway_alive": _gateway_alive(),
+            "key_present": bool(os.environ.get(_KEY_ENV)),
+            "key_source": key_source,          # "env" | "secrets.env" | None
+            "repo_root": str(REPO_ROOT),   # the banner's `<root>/secrets.env` path
+            "python": sys.executable,      # which interpreter the lab executes under
             # Read once at startup: reloading the shim mid-session would swap the
             # MockRouter class out from under an in-flight query. Install the SDK,
             # then restart the tile.
             "sdk_available": shim.SDK_AVAILABLE,
-            "lab_error": None}
-    try:
-        probe = _probe_copy(_load_lab())
-        with _PROBE_LOCK:                      # belt and braces: one probe at a time
-            unlocks = probe.probe_unlocks(probe)
-    except Exception as exc:                   # a half-typed lab must not 500 the UI
-        unlocks = {"ex1": False, "ex2": False, "ex3": False, "ex5": False}
-        body["lab_error"] = f"{type(exc).__name__}: {exc}"
-    return {"unlocks": unlocks, **body}
+            "lab_error": f"{type(lab_exc).__name__}: {lab_exc}" if lab_exc else None,
+            "lab_hint": _lab_hint(lab_exc) if lab_exc else None}
 
 
 def _memory_mb(field):
@@ -189,6 +291,7 @@ def query(body: dict):
 
     def gen():
         try:
+            _refresh_key()          # the call below buys real tokens with this key
             lab = _load_lab()
             if strategy not in constants.STRATEGIES:
                 raise ValueError(f"unknown strategy {strategy!r}")
@@ -236,69 +339,6 @@ def query(body: dict):
             yield _sse("error", {"message": _locked(blank)})
         except Exception as exc:
             yield _sse("error", {"message": f"{type(exc).__name__}: {exc}"})
-
-    return StreamingResponse(gen(), media_type="text/event-stream")
-
-
-def _canonical_rank(strategy):
-    order = constants.STRATEGIES
-    return order.index(strategy) if strategy in order else len(order)
-
-
-# THE /api/race CONTRACT: run_suite answers the 12-task workload under these four
-# and raises ValueError on anything else, so these four are all the race accepts.
-# `gateway` and `mock_demo` are /api/query strategies only -- they are in
-# constants.STRATEGIES, so the UI must not offer them as race chips.
-RACE_STRATEGIES = ["strong_only", "efficient_only", "manual_classifier", "switchyard_stage"]
-
-
-@app.post("/api/race")
-def race(body: dict):
-    """Ex5's leaderboard: the 12-task suite under each strategy, one row at a time.
-    Accepts RACE_STRATEGIES only (see above)."""
-    requested = body.get("strategies") or []
-
-    def gen():
-        # Validate BEFORE the first suite runs. A race is ~12 live calls per strategy,
-        # so a bad entry discovered at strategy three has already spent real money on
-        # a run that ends in an error instead of a verdict. Rejection is all-or-
-        # nothing rather than "run the valid subset": silently dropping a chip the
-        # learner selected would hand back a verdict comparing less than they asked
-        # for, and the receipt would not say so.
-        unsupported = list(dict.fromkeys(s for s in requested if s not in RACE_STRATEGIES))
-        if unsupported or not requested:
-            problem = (f"unsupported {', '.join(unsupported)}" if unsupported
-                       else "no strategies selected")
-            yield _sse("error", {"message": f"Race: {problem}. "
-                                            f"Supported: {', '.join(RACE_STRATEGIES)}."})
-            return
-        results = {}
-        try:
-            lab = _load_lab()
-            # routing_verdict picks the routed row by dict INSERTION order, so results
-            # go in in constants.STRATEGIES order however the UI listed them --
-            # otherwise the receipt would compare against whichever chip came first.
-            # dict.fromkeys also collapses a chip sent twice into one suite run.
-            for strategy in dict.fromkeys(sorted(requested, key=_canonical_rank)):
-                results[strategy] = lab.run_suite(strategy, lab.RunningBill())
-                rows = lab.routing_verdict(results)["rows"]
-                yield _sse("race_row", next(r for r in rows if r["strategy"] == strategy))
-            yield _sse("race_receipt", {"receipt": lab.routing_verdict(results)["receipt"]})
-        except Exception as exc:
-            # Whatever finished has already been paid for: render its verdict before
-            # saying what broke. (If the verdict itself is the blank that broke, there
-            # is nothing to render -- say so once, in the error.)
-            receipt = None
-            if results:
-                try:
-                    receipt = lab.routing_verdict(results)["receipt"]
-                except Exception:
-                    receipt = None
-            if receipt is not None:
-                yield _sse("race_receipt", {"receipt": receipt})
-            yield _sse("error", {"message": _locked(exc)
-                                 if isinstance(exc, NotImplementedError)
-                                 else f"{type(exc).__name__}: {exc}"})
 
     return StreamingResponse(gen(), media_type="text/event-stream")
 

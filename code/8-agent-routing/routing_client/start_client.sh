@@ -6,10 +6,13 @@
 # lesson). Every path below therefore ends in a listening socket: the real client
 # when it can run, a page explaining the one fix when it cannot.
 #
-# The client imports the learner's routing_lab.py, so it must run on the same
-# interpreter the lab does: the Module 8 venv if install_switchyard.sh already made
-# one (that is where the Switchyard SDK lives), otherwise the ambient python3.
-# Override with ROUTING_CLIENT_PYTHON=/path/to/python.
+# The client imports the learner's routing_lab.py, so it must run on an interpreter
+# that CAN — which is not a fixed path. Inside the Workbench container the ambient
+# `python3` is a bare system 3.10 while JupyterLab's own 3.12 (reachable as
+# `python3.12`) carries the whole workshop stack; on other machines it is the
+# Module 8 venv install_switchyard.sh built. So candidates are PROBED, never
+# assumed: first one that can import the lab's dependencies wins, preferring one
+# that also has the Switchyard SDK. Override with ROUTING_CLIENT_PYTHON=/path.
 #
 # ROUTING_LAB_MODULE=routing_lab.answers renders the completed lab instead of the
 # learner's copy -- the demo/screenshot path, never the default.
@@ -20,9 +23,38 @@ PORT="${1:?usage: start_client.sh <port>}"
 cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1          # routing_client/
 
 VENV_PY="${SWITCHYARD_VENV:-$HOME/.local/share/module8-switchyard-venv}/bin/python"
+
+# find_spec, not import: the probe must stay cheap (a tile launch, not a test run)
+# and must not execute package code just to ask whether it exists.
+has_module() {   # has_module <python> <module>
+    "$1" -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('$2') else 1)" \
+        >/dev/null 2>&1
+}
+
+runnable() {     # a candidate that exists: absolute paths by -x, bare names by PATH
+    case "$1" in
+        /*) [ -x "$1" ] ;;
+        *)  command -v "$1" >/dev/null 2>&1 ;;
+    esac
+}
+
 PY="${ROUTING_CLIENT_PYTHON:-}"
 if [ -z "$PY" ]; then
-    if [ -x "$VENV_PY" ]; then PY="$VENV_PY"; else PY="$(command -v python3 || true)"; fi
+    LAB_PY=""            # best interpreter that can run the lab (but not the SDK)
+    ANY_PY=""            # best interpreter full stop — the setup-page fallback
+    for cand in "$VENV_PY" python3.12 python3 python; do
+        runnable "$cand" || continue
+        [ -n "$ANY_PY" ] || ANY_PY="$cand"
+        if has_module "$cand" langchain_nvidia_ai_endpoints; then
+            if has_module "$cand" switchyard; then PY="$cand"; break; fi
+            [ -n "$LAB_PY" ] || LAB_PY="$cand"
+        fi
+    done
+    # No lab-capable interpreter at all: fall back to anything that can at least
+    # serve the UI — the server then shows lab_error with the install hint, which
+    # beats a static setup page because it updates live once the deps arrive.
+    PY="${PY:-$LAB_PY}"
+    PY="${PY:-$ANY_PY}"
 fi
 
 setup_page() {   # bind $PORT with guidance instead of leaving the launcher hanging
@@ -76,5 +108,5 @@ if ! "$PY" -c 'import fastapi, uvicorn' 2>/dev/null; then
     exit 0
 fi
 
-echo "[start_client] serving the Routing Client on http://127.0.0.1:$PORT (lab: ${ROUTING_LAB_MODULE:-routing_lab})"
+echo "[start_client] serving the Routing Client on http://127.0.0.1:$PORT (python: $PY · lab: ${ROUTING_LAB_MODULE:-routing_lab})"
 exec "$PY" -m uvicorn server:app --host 127.0.0.1 --port "$PORT"

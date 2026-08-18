@@ -1,22 +1,22 @@
 /* Routing Client — the window's glass.
  *
  * WINDOW, NOT WIZARD (the same contract server.py keeps): nothing here decides a
- * lane, prices a token, or grades a race. Every number on the screen arrived on an
+ * lane or prices a token. Every number on the screen arrived on an
  * SSE event from routing_lab.py; this file renders it and animates the yard.
  *
  * The API it consumes (routing_client/server.py):
  *   GET  /api/status  -> {unlocks:{ex1,ex2,ex3,ex5}, gateway_alive, key_present,
- *                         sdk_available, lab_error, repo_root}
+ *                         key_source, sdk_available, lab_error, lab_hint,
+ *                         repo_root, python}
  *   GET  /api/gpu     -> {available, utilization_pct, memory_used_mb}   (gateway mode only)
  *   GET  /api/gateway_stats -> {available, stats} | 503 {available:false, error}
  *   POST /api/query   -> SSE: route_decision {lane,model,why} · receipt (+counterfactual_saved)
  *                             · answer {text} · error {message}
- *   POST /api/race    -> SSE: race_row {strategy,accuracy,cost,frontier_pct,router_tax_pct}
- *                             · race_receipt {receipt} · error {message}
  *
  * No frameworks, no build step, no node_modules. Paths are RELATIVE ("api/status",
  * never "/api/status") so the client survives being served under a JupyterLab
- * proxy prefix.
+ * proxy prefix. And the launcher's iframe is sandboxed WITHOUT allow-forms, so
+ * nothing here may depend on form submission — see wire().
  */
 (function () {
   "use strict";
@@ -53,29 +53,9 @@
     { id: "mock_demo",         sub: "no SDK needed — deterministic demo router" }
   ];
 
-  // MIRRORS `RACE_STRATEGIES` in routing_client/server.py: run_suite answers the
-  // 12-task workload under these four and raises on anything else. `gateway` and
-  // `mock_demo` are /api/query strategies ONLY and must never appear as race chips.
-  // A fifth strategy moves both lists in the same diff.
-  var RACE_STRATEGIES = ["strong_only", "efficient_only", "manual_classifier", "switchyard_stage"];
-  var TASKS_PER_SUITE = 12;
-
-  // What one suite actually costs in LIVE calls — twelve tasks is not twelve calls.
-  // Every suite adds one LLM-judge call (the single unverifiable task is graded by a
-  // model, not a string check), and manual_classifier pays the router tax: a second
-  // call per task before any work happens. 13 + 13 + 25 + 13 = 64 for all four.
-  var SUITE_CALLS = { strong_only: TASKS_PER_SUITE + 1, efficient_only: TASKS_PER_SUITE + 1,
-                      manual_classifier: TASKS_PER_SUITE * 2 + 1,
-                      switchyard_stage: TASKS_PER_SUITE + 1 };
-  function raceCalls(picks) {
-    return picks.reduce(function (n, id) { return n + (SUITE_CALLS[id] || TASKS_PER_SUITE); }, 0);
-  }
-
   // First unlocked wins; the learner's own pick is sticky from then on. Routed
   // before flat-rate: the client defaults to the cheap lane, like the module argues.
   var AUTO_DEFAULTS = ["switchyard_stage", "manual_classifier", "efficient_only", "mock_demo"];
-
-  var SVG_NS = "http://www.w3.org/2000/svg";
 
   // ---------------------------------------------------------------- tiny DOM
 
@@ -119,11 +99,17 @@
     counterfactual: 0,  // Σ receipt.counterfactual_cost — the frontier-only price of the same session
     saved: 0,           // Σ receipt.counterfactual_saved (a frontier call contributes 0.0 by construction)
     lane: null,         // lane of the decision in flight, for the receipt that follows it
-    busy: false,
-    racing: false,
-    raceSel: {},
-    raceRows: []
+    busy: false         // a query in flight
   };
+
+  // While a query is spending, Send goes quiet and the signal lamp names the
+  // strategy carrying it. One truth, consulted everywhere.
+  function syncBusy() {
+    $("#send").disabled = state.busy;
+    var lamp = $("#busy-live");
+    if (state.busy) lamp.textContent = "routing via " + (state.strategy || "…") + " …";
+    lamp.hidden = !state.busy;
+  }
 
   // ------------------------------------------------------------- SSE reading
 
@@ -397,6 +383,28 @@
     node.appendChild(document.createTextNode(rest));
   }
 
+  // Same three figures the lab's Exercise 4 prints. METER ON TOKENS, NEVER ON
+  // CALLS: the gateway's
+  // `tiers.*.calls` reads 0 for its default tier however much traffic it served (a
+  // verified upstream quirk — docs/specs/switchyard-api-notes.md); token_pct is the
+  // honest share.
+  function statsBits(stats) {
+    var classifier = stats.classifier || {};
+    var overhead = stats.routing_overhead || {};
+    var calls = num(classifier.total_requests);
+    var tiers = stats.tiers || {};
+    var names = Object.keys(tiers).sort();
+    return {
+      tax: count(calls) + (calls === 1 ? " judge call · " : " judge calls · ") +
+           count((classifier.total_tokens || {}).total) + " tokens · " +
+           count(overhead.avg_ms) + " ms added per request",
+      split: names.map(function (name) {
+        return name + " " + num(tiers[name].token_pct).toFixed(0) + "%";
+      }).join(" / "),
+      hasTiers: names.length > 0
+    };
+  }
+
   function renderGatewayStats(payload) {
     var node = $("#gateway-stats");
     var stats = payload && payload.available && payload.stats;
@@ -407,20 +415,9 @@
       return;
     }
 
-    // Same three figures the lab's Exercise 4 prints, in the same order.
-    var classifier = stats.classifier || {};
-    var overhead = stats.routing_overhead || {};
-    var calls = num(classifier.total_requests);
-    var tax = count(calls) + (calls === 1 ? " judge call · " : " judge calls · ") +
-              count((classifier.total_tokens || {}).total) + " tokens · " +
-              count(overhead.avg_ms) + " ms added per request";
-
-    // METER ON TOKENS, NEVER ON CALLS: the gateway's `tiers.*.calls` reads 0 for its
-    // default tier however much traffic that tier served (a verified upstream quirk —
-    // docs/specs/switchyard-api-notes.md). token_pct is the honest share.
-    var tiers = stats.tiers || {};
-    var names = Object.keys(tiers).sort();
-    if (!names.length) {
+    var bits = statsBits(stats);
+    var tax = bits.tax;
+    if (!bits.hasTiers) {
       // An unlabelled tier is not a missing datum: it is the router having failed to
       // decide, with every request served anyway. The lab's Ex4 print says the same.
       paintStats(node, "degraded", "⚠ the gateway reports no tier labels",
@@ -429,11 +426,8 @@
         tax + ".");
       return;
     }
-    var split = names.map(function (name) {
-      return name + " " + num(tiers[name].token_pct).toFixed(0) + "%";
-    }).join(" / ");
     paintStats(node, "", "the gateway's own meter",
-      " · tokens by tier: " + split + " · router tax: " + tax +
+      " · tokens by tier: " + bits.split + " · router tax: " + tax +
       " — spent server-side, which is why every receipt above reads $0.0000 of it.");
   }
 
@@ -524,15 +518,17 @@
 
   // ------------------------------------------------------------- the query
 
+  // Returns true when a query was actually dispatched — the ask box only clears
+  // itself on true, so a refused send (busy, no strategy) never eats typed text.
   function ask(text) {
     text = String(text || "").trim();
-    if (!text) return;
-    if (state.busy) { toast("a query is already in flight — wait for it to land"); return; }
-    if (!state.strategy) { toast("pick a strategy first"); return; }
+    if (!text) return false;
+    if (state.busy) { toast("a query is already in flight — wait for it to land"); return false; }
+    if (!state.strategy) { toast("pick a strategy first"); return false; }
 
     state.busy = true;
     state.lane = null;
-    $("#send").disabled = true;
+    syncBusy();
     resetCard();
 
     var sawAnswer = false, sawError = false;
@@ -550,9 +546,10 @@
       toast(err && err.message ? err.message : String(err), "error");
     }).then(function () {
       state.busy = false;
-      $("#send").disabled = false;
+      syncBusy();
       refreshStatus();      // a query that filled in a blank may have unlocked something
     });
+    return true;
   }
 
   // ---------------------------------------------------------------- status
@@ -627,29 +624,36 @@
     var box = $("#banners");
     clear(box);
     if (!s.key_present) {
+      // The server already looked in BOTH places a key can live for a tile — its
+      // own environment and <root>/secrets.env, which it re-reads on every poll —
+      // so this banner means the key is genuinely nowhere, and the fix needs no
+      // relaunch: the moment secrets.env has it, this banner takes itself down.
       box.appendChild(banner("bad",
-        "NVIDIA_API_KEY is not set for this client.",
-        "Every live query will fail until it is — except gateway, whose answer is bought " +
-        "with the key exported in the terminal running the gateway. Set it in the terminal " +
-        "that started the client — the server reads the key once, at startup — then " +
-        "relaunch the tile:",
-        "set -a; source " + repoRoot(s) + "/secrets.env; set +a",
-        "mock_demo is not a way around this either: its router is a mock, but the call " +
-        "that answers is a real one."));
+        "NVIDIA_API_KEY is missing — not in the client's environment, and not in " +
+        repoRoot(s) + "/secrets.env.",
+        "Every live query will fail until it's set, mock_demo included (its router is a " +
+        "mock; the call that answers is real). Save it with the Secrets Manager tile on " +
+        "the JupyterLab launcher, or add this line to " + repoRoot(s) + "/secrets.env — " +
+        "the client re-reads that file every few seconds, no relaunch needed:",
+        "NVIDIA_API_KEY=nvapi-…",
+        "The one exception is gateway: its answers are bought with the key exported in " +
+        "the terminal running the gateway (Exercise 4's serve step)."));
     }
     if (s.lab_error) {
       box.appendChild(banner("warn",
         "routing_lab.py did not execute.",
         "Every system reads offline until it does — this is the file itself failing, not a " +
         "blank exercise:",
-        s.lab_error));
+        s.lab_error,
+        s.lab_hint || ""));
     }
     if (!s.sdk_available) {
       box.appendChild(banner("warn",
-        "The Switchyard SDK is not installed.",
+        "The Switchyard SDK is not importable from the client's interpreter.",
         "switchyard_stage answers through the MockRouter demo path instead — the query still " +
-        "routes, but the decision is the mock's, not the SDK's. Install it, then restart the " +
-        "tile (the flag is read once at server startup):",
+        "routes, but the decision is the mock's, not the SDK's. Install it, then relaunch " +
+        "the tile — the SDK is bound once per server process, so a relaunch is what swaps " +
+        "the mock out:",
         "bash scripts/install_switchyard.sh"));
     }
   }
@@ -667,13 +671,11 @@
     // Repaint the chips/banners only when something actually moved: this runs every
     // POLL_MS, and rebuilding the header on every tick flickers and eats hover.
     var sig = JSON.stringify([s.unlocks, s.gateway_alive, s.key_present, s.sdk_available,
-                              s.lab_error, s.repo_root, state.strategy]);
+                              s.lab_error, s.lab_hint, s.repo_root, state.strategy]);
     if (sig === state.sig) return;
     state.sig = sig;
     renderStrategies(s);
     renderBanners(s);
-    renderRaceChips();
-    updateRaceControls();
     // Only when the pick actually moved: the GPU poll runs at 2s, and restarting its
     // interval on every 5s status tick would quietly stretch it.
     syncGatewayPanels();
@@ -718,266 +720,42 @@
     syncGpuPolling();       // stops the 2s GPU poll too, and restarts it on return
   });
 
-  // ------------------------------------------------------------- race mode
-
-  function renderRaceChips() {
-    var box = $("#race-strats");
-    clear(box);
-    RACE_STRATEGIES.forEach(function (id) {
-      var open = unlocked(id, state.status || {});
-      if (!open) delete state.raceSel[id];
-      var chip = el("button", "chip" + (open ? "" : " locked") + (state.raceSel[id] ? " on" : ""));
-      chip.type = "button";
-      chip.disabled = !open || state.racing;
-      chip.title = open ? SUITE_CALLS[id] + " live model calls" : lockNote(id);
-      chip.setAttribute("aria-pressed", state.raceSel[id] ? "true" : "false");
-      chip.appendChild(el("span", "id", id));
-      chip.appendChild(el("span", "sub", open ? SUITE_CALLS[id] + " live calls" : lockNote(id)));
-      chip.addEventListener("click", function () {
-        if (state.raceSel[id]) delete state.raceSel[id];
-        else state.raceSel[id] = true;
-        renderRaceChips();
-        updateRaceControls();
-      });
-      box.appendChild(chip);
-    });
-  }
-
-  function racePicks() {
-    // canonical order, so the row the lab's verdict calls "routed" is the one the
-    // learner would expect (server.py re-sorts too — this only keeps the UI honest).
-    return RACE_STRATEGIES.filter(function (id) { return !!state.raceSel[id]; });
-  }
-
-  function updateRaceControls() {
-    var btn = $("#run-race");
-    var picks = racePicks();
-    var ready = !!(state.status && state.status.unlocks && state.status.unlocks.ex5);
-    if (state.racing) {
-      btn.disabled = true;
-      btn.textContent = "racing " + picks.length + " strategies — " +
-                        raceCalls(picks) + " live calls, no cancel …";
-      return;
-    }
-    btn.disabled = !ready || picks.length === 0;
-    if (!ready) {
-      btn.title = "unlocks in Exercise 5";
-      btn.textContent = "Run the 12-task suite — unlocks in Exercise 5 (routing_verdict)";
-    } else if (!picks.length) {
-      btn.title = "";
-      btn.textContent = "Run the 12-task suite — pick at least one strategy above";
-    } else {
-      btn.title = "";
-      btn.textContent = "Run the 12-task suite × " + picks.length + " — ≈" +
-                        raceCalls(picks) + " live model calls, several minutes, " +
-                        "no cancel" + (picks.length === RACE_STRATEGIES.length ? " (all four)" : "");
-    }
-  }
-
-  function addRaceRow(row) {
-    var tr = el("tr", row.strategy === "strong_only" ? "baseline" : null);
-    [row.strategy,
-     num(row.accuracy) + "/12",
-     usd(row.cost),
-     num(row.frontier_pct).toFixed(0) + "%",
-     num(row.router_tax_pct).toFixed(0) + "%"
-    ].forEach(function (cell) { tr.appendChild(el("td", null, cell)); });
-    $("#race-table").querySelector("tbody").appendChild(tr);
-  }
-
-  function setRaceReceipt(text, kind) {
-    var node = $("#race-receipt");
-    node.className = kind;
-    node.textContent = text;
-  }
-
-  function renderRaceReceipt(receipt) {
-    var text = String(receipt == null ? "" : receipt).trim();
-    // "insufficient data" is what the lab's verdict returns when it has no
-    // strong_only row to compare a routed one against — a state, never a verdict.
-    if (!text || text === "insufficient data") {
-      setRaceReceipt("not enough strategies finished for a verdict — the comparison needs " +
-                     "strong_only plus one routed strategy (manual_classifier or switchyard_stage).",
-                     "neutral");
-      return;
-    }
-    setRaceReceipt("🧾 " + text, "verdict");
-  }
-
-  function runRace() {
-    var picks = racePicks();
-    if (!picks.length || state.racing) return;
-
-    state.racing = true;
-    state.raceRows = [];
-    clear($("#race-table").querySelector("tbody"));
-    setRaceReceipt("", "");
-    drawPareto();
-    renderRaceChips();
-    updateRaceControls();
-
-    var sawReceipt = false, sawError = false;
-    stream("api/race", { strategies: picks }, function (name, d) {
-      if (name === "race_row") {
-        state.raceRows.push(d);
-        addRaceRow(d);
-        drawPareto();
-      } else if (name === "race_receipt") {
-        sawReceipt = true;
-        renderRaceReceipt(d.receipt);
-      } else if (name === "error") {
-        sawError = true;
-        toast(d.message, "error");
-        if (!sawReceipt) setRaceReceipt(d.message, "bad");
-      }
-    }).then(function () {
-      if (!sawReceipt && !sawError) {
-        toast("the race stream ended without a verdict. Check the terminal running the client.", "error");
-      }
-    }).catch(function (err) {
-      toast(err && err.message ? err.message : String(err), "error");
-    }).then(function () {
-      state.racing = false;
-      renderRaceChips();
-      updateRaceControls();
-      refreshStatus();
-    });
-  }
-
-  // ------------------------------------------------- the Pareto scatter (§4c)
-
-  var PAD = { l: 58, r: 22, t: 22, b: 46 }, CHART = { w: 460, h: 260 };
-  var INK = { dim: "#c6c6c6", mute: "#8f8f8f", axis: "#2a3441" };
-
-  function svgEl(name, attrs, text) {
-    var node = document.createElementNS(SVG_NS, name);
-    for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) {
-      node.setAttribute(k, attrs[k]);
-    }
-    if (text != null) node.textContent = text;
-    return node;
-  }
-
-  function label(x, y, text, anchor, fill) {
-    return svgEl("text", {
-      x: x.toFixed(1), y: y.toFixed(1), "text-anchor": anchor || "middle",
-      fill: fill || INK.mute, "font-size": "11", "font-family": "ui-monospace, Menlo, Consolas, monospace"
-    }, text);
-  }
-
-  function niceMax(v) {
-    if (!(v > 0)) return 0.01;
-    var p = Math.pow(10, Math.floor(Math.log10(v)));
-    var n = v / p;
-    var step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
-    return step * p;
-  }
-
-  function axisMoney(v) {
-    if (v === 0) return "$0";
-    return "$" + v.toFixed(v < 0.01 ? 4 : v < 0.1 ? 3 : 2);
-  }
-
-  function drawPareto() {
-    var svg = $("#pareto");
-    clear(svg);
-    var x0 = PAD.l, x1 = CHART.w - PAD.r, yBase = CHART.h - PAD.b, yTop = PAD.t;
-    var rows = state.raceRows;
-    var costs = rows.map(function (r) { return num(r.cost); });
-    var xMax = niceMax(Math.max.apply(null, costs.concat([0])) * 1.1);
-    var X = function (c) { return x0 + (num(c) / xMax) * (x1 - x0); };
-    var Y = function (a) { return yBase - (Math.max(0, Math.min(12, num(a))) / 12) * (yBase - yTop); };
-
-    // two recessive axis lines, no gridlines
-    svg.appendChild(svgEl("line", { x1: x0, y1: yBase, x2: x1, y2: yBase, stroke: INK.axis, "stroke-width": 1 }));
-    svg.appendChild(svgEl("line", { x1: x0, y1: yTop, x2: x0, y2: yBase, stroke: INK.axis, "stroke-width": 1 }));
-    [0, 6, 12].forEach(function (a) { svg.appendChild(label(x0 - 9, Y(a) + 4, String(a), "end")); });
-    [0, xMax / 2, xMax].forEach(function (c) { svg.appendChild(label(X(c), yBase + 18, axisMoney(c), "middle")); });
-    svg.appendChild(label((x0 + x1) / 2, CHART.h - 8, "cost ($ · 12 tasks)", "middle"));
-    var midY = yTop + (yBase - yTop) / 2;
-    var yTitle = label(16, midY, "accuracy (/12)", "middle");
-    yTitle.setAttribute("transform", "rotate(-90 16 " + midY.toFixed(1) + ")");
-    svg.appendChild(yTitle);
-
-    if (!rows.length) {
-      svg.appendChild(label((x0 + x1) / 2, midY, "each finished strategy lands here", "middle"));
-      return;
-    }
-
-    // Identity is carried by the direct label on every point, never by hue alone:
-    // #76b900 and #e8a33d are ~2 ΔE apart under protanopia. Shape doubles it up —
-    // the frontier baseline is a hollow diamond, the routed points filled dots.
-    var placed = [];
-    rows.forEach(function (row) {
-      var px = X(row.cost), py = Y(row.accuracy);
-      var baseline = row.strategy === "strong_only";
-      var color = baseline ? "#e8a33d" : "#76b900";
-      var g = svgEl("g", {});
-      g.appendChild(svgEl("title", {}, row.strategy + ": " + num(row.accuracy) + "/12 · " + usd(row.cost)));
-      g.appendChild(svgEl("circle", { cx: px, cy: py, r: 13, fill: "transparent" }));   // 26px hit target
-      if (baseline) {
-        g.appendChild(svgEl("rect", {
-          x: (px - 6).toFixed(1), y: (py - 6).toFixed(1), width: 12, height: 12,
-          fill: "none", stroke: color, "stroke-width": 2,
-          transform: "rotate(45 " + px.toFixed(1) + " " + py.toFixed(1) + ")"
-        }));
-      } else {
-        g.appendChild(svgEl("circle", {
-          cx: px.toFixed(1), cy: py.toFixed(1), r: 5.5,
-          fill: color, stroke: "#0e1116", "stroke-width": 2
-        }));
-      }
-
-      // Two 11px lines per point (name over values). Placed above the dot when that
-      // band is free, then successively further below: race points bunch up at 12/12,
-      // and a label written over another label is worse than one written a little
-      // away from its dot. Widths are measured in monospace columns, so the check is
-      // a real box overlap rather than a guess at horizontal distance.
-      var lines = [row.strategy, num(row.accuracy) + "/12 · " + usd(row.cost)];
-      var width = Math.max(lines[0].length, lines[1].length) * 6.6;
-      var anchor = px > x1 - 70 ? "end" : (px < x0 + 70 ? "start" : "middle");
-      var left = anchor === "end" ? px - width : (anchor === "start" ? px : px - width / 2);
-      var box = null;
-      [-26, 20, 44, -50, 68, 92].forEach(function (dy) {
-        if (box) return;
-        var slot = { left: left, right: left + width, top: py + dy - 8, bottom: py + dy + 16, y: py + dy };
-        if (slot.top < 2 || slot.bottom > yBase + 2) return;
-        var clash = placed.some(function (p) {
-          return slot.left < p.right && p.left < slot.right && slot.top < p.bottom && p.top < slot.bottom;
-        });
-        if (!clash) box = slot;
-      });
-      if (!box) {   // every slot taken: put it back by the dot, clamped into the plot
-        var y = Math.min(Math.max(py + 20, 10), yBase - 14);
-        box = { left: left, right: left + width, top: y - 8, bottom: y + 16, y: y };
-      }
-      placed.push(box);
-      g.appendChild(label(px, box.y, lines[0], anchor, INK.dim));
-      g.appendChild(label(px, box.y + 12, lines[1], anchor, INK.mute));
-      svg.appendChild(g);
-    });
-  }
-
   // ------------------------------------------------------------------- boot
 
   function wire() {
+    var input = $("#q");
+
+    // NEVER via form submission. The JupyterLab launcher renders this app in an
+    // iframe sandboxed WITHOUT allow-forms (jupyter-app-launcher pins the token
+    // list), and a sandboxed form does not submit: Enter and a type=submit button
+    // do nothing, fire no event, and log only to a console the learner never sees.
+    // Click and keydown are not form submission, so the box is driven from those;
+    // the submit listener stays as a belt-and-braces fallback for any unsandboxed
+    // context (it cannot double-fire — Enter is consumed by the keydown handler
+    // before implicit submission, and the Send button is type=button).
+    function submitQuery() {
+      if (ask(input.value)) input.value = "";
+      else if (!String(input.value || "").trim()) input.focus();
+    }
+
+    input.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" || event.isComposing) return;
+      event.preventDefault();
+      submitQuery();
+    });
+    $("#send").addEventListener("click", submitQuery);
     $("#ask").addEventListener("submit", function (event) {
       event.preventDefault();
-      var input = $("#q");
-      ask(input.value);
-      input.value = "";
+      submitQuery();
     });
 
     Array.prototype.forEach.call(document.querySelectorAll("#chips .ex"), function (button) {
       button.addEventListener("click", function () { ask(button.textContent); });
     });
-
-    $("#run-race").addEventListener("click", runRace);
   }
 
   setupYard();
   wire();
-  drawPareto();
   renderMeters();
   refreshStatus();
   startPolling();

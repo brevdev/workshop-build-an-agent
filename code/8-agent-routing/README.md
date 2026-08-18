@@ -80,7 +80,14 @@ Your copied `routes.toml` is git-ignored — the `.template` and `.answers` file
 
 `probe_unlocks(module)` in `routing_lab.py` is this module's unlock check. It calls each exercise's entry point with fake inputs — never a token, never a socket — and returns `{"ex1": …, "ex2": …, "ex3": …, "ex5": …}`, `False` for any exercise whose blank still raises `NotImplementedError`. Exercise 4's blank is a config file rather than Python, so it is not probed; gateway liveness stands in for it.
 
-The **Routing Client** reads that dict: a JupyterLab launcher tile that renders your routing decisions live, one capability lighting up per blank you fill. It is a window, not a wizard — it holds no routing logic of its own, it imports yours. It ships with the rest of the module.
+The **Routing Client** reads that dict: a JupyterLab launcher tile positioned as the module's **end-of-lab recap and playground** — the exercises live in `routing_lab.py`/`.ipynb` alone, and once they're done the client renders the result live: pick any strategy (including the gateway and the SDK-less `mock_demo`), ask anything, and read the receipts, the session meters, and the gateway's own books. It is a window, not a wizard — it holds no routing logic of its own, it imports yours. The strategy chips stay gated on `probe_unlocks`, so a finished lab reads `systems online: 5/5` the moment the tile opens, and a half-finished one says exactly which exercise each grey chip is waiting on.
+
+Two things the tile resolves for itself, because a tile has no terminal to inherit from:
+
+- **The interpreter.** `start_client.sh` probes its candidates — `ROUTING_CLIENT_PYTHON`, the Switchyard venv, `python3.12`, `python3`, `python` — and runs the first that can import the lab's dependencies, preferring one that also carries the SDK. (Inside the Workbench container that is JupyterLab's own 3.12; the ambient `python3` there is a bare system 3.10 that can't run the lab.) If none qualifies, the client still serves, and its banner names the missing module and the fix instead of leaving the tile dark.
+- **The key.** `server.py` reconciles `NVIDIA_API_KEY` with `<repo_root>/secrets.env` on every status poll and before every live query: a key exported at launch wins; otherwise the file's current value is injected — and retracted if the file loses it — so the Secrets Manager reaches a tile that is already open, no relaunch. The SDK flag is the one thing still read once, at startup (reloading the shim mid-session would swap `MockRouter` out from under an in-flight query): install, then relaunch the tile.
+
+Deliberately **not** in the client: exercise runners. The suites, the stage-transition demo, and the scoreboard run from the lab files only (`python3 routing_lab.py --exercise N` or the notebook) — the client answers single queries through `/api/query` and reads the gateway's `/v1/stats`, nothing more. Keeping every multi-call spend in the files keeps the exercises' single source of truth obvious and the tile's cost ceiling low (one live call per Send).
 
 ## Read the lesson
 

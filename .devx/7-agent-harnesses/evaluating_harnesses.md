@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 07 / 06 - WRAP UP" data-title="You know what was running your agents." data-sub="You leave with a framework for choosing harnesses - not a favorite." data-meta="TAKEAWAY::context-tax framework|NEXT::keep skills with you"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 06 - WRAP UP" data-title="You know what was running your agents." data-sub="You leave with a framework for choosing harnesses - not a favorite." data-meta="TAKEAWAY::context-tax framework|NEXT::Module 08 - Routing"></div>
 
 You came into this module having built six agents. You leave knowing what was actually running them.
 
@@ -56,7 +56,8 @@ Open, portable, verifiable. Capability that travels.
   <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>HITL + command allowlists</div>
   <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
   <div class="dx-cell"><h4>MODULE 6</h4><span class="dx-big">Hardened agent</span>Kernel enforcement + continuous evaluation</div>
-  <div class="dx-cell is-wide"><h4>MODULE 7 - YOU ARE HERE</h4><span class="dx-big">The harness layer</span>Context tax + portable, verified skills in any harness</div>
+  <div class="dx-cell"><h4>MODULE 7</h4><span class="dx-big">The harness layer</span>Context tax + portable, verified skills</div>
+  <div class="dx-cell is-wide"><h4>MODULE 8 - UP NEXT</h4><span class="dx-big">Agent routing</span>The right model for every call - tokenomics + NeMo Switchyard</div>
 </div>
 
 <!-- fold:break -->
@@ -72,5 +73,6 @@ Open, portable, verifiable. Capability that travels.
 - 🦞 [OpenClaw docs](https://docs.openclaw.ai) — your Module 6 harness
 - ⚡ [RAPIDS cuDF docs](https://docs.rapids.ai/api/cudf/stable/) — the library behind your Exercise 4 speedup
 - 🚀 Keep an eye on [build.nvidia.com](https://build.nvidia.com) — agent demos built on these skills (including cuOpt) are landing soon
+- 🛤️ [NeMo Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) — route every call to the right model; the subject of Module 8
 
-> **Congratulations!** You've completed the Build-an-Agent workshop — all seven modules, from your first ReAct loop to the harness layer that runs it all. Your agents have engines, cars, *and* a garage full of verified parts. Go build.
+> **Module 7 complete!** Your agents have engines, cars, and a garage full of verified parts. One thing is still welded in place: every call uses the same engine. **Module 8 - Agent Routing** hands your harness a switchyard — the right model for every call.

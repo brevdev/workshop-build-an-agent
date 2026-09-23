@@ -1,0 +1,470 @@
+/* Routing Client — dx dark theme.
+   The tokens below are COPIED from .devx/_static/css/devx-theme.css rather than
+   linked to it: this client is served by its own FastAPI app out of
+   routing_client/static/, so a path across directories would 404 the moment the
+   tile is launched. Copied, not invented — the values must stay in step with the
+   shared theme when it moves.
+   Three deviations, all deliberate:
+     · the surface ladder is the yard's (#0e1116 / #161b22 / #2a3441), matching
+       yard.svg and start_client.sh's setup page rather than the docs' #000/#161616;
+     · --dx-red is new. The shared theme is green+amber only and has no danger
+       token, and the missing-key banner has to read as broken, not as a hint;
+     · --dx-local is new for the same reason: the local-NIM lane is a THIRD tier,
+       and painting it green would say "the open hosted model" — which is exactly
+       the claim Ex4b's receipt cannot make. */
+
+:root {
+  color-scheme: dark;
+
+  /* lifted from devx-theme.css :root */
+  --dx-green: #76b900;
+  --dx-green-hover: #549a00;
+  --dx-green-dim: rgba(118, 185, 0, 0.14);
+  --dx-amber: #e8a33d;
+  --dx-amber-dim: rgba(232, 163, 61, 0.14);
+  --dx-fg: #f2f2f2;
+  --dx-fg-dim: #c6c6c6;
+  --dx-fg-mute: #8f8f8f;
+  --dx-radius: 4px;
+  --dx-ease: 0.2s ease-out;
+  /* JetBrains Mono is deliberately NOT linked (its .woff2 lives under .devx/) —
+     the system mono stack keeps this client standalone. */
+  --dx-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --dx-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* the yard's surfaces */
+  --bg: #0e1116;
+  --panel: #161b22;
+  --edge: #2a3441;
+  --edge-hot: #4a5a6e;
+  --dx-red: #e5484d;
+  --dx-red-dim: rgba(229, 72, 77, 0.12);
+  --dx-local: #4aa8c0;      /* the local lane — MIRRORS .y-hot-local in yard.svg */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--dx-fg);
+  font-family: var(--dx-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px 26px;
+}
+
+code, b, .mono { font-family: var(--dx-mono); }
+
+/* ---------------------------------------------------------------- header */
+
+header { display: flex; flex-direction: column; gap: 12px; }
+
+.title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+
+h1 {
+  margin: 0;
+  font-family: var(--dx-mono);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--dx-green);
+}
+h1::before {
+  content: "";
+  display: inline-block;
+  width: 22px; height: 2px;
+  background: var(--dx-green);
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+.tagline { margin: 0; color: var(--dx-fg-mute); font-size: 12px; }
+.tagline code { color: var(--dx-fg-dim); }
+
+/* strategy chips — grouped by who runs the decision (client.js GROUPS): the
+   dashed box says "grouping, not control", and the NeMo Switchyard label spans
+   its two chips instead of being welded onto one of them. */
+#strategies { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+
+.chip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 8px 8px;
+  border: 1px dashed var(--edge);
+  border-radius: var(--dx-radius);
+}
+.chip-group-label {
+  font-family: var(--dx-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dx-fg-mute);
+}
+.chip-group-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 12px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-dim);
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color var(--dx-ease), background var(--dx-ease), color var(--dx-ease);
+}
+.chip:hover:not(:disabled) { border-color: var(--edge-hot); color: var(--dx-fg); }
+.chip .top { display: flex; gap: 8px; align-items: baseline; }
+.chip .fam { font-size: 10px; color: var(--dx-fg-mute); }
+.chip .sub { font-size: 11px; color: var(--dx-fg-mute); }
+.chip.on {
+  border-color: var(--dx-green);
+  background: var(--dx-green-dim);
+  color: var(--dx-fg);
+}
+.chip.on .sub { color: var(--dx-fg-dim); }
+.chip:disabled, .chip.locked {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* meters */
+#meters { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.meter {
+  padding: 6px 12px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  color: var(--dx-fg-mute);
+}
+.meter b { color: var(--dx-fg); font-weight: 700; }
+.meter.save b { color: var(--dx-green); }
+#online.all-on { border-color: var(--dx-green); color: var(--dx-green); }
+
+/* ------------------------------------------------------------- banners */
+
+#banners:empty { display: none; }
+#banners { display: flex; flex-direction: column; gap: 8px; }
+
+.banner {
+  padding: 10px 14px;
+  border: 1px solid var(--edge);
+  border-left-width: 3px;
+  border-radius: var(--dx-radius);
+  background: var(--panel);
+  font-size: 13px;
+  color: var(--dx-fg-dim);
+}
+.banner b { color: var(--dx-fg); }
+.banner pre {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  color: var(--dx-fg-dim);
+  white-space: pre-wrap;
+  user-select: all;
+}
+.banner.bad { border-left-color: var(--dx-red); background: var(--dx-red-dim); }
+.banner.bad b { color: var(--dx-red); }
+.banner.warn { border-left-color: var(--dx-amber); background: var(--dx-amber-dim); }
+.banner.warn b { color: var(--dx-amber); }
+
+/* ------------------------------------------------------------- welcome */
+
+#welcome {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  padding: 18px 22px 14px;
+  max-width: 880px;
+}
+#welcome[hidden] { display: none; }
+#welcome h2 {
+  margin: 0 0 8px;
+  font-family: var(--dx-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--dx-amber);
+}
+#welcome p { margin: 0 0 10px; font-size: 13px; color: var(--dx-fg-dim); }
+#welcome code { color: var(--dx-fg); font-size: 12px; }
+
+.welcome-path {
+  margin: 12px 0;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--edge);
+  border-left: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+}
+.welcome-path h3 {
+  margin: 0 0 6px;
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--dx-green);
+}
+.welcome-path pre {
+  margin: 8px 0;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  color: var(--dx-fg-dim);
+  white-space: pre-wrap;
+  user-select: all;
+}
+.welcome-foot { font-size: 11px; color: var(--dx-fg-mute); }
+
+/* ---------------------------------------------------------------- main */
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 980px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+#yard-wrap {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  padding: 8px;
+}
+#yard { display: block; width: 100%; aspect-ratio: 900 / 320; border: 0; }
+/* The <object> box is sized here, but the local lane only exists in the SVG's own
+   document — so when client.js grows that viewBox to 900x360 it adds this class,
+   or the taller drawing would letterbox itself inside a 900x320 frame. */
+#yard.with-gpu { aspect-ratio: 900 / 360; }
+/* client.js's fallback when <object>.contentDocument is unreachable: the same SVG,
+   inlined into this document. It needs the sizing the <object> had (height: auto
+   follows the viewBox, so the inline path needs no class). */
+.yard-inline svg { display: block; width: 100%; height: auto; }
+
+/* The gateway's own meter. Present only in gateway mode, and only while /v1/stats
+   answers: these are the numbers a receipt structurally cannot carry. */
+#gateway-stats[hidden] { display: none; }
+#gateway-stats {
+  margin: 8px 2px 2px;
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  color: var(--dx-fg-mute);
+}
+#gateway-stats b { color: var(--dx-fg-dim); font-weight: 400; }
+#gateway-stats.degraded { color: var(--dx-amber); }
+#gateway-stats.degraded b { color: var(--dx-amber); }
+
+#receipts {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  padding: 12px 14px 14px;
+}
+#receipts h2 {
+  margin: 0;
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--dx-green);
+}
+.hint { margin: 6px 0 10px; font-size: 11px; color: var(--dx-fg-mute); }
+.hint b { color: var(--dx-fg-dim); font-weight: 400; }
+
+#receipt-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 46vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#receipt-log:empty::after {
+  content: "no calls yet — ask something below";
+  font-size: 11px;
+  color: var(--dx-fg-mute);
+}
+
+.receipt {
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--edge);
+  border-left-width: 3px;
+  border-radius: var(--dx-radius);
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  color: var(--dx-fg-mute);
+  word-break: break-word;
+}
+.receipt.efficient { border-left-color: var(--dx-green); }
+.receipt.capable { border-left-color: var(--dx-amber); }
+.receipt.local { border-left-color: var(--dx-local); }
+.receipt .lane { float: right; font-size: 11px; }
+.receipt.efficient .lane { color: var(--dx-green); }
+.receipt.capable .lane { color: var(--dx-amber); }
+.receipt.local .lane { color: var(--dx-local); }
+.receipt .model { color: var(--dx-fg); }
+.receipt .why { color: var(--dx-fg-dim); margin-top: 2px; }
+.receipt .nums { margin-top: 4px; }
+.receipt .nums b { color: var(--dx-fg-dim); font-weight: 400; }
+.receipt .saved { color: var(--dx-green); margin-top: 2px; }
+
+/* -------------------------------------------------------------- footer */
+
+footer { display: flex; flex-direction: column; gap: 10px; }
+
+#chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chips-label { font-family: var(--dx-mono); font-size: 11px; color: var(--dx-fg-mute); }
+
+.ex {
+  padding: 6px 10px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg-dim);
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  max-width: 44ch;
+  transition: border-color var(--dx-ease), color var(--dx-ease);
+}
+.ex:hover { color: var(--dx-fg); }
+.ex.commodity:hover { border-color: var(--dx-green); }
+.ex.frontier:hover { border-color: var(--dx-amber); }
+.ex::before {
+  content: attr(data-tag) " · ";
+  font-size: 11px;
+}
+.ex.commodity::before { color: var(--dx-green); }
+.ex.frontier::before { color: var(--dx-amber); }
+
+#ask { display: flex; gap: 8px; }
+#q {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  color: var(--dx-fg);
+  font-family: var(--dx-mono);
+  font-size: 13px;
+}
+#q:focus { outline: none; border-color: var(--dx-green); }
+
+button {
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  color: var(--dx-fg);
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--dx-radius);
+  padding: 8px 14px;
+  cursor: pointer;
+}
+#send {
+  background: var(--dx-green);
+  border-color: var(--dx-green);
+  color: #0e1116;
+  font-weight: 700;
+  min-width: 90px;
+}
+#send:hover:not(:disabled) { background: var(--dx-green-hover); border-color: var(--dx-green-hover); }
+#send:disabled { opacity: 0.45; cursor: progress; }
+
+#reply {
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-left: 3px solid var(--dx-green);
+  border-radius: var(--dx-radius);
+  max-height: 32vh;
+  overflow-y: auto;
+}
+.reply-q { margin: 0 0 6px; font-family: var(--dx-mono); font-size: 11px; color: var(--dx-fg-mute); }
+.reply-a { white-space: pre-wrap; font-size: 13px; color: var(--dx-fg-dim); }
+
+/* ------------------------------------------ the signal lamp (query busy) */
+
+#busy-live {
+  align-self: center;
+  font-family: var(--dx-mono);
+  font-size: 11px;
+  color: var(--dx-fg-dim);
+  white-space: nowrap;
+}
+#busy-live::before {
+  content: "";
+  display: inline-block;
+  width: 8px; height: 8px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--dx-green);
+  vertical-align: baseline;
+  animation: lamp 1.1s ease-in-out infinite;
+}
+@keyframes lamp {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--dx-green-dim); }
+  50%      { opacity: 0.35; box-shadow: 0 0 0 5px var(--dx-green-dim); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #busy-live::before { animation: none; }
+}
+
+/* -------------------------------------------------------------- toasts */
+
+#toasts {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 460px;
+  z-index: 20;
+}
+.toast {
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-left: 3px solid var(--dx-fg-mute);
+  border-radius: var(--dx-radius);
+  font-family: var(--dx-mono);
+  font-size: 12px;
+  color: var(--dx-fg-dim);
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+.toast.error { border-left-color: var(--dx-red); color: var(--dx-fg); }
+.toast::after {
+  content: " (click to dismiss)";
+  color: var(--dx-fg-mute);
+  font-size: 11px;
+}

@@ -10,7 +10,7 @@ sudo npm install n@10.2.0 -g
 sudo n stable
 
 # Install Claude Code so learners can run the in-repo workshop tutor skills
-# (/workshop, /module-1..7) from a JupyterLab terminal or VS Code. The skills live in
+# (/workshop, /module-1..8) from a JupyterLab terminal or VS Code. The skills live in
 # this repo's .claude/skills/ and load automatically when `claude` is run from /project/.
 # Kept NON-FATAL on purpose: the tutor is an optional enhancement and must never break the
 # GPU build if npm has a hiccup. `set -e` is active, so we swallow failure and print a
@@ -22,7 +22,7 @@ sudo npm install -g @anthropic-ai/claude-code \
 # tutor skills ship for Codex in this repo's .agents/skills/ (the Agent Skills format is
 # cross-harness) and load automatically when `codex` is run from /project/. Learners can
 # use whichever harness they prefer — `claude` or `codex` — to reach /workshop and
-# /module-1..7. Also NON-FATAL for the same reason as the Claude install above.
+# /module-1..8. Also NON-FATAL for the same reason as the Claude install above.
 sudo npm install -g @openai/codex \
   || echo "WARNING: '@openai/codex' install failed; run 'sudo npm install -g @openai/codex' manually in a terminal to use the workshop tutor with Codex."
 
@@ -184,3 +184,17 @@ if [ -f "$TRL_IMPORT_UTILS" ]; then
 else
     echo "WARNING: trl/import_utils.py not found; skipping trl availability-flag patches"
 fi
+
+# Module 8: pre-install the pinned NeMo Switchyard stack (the wheel carries both the
+# Python library and the Rust gateway), so the Routing Lab and the Routing Client tile
+# are ready on first launch instead of paying a cold, network-bound install mid-exercise.
+# The script owns its own pins and sha256 verification, is idempotent (a no-op once the
+# pinned version imports), and picks python3.12 or its own venv without help from us —
+# see code/8-agent-routing/scripts/install_switchyard.sh and the pin-bump runbook in
+# code/8-agent-routing/README.md. Runs last because it needs nothing built above it.
+# NON-FATAL on purpose, same reasoning as the harness CLIs above: `set -e` is active, so
+# we swallow failure rather than abort the GPU build. switchyard_shim.py then degrades to
+# MockRouter behind a loud banner and every exercise still teaches; the banner names the
+# script, so a learner can re-run it by hand from a terminal to get the real SDK back.
+bash /project/code/8-agent-routing/scripts/install_switchyard.sh \
+  || echo "⚠️ switchyard install deferred — lab falls back to MockRouter"

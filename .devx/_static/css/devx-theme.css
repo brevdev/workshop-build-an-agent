@@ -1044,6 +1044,7 @@ html.dx-mod4 .app-name::after { content: 'DEVX WORKSHOP / MODULE 04'; }
 html.dx-mod5 .app-name::after { content: 'DEVX WORKSHOP / MODULE 05'; }
 html.dx-mod6 .app-name::after { content: 'DEVX WORKSHOP / MODULE 06'; }
 html.dx-mod7 .app-name::after { content: 'DEVX WORKSHOP / MODULE 07'; }
+html.dx-mod8 .app-name::after { content: 'DEVX WORKSHOP / MODULE 08'; }
 
 /* sidebar search goes terminal */
 .sidebar .search { border-bottom: 1px solid var(--dx-border) !important; }

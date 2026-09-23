@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en" class="dx-dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routing Client</title>
+<link rel="stylesheet" href="client.css">
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <h1>ROUTING CLIENT</h1>
+    <p class="tagline">a window on <code>routing_lab.py</code> — every lane, price and receipt below was
+      decided by your file, not by this app</p>
+  </div>
+  <div id="strategies" aria-label="strategy picker"><!-- chips injected by client.js from /api/status --></div>
+  <div id="meters">
+    <span class="meter">session <b id="bill">$0.0000</b></span>
+    <span class="meter save">saved vs frontier-only <b id="saved">$0.0000 (0%)</b></span>
+    <span class="meter" id="online">systems online: 0/5</span>
+  </div>
+</header>
+
+<!-- key / lab / SDK health. Persistent, never a toast: these do not go away by themselves. -->
+<div id="banners" role="status" aria-live="polite"></div>
+
+<!-- Shown INSTEAD of the yard when nothing is runnable (no exercise solved, no gateway
+     on :4000) — a fresh workshop lands exactly there. client.js swaps this for the yard
+     on the first status poll that finds anything alive; no relaunch, no refresh. -->
+<section id="welcome" hidden aria-label="getting started">
+  <h2>NOTHING TO DRIVE YET</h2>
+  <p>This client is a <b>window, not a wizard</b>: it renders
+    <code>code/8-agent-routing/routing_lab.py</code> live and holds no routing logic of its
+    own — so on a fresh workshop there is nothing it can run. Two ways in:</p>
+
+  <div class="welcome-path">
+    <h3>THE FULL EXPERIENCE — do the module</h3>
+    <p>Open <b>8. Agent Routing</b> from the JupyterLab launcher and work
+      <b>The Routing Lab</b>'s five exercises. Every solved exercise lights its strategy chips
+      here within a few seconds — a finished lab reads <code>systems online: 5/5</code>, and this
+      page becomes the playground for the router you wrote.</p>
+  </div>
+
+  <div class="welcome-path">
+    <h3>THE EXPRESS LANE — route through the reference policy</h3>
+    <p>No exercises required: serve the module's completed <code>routes.toml.answers</code> and
+      the <code>gateway</code> chip lights the moment <code>:4000</code> answers. In a
+      JupyterLab terminal:</p>
+    <pre id="welcome-express"></pre>
+    <p>Then ask this page anything — every query routes through NeMo Switchyard's escalation
+      policy, with live receipts, the savings meter, and the gateway's own
+      <code>/v1/stats</code> books. (The gateway buys its answers with the key exported in
+      <b>that</b> terminal.)</p>
+  </div>
+
+  <p class="welcome-foot">This card takes itself down as soon as anything is runnable — it
+    re-checks every few seconds.</p>
+</section>
+
+<main>
+  <section id="yard-wrap">
+    <object id="yard" data="yard.svg" type="image/svg+xml" aria-label="the switchyard"></object>
+    <!-- gateway mode only: the split and the router tax measured by the gateway
+         itself, which a per-call receipt structurally cannot see. -->
+    <p id="gateway-stats" role="status" aria-live="polite" hidden></p>
+  </section>
+  <aside id="receipts">
+    <h2>RECEIPTS</h2>
+    <p class="hint">newest first · <b>would-have-been</b> re-prices the same tokens at the frontier
+      tier — an estimate, since a different model writes a different number of them</p>
+    <ol id="receipt-log"></ol>
+  </aside>
+</main>
+
+<footer>
+  <div id="chips">
+    <span class="chips-label">try one:</span>
+    <button class="ex commodity" data-tag="commodity">Convert 2 hours to minutes.</button>
+    <button class="ex commodity" data-tag="commodity">Extract the email from: "mail ada@example.com now".</button>
+    <button class="ex frontier" data-tag="frontier">Plan a 5-step LLM migration with an eval gate.</button>
+    <button class="ex frontier" data-tag="frontier">A ships 3 features/sprint, 2 reviews each at 45min — review-hours per 4-sprint quarter?</button>
+  </div>
+
+  <!-- type="button" + keydown wiring, NEVER form submission: the JupyterLab launcher
+       renders this app in an iframe sandboxed without allow-forms, where submitting a
+       form is silently blocked (no submit event, no error). The form element stays for
+       layout and semantics; client.js drives it from click/keydown instead. -->
+  <form id="ask" autocomplete="off">
+    <input id="q" placeholder="Ask anything — watch it route" aria-label="your query">
+    <button id="send" type="button">Send</button>
+    <!-- the yard's signal lamp: lit while a query is spending, naming the strategy
+         that carries it. -->
+    <span id="busy-live" role="status" hidden></span>
+  </form>
+
+  <div id="reply" hidden>
+    <p class="reply-q"></p>
+    <div class="reply-a"></div>
+  </div>
+</footer>
+
+<div id="toasts" aria-live="assertive"></div>
+
+<script src="client.js"></script>
+</body>
+</html>

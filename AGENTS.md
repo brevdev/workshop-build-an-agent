@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Instructions for coding agents (Codex, Claude Code, …) working in this repository.
-This is the **Build-an-Agent workshop** (a.k.a. DevX / DevX-Lab): a seven-module,
+This is the **Build-an-Agent workshop** (a.k.a. DevX / DevX-Lab): an eight-module,
 hands-on course that runs on NVIDIA AI Workbench. Learners work through Jupyter
 notebooks under `code/` and lessons under `.devx/`.
 
@@ -12,8 +12,8 @@ They auto-load when an agent runs from the project root and trigger by descripti
 be invoked explicitly. **In Codex, invoke a skill with `$name`** (e.g. `$workshop`); in
 Claude Code use `/name` (e.g. `/workshop`):
 
-- `$workshop` — overview + router across the 7 modules
-- `$module-1` … `$module-7` — one tutor per module
+- `$workshop` — overview + router across the 8 modules
+- `$module-1` … `$module-8` — one tutor per module
 - `$setup-workshop` — local install helper
 - `$nvwb`, `$nvwb-project` — NVIDIA AI Workbench CLI + in-container project awareness
 

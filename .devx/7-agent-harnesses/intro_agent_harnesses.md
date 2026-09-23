@@ -11,7 +11,7 @@ The model is a stateless function. Tokens in, tokens out. Everything that made y
 Every module so far handed you an agent. Seen through this module's lens, it also handed you a harness — six of them, and you've already driven them all:
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>A hand-rolled ReAct loop</div>
+  <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>A ReAct loop written by hand</div>
   <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>LangGraph + MCP tools</div>
   <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Judging what the loop produced</div>
   <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>Training + Superpowers skills</div>

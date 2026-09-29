@@ -294,6 +294,8 @@ Implement some key training configuration parameters.
 
 These three settings control the core training dynamics: `num_generations` is how many candidate outputs GRPO generates per prompt (more = richer comparison signal), `learning_rate` controls the step size for weight updates, and `max_steps` caps the total training iterations. Implement `training_args` with `num_generations=4`, `learning_rate=1e-5`, and `max_steps=50`.
 
+Run the token-budget cell first. It measures the formatted prompts in both data splits and reserves at least 256 tokens for each generated answer within `MAX_SEQ_LENGTH`. If a request is too long, review it before proceeding; the check does not silently truncate prompts or remove held-out examples.
+
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
@@ -344,7 +346,7 @@ Run the training cell. Runtime depends on GPU, generation length, and the number
 
 > Use a GPU with enough **free** memory for the model, optimizer and rollouts. Check memory availability before starting; lower batch size or generation length if needed.
 
-The training cell first scores the base 9B on the held-out set, then scores the trained version with the same prompts and greedy decoding. Read `outputs/grpo_langgraph_cli/held_out_comparison.json` for successes and regressions. The earlier hosted starter agent is a different model, so it is not this baseline.
+After constructing the trainer, run the training cell once. It first scores the base 9B with its LoRA adapters disabled, then calls `trainer.train()`. The following comparison cell scores the trained version on the same held-out rows, system prompt, greedy decoding and answer-length budget. Read `outputs/grpo_langgraph_cli/held_out_comparison.json` for successes and regressions; improvement is not guaranteed. The earlier hosted starter agent is a different model, so it is not this baseline.
 
 After the save cell, the customized model should appear in: `outputs/grpo_langgraph_cli/merged_model/`.
 

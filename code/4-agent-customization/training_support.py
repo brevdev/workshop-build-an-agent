@@ -78,6 +78,41 @@ def check_split(train_records, val_records):
         raise ValueError(f"Train/validation overlap: {len(overlap)} request(s). Deduplicate before splitting.")
 
 
+def training_token_budget(tokenizer, train_dataset, val_dataset, max_seq_length,
+                          min_completion_length=256, prompt_buffer=16):
+    """Reserve completion space without silently truncating either data split.
+
+    Measure the rendered chat prompts, including the generation prefix. Refuse
+    overlong rows rather than dropping held-out examples from the comparison.
+    """
+    if min_completion_length <= 0 or max_seq_length <= min_completion_length:
+        raise ValueError("MAX_SEQ_LENGTH must leave room for both the prompt and completion.")
+    if prompt_buffer < 0:
+        raise ValueError("The prompt buffer must be nonnegative.")
+
+    prompt_limit = max_seq_length - min_completion_length
+    longest_prompt = 0
+    for split_name, dataset in (("Training", train_dataset), ("Held-out", val_dataset)):
+        # Transformers 5 defaults to a mapping; count token IDs, not its fields.
+        lengths = [len(tokenizer.apply_chat_template(
+            row["prompt"], add_generation_prompt=True, tokenize=True, return_dict=False,
+        )) for row in dataset]
+        if not lengths:
+            raise ValueError(f"{split_name} dataset is empty. Check the data-loading cell.")
+        oversized = sum(length > prompt_limit for length in lengths)
+        if oversized:
+            raise ValueError(
+                f"{split_name} dataset has {oversized} prompt(s) above the {prompt_limit}-token "
+                f"limit after reserving {min_completion_length} completion tokens. "
+                "Review/shorten those requests or increase MAX_SEQ_LENGTH if memory allows. "
+                "No rows were removed."
+            )
+        longest_prompt = max(longest_prompt, max(lengths))
+
+    max_prompt_length = min(longest_prompt + prompt_buffer, prompt_limit)
+    return max_prompt_length, max_seq_length - max_prompt_length
+
+
 def evaluate_cli_model(model, tokenizer, dataset, verify_endpoint, max_new_tokens=256):
     """Greedy, held-out evaluation; never executes a generated shell command.
 
@@ -94,7 +129,8 @@ def evaluate_cli_model(model, tokenizer, dataset, verify_endpoint, max_new_token
             text = tokenizer.apply_chat_template(
                 example["prompt"], tokenize=False, add_generation_prompt=True,
             )
-            inputs = tokenizer(text, return_tensors="pt").to(model.device)
+            # The chat template already supplies special tokens, as in GRPO.
+            inputs = tokenizer(text, return_tensors="pt", add_special_tokens=False).to(model.device)
             with torch.inference_mode():
                 output = model.generate(
                     **inputs, max_new_tokens=max_new_tokens, do_sample=False,

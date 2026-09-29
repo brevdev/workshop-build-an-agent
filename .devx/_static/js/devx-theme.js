@@ -278,7 +278,7 @@
     try {
       document.cookie.split(';').forEach(function (c) {
         var name = c.split('=')[0].trim();
-        if (name.indexOf('docsify-unfold-') === 0) {
+        if (window.dxUnfoldCookiePrefix && name.indexOf(window.dxUnfoldCookiePrefix) === 0) {
           document.cookie = name + '=; path=/; max-age=0';
         }
       });
@@ -382,6 +382,21 @@
   }
 
   /* ---- docsify plugin -------------------------------------------------------- */
+  function initCodeAccessibility(root) {
+    function update() {
+      root.querySelectorAll('pre > code').forEach(function (code) {
+        code.tabIndex = 0; // Allow keyboard scrolling of long code lines.
+      });
+      root.querySelectorAll('.docsify-copy-code-button [aria-hidden="hidden"]').forEach(function (label) {
+        label.setAttribute('aria-hidden', 'true');
+      });
+    }
+    update();
+    var observer = new MutationObserver(update);
+    observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-hidden'] });
+    onCleanup(function () { observer.disconnect(); });
+  }
+
   function plugin(hook, vm) {
     hook.doneEach(function () {
       teardown();
@@ -400,6 +415,7 @@
       initQuizzes(root);
       initBets(root);
       initReveals(root);
+      initCodeAccessibility(root);
       // tag code panels with their language for the pre::after chip
       root.querySelectorAll('pre[data-lang]').forEach(function () { /* docsify sets data-lang already */ });
       // Completion checkmark: single-section pages (no fold:breaks) are earned on

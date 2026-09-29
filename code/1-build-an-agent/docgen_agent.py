@@ -3,6 +3,13 @@ Simple React-style agent that uses Tavily search tool to research topics and gen
 """
 
 import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workshop_support import get_model, load_secrets
+
+load_secrets()
 
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
@@ -11,7 +18,7 @@ from tools import search_tavily
 # Load configuration
 API_KEY = os.environ["NVIDIA_API_KEY"]
 MODEL_URL = "https://integrate.api.nvidia.com/v1"
-MODEL_NAME = "nvidia/nemotron-3-super-120b-a12b"
+MODEL_NAME = get_model("chat")
 
 # Initialize the LLM
 llm = ChatOpenAI(
@@ -19,6 +26,8 @@ llm = ChatOpenAI(
     model_name=MODEL_NAME,
     api_key=API_KEY,
     temperature=0.7,
+    timeout=180,
+    max_retries=2,
 )
 
 # Create the tool collection

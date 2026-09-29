@@ -14,7 +14,7 @@ We chose this agent use case for customization because:
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell is-wide"><h4>OBSERVABLE OUTPUTS</h4>Shell commands are concrete and verifiable - we can objectively check if <code>langgraph new --template react-agent-python</code> is correct (unlike creative writing).</div>
-  <div class="dx-cell"><h4>CLEAR TARGET</h4>The base model knows generic bash but not the LangGraph CLI - a gap that's measurable and fixable with training.</div>
+  <div class="dx-cell"><h4>CLEAR TARGET</h4>Observe the hosted starter agent, then measure training against the same local 9B model.</div>
   <div class="dx-cell"><h4>REAL-WORLD</h4>Many developers want agents that understand their specific CLIs, APIs, and toolchains.</div>
 </div>
 
@@ -26,13 +26,13 @@ The agent follows the **ReAct pattern** from Module 1—Reason, Act, Observe in 
 
 ![ReAct Loop](img/react_loop_dark.svg)
 
-**LangGraph** orchestrates this state machine. The human-in-the-loop gate is what makes this agent safe to use on a real system—more on that below.
+**LangGraph** orchestrates this state machine. The human-in-the-loop gate gives you a chance to inspect each command before execution.
 
 <!-- fold:break -->
 
 ## Human-in-the-Loop
 
-A bash agent that can execute arbitrary shell commands is powerful—and dangerous. Without safeguards, a single hallucinated command could delete files, expose secrets, or corrupt your system. 
+A bash agent that can execute arbitrary shell commands is powerful—and dangerous. Without safeguards, a single hallucinated command could delete files, expose secrets, or corrupt your system.
 
 **Human-in-the-loop (HITL)** execution is an essential design pattern for agents that take real-world actions.
 
@@ -63,6 +63,8 @@ Human-in-the-loop execution adds a confirmation step between generation and exec
 
 ![HITL Execution Flow](img/hitl_flow_dark.svg)
 
+The wrapper runs one allowed command at a time without shell operators. It uses your OS account; its working directory and command list are not a filesystem sandbox.
+
 **The agent never executes directly.** Instead, it proposes a command and waits for human approval. This simple change provides:
 
 <div class="dx-island dx-reveal">
@@ -72,7 +74,7 @@ Human-in-the-loop execution adds a confirmation step between generation and exec
     <li><span class="dx-chip">VERIFY INTENT</span> confirm the command matches what you actually wanted.</li>
     <li><span class="dx-chip">LEARN</span> see what the agent gets wrong before it causes harm.</li>
     <li><span class="dx-chip">BUILD TRUST</span> gain confidence in the agent over time.</li>
-    <li><span class="dx-chip">MODIFY</span> adjust the proposed command before execution.</li>
+    <li><span class="dx-chip">REVISE</span> reject and request a corrected command.</li>
   </ul>
 </div>
 
@@ -92,7 +94,7 @@ When you run the bash agent, every command goes through confirmation:
   <span class="dx-term-line" data-kind="answer" data-delay="350">y -> executed. New project created at ./myapp</span>
 </div>
 
-You can **approve** (`y`) to run it, **reject** (`n` or Enter) to abort, or **review** and modify before executing.
+You can **approve** (`y`) or **reject** (`n` or Enter). To change a command, reject it and ask for a new proposal.
 
 This pause is intentional. It forces you to read and understand what's about to happen.
 
@@ -197,7 +199,7 @@ Make sure you're in the `code/4-agent-customization` directory:
 cd code/4-agent-customization
 ```
 
-And start the agent you just built: 
+And start the supplied CLI version of the agent:
 
 ```bash
 python3.12 -m bash_agent.main_langgraph
@@ -236,19 +238,19 @@ Skills transform the agent from a simple command executor into a methodical prob
 
 <!-- fold:break -->
 
-## The Gap We'll Fix
+## Check the Baseline
 
-Now that we've built our baseline bash agent, let's identify the gap we'll close through customization. Try these prompts and note what the base agent produces:
+Now that we've built our baseline bash agent, let's measure its command accuracy before customization. Try these prompts and note what the base agent produces:
 
 <div class="dx-island dx-reveal">
-  <p class="dx-island-title">THE GAP - BASE MODEL vs WHAT IT SHOULD DO</p>
+  <p class="dx-island-title">CHECK THE BASELINE AGAINST VALID COMMANDS</p>
   <ul>
-    <li><b>Create a new LangGraph project with the react template</b><br>base model: hallucinated or generic &rarr; should be <code>langgraph new ./myapp --template react-agent-python</code></li>
-    <li><b>Start a dev server on port 8080</b><br>base model: wrong flags or syntax &rarr; should be <code>langgraph dev --port 8080</code></li>
-    <li><b>Build a docker image tagged v2</b><br>base model: missing flags &rarr; should be <code>langgraph build --tag v2</code></li>
+    <li><b>Create a new LangGraph project with the react template</b><br>one valid command: <code>langgraph new ./myapp --template react-agent-python</code></li>
+    <li><b>Start a dev server on port 8080</b><br>expected command: <code>langgraph dev --port 8080</code></li>
+    <li><b>Build a docker image tagged v2</b><br>expected command: <code>langgraph build --tag v2</code></li>
   </ul>
 </div>
 
-The base model knows generic bash but has never seen the LangGraph CLI. It guesses—and guesses wrong. By the end of this module, that same agent will reliably produce correct commands because the knowledge will be **baked into the model's weights**.
+Record which commands the hosted baseline gets right. Training may improve the local model's CLI outputs; the training notebook compares that model's held-out results before and after training.
 
 Now let's take a look at [Synthetic Data Generation](sdg.md) to get started with the customization pipeline.

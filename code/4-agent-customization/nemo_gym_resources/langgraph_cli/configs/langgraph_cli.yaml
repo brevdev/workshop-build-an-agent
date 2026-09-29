@@ -1,3 +1,4 @@
+# Reference configuration; app.py implements the verifier and does not load this YAML.
 # NeMo Gym Configuration for LangGraph CLI Resource Server
 # Domain: agent (tool-calling/agentic task)
 
@@ -10,7 +11,7 @@ description: |
 
 server:
   host: "0.0.0.0"
-  port: 8000
+  port: 8001
   workers: 4
 
 verification:
@@ -45,8 +46,8 @@ verification:
 
 # Dataset configuration for training
 dataset:
-  train_file: "data/train.jsonl"
-  val_file: "data/val.jsonl"
+  train_file: "data/langgraph_cli/train.jsonl"
+  val_file: "data/langgraph_cli/val.jsonl"
   # Each record should have:
   # - input: str (natural language request)
   # - output: dict (expected CLIToolCall structure)

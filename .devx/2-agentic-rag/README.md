@@ -1,6 +1,6 @@
 <div class="dx-hero" data-eyebrow="MODULE 02 / AGENTIC RAG" data-title="Agentic RAG Workshop" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
 
-The Agentic RAG Workshop teaches you how to build intelligent Retrieval Augmented Generation (RAG) systems using NVIDIA technology and LangGraph. You'll create an **IT Help Desk Agent** - an intelligent system that can dynamically decide when and how to search knowledge bases to answer user queries. Unlike traditional RAG systems that always perform the same retrieval steps, agentic RAG gives the model control over when and how to use retrieval as a tool.
+Build an **IT Help Desk Agent** with NVIDIA models and LangGraph. A basic RAG pipeline retrieves before generation; this agent instead lets the model decide when and how to call retrieval tools. You'll add web search and reusable skills, then test the agent through the Simple Agents Client.
 
 This workshop will help you understand the evolution from basic LLMs to traditional RAG to intelligent agentic RAG. Here's what you're in for:
 
@@ -26,7 +26,7 @@ By the end of this workshop, you'll know how to:
 
 This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
 
-<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+<button onclick="launch('Claude Code', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
 
 Ask for this module by name — `/module-2` in Claude Code, `$module-2` in Codex — or just describe what you're stuck on and the right skill loads on its own.
 
@@ -37,4 +37,3 @@ Ask for this module by name — `/module-2` in Claude Code, `$module-2` in Codex
 </div>
 
 > Head over to [Setting up Secrets](secrets) to get started!
-

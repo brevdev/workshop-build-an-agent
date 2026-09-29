@@ -64,7 +64,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
@@ -373,6 +373,7 @@
 .chat-view {
   flex: 1;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -414,3 +415,18 @@
     min-width: 200px;
   }
 }
+
+/* Keep the selected setup visible when a backend build fails. */
+.build-error{max-width:620px;margin:12px 20px;padding:14px 18px;border:1px solid #ab694c;border-radius:6px;background:#2c211b;color:#ffceba;font-size:14px;line-height:1.6}
+.session-capabilities{margin:12px 24px;padding:10px 16px;border:1px solid var(--border-color,#454545);border-radius:6px;color:var(--text-secondary,#c6c6c6);font-size:13px;overflow-wrap:anywhere}
+.session-capabilities summary{cursor:pointer;color:var(--text-primary,#f2f2f2)}
+.session-capabilities p{margin:8px 0}
+button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--accent-color,#76b900);outline-offset:4px}
+.sandbox-toggle-card{width:100%;font:inherit;color:inherit;text-align:left}
+.skill-add{position:relative;z-index:3;flex-shrink:0;border:1px solid #686868;background:#222;color:#eee;border-radius:4px;width:30px;height:30px;cursor:pointer;font-size:20px;line-height:1}
+.skill-add:hover{border-color:var(--accent-color,#76b900);background:#333}
+.soul-card{font:inherit;text-align:left;color:inherit}
+.soul-model-id{display:block;margin-top:8px;max-width:210px;overflow-wrap:anywhere;font:10px/1.5 var(--dx-mono,monospace);color:#c6c6c6}
+
+.chat-view > .chat-section{flex:1;min-height:0;height:auto}
+.session-capabilities{flex:none}

@@ -2,7 +2,7 @@
 
 The Agent Customization Workshop teaches you how to **customize AI agents for specific domains** using NVIDIA technology. You'll transform a generic bash agent into a **LangGraph CLI expert** using Synthetic Data Generation (SDG) and Reinforcement Learning with Verifiable Rewards (RLVR).
 
-> While a DGX Spark (GB10) is supported, running this module on an A100-80GB or larger instance is highly recommended for faster training due to memory bandwidth constraints.
+> Training needs substantial free GPU memory. A100/H100 80GB is the intended training environment. Full 9B training on a GB10 alongside the workshop's large model service has not been validated; SDG and reward exercises can run without loading the local model.
 
 This workshop demonstrates a **generalizable pattern** that applies to customizing any AI agent. Here's what you're in for:
 
@@ -28,7 +28,7 @@ By the end of this workshop, you'll know how to:
 
 This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
 
-<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+<button onclick="launch('Claude Code', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
 
 Ask for this module by name — `/module-4` in Claude Code, `$module-4` in Codex — or just describe what you're stuck on and the right skill loads on its own.
 

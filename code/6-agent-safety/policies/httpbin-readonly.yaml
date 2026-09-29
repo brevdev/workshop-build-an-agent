@@ -1,18 +1,19 @@
 # ============================================================================
 # OpenShell Policy — Exercise 1 (NemoClaw "Stop the agent from phoning home")
 # ============================================================================
-# This is the FULL active policy for the `my-assistant` sandbox PLUS one new
-# rule that allows curl to read from httpbin.org.
+# This is a workshop baseline example plus a read-only httpbin rule.
+# The active baseline varies by installation; the lesson copies only
+# httpbin_access into a snapshot of the learner's current policy.
 #
 # The interesting part to read is the `httpbin_access` block under
 # `network_policies` — that's the new rule the workshop adds. Everything else
-# is the unchanged baseline (filesystem_policy, process, landlock, and the
+# is an example baseline (filesystem_policy, process, landlock, and the
 # baseline network rules for brave/brew/huggingface/pypi/etc.) — included
-# verbatim because `openshell policy set` does a full policy replacement, and
+# because `openshell policy set` does a full policy replacement, and
 # the static layers must be present or the gateway will refuse to apply.
 #
 # Apply with:
-#   openshell policy set my-assistant --policy httpbin-readonly.yaml --wait
+#   Follow .devx/6-agent-safety/using_nemoclaw.md to preserve the active baseline.
 # ============================================================================
 
 version: 1
@@ -166,19 +167,6 @@ network_policies:
     - path: /usr/bin/node
     - path: /usr/bin/curl
     - path: /usr/bin/python3
-  npm_registry:
-    name: npm_registry
-    endpoints:
-    - host: registry.npmjs.org
-      port: 443
-      protocol: rest
-      enforcement: enforce
-      rules:
-      - allow:
-          method: GET
-          path: /**
-    binaries:
-    - path: /usr/local/bin/openclaw
   npm_yarn:
     name: npm_yarn
     endpoints:
@@ -191,6 +179,7 @@ network_policies:
       tls: skip
       access: full
     binaries:
+    - path: /usr/local/bin/openclaw
     - path: /usr/local/bin/npm*
     - path: /usr/local/bin/npx*
     - path: /usr/local/bin/node*

@@ -1,42 +1,18 @@
-graph TB
-    subgraph "NemoClaw Reference Stack"
-        direction TB
-
-        subgraph "Agent Layer"
-            OC["OpenClaw Agent<br/>SOUL.md + HEARTBEAT.md<br/>Markdown memory"]
-        end
-
-        subgraph "Application Layer (your code, Exercise 5)"
-            CL["Content Classifier<br/>PII / proprietary / public"]
-        end
-
-        subgraph "Routing Layer"
-            PR["Privacy Router (inference.local)<br/>Credential injection<br/>+ operator-chosen backend"]
-        end
-
-        subgraph "Inference Layer"
-            NEM["Nemotron 3 Nano 4B<br/>Local inference"]
-            CLOUD["Cloud Frontier Model<br/>Remote inference"]
-        end
-
-        subgraph "Enforcement Layer"
-            OS["OpenShell Runtime<br/>Landlock + seccomp + network proxy"]
-            POL["Policy YAML + openshell inference set<br/>filesystem + process + network + backend"]
-        end
+flowchart TB
+    OC["OpenClaw agent<br/>Workspace instructions and memory"]
+    PR["inference.local / Privacy Router<br/>Provider credentials and configured route"]
+    Backend["Selected hosted or local model"]
+    OS["OpenShell runtime<br/>Filesystem, process and network controls"]
+    Policy["Operator<br/>Policy YAML and inference configuration"]
+    OC -->|"Inference requests"| PR
+    PR --> Backend
+    OS -->|"Enforces configured boundaries"| OC
+    Policy -->|"Configures"| OS
+    Policy -->|"Selects route"| PR
+    subgraph Demo["Separate application exercise"]
+        Input["Example text"] --> CL["Your classifier"] --> Proposal["Proposed route<br/>Not connected to live requests"]
     end
-
-    OC -->|"All queries"| CL
-    CL -->|"Routes per sensitivity"| PR
-    PR -->|"When operator backend = local"| NEM
-    PR -->|"When operator backend = cloud"| CLOUD
-    OS -->|"Enforces"| OC
-    POL -->|"Configures"| OS
-    POL -.->|"Sets active backend"| PR
-
     style OC fill:#9c27b0,color:#fff
-    style CL fill:#ffeb3b,color:#000
     style PR fill:#ff9800,color:#000
-    style NEM fill:#2196f3,color:#fff
-    style CLOUD fill:#673ab7,color:#fff
     style OS fill:#4caf50,color:#fff
-    style POL fill:#607d8b,color:#fff
+    style Policy fill:#607d8b,color:#fff

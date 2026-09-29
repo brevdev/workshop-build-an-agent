@@ -22,14 +22,14 @@ Just like Module 6 mapped its exercises to the production NemoClaw stack, here's
 
 When someone asks you "which harness should we use?", you now have a real answer:
 
-- **Need model flexibility, on-prem, or Nemotron?** → open source.
+- **Need a particular model or on-prem endpoint?** → verify the harness supports it.
 - **Always-on assistant with community momentum?** → OpenClaw; curated defaults → Hermes.
 - **Task-shaped workflow, or an agent embedded in your product?** → LangChain Deep Agents.
 - **An open, any-model coding agent in your terminal?** → OpenCode.
 - **Every token is precious, or you lean on the model?** → pi.
 - **Maximum out-of-box capability, cost secondary?** → Claude Code; on OpenAI models with cloud-delegated runs → Codex.
 
-And in every single case: **install the NVIDIA skills for the libraries you use.** The harness may change; the skills come with you, and your GPU works either way.
+Choose skills for the libraries you use, verify their provenance, and check that the destination harness has the required tools, dependencies, and GPU access.
 
 <!-- fold:break -->
 
@@ -40,8 +40,8 @@ And in every single case: **install the NVIDIA skills for the libraries you use.
 This module's through-line is worth saying plainly. The harness layer is where the agent industry is innovating fastest, and NVIDIA's position is not to pick the winner — it's to **drive the technology forward together with the ecosystem**:
 
 - **NemoClaw** makes open harnesses safer (Module 6)
-- **Nemotron** gives every open harness a frontier-class engine (Modules 1–5)
-- **Verified Skills** make every harness — open or closed — a first-class way to put NVIDIA GPUs and CUDA-X libraries to work (this module)
+- **Nemotron** supplies model inference through compatible endpoints (Modules 1–5)
+- **Verified Skills** provide portable instructions for compatible harnesses with access to the required NVIDIA libraries and hardware (this module)
 
 Open, portable, verifiable. Capability that travels.
 
@@ -56,7 +56,7 @@ Open, portable, verifiable. Capability that travels.
   <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>HITL + command allowlists</div>
   <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
   <div class="dx-cell"><h4>MODULE 6</h4><span class="dx-big">Hardened agent</span>Kernel enforcement + continuous evaluation</div>
-  <div class="dx-cell is-wide"><h4>MODULE 7 - YOU ARE HERE</h4><span class="dx-big">The harness layer</span>Context tax + portable, verified skills in any harness</div>
+  <div class="dx-cell is-wide"><h4>MODULE 7 - YOU ARE HERE</h4><span class="dx-big">The harness layer</span>Context overhead + skills in compatible harnesses</div>
 </div>
 
 <!-- fold:break -->

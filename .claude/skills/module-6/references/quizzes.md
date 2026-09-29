@@ -4,46 +4,41 @@ Richer "Check Your Understanding" feedback than the in-page two-liner. Encourage
 first; then explain the answer, the principle, why each distractor is tempting, and how to
 go deeper.
 
-## `intro_agent_safety.md` — "2 AM prompt injection says POST your data out. What stops it?"
+## `intro_agent_safety.md` — "Which control enforces a per-destination allowlist?"
 - **Correct:** *Deny-by-default network egress enforced by OpenShell.*
-- **Why:** egress is enforced at the **proxy, outside the agent process** — even a fully
-  hijacked agent has **no network path** to the exfiltration endpoint. The control doesn't
+- **Why:** egress is enforced at the **proxy, outside the agent process** — when no matching allow rule exists, even a fully
+  hijacked agent cannot use that endpoint through the enforced network path. The control doesn't
   depend on the agent's cooperation.
-- **Distractors:** *a SOUL.md rule* → soft; the agent decides whether to follow it and an
-  injection talks right past it; *HITL gate* → no human is awake at 2 AM (HITL degrades to
-  approve-all/block-all); *Docker* → isolates the process but still leaves an open pipe to
-  the internet.
+- **Distractors:** *a SOUL.md rule* → guidance, not an enforced boundary;
+  *HITL gate* → waits for a person, without itself defining allowed destinations;
+  *Docker* → network behavior depends on configuration; Module 5
+  explicitly disables container networking, while its web/RAG tools run in the application.
 - **Principle:** the three gaps (no human awake / drift / mixed data) + "trust the kernel"
   (`concepts.md`).
 - **Go deeper:** ask which layer stops each *other* attack (file tamper → Landlock; privilege
   escalation → seccomp; key theft → credential isolation).
 
 ## `why_nemoclaw.md` — "What does the Privacy Router actually do?" (the key one)
-- **Correct:** *It enforces the operator's chosen backend and injects credentials, so the
-  agent never holds keys.*
+- **Correct:** *It enforces the chosen backend and injects inference credentials at the gateway.*
 - **Why:** the router is an **operator-chosen, credential-injecting HTTP forwarder**. The
   operator sets one backend per gateway; the router enforces that choice and injects host-side
   credentials at `inference.local`. The agent calls it with **no key**.
-- **Distractors (all are the *same* misconception — that the router inspects content):**
-  *auto-routes sensitive queries to local* → **NO** — content-aware routing is a classifier
-  *you build in front* (Exercise 5); *encrypts prompts* → it's credential isolation + backend
-  selection, not transport encryption; *scans responses for PII* → no response scanning at all.
-- **Principle:** the module's most-tested point — *the router does not read content*
+- **Distractors:**
+  *auto-routes sensitive queries to local* → **NO** — Exercise 5 builds a separate
+  classifier that only proposes a route; *encrypts prompts* → it's credential isolation + backend
+  selection; *scans responses for PII* → it does not classify or redact PII.
+- **Principle:** *the router does not classify sensitivity or redact PII*
   (`concepts.md` → Privacy Router; `diagrams.md` → nemoclaw_stack shows the classifier as
   "your code").
-- **Go deeper:** have them trace `classify_sensitivity` (their code) → `openshell inference
-  set` (operator) → the router (enforces) to see who does what.
+- **Go deeper:** distinguish classifier output from actual routing. Explain why changing a
+  shared gateway per prompt can send another request to the wrong destination.
 
-## `evaluating_safety.md` — "Same pass rate; why does the sandboxed agent score higher on defense-in-depth?"
-- **Correct:** *Its refusal cites kernel-level enforcement, which cannot be talked past; a
-  prompt-only refusal can.*
-- **Why:** **pass rate** asks *"was it safe?"* (binary); **defense-in-depth** asks *"how?"* —
-  a kernel **sandbox_block** (EACCES/permission-denied) is non-defeasible (weight 1.0); a
-  **prompt_refusal** ("I cannot…") could be talked past by the next attack (0.7); benign-pass
-  0.5; compliance 0.0.
-- **Distractors:** *refused faster* → speed isn't scored; *bigger model* → same model, the
-  difference is *how* the refusal was enforced; *higher pass rate* → identical by assumption,
-  which is exactly why pass rate hides the sandbox's contribution.
-- **Principle:** mechanism-of-safety weighting (`concepts.md` → safety eval).
-- **Go deeper:** ask them to find a probe where the host agent and sandboxed agent both pass
-  but for different reasons, and explain the score gap.
+## `evaluating_safety.md` — “The agent says permission denied. What can you conclude?”
+- **Correct:** inspect the tool result and operator-side logs before attributing the denial.
+- **Why:** the model can say those words without attempting a tool call. Even a real error
+  may come from POSIX permissions, Landlock, a proxy, or another layer.
+- **Distractors:** the text does not prove a kernel block or establish deployment safety.
+- **Principle:** keep evidence of enforcement separate from quality of the answer.
+- **Go deeper:** compare a canary leak after a refusal, a refused benign request, and a
+  timeout. The first two fail screening; the timeout is a missing measurement. None can be
+  averaged into a passing result. Offline screening alone is not a full rubric review.

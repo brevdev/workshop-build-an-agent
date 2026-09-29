@@ -9,7 +9,7 @@
 #   3. NemoClaw gateway (reachable — `nemoclaw status` can list sandboxes)
 #   4. NemoClaw sandbox (my-assistant reports `Phase: Ready`)
 #
-# It mutates nothing and never touches the network. Run it whenever an
+# It reads local process status and queries the control plane. Run it whenever an
 # exercise in `using_nemoclaw.md` or `evaluating_safety.md` fails, to see
 # which layer is down and exactly what to run to bring it back.
 #
@@ -79,12 +79,17 @@ if ! command -v nemoclaw >/dev/null 2>&1; then
     note_broken "nemoclaw-cli"
     NEMOCLAW_USABLE=0
 else
-    nemoclaw_out="$(timeout 20 nemoclaw --version 2>&1)"
+    nemoclaw_out="$(timeout 20 nemoclaw --version 2>&1)"; cli_rc=$?
     if printf '%s' "$nemoclaw_out" | grep -q "Cannot find module"; then
         fail "nemoclaw is installed but its files are incomplete (corrupt install)"
         info "Signature: \"Cannot find module '.../dist/lib/agent/runtime'\""
         info "Repair by reinstalling: $RECOVER_CMD"
         note_broken "nemoclaw-corrupt"
+        NEMOCLAW_USABLE=0
+    elif [ "$cli_rc" -ne 0 ]; then
+        fail "nemoclaw CLI did not respond successfully"
+        info "Check the installation before continuing."
+        note_broken "nemoclaw-cli"
         NEMOCLAW_USABLE=0
     else
         ok "nemoclaw CLI responds"
@@ -144,8 +149,8 @@ fi
 echo
 echo "=============================================================="
 if [ -z "$FIRST_BROKEN" ]; then
-    echo " READY — all four layers are up."
-    echo " You can run every exercise in using_nemoclaw.md end to end."
+    echo " READY — control-plane checks passed."
+    echo " Continue with the lesson's policy and behavior checks."
 else
     echo " NOT READY — the live sandbox is unavailable."
     echo
@@ -153,14 +158,11 @@ else
     echo
     echo "     $RECOVER_CMD"
     echo
-    echo " It is idempotent: if parts are already healthy it just restores"
-    echo " the tunnel; if the install is corrupt or the sandbox is missing it"
-    echo " reinstalls and re-onboards. Then re-run this health check."
+    echo " This may rerun onboarding. Then run this health check again."
     echo
     echo " Can't bring it up right now? You are NOT blocked. The Python"
-    echo " sidekicks and the safety-evaluation capstone in evaluating_safety.md"
-    echo " run fully offline against the built-in leaky mock agent — only the"
-    echo " live-sandbox walkthroughs (Exercises 1-4) need the control plane."
+    echo " classifier and mock screening in evaluating_safety.md run offline."
+    echo " The judge needs API access; the live walkthroughs need this control plane."
 fi
 echo "=============================================================="
 echo

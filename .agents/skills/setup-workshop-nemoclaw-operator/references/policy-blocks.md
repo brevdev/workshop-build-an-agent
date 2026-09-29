@@ -1,10 +1,11 @@
 # Policy blocks — exact YAML, apply semantics, verification
 
-Everything here was verified live against OpenShell v0.0.53, with
+The original blocks were tested against OpenShell v0.0.53, with
 lifecycle-sensitive items re-verified on v0.0.96 where noted (gateway as a
 user systemd unit `openshell-gateway.service`; L7 proxy + OCSF audit log via
 `docker logs <container>`). Adjust the repo slug / sandbox name if yours
-differ.
+differ. Module 2 now uses Python for remote MCP; the composer adds those
+binaries to an existing Node-only block without replacing its endpoints.
 
 ## Apply semantics (read first)
 
@@ -125,7 +126,7 @@ and any mirror host), alongside the chat/completions/embeddings rules:
 ## Workshop integration blocks (audited 2026-07-21)
 
 Four more routes the module content actually exercises. Full-coverage
-sandboxes should carry all four (a SKILL.md Phase 1b recreate boots from the
+sandboxes should carry all four (a SKILL.md Phase 1b restart boots from the
 live policy, so they survive it; a stock-template recreate reverts them —
 re-run Phase 1). Binaries: same python/curl set as `pypi_install` minus uv.
 
@@ -192,15 +193,7 @@ re-run Phase 1). Binaries: same python/curl set as `pypi_install` minus uv.
       - allow: { method: GET, path: /** }
     binaries:
     - path: /usr/local/bin/node
-  # Tavily REMOTE MCP host — module-2 PART 2A, the shipped default that every
-  # non-sandboxed pathway uses. Needs the npm_install block too (npx fetches the
-  # mcp-remote transport at call time). mcp-remote 0.1.38 speaks MCP
-  # streamable-HTTP: POST for JSON-RPC, GET for the SSE stream and for OAuth
-  # discovery under /.well-known/**, DELETE to end the session. Observed live:
-  #   GET  /mcp/                                       GET /.well-known/oauth-authorization-server
-  #   GET  /.well-known/oauth-protected-resource/mcp   POST /mcp/
-  # ⚠️ Policy alone is NOT sufficient — the MCP stdio transport drops the proxy
-  # env vars, so the in-sandbox skill's tune_remote_mcp_env.py is also required.
+  # Module 2 remote MCP: Python Streamable HTTP with header authentication.
   mcp_tavily:
     name: mcp-tavily
     endpoints:
@@ -213,7 +206,10 @@ re-run Phase 1). Binaries: same python/curl set as `pypi_install` minus uv.
       - allow: { method: POST, path: /** }
       - allow: { method: DELETE, path: /** }
     binaries:
-    - path: /usr/local/bin/node
+    - path: /usr/bin/python3
+    - path: /usr/bin/python3.13
+    - path: /opt/hermes/.venv/bin/python
+    - path: /usr/bin/curl
   # tiktoken downloads BPE encodings at first get_encoding() (module 7).
   tiktoken_encodings:
     name: tiktoken-encodings
@@ -321,13 +317,9 @@ window bricks the sandbox (`ExpiredSignature` crash loop). After the boot,
 - `build.nvidia.com` — not needed; it appears only in notebook prose. Chat/
   completions/embeddings hit `integrate.api.nvidia.com`; reranking hits
   `ai.api.nvidia.com` (block above).
-- (`mcp.tavily.com` used to be listed here. It is now OPENED — see the
-  `mcp_tavily` block above — so module-2 PART 2A has parity with the
-  non-sandboxed pathways. PART 2B still works and remains a valid teaching
-  contrast: the local server exposes 1 tool, the remote MCP exposes 5.)
 - `t.explodinggradients.com` — ragas telemetry; the sandbox skill exports
   `RAGAS_DO_NOT_TRACK=true` instead.
-- npm registry for tooling, conda/pytorch mirrors,
+- conda/pytorch mirrors,
   `workbench.download.nvidia.com` — the sandbox path needs none of them (the
   in-sandbox skill ships a prebuilt labextension and compiles its shim with
   the ziglang wheel).

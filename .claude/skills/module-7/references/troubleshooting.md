@@ -14,7 +14,7 @@ signal of an untouched blank (guide via `exercises.md`), **not** a bug to fix fo
 - `--exercise 5` raises in `self_evolve_skill` → Ex 5 unfilled.
 
 ## Keys, imports, dependencies
-- **`NVIDIA_API_KEY`** in repo-root `secrets.env` (gitignored) — every harness + the lab call
+- **`NVIDIA_API_KEY`** in repo-root `secrets.env` (gitignored) — the core lab and configured Hermes calls use
   `nvidia/nemotron-3-super-120b-a12b` through `integrate.api.nvidia.com`. **401** → key
   missing/invalid (set it via the Secrets Manager / https://build.nvidia.com).
 - **`ModuleNotFoundError: tiktoken`** (Ex 2) or `langchain_nvidia_ai_endpoints` → install the
@@ -33,26 +33,30 @@ harness, not a specific one.
 - **"Hermes can't reach the model" / auth errors** → the `base_url` is missing `/v1`, the
   `api_key` env var isn't exported in that shell, or the model name is wrong. Same Nemotron
   endpoint the minimal harness uses.
-- **Skills:** Hermes auto-discovers everything in `~/.hermes/skills/`; `cp -r` a skill folder
-  there (Ex 3) or `hermes skills install NVIDIA/skills/<name>` (agentskills.io-compatible).
+- **Hermes cannot import pandas/cuDF:** run `python -c "import sys; print(sys.executable)"`
+  in the workshop terminal and ask Hermes to use that interpreter. Its isolated runtime
+  may not contain workshop libraries; the skill format does not install them.
+- **Skills:** Hermes discovers skills in `~/.hermes/skills/`; copy the authored folder
+  there (Ex 3), or the complete locally verified NVIDIA folder after Ex 4. Remote hub
+  installs can fail or omit support files when fetching fails, even with a zero exit code.
+  Check references as well as `SKILL.md`; a hub scan does not replace signature verification.
 
 ## The verified-skill install (Exercise 4)
 - `bash code/7-agent-harnesses/scripts/install_nvidia_skill.sh accelerated-computing-cudf`
   clones [`NVIDIA/skills`](https://github.com/NVIDIA/skills), checks the `skill.oms.sig`
   signature, prints the skill card, and installs into the lab `skills/` dir. Needs **network +
-  git** (and, for `npx skills add`, **Node/`npx`** — already in the DevX-Lab container).
+  git + model-signing** (preinstalled in the workshop image). The script refuses missing signatures, failed verification, and unexpected unsigned payload files.
 - **Signature/verification fails** → don't bypass it; that's the governance point. Re-clone /
   check network; a failed signature means *don't trust the skill*.
 - **`run_gpu_task` says "Skill not installed"** → the install script hasn't run (or installed
   elsewhere); it looks for `skills/accelerated-computing-cudf/SKILL.md`.
 
 ## GPU / cuDF (Exercise 4)
-- **GPU util stays at 0** → the dataset must cross the **100K-row size gate** the skill teaches
-  (the generator makes ~1M rows by default); confirm cuDF imported GPU-side:
+- **GPU util stays at 0** → short operations can fall between samples. Inspect the executed
+  code and confirm cuDF imports:
   `python -c "import cudf; print(cudf.__version__)"`.
-- **No GPU on the box** → expected and handled: `run_gpu_task` detects `nvidia-smi` is absent,
-  prints a clear fallback message, and runs pandas instead; the answers notebook shows the
-  expected GPU output. The *concept* (local execution, the division of labor) still lands.
+- **No GPU on the box** → `run_gpu_task` warns and asks the agent to choose an available
+  stack. Request pandas if needed. Inspect the code and output; utilization is not a correctness or speed test.
 - **Test data missing** → `run_gpu_task`/`run_self_evolution_demo` auto-run
   `scripts/make_test_data.py` to create `test_data/sensor_readings.csv`; you can run it manually.
 
@@ -64,8 +68,8 @@ harness, not a specific one.
 - **Skill written but not picked up next run** → it landed outside `skills/<name>/SKILL.md`
   (the loader globs `skills/*/SKILL.md`), or the body still has ``` fences breaking the parse.
 
-## Optional closed-harness track (no fix needed, just framing)
-Claude Code / Codex are **subscription** and entirely optional — the whole lab runs in open
+## Optional coding-harness track
+Claude Code / Codex need their own model access and are entirely optional — the whole lab runs in open
 harnesses on Nemotron. If a learner wants to verify portability:
 `npx skills add nvidia/skills --skill accelerated-computing-cudf --agent claude-code` (or
 `--agent codex`). Same `SKILL.md`, same GPU, different harness.

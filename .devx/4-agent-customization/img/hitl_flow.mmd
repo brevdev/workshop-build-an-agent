@@ -12,7 +12,7 @@ flowchart LR
     subgraph hitl[HITL Execution Flow]
         direction LR
         request[User<br />Request] --> propose[Agent<br />Proposes<br />Command] --> review[Human<br />Reviews<br />& Approves] --> execute[Execute<br />or<br />Abort]
-        review -.-> modify[Modify<br />if needed]
+        review -.-> modify[Reject + refine<br />new request]
         modify -.-> propose
     end
 

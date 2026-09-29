@@ -29,7 +29,7 @@ That's it. Five exercises, run them in order: `--exercise 1` → `5`.
 |---|-----------|-------------|
 | 1 | A minimal harness | 4 tools + a loop = a working agent |
 | 2 | The "context tax" meter | Measure what each harness costs per turn |
-| 3 | A portable skill | Write it once, run it in any harness |
+| 3 | A portable skill | Reuse instructions in compatible harnesses |
 | 4 | A GPU skill | Drive your GPU with a signed NVIDIA cuDF skill |
 | 5 | A self-evolving harness | The agent writes its own skill, then uses it |
 
@@ -56,4 +56,4 @@ cd ../../.devx/7-agent-harnesses && python3 -m http.server 8137
 # then open http://localhost:8137
 ```
 
-Built on NVIDIA Nemotron + [NVIDIA Verified Skills](https://github.com/NVIDIA/skills). Runs in any harness — including [Hermes](https://hermes-agent.nousresearch.com).
+Built on NVIDIA Nemotron + [NVIDIA Verified Skills](https://github.com/NVIDIA/skills). Portable to compatible harnesses — including [Hermes](https://hermes-agent.nousresearch.com).

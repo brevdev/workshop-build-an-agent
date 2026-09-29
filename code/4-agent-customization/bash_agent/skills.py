@@ -18,6 +18,8 @@ SKILLS_DIR = Path(__file__).parent.parent / "skills" / "superpowers"
 
 def load_skill(skill_name: str) -> str:
     """Load a skill from the skills directory."""
+    if skill_name not in list_skills():
+        return f"Unknown skill: {skill_name}. Use list_available_skills()."
     skill_path = SKILLS_DIR / skill_name / "SKILL.md"
     if skill_path.exists():
         return skill_path.read_text()

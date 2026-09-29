@@ -12,12 +12,12 @@ The question isn't whether your agent can do the work. It's whether your agent c
 
 ## Why Agent Security Is Different
 
-Traditional application security assumes a clear trust boundary: the server trusts its own code, and external inputs are validated at the edge. Agents break this model in fundamental ways. Five properties make agent security a distinct discipline. Click on each to learn more. 
+Agents pass untrusted text into models that can request actions. Keeping data separate from instructions becomes harder. Five properties deserve attention. Click on each to learn more.
 
 <details class="dx-peek">
 <summary>1. Blurred trust boundaries</summary>
 
-A web server has a clear inside and outside. An agent doesn't. It consumes untrusted content (user messages, tool outputs, RAG retrieval results, RSS feeds) and produces outputs that may themselves become inputs to other agents or tools. The agent is simultaneously client, server, and user -- and every boundary is a potential injection point.
+User requests, tool outputs, and retrieved documents can share the same model context. A document can contain text that looks like an instruction. Treat external content as data and enforce tool permissions outside the model.
 
 </details>
 
@@ -38,14 +38,14 @@ Every tool an agent can invoke is a potential privilege escalation vector. A fil
 <details class="dx-peek">
 <summary>4. Persistent memory</summary>
 
-Unlike a stateless API call, agents carry context across sessions. MEMORY.md, diary entries, and learned preferences accumulate over time. A subtle poisoning of memory in week one can influence the agent's behavior in week ten. Compromises can be long-lived and difficult to detect.
+Agents with persistent memory carry information across sessions. A poisoned MEMORY.md entry can influence later decisions, making a compromise harder to detect and undo.
 
 </details>
 
 <details class="dx-peek">
 <summary>5. Amplification through reasoning</summary>
 
-Agents don't just execute single commands -- they plan, reason, and chain multiple steps together. A small manipulation in an early reasoning step can compound through the chain into a large, unintended action. What starts as a benign-looking data fetch can escalate into an unauthorized deployment.
+Agents can chain multiple actions together. A small manipulation early in that chain can lead to a larger, unintended action later.
 
 </details>
 
@@ -59,8 +59,8 @@ To see where we stand so far, here's a quick recap of the capabilities and safet
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>Tool selection and scoping</div>
-  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>Data access boundaries</div>
-  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Adversarial test cases</div>
+  <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>Retrieval and evidence</div>
+  <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Behavior and quality checks</div>
   <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>HITL + command allowlists</div>
   <div class="dx-cell is-wide"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>Container isolation + resource limits</div>
 </div>
@@ -78,7 +78,7 @@ In Module 4, you built a bash agent with explicit command filtering:
 - **Command allowlists** — Only pre-approved binaries (e.g., `ls`, `cat`, `grep`) could execute
 - **Human-in-the-loop** — A human operator approved or rejected each action before execution
 
-These controls live in Python. They check every command *before* it reaches the shell.
+These controls live in Python. They check each command before the tool executes it.
 
 </div>
 </div>
@@ -90,9 +90,9 @@ These controls live in Python. They check every command *before* it reaches the 
 
 As you learned in Module 5, Docker sandboxing added OS-level boundaries:
 
-- **Namespace isolation** — The agent gets its own filesystem, process tree, and network stack
-- **Resource limits** — Capped CPU, memory, and network bandwidth
-- **No host mounts** — The container cannot see host files
+- **Namespace isolation** — Selected tools run in a separate filesystem, process tree, and network stack
+- **Resource limits** — Capped CPU, memory, and process count
+- **No host mounts or network** — The execution container gets neither project files nor network access
 - **Auto-cleanup** — Containers are destroyed when sessions end
 
 These controls live at the container runtime level. They enforce boundaries regardless of what the agent does inside.
@@ -112,33 +112,29 @@ Application allowlists and container isolation are necessary but not sufficient 
 
 HITL works during business hours. But autonomous agents run overnight, over weekends, and across time zones.
 
-- **Approval fatigue** — Even during business hours, humans tend to rubber-stamp after the 50th approval
+- **Approval fatigue** — Repeated prompts can lead to rubber-stamping
 - **Batch operations** — An agent processing 500 tickets can't wait for 500 approvals
 - **Latency** — Real-time agents (chat, monitoring) can't block on human response times
 
-When no human is available, HITL degrades to either "approve everything" or "block everything." Neither is acceptable.
+Required approvals pause work until a person responds. Unattended operation needs clear policies for actions you have already decided to permit.
 
 <!-- fold:break -->
 
 ### Gap 2: Agent Drift
 
-Always-on agents are not static. They are self-evolving.
+An agent's context and available tools can change over time.
 
 - **Memory accumulation** — OpenClaw agents write to MEMORY.md and diary entries. Over weeks, the agent's context shifts.
 - **SOUL.md modification** — Some agent frameworks allow the agent to update its own system prompt. Small edits compound.
 - **Stale allowlists** — The command allowlist you wrote in month one doesn't cover the new tools the agent discovered in month three.
 
-Static rules applied to a dynamic agent create a widening gap between what the policy permits and what the agent actually does.
+An enforced allowlist still applies as context changes. Review whether its permissions still fit the task; new tools should not gain access automatically.
 
 <!-- fold:break -->
 
 ### Gap 3: Mixed-Sensitivity Data
 
-Docker isolates the *process* but doesn't distinguish the *data*. Inside the container, every document looks the same to the agent.
-
-- An email containing a customer's SSN is treated identically to a public RSS feed summary
-- A proprietary internal memo gets sent to the same cloud API as a Wikipedia excerpt
-- There's no mechanism to route sensitive data to local inference and public data to cloud
+Docker isolates the *process* but does not classify document sensitivity or choose a model based on it. Deciding which data can reach a cloud model needs a separate application or data policy.
 
 Container isolation answers "where can the agent run?" but not "what data should the agent actually see?"
 
@@ -150,14 +146,12 @@ These gaps map to different enforcement layers. Each layer adds protection that 
 
 > **A note on roles.** Throughout this module, the **operator** is the human (or automation acting on their behalf) with host-level access to the OpenShell gateway — the role that configures providers, sets the active inference backend, and applies policies. The **agent** runs inside the sandbox and cannot perform these actions; the **end user** sends prompts to the agent and is one step further removed. The distinction matters because much of M6's security story is *"the operator's configuration is enforced even when the agent is compromised."*
 
-| Dimension | Application-Level (M4) | Container Isolation (M5) | Kernel-Level + Data Routing (M6) |
+| Dimension | Application Controls (M4) | Container Isolation (M5) | OpenShell Policies (M6) |
 |-----------|----------------------|------------------------|--------------------------------|
-| **Enforcement layer** | Python code | Container runtime | Linux kernel (Landlock LSM) |
-| **Bypass difficulty** | Medium — regex evasion, encoding tricks | Hard — requires container escape | Very hard — kernel enforces, process designed to be unable to lift |
-| **Granularity** | Per-command | Per-container | Per-file, per-endpoint, per-binary |
-| **Data awareness** | None | None | Operator-controlled routing + classifier hook |
-| **Human dependency** | High (HITL) | Low (set-and-forget) | None (policy is self-enforcing) |
-| **Drift resilience** | Low — static allowlists | Medium — container config is fixed | High — kernel policy survives agent evolution |
+| **Enforced by** | Python tool wrapper | Container runtime and kernel | Kernel, proxy, and gateway |
+| **Scope** | Commands and approvals | Tool process, files, network, and resources | Paths, syscalls, destinations, and inference backend |
+| **Data awareness** | Only if the application adds it | No content classification | Backend chosen by the operator; classifier is separate |
+| **Still needs review** | Allowed commands and approvals | Mounts, networking, and limits | Policies, providers, and runtime configuration |
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-intro_agent_safety-3">Thought Exercise: The 2 AM Prompt Injection</button>
@@ -171,23 +165,23 @@ Your OpenClaw agent processes a customer support queue overnight. At 2 AM, a pro
 Walk through how each layer responds:
 
 **Application-level allowlist (M4):**
-The agent's command allowlist blocks `cat /etc/environment`. But the injection doesn't ask the agent to run a shell command — it asks the agent to *output* the information. If the agent has already seen environment variables in its context, the allowlist can't prevent the agent from including them in a response.
+A command allowlist limits which programs can run. Even if a command is denied, that doesn't erase data the model has already seen or prevent it from including that data in an answer.
 
 **Container isolation (M5):**
-Docker prevents the agent from accessing `/etc/environment` on the host. But inside the container, the agent may have access to its own environment variables (API keys injected for tool use). The container doesn't prevent the agent from *saying* what it knows.
+A container can withhold host files, but files or credentials mounted or injected into it may still be accessible. It doesn't prevent the model from *saying* what it knows.
 
 **Kernel enforcement + data routing (M6):**
-OpenShell's Landlock policy restricts `/etc/environment` to read-only for the agent process, and the network policy blocks outbound connections except to the approved LLM endpoint. Even if the injection succeeds at the prompt level, the agent faces significantly higher barriers to exfiltrating data because OpenShell's egress proxy blocks the network path. And because the Privacy Router routes inference through `inference.local` with credentials injected at the gateway, the API key is never in the agent's environment in the first place — there is nothing for the injection to print.
+Landlock can deny reads outside the allowed paths; read-only access still permits reading. Network rules restrict destinations, while the inference gateway keeps provider credentials outside the agent's environment. These controls reduce exposure, but secrets already in files or context can still leak through allowed outputs.
 
 **Continuous verification:**
-The safety eval suite would catch this in its next scheduled run — the red-team probe for prompt injection would detect that the agent attempted to comply with the override instruction.
+The safety suite tests for known leaks and injection behavior when you run it. A small probe set can miss other attacks; this workshop does not schedule it automatically.
 
-No single layer is perfect. But all four layers failing simultaneously is the scenario an attacker must achieve.
+Each layer covers different risks. A harmful action that the policy allows may need no bypass at all.
 
 </div>
 </div>
 
-The progression is clear: from trusting the model, to trusting the container, to trusting the kernel.
+The progression adds controls around the model, then tests what those controls actually enforce.
 
 <!-- fold:break -->
 
@@ -206,7 +200,7 @@ NemoClaw ships with deny-by-default security controls across four layers: **netw
 
 ### Layer 1: Network
 
-Controls where the agent can connect. All outbound traffic is blocked by default — only endpoints explicitly listed in the policy are reachable. Each endpoint rule is scoped to specific binaries and HTTP methods, so even an allowed host has limited exposure.
+Controls where the agent can connect. Unlisted destinations are denied. Rules can select executables, and REST policies can restrict HTTP methods on an allowed host.
 
 > In NemoClaw, **OpenShell's HTTP CONNECT proxy** intercepts all egress from the sandbox and evaluates each request against the policy. Requests to unlisted endpoints are denied and logged for operator review.
 
@@ -214,7 +208,7 @@ Controls where the agent can connect. All outbound traffic is blocked by default
 
 ### Layer 2: Filesystem
 
-Controls what the agent can read and write. System paths (`/usr`, `/lib`, `/etc`) are read-only, and writable access is limited to designated workspace directories (`/sandbox`, `/tmp`). This helps protect against binary tampering, credential theft, and configuration manipulation.
+Controls what the agent can read and write. System paths (`/usr`, `/lib`, `/etc`) are read-only, and writable access is limited to designated directories (`/sandbox`, `/tmp`). Read-only access prevents writes; it still permits reading any secrets in those paths.
 
 > In NemoClaw, **OpenShell applies Landlock LSM** restrictions at the kernel level. These rules are locked at sandbox creation and are designed to be irrevocable — the agent process should not be able to modify or lift them.
 
@@ -230,17 +224,17 @@ Controls what the agent can execute. The agent runs as a non-root user with drop
 
 ### Layer 4: Inference
 
-Controls which AI models the agent can use and how credentials are handled. The agent calls a local inference endpoint (`inference.local`) while the host manages provider credentials separately — the agent is designed to never have direct access to API keys.
+Controls the inference backend and its credentials. The agent calls `inference.local`; the host supplies the configured provider's key without placing it in the sandbox.
 
-> In NemoClaw, **OpenShell routes all inference through the gateway**, which strips sandbox-supplied credentials and injects host-side ones from the configured Provider record. The **Privacy Router** enforces the operator's choice of one backend per gateway — a local model (like Nemotron) or a cloud endpoint — and supports hot-swapping the active backend without recreating sandboxes. Per-request, content-aware routing is a pattern you build on top of this primitive (covered in Exercise 5).
+> Calls to **`inference.local`** use the gateway's configured backend and host-side inference credentials. The operator can switch that backend without recreating sandboxes. Per-request choices need separately configured routes; Exercise 5 builds a classifier that proposes a route without changing shared gateway state.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="dx-quiz-q">An autonomous agent runs overnight with no human watching. A prompt injection tells it to POST your data to an external server. Which control actually stops the exfiltration?</p>
+  <p class="dx-quiz-q">An agent needs approved websites while running unattended. Which control can enforce a per-destination allowlist?</p>
   <button class="dx-quiz-opt" data-fb="SOUL.md rules are soft - the agent itself decides whether to follow them, and a prompt injection can talk it right past them. Nothing enforces the rule.">A rule in SOUL.md forbidding the agent from sending data to outside servers</button>
-  <button class="dx-quiz-opt" data-fb="No human is awake at 2 AM. Human-in-the-loop degrades to approve-everything or block-everything when nobody is there to approve - neither is acceptable.">A human-in-the-loop approval gate</button>
-  <button class="dx-quiz-opt" data-right data-fb="Right. Deny-by-default egress is enforced at the proxy, outside the agent process. Even a fully hijacked agent has no network path to the exfiltration endpoint.">Deny-by-default network egress enforced by OpenShell</button>
-  <button class="dx-quiz-opt" data-fb="A container isolates the process, but it still has an open pipe to the internet. Docker does not restrict which external hosts the agent can reach.">Docker container isolation</button>
+  <button class="dx-quiz-opt" data-fb="An approval gate can block a request while it waits for a person. It does not itself define the allowed network destinations.">A human-in-the-loop approval gate</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. The proxy enforces the configured destinations outside the agent process. Unlisted destinations are denied.">Deny-by-default network egress enforced by OpenShell</button>
+  <button class="dx-quiz-opt" data-fb="Container isolation alone does not select allowed destinations. Module 5's network-disabled container blocks all network access instead.">Docker container isolation alone</button>
 </div>
 
 <!-- fold:break -->

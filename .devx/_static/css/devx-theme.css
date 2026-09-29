@@ -429,7 +429,7 @@
 .dx-term-line[data-kind="prompt"]::before { content: '$ '; color: var(--dx-green); font-weight: 700; }
 .dx-term-line[data-kind="think"] { color: #8f8f8f; font-style: italic; }
 .dx-term-line[data-kind="tool"] { color: #8fcb2b; }
-.dx-term-line[data-kind="tokens"] { color: #767676; }
+.dx-term-line[data-kind="tokens"] { color: #a6a6a6; }
 .dx-term-line[data-kind="answer"] { color: #ffffff; }
 .dx-term-line.dx-typing::after {
   content: '▋';
@@ -1582,4 +1582,16 @@ html.dx-dark .markdown-section .mermaid .edgeLabel { background-color: var(--dx-
   }
   .markdown-section details.dx-peek[open]::details-content,
   .markdown-section details.dx-def[open]::details-content { opacity: 1; }
+}
+
+/* Shared navigation stays legible on the dark reading surface. */
+html.dx-dark .pagination-item-label { color: var(--dx-fg-dim) !important; opacity: 1 !important; }
+html.dx-dark .pagination-item-title { opacity: 1 !important; }
+html.dx-dark .pagination-item { opacity: 1; }
+html.dx-dark .markdown-section pre .token.comment,
+html.dx-dark .markdown-section pre .token.prolog,
+html.dx-dark .markdown-section pre .token.doctype { color: #a6a6a6; }
+:where(button, a, input, select, summary):focus-visible {
+  outline: 2px solid var(--dx-green);
+  outline-offset: 3px;
 }

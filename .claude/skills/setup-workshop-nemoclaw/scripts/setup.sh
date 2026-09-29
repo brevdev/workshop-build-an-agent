@@ -7,7 +7,7 @@
 # Prereqs (verify with scripts/preflight.sh; details in
 # references/operator-contract.md — the operator does these OUTSIDE the sandbox):
 #   - Sandbox policy allows GET pypi.org + files.pythonhosted.org and
-#     POST /v1/ranking on integrate.api.nvidia.com (module-2 reranker).
+#     POST /v1/retrieval/** on ai.api.nvidia.com (module-2 reranker).
 #   - NVIDIA key staged at $REPO/secrets.env  (NVIDIA_API_KEY=...)
 set -euo pipefail
 
@@ -44,7 +44,7 @@ say "1. venv + pinned deps"
 if [ ! -x "$VENV/bin/python" ]; then
   uv venv "$VENV"
 fi
-# Install the exact pinned set proven to work (modules 1-3 + tiles + tooling).
+# Install the CPU package set; core agent/evaluation pins match the workshop.
 # GPU-only deps (torch/unsloth/cudf) are intentionally OMITTED — module-4
 # training and module-7's cudf exercise need a GPU we don't have (module 7
 # falls back to pandas without it) and installing them hangs voila.
@@ -169,32 +169,8 @@ if os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy"):
 EOF
 printf 'import _workshop_aiohttp_trust_env\n' > "$SITE_PKGS/zz-workshop-aiohttp-trust-env.pth"
 
-# ---- 4d. module-3 judge rate limiter -----------------------------------------
-say "4d. module-3 judge rate limiter"
-# ragas.evaluate()'s default concurrency 429s the NVIDIA API key's RPM budget
-# and the module-3 RAGAS cell "succeeds" with nan metrics (verified with the
-# eval notebook running SOLO). Throttle the judge model itself (sandbox copy
-# of evaluation_framework.py; marker-guarded, idempotent) — fixes both the
-# LLM-as-judge loops and ragas without touching any exercise cell.
-"$VENV/bin/python" "$SKILL_DIR/scripts/tune_judge_rate_limit.py" "$REPO"
-
-# ---- 4e. module-5 model map repair -------------------------------------------
-say "4e. module-5 model map"
-# deepseek-r1-0528 is retired from the NIM catalog (404s everywhere) and
-# meta/llama-3.3-70b-instruct currently answers slower than ChatNVIDIA's 60s
-# client timeout, erroring every Deep Agent turn. Remap the sandbox copies
-# (backend + lab files; marker-guarded) to served, fast siblings.
-"$VENV/bin/python" "$SKILL_DIR/scripts/tune_model_map.py" "$REPO"
-
-# ---- 4e2. module-2 remote-MCP child env (PART 2A parity) ---------------------
-say "4e2. module-2 remote-MCP child env"
-# The MCP stdio transport forwards only HOME/LOGNAME/PATH/SHELL/TERM/USER to
-# the child, so `npx mcp-remote` starts with no proxy config and dies at
-# `getaddrinfo EAI_AGAIN mcp.tavily.com` — with NO OCSF line, since nothing
-# reaches the L7 proxy. Inject SANDBOX_MCP_ENV so PART 2A (the shipped default
-# every non-sandboxed pathway uses) works here too. Needs the operator's
-# npm_install + mcp_tavily policy blocks.
-"$VENV/bin/python" "$SKILL_DIR/scripts/tune_remote_mcp_env.py" "$REPO"
+# Models, judge pacing and header-based MCP transport live in the workshop
+# source. Keep them intact; Workshop Health checks the configured endpoints.
 
 # ---- 4f. module-5 Deep Agents Client frontend --------------------------------
 say "4f. Deep Agents Client frontend (npm install + build)"

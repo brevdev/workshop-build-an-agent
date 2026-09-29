@@ -17,9 +17,7 @@ const SKILL_BLOCK_MAP: Record<string, string> = {
 // Map blocky-bits block names → our model IDs
 const MODEL_BLOCK_MAP: Record<string, string> = {
   'NVIDIA': 'nemotron',
-  'Meta': 'llama',
-  'Claude': 'claude',
-  'Google': 'deepseek',  // fallback mapping
+  'Lightning': 'nemotron_fast',
 };
 
 interface BlockyBitsResponse {
@@ -28,7 +26,7 @@ interface BlockyBitsResponse {
   model_blocks: Array<{ name: string; [key: string]: unknown }>;
 }
 
-interface UseBlockyBitsResult {
+export interface UseBlockyBitsResult {
   connected: boolean;
   skillIds: string[];
   modelId: string | null;
@@ -38,7 +36,7 @@ interface UseBlockyBitsResult {
 
 const POLL_INTERVAL = 1000; // 1 second
 
-export function useBlockyBits(enabled: boolean = true): UseBlockyBitsResult {
+export function useBlockyBits(enabled: boolean = true, onUpdate?: (state: UseBlockyBitsResult) => void): UseBlockyBitsResult {
   const [connected, setConnected] = useState(false);
   const [skillIds, setSkillIds] = useState<string[]>([]);
   const [modelId, setModelId] = useState<string | null>(null);
@@ -81,12 +79,10 @@ export function useBlockyBits(enabled: boolean = true): UseBlockyBitsResult {
       const modelBlocks = (data.model_blocks || []).map(b => b.name);
       setRawModelBlock(modelBlocks[0] || null);
 
-      if (modelBlocks.length > 0) {
-        const mapped = MODEL_BLOCK_MAP[modelBlocks[0]];
-        setModelId(mapped || null);
-      } else {
-        setModelId(null);
-      }
+      const mapped = MODEL_BLOCK_MAP[modelBlocks[0]] || null;
+      setModelId(mapped);
+      onUpdate?.({ connected: true, skillIds: [...new Set(mappedSkills)], modelId: mapped,
+        rawSkillBlocks: blockNames, rawModelBlock: modelBlocks[0] || null });
     } catch {
       failCountRef.current++;
       // After 3 consecutive failures, mark as disconnected
@@ -94,11 +90,10 @@ export function useBlockyBits(enabled: boolean = true): UseBlockyBitsResult {
         setConnected(false);
       }
     }
-  }, [enabled]);
+  }, [enabled, onUpdate]);
 
   useEffect(() => {
     if (!enabled) {
-      setConnected(false);
       return;
     }
 
@@ -115,5 +110,5 @@ export function useBlockyBits(enabled: boolean = true): UseBlockyBitsResult {
     };
   }, [enabled, poll]);
 
-  return { connected, skillIds, modelId, rawSkillBlocks, rawModelBlock };
+  return { connected: enabled && connected, skillIds, modelId, rawSkillBlocks, rawModelBlock };
 }

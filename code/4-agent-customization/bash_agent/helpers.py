@@ -8,6 +8,7 @@ Supports both:
 
 from typing import Any, Dict, List, Tuple, Optional
 import json
+import shlex
 import re
 
 from openai import OpenAI
@@ -35,9 +36,13 @@ class Messages:
         """Add a user message to the conversation."""
         self.messages.append({"role": "user", "content": message})
 
-    def add_assistant_message(self, message: str):
-        """Add an assistant message to the conversation."""
-        self.messages.append({"role": "assistant", "content": message})
+    def add_assistant_message(self, message: str, tool_calls=None):
+        """Store the assistant call before appending its matching tool results."""
+        entry = {"role": "assistant", "content": message}
+        if tool_calls:
+            entry["tool_calls"] = [call.model_dump() if hasattr(call, "model_dump") else call
+                                   for call in tool_calls]
+        self.messages.append(entry)
 
     def add_tool_message(self, message: Any, id: str):
         """Add a tool response message."""
@@ -139,6 +144,11 @@ class HuggingFaceLLM:
             device_map=self.config.device,
             trust_remote_code=True,
         )
+
+        # A saved remote-code model is loaded in a fresh process here; training
+        # monkey-patches do not survive saving. Apply generation compatibility.
+        from nemotron_unsloth_patch import patch_nemotron_for_inference
+        patch_nemotron_for_inference(self.model)
 
         # Ensure pad token is set
         if self.tokenizer.pad_token_id is None:
@@ -309,6 +319,13 @@ class HuggingFaceLLM:
         if command == "bash":
             return parsed.get("cmd")
 
+        from pydantic import ValidationError
+        from nemo_gym_resources.langgraph_cli.app import CLIToolCall
+        try:
+            CLIToolCall.model_validate(parsed)
+        except ValidationError:
+            return None
+
         # Build the langgraph command
         cmd_parts = ["langgraph", command]
 
@@ -347,7 +364,7 @@ class HuggingFaceLLM:
             path = parsed.get("path") or parsed.get("output_path") or "./Dockerfile"
             cmd_parts.append(path)
 
-        return " ".join(cmd_parts)
+        return shlex.join(cmd_parts)
 
 
 class OpenAILLM:

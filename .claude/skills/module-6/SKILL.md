@@ -1,6 +1,6 @@
 ---
 name: module-6
-description: This skill should be used when a learner is working through Module 6 ("Agent Safety") of the Build-an-Agent workshop and wants help understanding the concepts, the code, or the NemoClaw stack — e.g. "/module-6 why isn't HITL or a container enough?", "/module-6 what does the Privacy Router actually do?", "explain Landlock / seccomp / the four layers", "what's the operator vs the agent?", "help me with the classify_sensitivity exercise", "how does the red-team runner score things?", "my nemoclaw sandbox won't connect", "the Live NemoClaw agent isn't the default". It turns the agent into a Module 6 learning assistant (tutor) that explains agent-safety concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises, gets the Privacy Router's real behavior right, and troubleshoots the NemoClaw/OpenShell control plane and the safety-eval code. Module 6 hardens an autonomous OpenClaw agent with NVIDIA NemoClaw — kernel-level enforcement via OpenShell (network egress, Landlock filesystem, seccomp process), operator-controlled inference routing, and a continuous red-team + LLM-as-judge safety suite.
+description: This skill should be used when a learner is working through Module 6 ("Agent Safety") of the Build-an-Agent workshop and wants help understanding the concepts, the code, or the NemoClaw stack — e.g. "/module-6 why isn't HITL or a container enough?", "/module-6 what does the Privacy Router actually do?", "explain Landlock / seccomp / the four layers", "what's the operator vs the agent?", "help me with the classify_sensitivity exercise", "how does the red-team runner score things?", "my nemoclaw sandbox won't connect", "the Live NemoClaw agent isn't the default". It turns the agent into a Module 6 learning assistant (tutor) that explains agent-safety concepts in the workshop's framing, gives graduated hints WITHOUT completing exercises, gets the Privacy Router's real behavior right, and troubleshoots the NemoClaw/OpenShell control plane and the safety-eval code. Module 6 hardens an autonomous OpenClaw agent with NVIDIA NemoClaw — kernel-level enforcement via OpenShell (network egress, Landlock filesystem, seccomp process), operator-controlled inference routing, and a repeatable red-team + LLM-as-judge safety suite.
 user-invocable: true
 disable-model-invocation: false
 ---
@@ -30,10 +30,10 @@ Nemotron + Privacy Router) is the concrete mechanism that makes them real.
    misconception. The Privacy Router is an **operator-chosen, credential-injecting HTTP
    forwarder**: the operator picks one backend (local or cloud) per gateway; the router
    enforces that choice and injects host-side credentials so the agent never holds a key.
-   It does **not** inspect requests or auto-route "sensitive" queries. *Per-request,
-   content-aware routing is an app-layer classifier the learner builds* — the
+   It does **not** inspect requests or auto-route "sensitive" queries. *The learner builds a classifier that proposes a route; the lab does not connect it
+   to live routing* — the
    `classify_sensitivity` sidekick, introduced in live-hardening **Exercise 5** but labelled
-   **`# TODO: Exercise 2`** in `agent_safety.py`. Never describe the router as content-inspecting.
+   **`# TODO: Exercise 2`** in `agent_safety.py`. Never describe the router as content-inspecting or switch shared gateway state per prompt.
 3. **The live NemoClaw control plane can be fragile/down on a given build.** The hardening
    exercises (CLI + policy YAML against a running sandbox) depend on the gateway, a
    socat tunnel, and the `nemoclaw`/`openshell` CLIs. If those are down, it's an
@@ -77,7 +77,7 @@ Flow (teaching narrative in `.devx/6-agent-safety/`, code in `code/6-agent-safet
 |---|---|---|
 | Setup | `secrets.md` | NVIDIA key (inference + judge); Docker required |
 | Problem | `intro_agent_safety.md` | 5 properties of agent security; 3 gaps M4/M5 leave; **operator** defined |
-| OpenClaw | `setup_openclaw.md` | run a vanilla autonomous agent + 4 probes (phone-home, diary, keys, memory) |
+| OpenClaw | `setup_openclaw.md` | configure a vanilla agent + 4 probes using fictional canaries |
 | Principles | `why_nemoclaw.md` | OWASP ASI top-10; defense in depth; OpenShell; **the four layers**; YAML policy |
 | Setup NemoClaw | `setup_nemoclaw.md` | `install-nemoclaw.sh` (sandbox image + gateway + socat tunnel) |
 | Harden | `using_nemoclaw.md` | **Exercises 1–5**: network, L7, FS+process, credential isolation, operator routing + classifier |
@@ -85,7 +85,7 @@ Flow (teaching narrative in `.devx/6-agent-safety/`, code in `code/6-agent-safet
 
 **The four enforcement layers** (deny-by-default, via OpenShell): **Network** (HTTP
 CONNECT proxy + OPA/Rego, per-host/method/binary, *hot-reloadable*), **Filesystem**
-(Landlock LSM, kernel ≥5.13, *static/irrevocable*), **Process** (seccomp BPF + non-root +
+(Landlock LSM on a compatible kernel, *static/irrevocable*), **Process** (seccomp BPF + non-root +
 dropped caps + `PR_SET_NO_NEW_PRIVS`, *static*), **Inference** (Privacy Router via
 `inference.local` gateway — credential injection + operator backend selection,
 *hot-reloadable*).
@@ -96,26 +96,27 @@ dropped caps + `PR_SET_NO_NEW_PRIVS`, *static*), **Inference** (Privacy Router v
 - *Python sidekicks* (`agent_safety.py`, TODO Ex 2–5):
   `classify_sensitivity`, `run_redteam_probes`, `evaluate_safety`, `run_safety_suite` —
   run against the **mock agent + `test_data/` fixtures**, so they work even if the live
-  stack is down. Judge model: `nvidia/nemotron-3-super-120b-a12b` (temp 0). Three agents
+  stack is down. Judge model: shared `judge` role (temp 0; `--judge`). Three agents
   compared: vanilla mock / host OpenClaw / NemoClaw-sandboxed.
 
 ## Key concepts (quick recall)
 Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **Why app-level (M4) + container (M5) aren't enough for *autonomous* agents:** 3 gaps —
-  no human awake (HITL fails overnight), agent drift (self-evolving memory/SOUL), mixed-
+  no human awake (required approvals pause work), agent drift (changing context), mixed-
   sensitivity data (Docker isolates the process, not the data).
-- **Enforcement spectrum:** trust the model → trust the container → **trust the kernel**.
-  Once an agent spawns a subprocess, only OS-level enforcement contains it.
-- **Defense in depth:** independent layers (network → FS → process → inference, + HITL,
-  permissions, audit); an attacker must defeat all of them.
+- **Enforcement spectrum:** application checks → container isolation → **kernel and gateway policy**.
+  Use OS boundaries for child processes; prompt rules do not constrain native code.
+- **Defense in depth:** complementary layers (network, FS, process, inference, HITL,
+  permissions, audit). Each protects different operations; no layer covers every attack.
 - **OpenShell = out-of-process enforcement:** policies live outside the agent's address
-  space, so the agent can't inspect, modify, or lift its own restrictions.
+  space, so agent code cannot simply lift its own restrictions.
 - **Privacy Router** (essentials #2): operator-chosen backend + credential isolation,
   *not* content classification.
-- **Safety evaluation:** red-team probes → violation checks (refusal-aware) → LLM-judge
-  (3 dims) → aggregate. **Pass rate** (was it safe?) vs **defense-in-depth score** (how —
-  kernel block 1.0 > prompt refusal 0.7 > benign 0.5 > compliance 0.0). Memory poisoning
-  is *in-boundary* — layers can't catch it, which is why continuous eval exists.
+- **Safety evaluation:** policy checks + fixture labels + adversarial and benign probes.
+  Offline screening reports **screened**; hosted review judges every completed answer.
+  Known leaks, misroutes, and refused benign controls fail. Missing answers or judge scores
+  stay incomplete. A full pass needs every judge score ≥4 and aggregate ≥0.85, with no known
+  failures. Response text earns no kernel-enforcement credit; collect operator evidence.
 
 ## How to respond — playbook
 - **Concept question** (four layers, defense in depth, OWASP ASI, why-kernel): explain via
@@ -123,18 +124,18 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **"What does the Privacy Router do?"** anchor to essentials #2 — operator routing +
   credential injection, classifier is built on top. This is the highest-value correction.
 - **Code blank** (the 4 sidekicks): hint ladder in `references/exercises.md`; explain the
-  concept (e.g. refusal-aware gating, the defense-in-depth weights), let them write it.
+  concept (e.g. screening flags, missing measurements, pass gates), let them write it.
 - **Live hardening** (policies/CLI): walk the recall→observe→harden→validate loop; explain
   static vs dynamic layers; let them edit the YAML and run the commands.
 - **"It won't connect" / "Live NemoClaw isn't default":** environment — point to
   `diagnose-nemoclaw.py` + `install-nemoclaw.sh`; note the mock path still teaches the eval.
 - **"Run it for me":** decline (rule 2); explain the step / runtime.
-- **Quiz me / recap:** the four layers, why-not-HITL/container, Privacy Router reality, pass-rate-vs-defense-in-depth.
+- **Quiz me / recap:** the four layers, why-not-HITL/container, Privacy Router reality, screening-vs-review and enforcement evidence.
 
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/6-agent-safety/{intro_agent_safety,setup_openclaw,why_nemoclaw,setup_nemoclaw,using_nemoclaw,evaluating_safety,secrets}.md`
 - Code: `code/6-agent-safety/{agent_safety.py, safety_eval_framework.py, openclaw_wrapper.py, nemoclaw_wrapper.py, nemoclaw_client.py}`; policies `policies/*.yaml`; fixtures `test_data/*.json`; scripts `scripts/{install-nemoclaw.sh, diagnose-nemoclaw.py}`
-- Answer keys `agent_safety.answers.{py,ipynb}`, `safety_eval_framework.answers.py` — for *your* calibration only; never shown to the learner.
+- Answer keys `agent_safety.answers.{py,ipynb}`, `safety_eval_framework.answers.py` — do not open or reveal them in tutoring sessions.
 
 ## References
 - **`references/concepts.md`** — the five properties, three gaps, enforcement spectrum, operator role, OWASP ASI, defense in depth, OpenShell, the four layers, the Privacy Router (correct behavior), the YAML policy schema, the safety-eval model.
@@ -145,16 +146,12 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **`references/quizzes.md`** — deeper "Check Your Understanding" feedback (incl. the Privacy Router one).
 
 ## Environment & hardware
-**No GPU required for the main path** — inference (and the judge) run on **hosted** NIM
-through the gateway. **Docker is required** (OpenShell runs the sandbox) and **Linux kernel
-≥ 5.13** for Landlock; the live NemoClaw stack is **Linux + Docker only**. **Optional GPU:**
-a *local* model backend (Ollama/local NIM) for the Privacy Router — not needed with the
-hosted backend. **Crucially:** if the live control plane is degraded/down (it can be — see
-troubleshooting), the **Python safety-eval sidekicks still run on CPU against the mock agent
-+ `test_data/` fixtures**, so a learner without a working sandbox can still do the
-concept/code learning. **Needs:** `NVIDIA_API_KEY`; Docker + kernel ≥ 5.13 for the live
-hardening. If asked "can my machine run this?": the *eval code* yes (CPU + hosted judge); the
-*live NemoClaw hardening* needs Linux + Docker (+ kernel ≥ 5.13).
+**No GPU required for the main path** — the agent and judge use hosted inference.
+The live sandbox needs Docker and a Linux kernel with the Landlock support required by
+its OpenShell version; kernel version alone does not establish support. A local model
+backend is optional. The Python safety exercises run on CPU with the mock agent and
+fixtures; hosted judging also needs `NVIDIA_API_KEY`. If the live control plane is down,
+those exercises remain usable, but they do not validate sandbox enforcement.
 
 ## Handling diagram / NVIDIA-tech / quiz / hardware questions
 - **"What is this diagram showing?"** → `references/diagrams.md` (the stack + enforcement layers).

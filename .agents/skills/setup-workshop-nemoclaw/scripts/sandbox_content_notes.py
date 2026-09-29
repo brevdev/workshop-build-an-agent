@@ -12,7 +12,7 @@ Two adjustments, both idempotent and sandbox-copy-local (never committed):
 
 2. Inject a short "SANDBOX NOTE" admonition (marker-guarded) at the top of
    lessons whose primary flow depends on egress/hardware this sandbox
-   deliberately lacks (npm/remote-MCP, Docker, GPU), pointing at the
+   restricts (egress, Docker, GPU), pointing at the
    sandbox-supported alternative documented in the same lesson.
 
 Usage: python sandbox_content_notes.py /sandbox/workshop-build-an-agent
@@ -26,146 +26,65 @@ MARKER = "<!-- [sandbox-note] -->"
 
 NOTES = {
     "1-build-an-agent/secrets.md": (
-        "> **🛡️ SANDBOX NOTE:** The `claude`/`codex` CLIs mentioned in the "
-        "AI-tutor callout below are **not** preinstalled in this sandbox and "
-        "cannot be installed here. `registry.npmjs.org` IS reachable (the "
-        "`npm_install` policy block opens it, which is how the module-5 client "
-        "is built), but **scoped** packages like `@anthropic-ai/claude-code` "
-        "are refused: npm requests scoped metadata as `/@scope%2Fname` and the "
-        "L7 proxy rejects request-targets containing an encoded `/`. The "
-        "sandbox's resident NemoClaw agent carries the same workshop tutor skills "
-        "(`workshop`, `module-1` … `module-7`) — ask it for module guidance "
-        "through its normal messaging channel instead."
-    ),
-    "5-deep-agents/build_deep_agents.md": (
-        "> **🛡️ SANDBOX NOTE:** Skip `source .venv/bin/activate` in the "
-        "commands below — `demo/backend/.venv` does not exist here and the "
-        "workshop venv is already active in every terminal. Run the "
-        "`python`/`uvicorn` commands directly, and pick another port if "
-        "module-2's MCP server holds 8000."
-    ),
-    "6-agent-safety/evaluating_safety.md": (
-        "> **🛡️ SANDBOX NOTE:** The collapsed Step-1/Step-2 memory-poisoning "
-        "walkthrough edits the OpenClaw workspace (`/sandbox/.openclaw/…`) "
-        "created on the earlier setup pages — OpenClaw cannot be installed in "
-        "this sandbox (npm egress), so treat those steps as a read-through. "
-        "The evaluation pipeline below runs fully here: it uses the built-in "
-        "mock agent and skips CLI-backed agents gracefully."
-    ),
-    "7-agent-harnesses/agent_skills.md": (
-        "> **🛡️ SANDBOX NOTE:** `npx skills add …` needs the npm registry, "
-        "which is egress-blocked here (the command fails fast rather than "
-        "hanging). The catalog skill it installs is GPU-oriented (cuDF) — see "
-        "the Harness Lab's note for the policy-gated "
-        "`install_nvidia_skill.sh` alternative, and the repo-shipped "
-        "`skills/` and `code/7-agent-harnesses/skills/` folders for local "
-        "skill examples you can open right now."
-    ),
-    "7-agent-harnesses/gpu_skills.md": (
-        "> **🛡️ SANDBOX NOTE:** This page's proof-of-GPU flow (`nvidia-smi`, "
-        "the cuDF skill) needs a GPU host — not available in this sandbox; "
-        "treat it as a read-through. The skill anatomy and harness-integration "
-        "mechanics it teaches are exercised hands-on (CPU-only) in the "
-        "Harness Lab."
+        "> **🛡️ SANDBOX NOTE:** Tutor CLIs need their own credentials and permitted install "
+        "routes. You can also ask the resident workshop tutor for module guidance."
     ),
     "2-agentic-rag/mcp.md": (
-        "> **🛡️ SANDBOX NOTE:** The remote-MCP path (PART 2A — "
-        "`npx`/`mcp.tavily.com`) **works here**, same as the bare-metal and AI "
-        "Workbench pathways: the operator's `npm_install` + `mcp_tavily` policy "
-        "blocks open it, and setup.sh injects `SANDBOX_MCP_ENV` into "
-        "`rag_agent.py`. That last part matters — the MCP stdio transport only "
-        "forwards HOME/LOGNAME/PATH/SHELL/TERM/USER to the child process, so "
-        "without it `npx mcp-remote` starts with no proxy config and dies at "
-        "`getaddrinfo EAI_AGAIN mcp.tavily.com`. Pass `'env': SANDBOX_MCP_ENV` "
-        "in your `MCP_CONFIG`. PART 2B (the local server) still works and is "
-        "worth doing as a contrast: the local server exposes one tool, the "
-        "remote MCP exposes five (search, extract, crawl, map, research)."
+        "> **🛡️ SANDBOX NOTE:** Remote MCP uses Python with an Authorization header. The "
+        "operator must allow the Python interpreter to reach `mcp.tavily.com`; no Node "
+        "subprocess is needed. The optional local MCP server uses `api.tavily.com`."
     ),
     "2-agentic-rag/migrate.md": (
-        "> **🛡️ SANDBOX NOTE:** Local NIM deployment needs Docker and a GPU — "
-        "neither exists in this sandbox. Treat this lesson as a read-through "
-        "here and run it on a GPU host pathway (Brev / AI Workbench)."
+        "> **🛡️ SANDBOX NOTE:** Local NIM needs Docker and a GPU, which this sandbox does "
+        "not provide. Run this optional step on a GPU host."
     ),
     "4-agent-customization/grpo_training.md": (
-        "> **🛡️ SANDBOX NOTE:** The training notebooks (`02_grpo_training`, "
-        "`03_run_agent`) require a GPU and torch/unsloth, which are "
-        "intentionally not installed in this sandbox — their first import "
-        "cell fails fast. `bash_agent.ipynb` and "
-        "`01_synthetic_data_generation.ipynb` run fully here."
+        "> **🛡️ SANDBOX NOTE:** The training and customized-model notebooks need a GPU and "
+        "are unavailable here. You can still work through the starter bash agent and "
+        "synthetic-data notebook."
     ),
     "4-agent-customization/run_customized.md": (
-        "> **🛡️ SANDBOX NOTE:** Running the customized model locally requires "
-        "the GPU-trained checkpoint from the previous lesson — not available "
-        "in this sandbox pathway."
+        "> **🛡️ SANDBOX NOTE:** Local customized inference needs the GPU-trained checkpoint "
+        "from the previous lesson. Use a GPU host for this step."
+    ),
+    "5-deep-agents/build_deep_agents.md": (
+        "> **🛡️ SANDBOX NOTE:** Use the already active workshop venv; skip `source "
+        ".venv/bin/activate`. Stop the optional Module 2 MCP server before starting this "
+        "backend on port 8000."
     ),
     "5-deep-agents/experience_deep_agent.md": (
-        "> **🛡️ SANDBOX NOTE:** Skip the `python3.12 -m venv` + `pip install` "
-        "step — the backend's dependencies are pre-installed in the workshop "
-        "venv (and `python3.12` does not exist here). Start the backend "
-        "directly: `cd demo/backend && uvicorn server:app --host 0.0.0.0 "
-        "--port 8000` (pick another port if module-2's MCP server holds 8000). "
-        "Keep the default **Llama** model — the streaming backend garbles "
-        "Nemotron's reasoning output (same streaming/tool-calling caveat the "
-        "module-2 client documents). Model ids are remapped in this sandbox "
-        "(Llama → 3.1-70b, DeepSeek → V4-Pro): `deepseek-r1-0528` is "
-        "retired from the NIM catalog, `deepseek-v4-flash` is listed but no "
-        "longer answers (every probe times out), and `llama-3.3-70b` answers "
-        "slower than the client's 60s timeout. **The Deep Agents Client tile "
-        "works on first click** — `setup.sh` pre-runs `npm install` + "
-        "`npm run build` in `demo/`, so the tile serves the real Deep Agent "
-        "Builder UI (if that pre-build ever fails, setup.sh logs a WARNING and "
-        "the tile falls back to a 'setup required' page instead of hanging). "
-        "Docker sandboxing is still unavailable: sandbox-mode falls "
-        "back to local execution with a loud warning — that warning IS this "
-        "module's security lesson."
+        "> **🛡️ SANDBOX NOTE:** Dependencies are installed in the active workshop venv. "
+        "Start the backend with `cd demo/backend && uvicorn server:app --host 0.0.0.0 --port"
+        " 8000`. Docker is unavailable here: choose local execution explicitly, which runs "
+        "inside this existing OpenShell sandbox. Requesting Docker must fail instead of "
+        "changing execution modes."
     ),
-    "7-agent-harnesses/harness_lab.md": (
-        "> **🛡️ SANDBOX NOTE:** The Hermes installer host "
-        "(`hermes-agent.nousresearch.com`) is egress-blocked — but this "
-        "sandbox already ships `hermes` (check `hermes --version`), so the "
-        "Hermes exercises can use the preinstalled CLI. "
-        "`scripts/install_nvidia_skill.sh` needs a `git clone` of "
-        "github.com/NVIDIA/skills, which the policy scopes out by default — "
-        "the operator can enable it with the 4 extra rules documented in the "
-        "operator skill's policy-blocks.md."
+    "6-agent-safety/evaluating_safety.md": (
+        "> **🛡️ SANDBOX NOTE:** The Python exercises can use the explicit mock mode here. "
+        "Mock screening and text scores do not establish that the live sandbox enforced a "
+        "policy."
     ),
     "6-agent-safety/setup_nemoclaw.md": (
-        "> **🛡️ SANDBOX NOTE:** The NemoClaw installer needs Docker (gateway "
-        "container) — unavailable in this sandbox. The safety-evaluation "
-        "pipeline in [Evaluating Safety](evaluating_safety.md) still runs: "
-        "it uses the built-in mock agent and skips CLI-backed agents "
-        "gracefully."
+        "> **🛡️ SANDBOX NOTE:** NemoClaw onboarding needs Docker on the host. Continue with "
+        "the Python evaluation exercises here, and use a host for the live hardening lab."
     ),
     "6-agent-safety/setup_openclaw.md": (
-        "> **🛡️ SANDBOX NOTE:** **Skip the `install.sh` command below** — "
-        "`openclaw.ai` is not in the egress policy. Install straight from npm "
-        "instead, which IS allowed (`openclaw` is an unscoped package, and the "
-        "sandbox already ships Node v24):\n"
-        ">\n"
-        "> ```bash\n"
-        "> npm config set prefix /sandbox/.npm-global\n"
-        "> npm install -g --no-audit --no-fund openclaw@latest\n"
-        "> export PATH=\"/sandbox/.npm-global/bin:$PATH\"\n"
-        "> openclaw --version\n"
-        "> ```\n"
-        ">\n"
-        "> Then run `openclaw onboard` for the Step-2 wizard (the install "
-        "script normally launches it for you). Everything else on this page "
-        "applies as written.\n"
-        ">\n"
-        "> ⚠️ **Whether the agent can then talk to a model depends on your "
-        "operator.** The wizard points OpenClaw at "
-        "`https://integrate.api.nvidia.com/v1`, but OpenClaw is a Node process "
-        "and the default `nvidia` policy block only permits the hermes/python "
-        "binaries — so inference fails with `ERR_PROXY_TUNNEL` unless the "
-        "operator applied the optional `openclaw_inference` block (see the "
-        "operator skill's policy-blocks.md). Without it, continue to "
-        "[Evaluating Safety](evaluating_safety.md): the evaluation pipeline "
-        "runs with the mock agent and skips CLI-backed agents gracefully.\n"
-        ">\n"
-        "> Note that OpenClaw running *here* is inside the sandbox, so it is "
-        "**not** the \"unsandboxed host agent\" this module contrasts against — "
-        "it inherits the same Landlock/seccomp/proxy enforcement as NemoClaw."
+        "> **🛡️ SANDBOX NOTE:** OpenClaw installed here inherits this sandbox’s controls; it"
+        " cannot represent the unsandboxed comparison in this lesson. Use a separate host "
+        "for that comparison."
+    ),
+    "7-agent-harnesses/agent_skills.md": (
+        "> **🛡️ SANDBOX NOTE:** Bundled skills are available locally. Installing the NVIDIA "
+        "skill also needs the operator’s scoped GitHub clone rules."
+    ),
+    "7-agent-harnesses/gpu_skills.md": (
+        "> **🛡️ SANDBOX NOTE:** This sandbox has no GPU. Use the CPU path here; run the cuDF"
+        " comparison on a GPU host."
+    ),
+    "7-agent-harnesses/harness_lab.md": (
+        "> **🛡️ SANDBOX NOTE:** Check `hermes --version` before installing another copy. "
+        "Pass the workshop Python path if Hermes uses a different runtime. The NVIDIA skill "
+        "installer needs the operator’s scoped GitHub clone rules."
     ),
 }
 
@@ -194,7 +113,10 @@ for rel, note in sorted(NOTES.items()):
         continue
     text = open(path).read()
     orig = text
-    if MARKER not in text:
+    if MARKER in text:
+        text = re.sub(re.escape(MARKER) + r"\n(?:>[^\n]*(?:\n|$))+",
+                      lambda _: MARKER + "\n" + note + "\n", text, count=1)
+    else:
         lines = text.split("\n")
         insert_at = 1 if lines and lines[0].startswith("<div class=\"dx-hero\"") else 0
         lines.insert(insert_at, f"\n{MARKER}\n{note}")
@@ -229,7 +151,7 @@ if os.path.exists(SC):
             "      sandbox egress policy (read-only), so this works here.</li>\n"
             "    <li><strong>Backend:</strong> start it per the module-5 lesson SANDBOX NOTE —\n"
             "      <span class=\"term\">cd " + REPO + "/demo/backend\n"
-            "uvicorn server:app --host 0.0.0.0 --port 8010</span>.</li>\n"
+            "uvicorn server:app --host 0.0.0.0 --port 8000</span>.</li>\n"
             "  " )
         text = text[:start] + replacement + text[end:]
         # rewrite_project_paths() only touches ```bash fences (markdown lessons);

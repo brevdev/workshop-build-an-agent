@@ -9,8 +9,7 @@ server for the learner** — diagnose, then let them act.
 - **Recommended:** A100/H100 (80GB) for the GRPO step — base model is
   `NVIDIA-Nemotron-Nano-9B-v2` in **bf16** (`load_in_4bit=False`, because Mamba2 kernels
   are 4-bit-incompatible), trained with LoRA + GRPO rollouts → VRAM-hungry.
-- **DGX Spark (GB10):** the notebook *runs*, but training is **much slower** (memory
-  bandwidth). Set expectations (~1–1.5 hr is the A100/H100 figure; expect longer on GB10).
+- **DGX Spark (GB10):** shared GPU/CPU memory must have enough free capacity for weights, optimizer and rollouts. Check the CUDA/Mamba build before loading the 9B model.
 - **OOM during training** (in order): reduce `num_generations` 4→2; `per_device_train_batch_size`→1;
   raise `gradient_accumulation_steps` to compensate; ensure gradient checkpointing on;
   reduce `max_seq_length` if prompts allow. Memory ≈ batch × num_generations × seq_length.
@@ -28,11 +27,11 @@ If the learner sees either symptom, confirm the patch import + call are present 
 ordered correctly (after load, before PEFT).
 
 ## The reward server (NeMo Gym)
-- Must be **running before GRPO** training: `cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8000`.
+- Must be **running before GRPO** training: `cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8001`.
 - `reward_fn` POSTs to `/verify`; **connection refused / timeout** → server not running,
-  wrong port, or wrong `verify_endpoint`. Sanity-check: `curl localhost:8000/...`.
+  wrong port, or wrong `verify_endpoint`. Sanity-check: `curl localhost:8001/...`.
 - Reward is in **[-1, 1]** (flag-accuracy: `(correct − wrong − extra)/total`, exact = 1.0).
-- Test the reward path manually before a full run: `reward_fn([{"content": '{"command": "new"}'}])` should return > 0 for a valid output.
+- Test the reward path manually before a full run: `reward_fn([[{"content": json.dumps(train_dataset[0]["answer"])}]], answer=[train_dataset[0]["answer"]], prompts=[train_dataset[0]["prompt"]])` should return1.0. Infrastructure failures now stop the run.
 
 ## Training behavior (interpretation — guide, don't conclude)
 - **Rewards not improving / stuck near 0:** reward-fn bug, LR too low (try 2–5×), data not
@@ -42,13 +41,13 @@ ordered correctly (after load, before PEFT).
   shortcut (e.g. any valid JSON → empty `{}`). Fix: more validation components / held-out test.
 - **Garbage output after training:** catastrophic forgetting (LR too high → lower 5–10×),
   overfit to reward (more/diverse data), or trained too long (use an earlier checkpoint).
-- **Val reward ≪ train reward:** overfitting — more data, weight decay, fewer steps.
+- **Val reward ≪ train reward:** inspect overfitting, distribution mismatch, and label errors.
 - **Inconsistent rewards** (same output, different score): make the reward deterministic.
 
 ## SDG / NeMo Data Designer
-- Uses hosted `nvidia/nemotron-3-nano-30b-a3b` via **NeMo Data Designer** (`data-designer`).
+- Uses hosted `nvidia/nemotron-3.5-lightning-30b-a3b` via **NeMo Data Designer** (`data-designer`).
   If SDG errors or is slow/unreachable, the learner can **use the provided dataset**
-  (`data/langgraph_cli/train.jsonl` = 225, `val.jsonl` = 25) and move to GRPO.
+  (`data/langgraph_cli/train.jsonl` = 213, `val.jsonl` = 25) and move to GRPO.
 - Bad/invalid synthetic outputs will confuse training (the reward scores them as
   failures) — spot-check coverage/balance/diversity/validity before training.
 
@@ -74,6 +73,8 @@ ordered correctly (after load, before PEFT).
 and to pull the base model from NGC/HF. The GRPO training itself runs **locally on the GPU**.
 
 ## "Just run/train it for me" (policy reminder, not a bug)
-Decline and explain: training is ~1–1.5 hr of GPU time and is the learner's to run; the
+Decline and explain: training is a substantial GPU run and is the learner's to run; the
 reward server and SDG are theirs to start too. Offer the provided dataset/checkpoint
 shortcuts and the A100/H100-vs-GB10 guidance instead.
+
+For hosted rate limits (HTTP 429), wait before retrying. The notebook starts with 25 rows and one worker; use the shipped cleaned dataset when quota is limited.

@@ -31,7 +31,7 @@ export function SettingsPanel({ sandboxMode, onToggleSandbox, skills, sandboxMap
             <h3 className="settings-section-name">Sandbox Mode</h3>
           </div>
 
-          <div className="sandbox-toggle-card" onClick={onToggleSandbox}>
+          <button type="button" role="switch" aria-checked={sandboxMode} aria-label="Sandbox Mode" className="sandbox-toggle-card" onClick={onToggleSandbox}>
             <div className="sandbox-toggle-left">
               <span className="sandbox-toggle-icon">{sandboxMode ? '🔒' : '⚠️'}</span>
               <div className="sandbox-toggle-info">
@@ -39,14 +39,14 @@ export function SettingsPanel({ sandboxMode, onToggleSandbox, skills, sandboxMap
                   {sandboxMode ? 'Sandbox Enabled' : 'Sandbox Disabled'}
                 </span>
                 <span className="sandbox-toggle-desc">
-                  {sandboxMode ? 'Tools run in isolated containers' : 'Tools run on local machine'}
+                  {sandboxMode ? 'File and shell tools use Docker' : 'Shell tools run as your user'}
                 </span>
               </div>
             </div>
             <div className={`sandbox-switch ${sandboxMode ? 'on' : 'off'}`}>
               <div className="sandbox-switch-thumb" />
             </div>
-          </div>
+          </button>
 
           {/* Sandbox status per tool */}
           <AnimatePresence>
@@ -57,7 +57,7 @@ export function SettingsPanel({ sandboxMode, onToggleSandbox, skills, sandboxMap
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <div className="sandbox-tool-label">Tool isolation status</div>
+                <div className="sandbox-tool-label">Requested tool isolation</div>
                 {sandboxableSkills.map(skill => {
                   const isSandboxed = sandboxMap[skill.id] || false;
                   return (
@@ -65,7 +65,7 @@ export function SettingsPanel({ sandboxMode, onToggleSandbox, skills, sandboxMap
                       <span className="sandbox-tool-icon">{skill.icon}</span>
                       <span className="sandbox-tool-name">{skill.name}</span>
                       <span className={`sandbox-tool-badge ${isSandboxed ? 'locked' : 'unlocked'}`}>
-                        {isSandboxed ? '🔒 Isolated' : '🔓 Local'}
+                        {isSandboxed ? '🔒 Docker requested' : '🔓 Local'}
                       </span>
                     </div>
                   );
@@ -78,11 +78,11 @@ export function SettingsPanel({ sandboxMode, onToggleSandbox, skills, sandboxMap
           <div className="sandbox-info-box">
             <div className="sandbox-info-row">
               <span>🛡️</span>
-              <span>Isolated execution in <a href="https://www.docker.com/" target="_blank" rel="noreferrer">Docker</a> containers</span>
+              <span>File and shell tools in <a href="https://www.docker.com/" target="_blank" rel="noreferrer">Docker</a> containers</span>
             </div>
             <div className="sandbox-info-row">
               <span>🔐</span>
-              <span>API keys & local files stay protected</span>
+              <span>Web search and RAG run in the app</span>
             </div>
             <div className="sandbox-info-row">
               <span>🧹</span>

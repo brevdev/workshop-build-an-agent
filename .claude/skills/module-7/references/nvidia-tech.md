@@ -7,10 +7,9 @@ harness, but to make **every** harness better — engine (Nemotron), safety (Nem
 portable capability (Verified Skills).
 
 ## NVIDIA
-- **Nemotron** (`nvidia/nemotron-3-super-120b-a12b`) — the **engine** under every harness in
-  the lab: the minimal harness, Hermes, OpenClaw all call it. Resource: https://build.nvidia.com.
+- **Nemotron** (`nvidia/nemotron-3-super-120b-a12b`) — the hosted model for the core lab and the configured optional Hermes track. Resource: https://build.nvidia.com.
 - **NIM / API Catalog** — hosted inference at `https://integrate.api.nvidia.com/v1`
-  (OpenAI-compatible). What lets the whole module run with just an `NVIDIA_API_KEY`.
+  (OpenAI-compatible). Used by the core lab; optional coding agents need their own model access.
 - **ChatNVIDIA** (`langchain_nvidia_ai_endpoints`) — NVIDIA's official LangChain integration;
   the client the lab uses to talk to Nemotron. (LangChain itself is third-party; this package is NVIDIA's.)
 - **NVIDIA Verified Skills** — [`github.com/NVIDIA/skills`](https://github.com/NVIDIA/skills):
@@ -34,8 +33,8 @@ portable capability (Verified Skills).
 - **OpenClaw** — the open, config-first autonomous-agent framework (Module 6's harness). NemoClaw
   *wraps* it; OpenClaw is not NVIDIA.
 - **OpenCode** — the open "own every layer" harness.
-- **Claude Code** (Anthropic) and **Codex** (OpenAI) — the two *subscription* harnesses;
-  closed-source, frontier models. They consume the open skills format too (the optional Ex 4 track).
+- **Claude Code** (Anthropic) and **Codex** (OpenAI) — coding agents with separate account access;
+  Codex CLI is open source; model/service access is separate. Both consume the skills format (the optional Ex 4 track).
 - **Cursor, Kiro** — other harnesses/editors that consume the open spec.
 - **Agent Skills spec** — [agentskills.io](https://agentskills.io): the **open** spec behind
   skill portability. Community/open, not NVIDIA-owned — that's *why* one skill runs everywhere.
@@ -53,4 +52,4 @@ portable capability (Verified Skills).
 >   contribution is the engine (Nemotron), the safety stack (NemoClaw), and verified skills that
 >   work *with* them.
 > - *"Does my GPU only work in NVIDIA's own harness?"* No — a verified skill drives your GPU in
->   *any* harness, including Claude Code and Codex (the GPU work runs locally).
+>   *any* harness, including Claude Code and Codex (when tool execution has GPU access).

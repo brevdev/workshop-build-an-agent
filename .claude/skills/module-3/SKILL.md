@@ -70,44 +70,35 @@ Flow (teaching narrative in `.devx/3-agent-evaluation/`, code in `code/3-agent-e
 |---|---|---|---|
 | Setup | `secrets.md` | NVIDIA key (judge + agents); Tavily (report agent); LangSmith optional | `secrets.env` |
 | Concepts | `intro_evaluation.md` | why eval; process vs outcome; the judge problem | — |
-| Metrics | `evaluation_metrics.md` | RAGAS 2×2 + score bands; task-agent metrics | — |
+| Metrics | `evaluation_metrics.md` | RAGAS 2×2 + metric definitions; task-agent metrics | — |
 | Datasets | `evaluation_data.md` | dataset shapes; real/synthetic/hybrid; SDG | `generate_*_eval_dataset.ipynb` (run as-is) |
 | Run | `running_evaluations.md` | judge prompts; run/judge/RAGAS/analyze both agents | `evaluation_framework.py` (1 blank) + `evaluate_*_agent.ipynb` |
 | Improve | `continuous_improvement.md` | measure→analyze→…→repeat; 5 strategies; A/B | — |
 
 **What they evaluate:** the **RAG agent (Module 2)** and the **Report agent
 (Module 1)**. Shared code: `evaluation_framework.py` (judge LLM, embeddings, eval
-prompts, metric functions). **Judge model:** `nvidia/nemotron-3-super-120b-a12b` at
-**temperature 0** (consistent grading). Datasets in `data/evaluation/`
+prompts, metric functions). **Judge model:** the configured shared `judge` role at
+**temperature 0** (reduces sampling variation; does not guarantee repeatability). Datasets in `data/evaluation/`
 (`rag_agent_test_cases.json` = 12 cases; `report_agent_test_cases.json` = 6 topics),
-or learner-generated `synthetic_*` versions.
+or reviewed learner-generated `synthetic_*` subsets. Unreviewed candidates are not selected automatically.
 
 ## Key concepts (quick recall)
 Full reference + the workshop's framing in `references/concepts.md`. Essentials:
-- **Process vs outcome; localize before you fix.** A wrong RAG answer is either **bad
-  retrieval** or **bad generation** — measure them separately.
-- **RAGAS 2×2 (all score 0–1):** **Context Precision** + **Context Recall** = retrieval;
-  **Faithfulness** + **Answer Relevancy** = generation. **Bands differ by metric type** (per
-  `evaluation_metrics.md`): retrieval — Poor <0.50 / Fair 0.50–0.69 / Good 0.70–0.89 / Excellent 0.90+;
-  generation is stricter — Poor <0.60 / Fair 0.60–0.74 / Good 0.75–0.89 / Excellent 0.90+ (so a 0.72
-  faithfulness is *Fair*, not Good — never flatten one band table across all four).
-- **The faithful-but-irrelevant trap:** an answer can be fully grounded (high
-  faithfulness) yet not answer the question (low relevancy) — they measure different
-  things.
-- **The judge problem:** LLM-as-a-judge (primary, scalable, but biased/costly), human
-  (gold standard, sparing), deterministic checks (cheap, objective, shallow). **Calibrate**
-  the judge against a few human ratings before trusting it.
-- **Datasets:** RAG = question + ground-truth + expected-context + category; Report =
-  topic + expected-sections + quality-criteria. Real vs **synthetic (SDG)** vs hybrid;
-  synthetic needs human validation.
+- **Separate execution from quality.** Failed agent calls, judge calls, and invalid judge JSON are missing measurements, not low-quality answers. Review coverage with every mean.
+- **RAGAS metrics:** context precision is rank-sensitive average precision; context recall estimates reference-claim coverage. Faithfulness checks support in observed contexts; answer relevancy checks the match to the question. There are no universal production-readiness score bands.
+- **Scales differ:** custom 1–5 rubric scores are divided by 5 (0.2–1.0). This is not the same scale as RAGAS. Inspect per-metric statuses and denominators.
+- **Faithful but irrelevant:** a supported answer may still miss the question. Good retrieval also does not guarantee a good answer.
+- **Judge agreement:** human ratings need clear rubrics and independent review. A few examples start a discussion; they do not establish calibration.
+- **Datasets:** proposed RAG references require source review. Evaluation contexts come from the agent’s actual retrieval artifacts, never a second retrieval. Report evidence support uses actual search excerpts, not the judge’s memory.
+- **Fair comparison:** unique runs retain data, hashes, prompts, models, settings, and failures. Compare paired successful cases on the same input set while checking configuration and coverage changes.
 - **Improvement cycle:** measure → analyze → hypothesize → implement → validate →
   repeat. Map a low metric to a strategy (prompt, retrieval, model, architecture, data).
 
 ## How to respond — playbook
 - **Concept question** ("what is context recall?"): explain via `references/concepts.md`
-  (definition, retrieval/generation, score band), cite the teaching page, offer a check.
+  (definition, inputs, retrieval/generation), cite the teaching page, offer a check.
 - **"How do I read my scores?" / "faithfulness is 0.6":** guide interpretation — which
-  band? what do the judge's explanations say? retrieval or generation? Point to the
+  metric and scale? what do the judge's explanations and coverage say? Point to the
   module's "where to look" tables; let them conclude. Don't prescribe the fix outright.
 - **Code blank** (load dataset, run agent, `FAITHFULNESS_PROMPT`): hint ladder in
   `references/exercises.md`; explain the concept (e.g. the 4 eval-prompt principles),
@@ -123,7 +114,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/3-agent-evaluation/{intro_evaluation,evaluation_metrics,evaluation_data,running_evaluations,continuous_improvement,secrets}.md`
 - Code: `code/3-agent-evaluation/{evaluation_framework.py, evaluate_rag_agent.ipynb, evaluate_report_agent.ipynb, generate_rag_eval_dataset.ipynb, generate_report_eval_dataset.ipynb}`; datasets `data/evaluation/*.json`
-- Answer keys `evaluation_framework.answers.py`, `evaluate_*_agent.answers.ipynb` — for *your* calibration only; never shown to the learner.
+- Answer keys `evaluation_framework.answers.py`, `evaluate_*_agent.answers.ipynb` — contributor validation assets. Do not open or reveal them during tutoring.
 
 ## References
 - **`references/concepts.md`** — evaluation concepts, RAGAS metrics + bands, the judge problem, dataset design, the improvement cycle, alternative frameworks.

@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 07 / SETUP" data-title="Two minutes of setup." data-sub="One NVIDIA API key is all this module needs - set it once and every harness ahead just works." data-meta="NEEDS::NVIDIA_API_KEY|TIME::2 min"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / SETUP" data-title="Two minutes of setup." data-sub="The core lab uses an NVIDIA API key. Optional harnesses need their own setup." data-meta="NEEDS::NVIDIA_API_KEY|TIME::2 min"></div>
 
 <img src="_static/robots/spyglass.png" alt="Secrets Management Robot" style="float:right;max-width:240px;margin:20px;" />
 
@@ -13,7 +13,7 @@ Use the <button onclick="openVoila('code/secrets_management/secrets_management_7
 
 ## NVIDIA API Key
 
-This key powers every harness you'll drive in this module — from the bare-bones agent loop you build by hand to the OpenClaw assistant from Module 6. All of them call NVIDIA Nemotron through the same endpoint.
+This key powers the lab’s Nemotron calls and can be reused in the optional Hermes custom-endpoint setup. Claude Code and Codex require their own model access.
 
 NGC is the NVIDIA GPU Cloud. This is the repository for all NVIDIA software, models, and more. For this workshop, we will need an API Key in order to access models.
 

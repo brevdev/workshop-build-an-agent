@@ -3,11 +3,11 @@
 You have your dataset. Now how do you teach the model with it?
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide"><h4>SFT - SUPERVISED FINE-TUNING</h4>Memorize: input X produces output Y. Best for simple tasks with abundant data.</div>
+  <div class="dx-cell is-wide"><h4>SFT - SUPERVISED FINE-TUNING</h4>Learn from supervised input/output examples. Quality and coverage matter.</div>
   <div class="dx-cell is-wide"><h4>GRPO - RL-BASED</h4>Try multiple outputs, learn which score highest. Best for complex tasks with verifiable correctness.</div>
 </div>
 
-**GRPO (Group Relative Policy Optimization)** is a form of reinforcement learning with verifiable rewards (RLVR) that generates multiple candidate responses per prompt, scores them with a reward function, and reinforces the better ones. This exploration often discovers solutions that pure imitation would miss.
+**GRPO (Group Relative Policy Optimization)** compares rewards within a group of responses to guide policy updates. This lab uses verifiable CLI labels as rewards — reinforcement learning with verifiable rewards (RLVR).
 
 <!-- fold:break -->
 
@@ -51,17 +51,18 @@ GRPO (Group Relative Policy Optimization) is a form of reinforcement learning th
 3. **Computes advantages** — how much better each output is compared to the group average
 4. **Updates weights** to increase probability of higher-reward outputs
 
-**The key insight**: Instead of saying "memorize this exact answer," GRPO says "explore the output space and learn which patterns score higher." This exploration often discovers better solutions than pure imitation.
+**The key insight**: SFT learns from target answers; GRPO learns from rewards on sampled answers. Better rewards can help, but exploration alone does not guarantee better generalization.
 
 **Mathematical intuition**:
 ```
-Advantage = (reward - group_mean) / group_std
-Loss = -log(probability) * advantage
+Advantage ≈ (reward - group_mean) / (group_std + epsilon)
+Positive advantage increases the sampled answer’s probability.
+The trainer also clips policy updates; this is an intuition, not its full loss.
 ```
 
-Outputs that score above the group average get reinforced; below-average outputs get suppressed. The model learns *what makes outputs good*, not just specific answers.
+Outputs that score above the group average get reinforced; below-average outputs get suppressed. The model optimizes this reward, including any mistakes in the verifier.
 
-**Why "Group Relative"?** By comparing within a group rather than to a fixed baseline, GRPO adapts to the model's current ability level. Early in training when all outputs are poor, it still finds the *relatively* better ones to reinforce.
+**Why "Group Relative"?** By comparing within a group rather than to a fixed baseline, GRPO adapts to the model's current ability level. When all outputs receive the same reward, the group provides no relative learning signal.
 
 </div>
 </div>
@@ -74,9 +75,9 @@ Outputs that score above the group average get reinforced; below-average outputs
 | Aspect | SFT (Supervised Fine-Tuning) | GRPO (RL-based) |
 |--------|------------------------------|-----------------|
 | **Learning signal** | "Copy this exact output" | "Outputs like this score higher" |
-| **Data requirement** | Need perfect gold outputs | Need reward signal (can be noisy) |
-| **Exploration** | None — imitates only | Yes — tries variations |
-| **Overfitting risk** | High if data is small | Lower due to exploration |
+| **Data requirement** | High-quality target answers | A reliable reward signal |
+| **Exploration during training** | Learns from supplied targets | Samples and scores variations |
+| **Overfitting risk** | Depends on data and training | Also present; includes reward hacking |
 | **Best for** | Abundant high-quality data | Verifiable correctness, structured outputs |
 
 **Use SFT when:**
@@ -140,7 +141,7 @@ Your reward function is the most important piece of GRPO training. It defines wh
 The power of RLVR is that rewards are *objective*. For CLI commands:
 
 ```python
-# Good: Code-verifiable
+# Code-verifiable command check; the full reward also compares the reference and flags
 def reward(output):
     try:
         parsed = json.loads(output)
@@ -155,12 +156,12 @@ def reward(output):
     return llm_judge("Is this a good CLI command?", output)
 ```
 
-LLM judges add latency, cost, and inconsistency. For structured outputs, code verification is always better.
+For these labeled CLI outputs, code verification is fast and repeatable. It checks the criteria you encode; broader usefulness may need separate evaluation.
 
 </details>
 
 <details class="dx-peek">
-<summary>2. Granular — Partial credit beats binary pass/fail</summary>
+<summary>2. Granular — Partial credit where it helps</summary>
 
 A purely binary reward (1.0 or 0.0) provides sparse signal. The model doesn't know *how close* it was.
 
@@ -210,13 +211,13 @@ The <button onclick="goToLineAndSelect('code/4-agent-customization/nemo_gym_reso
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">GATE, THEN GRADE - HOW A SCORE IS BUILT</p>
   <div class="dx-tax">
-    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">valid JSON?</span><div class="dx-tax-track"><div class="dx-tax-fill">gate</div></div><span class="dx-tax-note">no → -1.0, no partial credit</span></div>
+    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">valid CLI object?</span><div class="dx-tax-track"><div class="dx-tax-fill">gate</div></div><span class="dx-tax-note">no → -1.0, no partial credit</span></div>
     <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">right command?</span><div class="dx-tax-track"><div class="dx-tax-fill">gate</div></div><span class="dx-tax-note">no → -1.0, no partial credit</span></div>
     <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">flag accuracy</span><div class="dx-tax-track"><div class="dx-tax-fill">grade</div></div><span class="dx-tax-note">(correct − wrong − extra) / total</span></div>
   </div>
 </div>
 
-An output that parses **and** picks the right command earns a graded score from its flags: `+1` for each correct flag, `-1` for each wrong value or hallucinated extra, divided by the number of expected flags (then clipped to `[-1, 1]`). A perfect call scores `1.0`; a correct command with one of two flags wrong scores `0.0`.
+An output that matches the schema **and** picks the right command earns a graded score from its flags: `+1` for each correct flag, `-1` for each wrong value or hallucinated extra, divided by the number of expected flags (then clipped to `[-1, 1]`). A perfect call scores `1.0`; a correct command with one of two flags wrong scores `0.0`.
 
 **Why gates instead of a weighted sum?** Because invalid JSON and the wrong command are *categorical* failures, not near-misses. If we handed out `0.2` just for emitting valid JSON, an empty `{}` would farm free reward — the exact reward-hacking trap from the previous section. Gating those to `-1.0` keeps the signal aligned with the real goal: a correct, well-formed CLI call.
 
@@ -243,15 +244,15 @@ To make this concrete, here's what happens in a single training step. The model 
   <span class="dx-term-title">grpo-step</span>
   <span class="dx-term-line" data-kind="prompt">Create a new react-agent project in ./myapp</span>
   <span class="dx-term-line" data-kind="think" data-delay="300">Generate 4 candidates, score each with the NeMo Gym verifier, reinforce the best.</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="250">[1] {command: new, template: react-agent-python, path: ./myapp}   reward 1.00</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="200">[2] {command: new, template: react-agent-python}   reward 0.50</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="200">[3] {command: new, template: nextjs, path: ./myapp}   reward 0.00</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="250">[1] {"command":"new","template":"react-agent-python","path":"./myapp"}   reward 1.00</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[2] {"command":"new","template":"react-agent-python"}   reward 0.50</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="200">[3] {"command":"new","template":"nextjs","path":"./myapp"}   reward 0.00</span>
   <span class="dx-term-line" data-kind="tool" data-delay="200">[4] not valid json   reward -1.00</span>
   <span class="dx-term-line" data-kind="think" data-delay="350">Candidate 1 is above the group average -> reinforce; candidate 4 far below -> suppress.</span>
-  <span class="dx-term-line" data-kind="answer" data-delay="400">Over 50+ steps the model converges on candidate-1-style outputs.</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="400">Updates favor higher-reward outputs; held-out evaluation checks whether they generalize.</span>
 </div>
 
-GRPO computes that Response #1 scored above the group average and reinforces its patterns. Response #4 scored far below, so those patterns are suppressed. Over many steps, the model converges toward reliably producing correct outputs.
+Response #1 scores above the group average; Response #4 scores below it. GRPO uses these differences to guide updates. Improvement depends on the data, reward and training settings.
 
 <!-- fold:break -->
 
@@ -260,7 +261,7 @@ GRPO computes that Response #1 scored above the group average and reinforces its
 Open a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> window — Start reward server:
 
 ```bash
-cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8000
+cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8001
 ```
 
 Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/02_grpo_training.ipynb');"><i class="fa-solid fa-flask"></i> 02_grpo_training.ipynb</button>
@@ -271,7 +272,7 @@ Then open the following notebook: <button onclick="openOrCreateFileInJupyterLab(
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'def reward_fn');"><i class="fas fa-code"></i> reward_fn</button> — Call the NeMo Gym `/verify` endpoint to score model outputs.
 
-Implement the reward function by making a call to the `/verify` endpoint. 
+Implement the reward function by making a call to the `/verify` endpoint.
 
 This is the bridge between GRPO and verifiable rewards: each model completion gets sent to the NeMo Gym server, which returns a reward score based on JSON validity, command correctness, and flag accuracy. Implement `resp` by posting a request to `verify_endpoint` with `json` set to `verify_request` and the `timeout` set to 30s.
 
@@ -289,7 +290,7 @@ resp = requests.post(verify_endpoint, json=verify_request, timeout=30)
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'training_args = GRPOConfig');"><i class="fas fa-code"></i> GRPOConfig</button> — Configure the GRPO hyperparameters.
 
-Implement some key training configuration parameters. 
+Implement some key training configuration parameters.
 
 These three settings control the core training dynamics: `num_generations` is how many candidate outputs GRPO generates per prompt (more = richer comparison signal), `learning_rate` controls the step size for weight updates, and `max_steps` caps the total training iterations. Implement `training_args` with `num_generations=4`, `learning_rate=1e-5`, and `max_steps=50`.
 
@@ -315,7 +316,7 @@ training_args = GRPOConfig(
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/02_grpo_training.ipynb', 'trainer = GRPOTrainer');"><i class="fas fa-code"></i> GRPOTrainer</button> — Wire up the model, reward function, and dataset into the trainer.
 
-Implement the `trainer` as a `GRPOTrainer` and wire up everything we've defined so far. 
+Implement the `trainer` as a `GRPOTrainer` and wire up everything we've defined so far.
 
 The `GRPOTrainer` orchestrates the full training loop shown above: generate completions, score them via the reward function, and reinforce the best ones. Implement `trainer` with `model`, `processing_class` set to `tokenizer`, `reward_funcs` as a single-item list containing `reward_fn`, `args` set to `training_args`, and the `train_dataset`.
 
@@ -335,19 +336,23 @@ trainer = GRPOTrainer(
 
 <!-- fold:break -->
 
+The notebook defaults to the supplied reviewed dataset. To train on your reviewed SDG output, change `DATA_DIR` to `Path("data/langgraph_cli/generated")` in its data-loading cell.
+
 ### Train the Agent
 
-Run `trainer.train()` notebook cell — depending on the number of iterations, this cell should take around **1 - 1.5 hours** to complete on an A100/H100.
+Run the training cell. Runtime depends on GPU, generation length, and the number of steps.
 
-> While the notebook should run on a DGX Spark (GB10), we highly recommend an A100/H100 GPU instance for faster training due to memory bandwidth constraints. 
+> Use a GPU with enough **free** memory for the model, optimizer and rollouts. Check memory availability before starting; lower batch size or generation length if needed.
 
-The customized model should appear in this location when completed: `outputs/grpo_langgraph_cli/merged_model/`. 
+The training cell first scores the base 9B on the held-out set, then scores the trained version with the same prompts and greedy decoding. Read `outputs/grpo_langgraph_cli/held_out_comparison.json` for successes and regressions. The earlier hosted starter agent is a different model, so it is not this baseline.
+
+After the save cell, the customized model should appear in: `outputs/grpo_langgraph_cli/merged_model/`.
 
 <!-- fold:break -->
 
 ## Troubleshooting
 
-If you're running into issues, click on any of the following to learn more. 
+If you're running into issues, click on any of the following to learn more.
 
 <details class="dx-peek is-solution">
 <summary>Rewards not improving</summary>
@@ -355,22 +360,22 @@ If you're running into issues, click on any of the following to learn more.
 **Possible causes and fixes:**
 
 1. **Reward function bug**
-   - Test manually: `reward_fn([{"content": '{"command": "new"}'}])`
-   - Should return > 0 for valid outputs
+   - Test a known row: `reward_fn([[{"content": json.dumps(train_dataset[0]["answer"])}]], answer=[train_dataset[0]["answer"]], prompts=[train_dataset[0]["prompt"]])`
+   - Its reference answer should return `1.0`; malformed outputs return `-1.0`. Server failures stop training.
 
 2. **Learning rate too low**
    - Try increasing by 2x or 5x
-   - Default 1e-5 is conservative; 5e-5 often works better
+   - Compare held-out results and stop if updates become unstable
 
 3. **Data lacks diversity**
    - Check: Are all training examples similar?
    - SDG should produce varied phrasings and command types
 
 4. **Not enough training steps**
-   - 50 steps is a minimum; try 100-200 for complex tasks
+   - 50 steps is a starting point; increase only while held-out results improve
 
 5. **Model capacity too small**
-   - Larger base models learn faster (but cost more)
+   - A different base model may help, but requires a new baseline and more resources
 
 </details>
 
@@ -414,7 +419,7 @@ If you're running into issues, click on any of the following to learn more.
 <details class="dx-peek is-solution">
 <summary>Validation reward much lower than training reward</summary>
 
-This indicates **overfitting** — the model memorized training examples rather than learning generalizable patterns.
+This can indicate **overfitting**, distribution mismatch, or label errors. Inspect held-out failures before changing training settings.
 
 **Solutions:**
 1. Add more training data (SDG can generate more)

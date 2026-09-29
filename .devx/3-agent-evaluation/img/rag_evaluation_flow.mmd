@@ -1,27 +1,23 @@
 graph TB
     A[User Question] --> B[RAG Agent]
-    B --> C[Retrieval]
-    C --> D[Retrieved Contexts]
+    B --> C[Retrieval Tool]
+    C --> D[Actual Retrieved Contexts]
     D --> B
     B --> E[Generated Response]
-    
     D --> F[Context Metrics]
-    E --> G[Generation Metrics]
-    A --> G
-    
+    R[Reviewed Reference Answer] --> F
+    A --> F
+    D --> J[Faithfulness]
+    E --> J
+    E --> K[Answer Relevancy]
+    A --> K
     F --> H[Context Precision]
     F --> I[Context Recall]
-    
-    G --> J[Faithfulness]
-    G --> K[Answer Relevancy]
-    
-    H --> L[Overall Score]
+    H --> L[Per-metric Scores + Coverage]
     I --> L
     J --> L
     K --> L
-    
     style A fill:#4CAF50
     style B fill:#2196F3
     style E fill:#FF9800
     style L fill:#9C27B0
-

@@ -1,8 +1,6 @@
-<div class="dx-hero" data-eyebrow="MODULE 07 / 01 - CONCEPTS" data-title="The LLM never remembered anything." data-sub="The harness is the layer that did - memory, tool execution, planning, and the token budget all live outside the model." data-meta="READ::20 min|CONCEPTS::5 responsibilities"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 01 - CONCEPTS" data-title="Who keeps the conversation?" data-sub="The harness is the layer that did - the harness supplies memory, runs tools, and manages context." data-meta="READ::20 min|CONCEPTS::5 design choices"></div>
 
-Here's an uncomfortable truth about every agent you've built in this workshop: the LLM never remembered anything, never called a tool, and never planned a single step.
-
-The model is a stateless function. Tokens in, tokens out. Everything that made your agents feel like *agents* — the memory, the tool execution, the planning loops, the self-evolving IDENTITY.md and MEMORY.md files from Module 6 — lived in a layer you've been using all along without naming it: the **harness**.
+The model reasons over the context it receives: it can propose plans and request tools. The **harness** runs those tools, carries messages forward, and supplies saved memory. You have used this layer throughout Modules 1–6.
 
 <!-- fold:break -->
 
@@ -14,7 +12,7 @@ Every module so far handed you an agent. Seen through this module's lens, it als
   <div class="dx-cell"><h4>MODULE 1</h4><span class="dx-big">Report agent</span>A hand-rolled ReAct loop</div>
   <div class="dx-cell"><h4>MODULE 2</h4><span class="dx-big">RAG help desk</span>LangGraph + MCP tools</div>
   <div class="dx-cell"><h4>MODULE 3</h4><span class="dx-big">Evaluation</span>Judging what the loop produced</div>
-  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>Training + Superpowers skills</div>
+  <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>Synthetic data + policy training</div>
   <div class="dx-cell"><h4>MODULE 5</h4><span class="dx-big">Deep agent</span>deepagents + Docker sandboxing</div>
   <div class="dx-cell is-wide"><h4>MODULE 6</h4><span class="dx-big">Hardened OpenClaw</span>An always-on agent under kernel enforcement</div>
 </div>
@@ -45,23 +43,23 @@ Here's what one turn of that agentic loop looks like from the harness's side —
 This separation matters because the two layers are **independent choices**:
 
 - **Same model, different harness** → a very different agent. Nemotron in a bare completion loop vs. Nemotron inside OpenClaw are night and day.
-- **Same harness, different model** → the capability ceiling moves, but the behavior and UX stay consistent.
+- **Same harness, different model** → the interface can stay familiar while reasoning, tool use, latency, and results change.
 
-And it's why understanding the harness matters more than ever. Models are converging. Harnesses are differentiating. To shape the behavior, reliability, and UX of the agent you're driving, you have to engineer its harness.
+The model and the harness both shape behavior, reliability, and the user experience. Evaluate them together.
 
 <!-- fold:break -->
 
-## The Five Things Harnesses Own
+## Five Harness Design Choices
 
 <img src="_static/robots/blueprint.png" alt="Blueprint Robot" style="float:right;max-width:240px;margin:20px;" />
 
-Every harness — from a 50-line loop to Claude Code — owns the same five responsibilities. You've already touched each one in this workshop:
+Harnesses differ in which capabilities they provide. These five choices connect the earlier modules to this lab:
 
 | # | Responsibility | What it means | Where you've seen it |
 |---|---|---|---|
-| 1 | **Memory** | What persists across sessions; what gets written, indexed, and recalled into context | OpenClaw's `MEMORY.md` and `USER.md` (Module 6); `MemorySaver` in deepagents (Module 5) |
-| 2 | **Self-evolution** | The agent improving its own scaffolding: writing its own memories, skills, and config | Your OpenClaw agent rewriting its `IDENTITY.md` and `MEMORY.md` as it learns (Module 6) |
-| 3 | **Skills** | Packaged procedural knowledge, loaded into context only when relevant | The Superpowers skills in Module 4; skill toggles in the Module 5 client |
+| 1 | **State and memory** | What carries across turns; durable memory needs persistent storage | Message history (Module 1); checkpointing and files (Module 5) |
+| 2 | **Optional self-evolution** | Proposing reusable instructions from experience, with validation and review | The skill-writing exercise at the end of this lab |
+| 3 | **Skills** | Packaged procedures loaded when requested | Skill loading (Module 2); skill toggles (Module 5) |
 | 4 | **Tool calling** | Tool schemas, execution, sandboxing, permissions, retries | MCP servers (Module 2); Docker sandboxing and HITL approval (Module 5) |
 | 5 | **Token efficiency** | The context window is the scarce resource — compaction, lazy loading, sub-agent isolation | Sub-agent delegation in Module 5 keeping the main context clean |
 
@@ -69,13 +67,13 @@ Every harness — from a 50-line loop to Claude Code — owns the same five resp
 
 ## The Context Tax
 
-Every piece of harness machinery has a price, paid in context tokens on **every single model call**:
+Every item included in a model request occupies context:
 
 - The system prompt explaining how the harness works
 - Tool schemas for every registered tool
 - Skill descriptions, memory excerpts, environment state
 
-We call this recurring overhead the **context tax**. A maximal harness might spend 7,000–10,000 tokens per turn before the user says a word. A minimal harness can get under 1,000. Neither is wrong — they're different approaches:
+We call this recurring overhead the **context tax**. The lab estimates about 400 tokens for its minimal setup and 3,922 for its larger bundled example. These are prompt-size estimates, not vendor benchmarks or billing totals:
 
 > **The maximal approach:** rich built-in capability (sub-agents, plan modes, large tool suites) is worth the overhead, because the model uses it to do more per turn.
 >
@@ -90,26 +88,26 @@ We call this recurring overhead the **context tax**. A maximal harness might spe
   </div>
 </div>
 
-In the lab, you'll measure this tax yourself — token by token — and implement the single most effective tax cut there is: **lazy skill loading**.
+In the lab, you'll estimate this overhead and reduce the initial skill context with **lazy loading**.
 
 <!-- fold:break -->
 
 ## You've Been Using a Harness All Along
 
-Let's map the OpenClaw always-on assistant that ran on markdown files in Module 6 to the five harness responsibilities:
+In an OpenClaw deployment, these choices appear in configuration and workspace files:
 
 - `MEMORY.md`, `USER.md`, `state/` → **memory**
-- The agent rewriting its own workspace files on every heartbeat → **self-evolution**
+- Permission to propose and save reusable procedures → **optional self-evolution**
 - The skills option in the setup wizard → **skills**
 - The gateway brokering filesystem, shell, and network access → **tool calling**
-- The `contextWindow` setting you bumped to 131,072 → **token efficiency**
+- Model context limits and history compaction → **context management**
 
 OpenClaw *is* a harness. So is deepagents. So is the bare ReAct loop from Module 1 — just a very small one.
 
 <div class="dx-island dx-quiz">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
   <p class="dx-quiz-q">Lazy skill loading — keeping skills as one-line descriptions until the agent invokes them — belongs to which harness responsibility?</p>
-  <button class="dx-quiz-opt" data-fb="Memory is cross-session persistence - lazy loading happens within a single turn's context.">Memory</button>
+  <button class="dx-quiz-opt" data-fb="Memory retains information within or across sessions. Here the focus is how much skill text enters the initial context.">Memory</button>
   <button class="dx-quiz-opt" data-fb="Tool schemas are part of the context tax, but lazy loading is a budget decision, not an execution mechanism.">Tool calling</button>
   <button class="dx-quiz-opt" data-right data-fb="Right - keeping one-line descriptions until a skill is invoked is spending the context budget deliberately.">Token efficiency</button>
   <button class="dx-quiz-opt" data-fb="Self-evolution is the agent rewriting its own scaffolding - lazy loading is the harness managing what enters context.">Self-evolution</button>

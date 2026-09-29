@@ -30,6 +30,14 @@ import os
 from typing import Optional
 
 
+def patch_nemotron_for_inference(model):
+    """Apply the generation fix after loading a fresh Nemotron checkpoint."""
+    causal_lm = model.get_base_model() if hasattr(model, "get_base_model") else model
+    name = causal_lm.__class__.__name__
+    if "NemotronH" in name and hasattr(causal_lm, "prepare_inputs_for_generation"):
+        _patch_prepare_inputs_for_generation(causal_lm, name)
+
+
 def patch_nemotron_for_unsloth_grpo(model):
     """
     Patch Nemotron's forward method to respect UNSLOTH_RETURN_HIDDEN_STATES.
@@ -225,13 +233,37 @@ def verify_patch(model, tokenizer):
         # Hidden dim for Nemotron-Nano-9B is 4480
         # Vocab size is 131072
         # If patch is working, we should get hidden_dim (4480) not vocab_size
-        is_working = test_output.logits.shape[-1] == 4480
+        is_working = test_output.logits.shape[-1] == model.config.hidden_size
         
         if is_working:
             print("✓ Monkey-patch verified: model returns hidden states when UNSLOTH_RETURN_HIDDEN_STATES=1")
         else:
-            print(f"✗ WARNING: Patch may not be working. Got shape {test_output.logits.shape}, expected [..., 4480]")
+            print(f"✗ WARNING: Patch may not be working. Got shape {test_output.logits.shape}, expected [..., {model.config.hidden_size}]")
         
         return is_working
     finally:
         os.environ["UNSLOTH_RETURN_HIDDEN_STATES"] = "0"
+
+
+def save_remote_model_code(model, output_dir):
+    """Bundle the trusted remote Python files needed by a fresh local loader.
+
+    Unsloth's merged-weight export does not copy these files. The code comes
+    from the exact model revision already loaded for training.
+    """
+    import inspect
+    import shutil
+    from pathlib import Path
+    from transformers.dynamic_module_utils import get_relative_import_files
+
+    base = model.get_base_model() if hasattr(model, "get_base_model") else model
+    destination = Path(output_dir)
+    destination.mkdir(parents=True, exist_ok=True)
+    sources = set()
+    for obj in (base, base.config):
+        if type(obj).__module__.startswith("transformers_modules."):
+            source = Path(inspect.getfile(type(obj)))
+            sources.add(source)
+            sources.update(Path(path) for path in get_relative_import_files(str(source)))
+    for source in sources:
+        shutil.copy2(source, destination / source.name)

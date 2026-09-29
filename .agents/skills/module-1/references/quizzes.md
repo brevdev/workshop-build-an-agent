@@ -15,8 +15,8 @@ each distractor is *tempting* but wrong, and how to go deeper.
   - *Sort tickets into 3 buckets* → one fixed classification = a single LLM call; the
     reasoning loop only adds latency/cost.
   - *Condense an email to bullets* → fixed input→output = a workflow (chain), not an agent.
-  - *Translate a block of text* → one deterministic transform; reaching for an agent is
-    over-engineering.
+  - *Translate a block of text* → one model call usually suffices. Output can vary;
+    this task does not require a tool-selection loop.
 - **Principle:** single-call vs workflow vs agent = *"who decides the path, and does it
   vary?"* (`concepts.md` → "the three stages").
 - **Go deeper:** ask the learner to classify one of *their own* tasks against the criterion.

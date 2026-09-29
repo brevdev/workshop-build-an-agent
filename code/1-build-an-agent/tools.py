@@ -3,11 +3,17 @@
 import asyncio
 import logging
 import os
+import sys
+from pathlib import Path
 from typing import Literal
 
 from langchain_core.tools import tool
 from tavily import AsyncTavilyClient
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workshop_support import load_secrets
+
+load_secrets()
 _LOGGER = logging.getLogger(__name__)
 
 tavily_client = AsyncTavilyClient(api_key=os.getenv("TAVILY_API_KEY"))

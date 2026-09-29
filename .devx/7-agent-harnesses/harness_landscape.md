@@ -1,6 +1,6 @@
-<div class="dx-hero" data-eyebrow="MODULE 07 / 02 - THE LANDSCAPE" data-title="Seven harnesses. One axis." data-sub="The fastest way to sort the ecosystem is by context tax - how much permanent per-turn overhead each harness spends before your task even starts." data-meta="HARNESSES::7|AXIS::context tax"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 02 - THE LANDSCAPE" data-title="Seven harnesses. One axis." data-sub="Compare tools, model support, hosting, and the context included in each request." data-meta="HARNESSES::7|AXIS::context tax"></div>
 
-Seven harnesses dominate the conversation today — five open source (bring any model) and two closed source (subscription). They don't differ much in *what* they do. They differ enormously in *how much context they spend doing it*.
+Here are seven harnesses with different defaults for tools, memory, and workflows. Their licenses, model access, and hosting options are separate choices.
 
 Let's start with that picture, then meet each one.
 
@@ -8,7 +8,7 @@ Let's start with that picture, then meet each one.
 
 ## The Context Tax Meter
 
-Approximate **permanent per-turn overhead** (system prompt + always-loaded tool schemas) for each design philosophy:
+Compare the two bundled lab configurations: system prompt plus tool schemas, estimated with `tiktoken`. These are teaching examples, not benchmarks of commercial harnesses.
 
 <div class="dx-island dx-bet" data-answer="3,922 tokens" data-explain="measured with tiktoken in Exercise 2; the minimal harness pays just 400.">
   <p class="dx-island-title">TAKE A GUESS</p>
@@ -22,18 +22,14 @@ Approximate **permanent per-turn overhead** (system prompt + always-loaded tool 
 </div>
 
 <div class="dx-island">
-  <p class="dx-island-title">CONTEXT TAX METER - PERMANENT PER-TURN OVERHEAD</p>
+  <p class="dx-island-title">CONTEXT TAX METER — BUNDLED EXAMPLES</p>
   <div class="dx-tax">
-    <div class="dx-tax-row" style="--dx-w:10"><span class="dx-tax-name">pi</span><div class="dx-tax-track"><div class="dx-tax-fill">~1k</div></div><span class="dx-tax-note">minimal</span></div>
-    <div class="dx-tax-row" style="--dx-w:35"><span class="dx-tax-name">OpenCode</span><div class="dx-tax-track"><div class="dx-tax-fill">~3.5k</div></div><span class="dx-tax-note">you decide</span></div>
-    <div class="dx-tax-row" style="--dx-w:45"><span class="dx-tax-name">LC Deep Agents</span><div class="dx-tax-track"><div class="dx-tax-fill">~4.5k</div></div><span class="dx-tax-note">moderate</span></div>
-    <div class="dx-tax-row" style="--dx-w:60"><span class="dx-tax-name">Hermes</span><div class="dx-tax-track"><div class="dx-tax-fill">~6k</div></div><span class="dx-tax-note">curated</span></div>
-    <div class="dx-tax-row" style="--dx-w:75"><span class="dx-tax-name">OpenClaw</span><div class="dx-tax-track"><div class="dx-tax-fill">~7.5k</div></div><span class="dx-tax-note">maximal</span></div>
-    <div class="dx-tax-row" data-tier="max" style="--dx-w:95"><span class="dx-tax-name">Claude Code / Codex</span><div class="dx-tax-track"><div class="dx-tax-fill">7-10k</div></div><span class="dx-tax-note">maximal</span></div>
+    <div class="dx-tax-row" style="--dx-w:10"><span class="dx-tax-name">Minimal lab</span><div class="dx-tax-track"><div class="dx-tax-fill">400</div></div><span class="dx-tax-note">estimated tokens</span></div>
+    <div class="dx-tax-row" data-tier="max" style="--dx-w:98"><span class="dx-tax-name">Maximal lab</span><div class="dx-tax-track"><div class="dx-tax-fill">3,922</div></div><span class="dx-tax-note">estimated tokens</span></div>
   </div>
 </div>
 
-> Figures are order-of-magnitude estimates that shift with every release and configuration — that's exactly why you'll **measure your own** in the lab. The shape of the chart is the lesson: a 10× spread in what different designers consider "necessary."
+> This measures serialized text with a proxy tokenizer. The model's tokenizer, request format, caching, and loaded context determine actual usage and cost.
 
 Maximal harnesses spend tokens to bake in capability from the get-go. Minimal harnesses assume the model can load capability when needed.
 
@@ -53,9 +49,9 @@ Click through the tabs — each profile covers the philosophy, what it optimizes
 
 > **Philosophy:** Open community, config-first, always-on. The original — and the harness you already know from Module 6.
 
-The largest open harness community. Agents are defined by markdown (`SOUL.md`, `AGENTS.md`), run continuously on heartbeats, and self-evolve their own memory. Powers the **NVIDIA NemoClaw** reference stack <span class="dx-chip is-green">NemoClaw ✓</span>
+Agents are configured with markdown (`SOUL.md`, `AGENTS.md`), run continuously on heartbeats, and self-evolve their own memory. Powers the **NVIDIA NemoClaw** reference stack <span class="dx-chip is-green">NemoClaw ✓</span>
 
-**Choose it when:** you want an always-on autonomous agent, the biggest community and plugin ecosystem, and any model (it runs Nemotron via NVIDIA endpoints, as you configured in Module 6).
+**Choose it when:** you want an always-on autonomous agent, a plugin ecosystem, and any model (it runs Nemotron via NVIDIA endpoints, as you configured in Module 6).
 
 **Watch for:** maximal context tax; safety is your job (that's what Module 6 was about).
 
@@ -65,7 +61,7 @@ The largest open harness community. Agents are defined by markdown (`SOUL.md`, `
 
 > **Philosophy:** *"The agent that grows with you."* A curated, tested open harness that writes its own memories and skills over time.
 
-[Hermes](https://hermes-agent.nousresearch.com), from NousResearch, takes the open-harness idea and ships it with refined defaults: a tested core, a vetted skill hub, and a `hermes skills install` command that speaks the open [agentskills.io](https://agentskills.io) spec. NVIDIA's tie is the deepest of any open harness — there's a [NemoClaw-for-Hermes blueprint](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent) on build.nvidia.com, and `NVIDIA/skills` is a built-in tap. <span class="dx-chip is-green">NemoClaw ✓</span>
+[Hermes](https://hermes-agent.nousresearch.com), from NousResearch, takes the open-harness idea and ships it with refined defaults: a tested core, a vetted skill hub, and a `hermes skills install` command that speaks the open [agentskills.io](https://agentskills.io) spec. There is a [NemoClaw-for-Hermes blueprint](https://build.nvidia.com/nvidia/nemoclaw-for-hermes-agent) on build.nvidia.com, and `NVIDIA/skills` is a built-in tap. <span class="dx-chip is-green">NemoClaw ✓</span>
 
 **Choose it when:** you want open source with guardrails — strong defaults, curated skills, and a harness that accumulates skills as it works. **It's the harness you'll drive in this module's lab.**
 
@@ -101,7 +97,7 @@ You used this in Module 5: `create_deep_agent()` with planning, sub-agent delega
 
 > **Philosophy:** Less harness, more model. No context tax.
 
-Built by Mario Zechner and Armin Ronacher, pi is the minimal pole of the landscape: a system prompt under **1,000 tokens**, exactly **four core tools** (Read, Write, Edit, Bash), and **lazy skills** — each installed capability costs one line of context per turn, with the full payload loading only when invoked.
+Created by Mario Zechner, pi is the minimal pole of the landscape: a system prompt under **1,000 tokens**, exactly **four core tools** (Read, Write, Edit, Bash), and **lazy skills** — each installed capability costs one line of context per turn, with the full payload loading only when invoked.
 
 Its signature move is **self-extension**: ask for a capability, and the agent writes its own TypeScript extension live, no restart. It's the purest example of a self-evolving harness — and the inspiration for two of your lab exercises.
 
@@ -111,23 +107,23 @@ Its signature move is **self-extension**: ask for a capability, and the agent wr
 
 #### **🤖 Claude Code**
 
-### Claude Code <span class="dx-chip">SUBSCRIPTION</span> · highest performing
+### Claude Code <span class="dx-chip">COMMERCIAL</span> · integrated coding workflow
 
 > **Philosophy:** Maximal harness, frontier model, deeply integrated. The reference point the open ecosystem measures against.
 
-Anthropic's subscription harness: rich tool suite, sub-agents, plan modes, hooks, MCP, and a skills system. The most capable out-of-box experience — and the most expensive.
+Anthropic's coding agent combines a tool suite, sub-agents, plan modes, hooks, MCP, and skills. Account access and usage costs depend on how you connect it.
 
 **Choose it when:** out-of-box capability matters more than cost or model choice.
 
-**Worth knowing:** even here, the open skills layer applies — NVIDIA Verified Skills install directly into Claude Code, and they execute on **your** hardware. More on that two pages from now.
+**Worth knowing:** even here, the open skills layer applies — NVIDIA Verified Skills install directly into Claude Code, and their code runs wherever its tools are configured to run. More on that two pages from now.
 
 #### **🛰️ Codex**
 
-### Codex <span class="dx-chip">SUBSCRIPTION</span> · OpenAI's agentic coder
+### Codex <span class="dx-chip">OPEN-SOURCE CLI</span> · OpenAI's agentic coder
 
 > **Philosophy:** Maximal harness around OpenAI's frontier models — a local CLI plus cloud sandboxes for delegated, parallel runs.
 
-OpenAI's subscription harness for software engineering. Its signature move is **cloud task delegation**: hand long-horizon jobs to sandboxed cloud environments and fan several out at once while you keep working. Also expensive, also closed.
+OpenAI's coding agent offers local CLI work and cloud task delegation. The [CLI is open source](https://developers.openai.com/blog/openai-for-developers-2025); model and hosted-service access are separate. [CLI guide](https://learn.chatgpt.com/docs/codex/cli).
 
 **Choose it when:** you're standardized on OpenAI's models, or your workflow leans on delegating batches of long-running tasks to cloud sandboxes.
 
@@ -215,18 +211,18 @@ Work through the three questions below. Your path ends at a recommendation.
 Whichever harness you land on, the NVIDIA pieces come with you:
 
 - **NemoClaw** powers the open harnesses (OpenClaw, Hermes)
-- **Nemotron** runs inside any open harness you pick
-- **NVIDIA Verified Skills** work across *all of them* — including Claude Code and Codex
+- **Nemotron** works with harnesses that support its endpoint and model capabilities
+- **NVIDIA Verified Skills** can travel between compatible harnesses, with the required tools and dependencies
 
-NVIDIA isn't picking a harness winner. The harness layer is where the industry is innovating fastest, and NVIDIA's approach is to **drive the technology forward together with the ecosystem** — contributing open models, open safety stacks, and open, portable, verifiable skills that make every harness better.
+NVIDIA isn't picking a harness winner. The harness layer is where the industry is innovating fastest, and NVIDIA's approach is to **drive the technology forward together with the ecosystem** — contributing open models, open safety stacks, and open, portable, verifiable skills that can extend compatible harnesses.
 
 <div class="dx-island dx-quiz">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="dx-quiz-q">Your team needs an always-on assistant, on-prem models are mandatory, and you want the largest community. Which harness do you pick?</p>
-  <button class="dx-quiz-opt" data-fb="Closed source means no on-prem model choice.">Claude Code</button>
-  <button class="dx-quiz-opt" data-fb="Minimal and model-flexible but the smallest batteries-included assistant story.">pi</button>
-  <button class="dx-quiz-opt" data-right data-fb="Open source + any model + the biggest always-on community - and NemoClaw hardens it.">OpenClaw</button>
-  <button class="dx-quiz-opt" data-fb="A capable open coding agent, but it is built for interactive terminal sessions, not always-on operation.">OpenCode</button>
+  <p class="dx-quiz-q">Which option provides the always-on assistant and OpenClaw configuration used in Module 6, with a configurable model endpoint?</p>
+  <button class="dx-quiz-opt" data-fb="This option was not the always-on assistant configured in Module 6.">Claude Code</button>
+  <button class="dx-quiz-opt" data-fb="Module 7 borrows pi’s minimal design; Module 6 configured OpenClaw.">pi</button>
+  <button class="dx-quiz-opt" data-right data-fb="Module 6 configured OpenClaw with NemoClaw; compatible model endpoints can be selected.">OpenClaw</button>
+  <button class="dx-quiz-opt" data-fb="OpenCode has its own runtime and server options; Module 6 configured OpenClaw.">OpenCode</button>
 </div>
 
 > That portable skills layer is the key that unlocks everything else. Head to [Agent Skills](agent_skills) to take it apart.

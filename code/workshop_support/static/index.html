@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" class="dx-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workshop Health</title>
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="health.css">
+  <script src="jupyter-link.js" defer></script>
+  <script src="health.js" defer></script>
+</head>
+<body>
+<main>
+  <header class="dx-hero">
+    <div class="eyebrow">WORKSHOP UTILITIES</div>
+    <h1>Workshop Health<span aria-hidden="true"></span></h1>
+    <p>Check your setup before you start.</p>
+    <div class="actions">
+      <button id="check" class="primary" type="button">Run endpoint checks</button>
+      <button id="refresh" type="button">Refresh setup</button>
+      <button id="secrets" type="button">Open Secrets Manager <span aria-hidden="true">↗</span></button>
+    </div>
+    <p class="hint">Endpoint checks use a few short API calls. Your keys stay on the server.</p>
+  </header>
+  <p id="message" role="status" aria-live="polite">Checking your environment…</p>
+  <div id="overview" class="overview" aria-label="Check summary"></div>
+  <section aria-labelledby="modules-title">
+    <div class="section-heading"><h2 id="modules-title">Ready to start?</h2><span>Modules 1–7</span></div>
+    <p class="intro">These checks cover setup and connectivity. Follow each lesson to start its local services and run the exercises.</p>
+    <div id="modules" class="modules"></div>
+  </section>
+  <section aria-labelledby="checks-title">
+    <h2 id="checks-title">Check details</h2>
+    <details open><summary>Model endpoints <span id="endpoint-summary"></span></summary><div id="endpoints" class="checks"></div><p id="checked-at" class="detail-footer"></p></details>
+    <details open><summary>API keys &amp; web search</summary><div id="keys" class="checks"></div></details>
+    <details open><summary>Local services <span class="summary-note">Start these during their lessons</span></summary><div id="services" class="checks"></div></details>
+    <details><summary>Environment</summary><div id="environment" class="checks"></div></details>
+  </section>
+  <footer>Build-an-Agent Workshop <span aria-hidden="true">/</span> NVIDIA DevX</footer>
+</main>
+</body>
+</html>

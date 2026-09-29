@@ -109,15 +109,15 @@ model:
 
 </details>
 
-Now run `hermes` and type the identical request. Both harnesses complete the task. Feel how different they are — verbosity, persistence, initiative, how much each one says before it acts. Same model. Different car.
+Now run `hermes` and type the identical request. Compare completion, tool results, verbosity and error handling. The model is the same; the runtime behavior can differ.
 
 <!-- fold:break -->
 
 ## Exercise 2 — Measure the Context Tax
 
-The landscape page showed estimated overhead bars. Now produce real numbers from your own harness. Three blanks this time: the tax meter itself, then the two halves of the lazy skill loader.
+Measure the two bundled harness configurations with `cl100k_base`. These prompt-and-schema estimates are a comparison proxy, not Nemotron billing counts. Complete the tax meter and both halves of the lazy loader.
 
-### 2a — `harness_overhead`: what every call costs
+### 2a — `harness_overhead`: estimate the starting context
 
 <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 2a');"><i class="fas fa-code"></i> TODO: Exercise 2a</button> — return the tokens a harness pays on **every** call: the system prompt **plus** the JSON-serialized schemas of all registered tools. Run each tool through `convert_to_openai_tool()` — it accepts both LangChain tool objects and already-converted dict schemas.
 
@@ -139,7 +139,7 @@ Counting only the prompt misses the point — the schemas are the bigger half of
 
 ### 2b(i) — Build the one-line skill index
 
-Lazy loading is the tax dodge: every installed skill costs *one line* of context, expanding to the full body only on demand. Two skills (`code_review`, `technical_writing`) come pre-installed so you have something to measure.
+Lazy loading is the tax dodge: every installed skill costs *one line* of context, expanding to the full body only on demand. Two skills (`code-review`, `technical-writing`) come pre-installed so you have something to measure.
 
 <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 2b(i)');"><i class="fas fa-code"></i> TODO: Exercise 2b(i)</button> — inside the loop over each `SKILL.md`: read the file, `parse_frontmatter()` it, store the full text in `bodies[meta["name"]]`, and append a `- {name}: {description}` line to `index_lines`.
 
@@ -147,7 +147,7 @@ Lazy loading is the tax dodge: every installed skill costs *one line* of context
 <summary>🆘 Need some help?</summary>
 
 ```python
-text = skill_file.read_text()
+text = read_skill_text(skill_file, skills_dir)
 meta = parse_frontmatter(text)
 bodies[meta["name"]] = text
 index_lines.append(f"- {meta['name']}: {meta['description']}")
@@ -176,21 +176,21 @@ return bodies.get(name, f"ERROR: no skill named {name!r}")
 cd code/7-agent-harnesses && python harness_lab.py --exercise 2
 ```
 
-A correct implementation prints exactly this:
+With the two shipped skills, the bundled version prints:
 
 ```text
-Minimal harness:     400 tokens/turn
-Maximal harness:   3,922 tokens/turn   (9.8x tax)
-2 eager skills: +516 tokens/turn
-2 lazy skills:  +59 tokens/turn   (9x savings)
+Minimal harness:     390 estimated tokens
+Maximal harness:   3,922 estimated tokens   (10.1x tax)
+2 eager skills: +515 estimated tokens
+2 lazy skills:  +58 estimated tokens   (9x savings)
 ```
 
-The savings scale with the catalog: at 30 installed skills, eager loading costs ~45,000 tokens per turn while the lazy index stays a few hundred. Rerun this after Exercises 3–5 and watch the skill lines grow.
+The initial savings grow with the catalog. Loaded bodies still enter the message history. Rerun this after Exercises 3–5 to compare the starting prompt sizes.
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">YOUR TARGETS</p>
   <div class="dx-gauges">
-    <div class="dx-gauge" data-pct="1"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>minimal</b><br>400 tokens / 32K</p></div>
+    <div class="dx-gauge" data-pct="1"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>minimal</b><br>390 tokens / 32K</p></div>
     <div class="dx-gauge" data-pct="12"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>maximal</b><br>3,922 tokens / 32K</p></div>
   </div>
 </div>
@@ -201,9 +201,9 @@ The savings scale with the catalog: at 30 installed skills, eager loading costs 
 
 <img src="_static/robots/wrench.png" alt="Wrench Robot" style="float:right;max-width:240px;margin:20px;" />
 
-No `TODO` in the Python this time — the blank is a whole new file. Write your own `SKILL.md`: a **dataset profiler** skill that teaches an agent a systematic procedure for summarizing an unfamiliar CSV. Follow the format of <button onclick="openOrCreateFileInJupyterLab('skills/code_review/SKILL.md');"><i class="fa-solid fa-book"></i> skills/code_review/SKILL.md</button>: frontmatter with `name` and a trigger-worthy `description`, then the procedure.
+No `TODO` in the Python this time — the blank is a whole new file. Write your own `SKILL.md`: a **dataset profiler** skill that teaches an agent a systematic procedure for summarizing an unfamiliar CSV. Follow the format of <button onclick="openOrCreateFileInJupyterLab('skills/code-review/SKILL.md');"><i class="fa-solid fa-book"></i> skills/code-review/SKILL.md</button>: frontmatter with `name` and a trigger-worthy `description`, then the procedure.
 
-Save it to `code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`, then prove portability — first in your harness, then in Hermes.
+Save it to `code/7-agent-harnesses/skills/dataset-profiler/SKILL.md`, then prove portability — first in your harness, then in Hermes.
 
 <details class="dx-peek is-solution">
 <summary>🆘  Need some help?</summary>
@@ -212,7 +212,7 @@ The `description` line is what triggers skill loading — make it match the task
 
 ```markdown
 ---
-name: dataset_profiler
+name: dataset-profiler
 description: Systematic procedure for profiling, summarizing, or exploring an unfamiliar CSV file or DataFrame
 ---
 
@@ -232,7 +232,7 @@ Follow this procedure in order and report findings in the output format below.
 (a compact template the agent fills in)
 ```
 
-A fully worked version lives at `code/7-agent-harnesses/skills/.examples/dataset_profiler/SKILL.md` — but draft yours first; a skill you authored yourself is the one worth carrying across harnesses.
+A fully worked version lives at `code/7-agent-harnesses/skills/.examples/dataset-profiler/SKILL.md` — but draft yours first; a skill you authored yourself is the one worth carrying across harnesses.
 
 </details>
 
@@ -244,15 +244,15 @@ cd code/7-agent-harnesses && python harness_lab.py --exercise 3
 
 Your Exercise 2 lazy loader picks up the new skill, and the agent is asked to profile `test_data/sensor_readings.csv`. Watch it follow *your* procedure.
 
-**Then Hermes:** drop the very same folder into Hermes's skills directory — Hermes auto-discovers everything in `~/.hermes/skills/` and is [agentskills.io](https://agentskills.io)-compatible, so there are zero changes to make:
+**Then Hermes:** from the project root, copy the unchanged folder into its skills directory:
 
 ```bash
-cp -r code/7-agent-harnesses/skills/dataset_profiler ~/.hermes/skills/
+cp -r code/7-agent-harnesses/skills/dataset-profiler ~/.hermes/skills/
 ```
 
-Then start `hermes` and ask it to profile the same CSV. It follows the identical procedure you wrote. (For a skill that already lives in a repo or at a URL, Hermes can pull it directly — e.g. `hermes skills install nvidia/skills/accelerated-computing-cudf`, which you'll use in Exercise 4.)
+Before starting Hermes, run `python -c "import sys; print(sys.executable)"` in the workshop terminal. Ask Hermes to use that Python path to profile the CSV; its own runtime may lack pandas. Check that it loads your skill and compare the output with your procedure. After Exercise 4, use the same copy approach for the complete locally verified NVIDIA skill folder, preserving its references and signature. A hub install or security scan alone does not confirm that all supporting files arrived.
 
-One file. Two harnesses. Zero changes. *That* is the open skills spec doing its job.
+The skill file transfers unchanged. Its tools, Python libraries and execution permissions still need to be available in each harness.
 
 <!-- fold:break -->
 
@@ -283,7 +283,7 @@ Your minimal harness gets asked to aggregate a large dataset ten times over, fas
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
-If GPU utilization stays at zero: check the dataset actually crossed the 100K-row size gate the skill teaches (the generator script makes 1M rows by default), and confirm cuDF imported GPU-side with `python -c "import cudf; print(cudf.__version__)"` — if that fails, `pip install cudf-cu12`. If the 🧾 receipt says the skill was never consulted, rerun — the load decision is the model's. No GPU on your machine? The exercise warns you up front and the agent falls back to pandas; the same aggregation still completes, just CPU-slow.
+If GPU utilization stays at zero, inspect the executed code and confirm cuDF imports with `python -c "import cudf; print(cudf.__version__)"`. The supplied dataset has 1M rows. If cuDF or the GPU is unavailable, ask the agent to use pandas and check its result. If the receipt says the skill was never consulted, inspect that decision or request the skill explicitly. Measure speed instead of assuming the GPU wins on every dataset.
 
 </details>
 
@@ -309,7 +309,7 @@ skill_md = invoke_with_retry(model, prompt).content
 skill_md = skill_md.strip().removeprefix("```markdown").removeprefix("```").removesuffix("```").strip()
 
 meta = parse_frontmatter(skill_md)  # validate BEFORE saving
-target = skills_dir / meta["name"] / "SKILL.md"
+target = skill_target(skills_dir, meta["name"])
 target.parent.mkdir(parents=True, exist_ok=True)
 target.write_text(skill_md)
 print(f"🌱  Agent wrote itself a new skill: {target}")

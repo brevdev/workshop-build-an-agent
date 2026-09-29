@@ -7,9 +7,8 @@ go deeper.
 ## `intro_customization.md` — "Prompts + tools already work. Should you train?"
 - **Correct:** *Probably not — if prompts and tools already work, training's upfront cost
   isn't justified.*
-- **Why:** training costs data + compute and bakes knowledge into weights. Reach for it only
-  when the model **fundamentally lacks the domain** that prompts/tools can't supply (the
-  "~90%" rule of thumb).
+- **Why:** training costs data, compute and maintenance. Evaluate it when important task
+  errors remain after improving prompts and tools; use held-out results to judge the gain.
 - **Distractors:** *training always improves* → it's not a free upgrade; *training replaces
   prompts/tools* → they're complementary (breadth vs depth); *only if you have a spare GPU* →
   hardware is logistics, not the deciding factor.
@@ -17,18 +16,10 @@ go deeper.
 - **Go deeper:** ask what *specific* failure they'd expect training to fix that a better
   prompt couldn't.
 
-## `sdg.md` — "Why does NeMo Data Designer generate the OUTPUT first?"
-- **Correct:** *Sampling outputs from the schema guarantees every example is valid; LLM-first
-  can hallucinate invalid commands.*
-- **Why:** schema-first means every output conforms to `CLIToolCall` *by construction*, and
-  samplers guarantee coverage; the LLM only writes the matching user request. Ask an LLM for
-  input/output pairs directly and it can invent commands/flags that don't exist.
-- **Distractors:** *JSON is faster than NL* → both call an LLM, speed isn't the point;
-  *LLMs can't write requests* → they can, that's exactly the second step; *avoid a schema* →
-  backwards, the schema is the foundation.
-- **Principle:** validity + coverage by construction (`concepts.md` → SDG).
-- **Go deeper:** connect to Module 3's synthetic *eval* data — same tool, same "validate
-  before trusting" caution.
+## `sdg.md` — Schema-valid does not mean semantically correct
+- **Correct principle:** samplers choose seed values; an LLM writes the request, then an LLM writes schema-constrained JSON. Review whether the pair agrees.
+- **Why:** a schema checks fields and types; a valid port or template can still be wrong for the request.
+- **Go deeper:** check blank requests, duplicates, conflicting labels, and train/validation overlap before trusting the dataset.
 
 ## `grpo_training.md` — "Reward = 1.0 for any valid JSON; reward soars, real accuracy is bad."
 - **Correct:** *Reward hacking — the model maximizes the metric without doing the task.*

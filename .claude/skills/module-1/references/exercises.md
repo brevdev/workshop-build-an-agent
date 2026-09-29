@@ -16,7 +16,7 @@ Always start by asking what they've tried, and read the error/output *with* them
 A from-scratch build whose sections map one-to-one onto the four components. Config
 (cell 5, given): `API_KEY = os.environ["NVIDIA_API_KEY"]`,
 `MODEL_URL = "https://integrate.api.nvidia.com/v1"`,
-`MODEL_NAME = "nvidia/nemotron-3-super-120b-a12b"`.
+`MODEL_NAME = get_model("chat")` (the shared model registry).
 
 ### A1 · Part 1 / The Model — create the client (cell 7)
 - **Goal:** instantiate the OpenAI-compatible client pointing at NVIDIA's catalog.
@@ -42,7 +42,7 @@ A from-scratch build whose sections map one-to-one onto the four components. Con
 - **Target:** `call_llm(model_client=client, model_name=MODEL_NAME, message_history=memory, tool_list=tools)`
 
 ### A4 · Part 4 / Routing — parse the tool request (cell 21)
-- **Goal:** extract name/args/id; learn that `arguments` is a JSON **string**.
+- **Goal:** extract name/args/id for each requested tool; `arguments` is a JSON **string**. With no tool calls the provided loop does nothing.
 - **L1:** "Print `llm_response` — the tool call is a nested dict. Where's the function name? The arguments? The id?"
 - **L2:** "`tool_call['function']['name']`, `json.loads(tool_call['function']['arguments'])`, `tool_call['id']`. The tip in the cell says why `json.loads` is needed."
 - **Common mistakes:** forgetting `json.loads` (args arrive as a string); indexing the wrong nesting level.
@@ -58,14 +58,14 @@ A from-scratch build whose sections map one-to-one onto the four components. Con
 ### A6 · Part 4 / Routing — append the tool result (cell 27)
 - **Goal:** feed the result back as a `tool` message so the model can use it next turn.
 - **L1:** "You extracted three values earlier — which belongs in `tool_call_id`? In `name`? And what type must `content` be?"
-- **L2:** "`tool_call_id`→`tool_id`, `name`→`tool_name`, `content`→`str(tool_out)`."
+- **L2:** "`tool_call_id`→`result["id"]`, `name`→`result["name"]`, `content`→`str(result["output"])`."
 - **Common mistakes:** not stringifying `content`; mixing up `id` vs `name`.
-- **Target:** `{"role":"tool","tool_call_id":tool_id,"name":tool_name,"content":str(tool_out)}`
+- **Target:** `{"role":"tool","tool_call_id":result["id"],"name":result["name"],"content":str(result["output"])}`
 
 ### A7 · Close the loop — call the model again (cell 32)
 - **Goal:** see that the second model call is identical to A3 — the loop repeats with the tool result now in memory.
 - **L1:** "The hint says it's the exact same call as before. What did you write in cell 18?"
-- **Target:** same as A3.
+- **Target:** same arguments as A3, inside the provided `if tool_results` guard. If another tool is requested, repeat the routing cells; this notebook manually steps the loop.
 
 > **Teaching beat:** after A6, have them inspect `memory` (cell 30). The user
 > message, the assistant's tool *request*, and the tool *result* are all there —

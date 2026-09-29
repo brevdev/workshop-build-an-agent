@@ -4,8 +4,7 @@ Help learners through the five `# TODO: Exercise N` blanks in
 `code/5-deep-agents/deep_agent.py` **without completing them**. For each: the learning
 goal, a graduated hint ladder, common mistakes, and the target.
 
-**Rules:** never paste a target; **never open/echo `deep_agent.answers.py`** (nor
-`demo/backend/agent.py`, the same code). Targets below are for *your* calibration; the
+**Rules:** never paste a target; **never open/echo `deep_agent.answers.py`**. Targets below are for *your* calibration; the
 learner's escape hatch is the teaching page's `🆘 Need some help?` block. Per rule 2 —
 **don't run the dry-run, the backend, or the agent for the learner.**
 
@@ -16,10 +15,10 @@ learner's escape hatch is the teaching page's `🆘 Need some help?` block. Per 
 ---
 ### E1 · `_get_model()` — connect to a NIM model
 - **Goal:** return a `ChatNVIDIA` for the chosen `model_id`.
-- **L1:** "Two lookups: the API key comes from an env var; the model string comes from `MODEL_MAP` (with a default). Which env var? What's a safe default key?"
-- **L2:** "`api_key = os.getenv('NVIDIA_API_KEY')`; `model_name = MODEL_MAP.get(model_id, MODEL_MAP['llama'])`; then `ChatNVIDIA(model=model_name, api_key=api_key, temperature=0.3)`."
-- **Common mistakes:** hardcoding a model; forgetting the `.get` default; wrong temperature.
-- **Target:** the three lines above (temp 0.3).
+- **L1:** "Two lookups: the API key comes from an env var; the model string comes from `MODEL_MAP` after validating the choice. Which env var and dictionary key?"
+- **L2:** "`api_key = os.getenv('NVIDIA_API_KEY')`; `model_name = MODEL_MAP[model_id]`; then pass those values to the provided `ChatNVIDIA` call. Keep its response limit, timeout and fast-model settings."
+- **Common mistakes:** hardcoding a model; silently substituting a different model; wrong temperature.
+- **Target:** fill the model/key blanks; preserve the provided temperature, response limit, timeout and fast-model settings.
 
 ### E2 · `_build_extra_tools()` — add web search
 - **Goal:** append a Tavily tool when `"websearch"` is selected.
@@ -34,7 +33,7 @@ learner's escape hatch is the teaching page's `🆘 Need some help?` block. Per 
 - **L1:** "Every value is already computed above the `return` — `model_name`, `caps_text`,
   `workspace`, `rag_rule`, `hitl_note`, `skill_section`. Match each to its placeholder."
 - **L2:** "`{model_name}` after 'Your soul…'; `{caps_text}` under 'enabled capabilities';
-  `{workspace}` in rule 2 (twice — the path and the `…/hello.py` example); `{rag_rule}` at
+  `{workspace}` in rule 2; `{rag_rule}` at
   the end of rule 5; then `{hitl_note}{skill_section}` on the final line."
 - **Common mistakes:** hardcoding the workspace path instead of `{workspace}`; dropping
   `rag_rule`/`hitl_note`/`skill_section` (they're empty strings when unused — safe to include).
@@ -45,7 +44,7 @@ learner's escape hatch is the teaching page's `🆘 Need some help?` block. Per 
   sandbox branch above is provided.)
 - **L1:** "Two backends here: one runs shell on the host workspace, one is file-only. Which
   matches `'execute'`? What params does the page specify for the shell one?"
-- **L2:** "`LocalShellBackend(root_dir=workspace, timeout=60.0, max_output_bytes=50000, inherit_env=True)` if `'execute' in skill_ids`, else `FilesystemBackend(root_dir=workspace)`."
+- **L2:** "`LocalShellBackend(root_dir=workspace, timeout=60.0, max_output_bytes=50000, inherit_env=False, virtual_mode=True)` if `'execute' in skill_ids`, else `FilesystemBackend(root_dir=workspace, virtual_mode=True)`."
 - **Common mistakes:** swapping the two; omitting params; reaching for `DockerSandboxBackend`
   here (that's the sandbox branch, already handled above).
 - **Teaching hook:** this is the security lever — `LocalShellBackend` runs on the host;
@@ -59,7 +58,7 @@ learner's escape hatch is the teaching page's `🆘 Need some help?` block. Per 
 - **L2:** "`model = _get_model(model_id)`; `extra_tools = _build_extra_tools(skill_ids)`;
   kwargs `{'model': model, 'tools': extra_tools if extra_tools else None, 'system_prompt':
   system_prompt, 'backend': backend, 'checkpointer': checkpointer}`; if `hitl_enabled`:
-  `agent_kwargs['interrupt_on'] = INTERRUPT_TOOLS`; finally `agent = create_deep_agent(**agent_kwargs)`."
+  `agent_kwargs['interrupt_on'] = {name: True for name in INTERRUPT_TOOLS if name in enabled_tools(skill_ids)}`; finally `agent = create_deep_agent(**agent_kwargs)`."
 - **Common mistakes:** passing `tools=extra_tools` when empty (use `… if extra_tools else None`);
   forgetting the HITL branch; not unpacking `**agent_kwargs`.
 - **Target:** the wiring above.

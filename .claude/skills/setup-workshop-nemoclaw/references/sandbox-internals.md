@@ -283,41 +283,26 @@ probes them):
 - `t.explodinggradients.com` — ragas usage telemetry. Do NOT open it;
   start-jupyter.sh exports `RAGAS_DO_NOT_TRACK=true` instead.
 
-ragas import gotcha: ragas 0.4.x hard-imports
-`langchain_community.chat_models.vertexai`, removed in langchain-community
-1.x, so a bare `import ragas` raises ModuleNotFoundError even though ragas IS
-installed. The module-3 evaluate notebooks ship a stub-module workaround cell
-— run it before importing ragas (verified working).
+Use the pinned RAGAS 0.2.15 API for the workshop notebooks; upgrading to 0.4.x
+changes the evaluation contract.
 
-## Module-2 web_search: remote MCP vs local server
+## Current workshop paths
 
-The shipped `rag_agent.py` PART 2A uses Tavily's REMOTE MCP via
-`npx -y mcp-remote https://mcp.tavily.com/mcp/...`. In this sandbox that is a
-dead end twice over: npx must download `mcp-remote` from `registry.npmjs.org`
-(blocked; and npm's retry backoff makes agent tool calls hang for minutes —
-this is what times out module-3's rag eval), and `mcp.tavily.com` is not
-allowlisted. **Use PART 2B (commented out in the same file): the local MCP
-server.** Its deps (`mcp`, `starlette`, `uvicorn`, `tavily`) are all in the
-sandbox pins; run `uvicorn mcp_server:app --port 8000` in module-2's dir and
-swap the `web_search` tool to the SSE config. Only `api.tavily.com` egress is
-needed. Verified end-to-end 2026-07-21.
+Module 2 uses Python Streamable HTTP with an Authorization header. The operator's
+`mcp_tavily` block must allow the resolved Python interpreter, including when an
+older policy allowed only Node. The optional local MCP server still uses
+`api.tavily.com`; stop it before starting the Module 5 backend on port 8000.
 
-## Module coverage on this sandbox (audited 2026-07-21)
+Setup preserves the shared model registry and judge pacing. Use **Workshop
+Utilities → Workshop Health** after installation to check the current endpoints.
+The CPU pins now match the course's RAGAS API and the Module 5 backend contract;
+this does not establish a new end-to-end test of a particular sandbox deployment.
 
-- **Fully working (CPU + workshop policy blocks):** module 1 (both notebooks),
-  module 2 (RAG + local-MCP web search; `langgraph dev` serving needs the
-  langgraph-cli pin), module 3 (generate + eval; rag-eval needs the module-2
-  local-MCP swap to avoid npx hangs), module-4 `bash_agent` + `01_synthetic`
-  (data-designer pin), module 6 safety pipeline (92.5% on the hardened
-  policy), module 7 (tiktoken route + pins), secrets manager, all 11 tiles,
-  all three client UIs.
-- **GPU-only by design (do NOT install torch/unsloth/cudf — hangs, wasted
-  egress):** module-4 `02_grpo_training` + `03_run_agent`; module-7's
-  optional cudf exercise degrades gracefully.
-- **Not available in-sandbox:** module-6 NemoClaw/OpenClaw CLI demos (Node
-  CLIs absent; installer needs `www.nvidia.com` + npm egress), module-5
-  Docker sandbox backend + Deep Agents client build (no Docker daemon; npm
-  blocked — the client serves its setup page as designed).
+The starter agents, hosted calls and Python exercises can run here when their
+packages and egress rules are available. Full GPU training, local NIM and nested
+Docker sandboxing are unavailable. Choose local execution explicitly for Module 5;
+a requested Docker session fails. Module 6 mock screening does not test the live
+kernel controls, and OpenClaw installed here inherits the existing sandbox.
 
 ## Environment quirks
 
@@ -342,7 +327,7 @@ needed. Verified end-to-end 2026-07-21.
 - Background waits are clamped (e.g. 180 s) and sessions have tool-iteration
   caps — run installs/servers as background processes with watch patterns
   (`"is running at"`), and write large artifacts incrementally.
-- Stay on git branch `edwli-dev`; do not `nvwb switch-branch` or switch to main.
+- Keep the branch the user selected; do not switch branches during setup.
 - Key pinned versions proven working: CPython 3.13.5, jupyterlab 4.6.1,
   jupyter-app-launcher 0.3.2, voila 0.5.12, jupyter-server-proxy 4.5.0,
   streamlit 1.59.2, ziglang 0.16.0.

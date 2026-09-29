@@ -7,8 +7,9 @@ import json
 import re
 import time
 import uuid
-import traceback
-from typing import AsyncGenerator
+import asyncio
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Literal
 
 from dotenv import load_dotenv
 
@@ -21,9 +22,37 @@ from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.types import Command
 
-from agent import create_agent  # noqa: E402
+from agent import create_agent, MODEL_MAP, MODEL_DISPLAY_NAMES  # noqa: E402
+from capabilities import enabled_tools
 
-app = FastAPI(title="Deep Agent Backend", version="0.3.0")
+def _safe_error_message(error: BaseException, action: str = "Agent run") -> str:
+    """Expose error type/status, never provider payloads or credential-bearing URLs."""
+    status = getattr(error, "status_code", None) or getattr(error, "status", None)
+    if status is None:
+        response = getattr(error, "response", None)
+        status = getattr(response, "status_code", None) or getattr(response, "status", None)
+    # NVIDIA's SDK may raise a plain Exception with a leading HTTP status.
+    if status is None:
+        match = re.match(r"^\[([45]\d{2})\]", str(error))
+        status = int(match.group(1)) if match else None
+    code = f"; HTTP {status}" if isinstance(status, int) and 400 <= status <= 599 else ""
+    hint = " Wait and retry." if status == 429 else " Check the service and configuration."
+    return f"{action} failed ({type(error).__name__}{code}).{hint}"
+
+
+@asynccontextmanager
+async def lifespan(app):
+    yield
+    for session in list(sessions.values()):
+        if session.sandbox is not None:
+            try:
+                await asyncio.to_thread(session.sandbox.delete)
+            except Exception as e:
+                print(_safe_error_message(e, "Sandbox cleanup"))
+    sessions.clear()
+
+
+app = FastAPI(title="Deep Agent Backend", version="0.3.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,7 +87,7 @@ sessions: dict[str, AgentSession] = {}
 # ── Request models ───────────────────────────────────────────────────────────
 
 class CreateAgentRequest(BaseModel):
-    model_id: str = "llama"
+    model_id: str = "nemotron"
     skill_ids: list[str] = []
     hitl_enabled: bool = False
     sandbox_map: dict[str, bool] = {}
@@ -67,7 +96,7 @@ class ChatRequest(BaseModel):
     message: str
 
 class ApprovalRequest(BaseModel):
-    decision: str = "approve"  # "approve" | "reject" | "edit"
+    decision: Literal["approve", "reject", "edit"] = "approve"  # "approve" | "reject" | "edit"
     edited_args: dict | None = None
 
 
@@ -101,20 +130,27 @@ async def health():
     return {"status": "ok", "service": "deep-agent-backend", "sessions": len(sessions)}
 
 
+@app.get("/api/models")
+async def model_choices():
+    return {"models": [{"id": key, "name": MODEL_DISPLAY_NAMES[key], "model": value}
+                       for key, value in MODEL_MAP.items()]}
+
+
 @app.post("/api/agent")
 async def create_agent_session(request: CreateAgentRequest):
     """Create a new agent session."""
     try:
         session_id = str(uuid.uuid4())[:8]
         thread_id = f"thread-{session_id}"
-        agent, sandbox = create_agent(request.skill_ids, request.model_id, request.hitl_enabled, request.sandbox_map)
+        agent, sandbox = await asyncio.to_thread(
+            create_agent, request.skill_ids, request.model_id, request.hitl_enabled, request.sandbox_map
+        )
         sessions[session_id] = AgentSession(
             agent, request.model_id, request.skill_ids, thread_id, request.hitl_enabled, sandbox=sandbox
         )
         sandboxed_tools = [k for k, v in request.sandbox_map.items() if v]
         # Report the ACTUAL sandbox state, not what was requested. `sandbox` is
-        # non-None only when the Docker container was really created; if it was
-        # requested but Docker was unavailable, create_agent fell back to local.
+        # non-None only when the Docker container was really created.
         # The UI drives its badge from these so it never shows "🔒 Sandboxed"
         # over unsandboxed execution.
         sandbox_requested = bool(sandboxed_tools)
@@ -126,10 +162,22 @@ async def create_agent_session(request: CreateAgentRequest):
             "hitl_enabled": request.hitl_enabled,
             "sandbox_requested": sandbox_requested,
             "sandbox_active": sandbox_active,
+            "enabled_tools": sorted(enabled_tools(request.skill_ids)),
+            "capabilities": {
+                "file_root": ("/workspace" if sandbox_active else "/") if "fileio" in request.skill_ids else None,
+                "execution": ("container" if sandbox_active else "host user") if "execute" in request.skill_ids else "disabled",
+                "container_network": "none" if sandbox_active else None,
+                "web_and_rag": "application-side tools",
+            },
         }
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
     except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        message = _safe_error_message(e, "Agent creation")
+        print(message)
+        raise HTTPException(status_code=500, detail=message) from e
 
 
 @app.delete("/api/agent/{session_id}")
@@ -143,7 +191,7 @@ async def delete_agent_session(session_id: str):
                 session.sandbox.delete()
                 print(f"[Session] Deleted sandbox for {session_id}")
             except Exception as e:
-                print(f"[Session] Sandbox cleanup error: {e}")
+                print(_safe_error_message(e, "Sandbox cleanup"))
         del sessions[session_id]
         return {"status": "deleted"}
     raise HTTPException(status_code=404, detail="Session not found")
@@ -169,6 +217,11 @@ async def approve_tool_call(session_id: str, request: ApprovalRequest):
     if not session.pending_interrupt:
         raise HTTPException(status_code=400, detail="No pending interrupt")
 
+    if request.decision == "edit":
+        actions = session.pending_interrupt.get("action_requests", [])
+        if len(actions) != 1 or not request.edited_args:
+            raise HTTPException(status_code=422, detail="Editing requires one pending action and its edited arguments.")
+
     return EventSourceResponse(_stream_resume(session, request.decision, request.edited_args))
 
 
@@ -180,7 +233,7 @@ async def _stream_response(session: AgentSession, user_message: str) -> AsyncGen
         full_response = ""
 
         async for event in session.agent.astream_events(
-            {"messages": session.messages},
+            {"messages": [HumanMessage(content=user_message)]},
             version="v2",
             config=session.config,
         ):
@@ -213,8 +266,9 @@ async def _stream_response(session: AgentSession, user_message: str) -> AsyncGen
         yield {"event": "done", "data": "{}"}
 
     except Exception as e:
-        traceback.print_exc()
-        yield {"event": "error", "data": json.dumps({"message": str(e)})}
+        message = _safe_error_message(e)
+        print(message)
+        yield {"event": "error", "data": json.dumps({"message": message})}
 
 
 async def _stream_resume(session: AgentSession, decision: str, edited_args: dict | None) -> AsyncGenerator[dict, None]:
@@ -267,8 +321,9 @@ async def _stream_resume(session: AgentSession, decision: str, edited_args: dict
         yield {"event": "done", "data": "{}"}
 
     except Exception as e:
-        traceback.print_exc()
-        yield {"event": "error", "data": json.dumps({"message": str(e)})}
+        message = _safe_error_message(e)
+        print(message)
+        yield {"event": "error", "data": json.dumps({"message": message})}
 
 
 def _process_event(event: dict, tool_timers: dict[str, float]) -> dict | None:
@@ -278,7 +333,12 @@ def _process_event(event: dict, tool_timers: dict[str, float]) -> dict | None:
     if kind == "on_chat_model_stream":
         chunk = event.get("data", {}).get("chunk")
         if chunk and hasattr(chunk, "content") and chunk.content:
-            return {"event": "token", "data": json.dumps({"content": chunk.content})}
+            content = chunk.content
+            if isinstance(content, list):
+                content = "".join(block.get("text", "") for block in content
+                                  if isinstance(block, dict) and block.get("type") == "text")
+            if content:
+                return {"event": "token", "data": json.dumps({"content": content})}
 
     elif kind == "on_tool_start":
         tool_name = event.get("name", "unknown")
@@ -303,10 +363,17 @@ def _process_event(event: dict, tool_timers: dict[str, float]) -> dict | None:
             }),
         }
 
-    elif kind == "on_tool_end":
+    elif kind in ("on_tool_end", "on_tool_error"):
         run_id = event.get("run_id", "")
         tool_name = event.get("name", "unknown")
-        output = event.get("data", {}).get("output", "")
+        data = event.get("data", {})
+        output = data.get("output", "")
+        if kind == "on_tool_error":
+            error = data.get("error")
+            output = _safe_error_message(error, "Tool execution") if isinstance(error, BaseException) else "Tool execution failed."
+        # ToolMessage status is structured metadata; ordinary file text may contain
+        # words such as "error" without indicating a failed tool call.
+        status = "error" if kind == "on_tool_error" or getattr(output, "status", None) == "error" else "success"
         start_time = tool_timers.pop(run_id, time.time())
         duration_ms = int((time.time() - start_time) * 1000)
         print(f"[Tool] END   {tool_name} ({duration_ms}ms): {str(output)[:150]}")
@@ -322,6 +389,7 @@ def _process_event(event: dict, tool_timers: dict[str, float]) -> dict | None:
                 "name": tool_name,
                 "output": output_str,
                 "duration": duration_ms,
+                "status": status,
             }),
         }
 

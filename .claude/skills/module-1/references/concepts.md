@@ -4,13 +4,13 @@ Answer conceptual questions accurately and in the workshop's own voice using thi
 For the authoritative narrative, read the teaching pages in
 `.devx/1-build-an-agent/`. Keep answers concise; lead the learner to the source for depth.
 
-## The evolution: three stages (`why_agents.md`)
-1. **Single LLM call** — prompt in, response out. Limited to training data; no live info, no actions.
-2. **Workflow / chain** — a fixed sequence of steps (e.g. RAG: retrieve → generate). More capable, but every query takes the same hardcoded path.
+## Three application patterns (`why_agents.md`)
+1. **Single LLM call** — prompt in, response out. Uses training knowledge and supplied context, which may contain fresh data; the application executes external actions.
+2. **Workflow / chain** — developer-defined control flow, which may branch or loop. The simple RAG example always retrieves, but workflows need not follow one fixed path.
 3. **Agent** — the **model decides what to do**: look at the situation, choose a tool (or none), act, observe, and repeat until done. The path adapts per task.
 
 Mental model: *who decides the path, and how flexible is it?* Single call = no
-decision; workflow = the developer hardcodes it; agent = the LLM chooses.
+decision; workflows use developer-defined control flow (which may branch/loop); agents delegate action selection to the model.
 
 ## When agents are (and aren't) the right tool
 Use an agent when: the path varies by input; multiple tools must combine
@@ -26,10 +26,10 @@ Worked examples from the module's quizzes:
   incident reports, and writing a root cause" — variable path, multiple sources,
   each step depends on the last.
 - **Not an agent:** "sort a ticket into billing/technical/other" (one fixed
-  classification — a single call) or "translate a block of text" (one deterministic
-  transform).
+  classification — a single call) or "translate a block of text" (usually one
+  model call; not necessarily deterministic).
 
-## The four components (`introduction_to_agents.md`)
+## Four useful components in this workshop (`introduction_to_agents.md`)
 - **Model** — the brain. Reads the conversation, decides whether to respond or call
   a tool, and generates output. Good agent models support **tool/function calling**,
   follow instructions reliably, and reason well. The workshop uses **NVIDIA Nemotron
@@ -60,7 +60,7 @@ Observation**: think ("I need current data"), act (call search), observe (read
 results), think ("now I can answer"), act (write the answer). Diagram:
 `.devx/1-build-an-agent/img/react_agent_dark.svg`. ReAct agents adapt to
 intermediate results, retry, and decompose tasks — that flexibility is what
-separates agents from fixed workflows.
+lets the model select actions at runtime; workflows may also branch and loop.
 
 **The key subtlety (both quizzes test it):** "tool calling" does **not** mean the
 model runs code. The model only emits a structured request (tool name + arguments);

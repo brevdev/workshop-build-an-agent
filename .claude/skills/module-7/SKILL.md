@@ -15,24 +15,15 @@ either setting.
 
 Module 7 is the **capstone**: it names the layer that ran every agent in Modules 1–6 —
 the **harness** — separates it from the model, and shows that the capability you package
-as a **skill** travels across all of them. It ends by putting the workshop's own GPU to
+as a **skill** can travel between compatible harnesses. It ends by putting the workshop's own GPU to
 work through a verified NVIDIA skill.
 
 **The learner asked:** $ARGUMENTS
 
 ## Module 7 framing — get this right
-- **The harness is the layer, the LLM is the engine.** The model is a stateless
-  function (tokens in → tokens out); everything that made the agents *feel* like agents —
-  memory, tool execution, planning, the loop — lives in the **harness**. *Same model +
-  different harness = a different agent.* This separation is the module's spine.
-- **The five harness responsibilities:** Memory, Self-evolution, Skills, Tool calling,
-  Token efficiency. Four are table stakes; **token efficiency** (the *context tax*) is the
-  axis that sorts the whole landscape.
-- **Skills are portable; that's the punchline.** One `SKILL.md` (the open
-  [agentskills.io](https://agentskills.io) spec) runs unchanged in pi, OpenClaw, Hermes,
-  Claude Code, Codex, Cursor… NVIDIA's bet is *not* to pick a harness winner but to make
-  every harness better — **Nemotron** (engine), **NemoClaw** (safety, M6), and **NVIDIA
-  Verified Skills** (portable, signed capability) across all of them.
+- **The harness surrounds the model.** The model can reason, propose plans, and request tools. The harness executes tools, carries state, and supplies saved memory. Both layers affect results.
+- **Five design choices:** state, optional self-evolution, skills, tool execution, and context management. Capabilities vary by implementation; not every harness provides all five.
+- **Skills are portable instructions.** Compatible harnesses can consume the same `SKILL.md`, but tools, dependencies, and permissions must match. NVIDIA contributes models, safety tooling, and signed skill packages.
 - **A meta-moment worth surfacing:** the very `/module-N` skills powering this tutor are
   that same open Agent Skills format. The learner is *using* the thing the module teaches.
 
@@ -81,7 +72,7 @@ Flow (teaching narrative in `.devx/7-agent-harnesses/`, code in `code/7-agent-ha
 
 | Step | Teaching page | Focus |
 |---|---|---|
-| Setup | `secrets.md` | NVIDIA key only (every harness calls Nemotron) |
+| Setup | `secrets.md` | NVIDIA key for the core lab; optional harness setup |
 | Concepts | `intro_agent_harnesses.md` | harness vs LLM (engine/car); the **5 responsibilities**; the **context tax**; lazy loading |
 | Landscape | `harness_landscape.md` | **7 harnesses** on the context-tax axis; the 3-question chooser; the NVIDIA perspective |
 | Skills | `agent_skills.md` | `SKILL.md` anatomy; lazy loading; the open spec; **NVIDIA Verified Skills** + the verification pipeline |
@@ -104,21 +95,11 @@ OpenClaw from M6 also works).
 Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **Harness vs LLM:** the LLM is the engine; the harness is the rest of the car. Two
   independent choices — same model + different harness = a very different agent.
-- **The five responsibilities:** Memory, Self-evolution, Skills, Tool calling, Token
-  efficiency. The learner has already met each one (M5 `MemorySaver`/sub-agents, M6
-  `MEMORY.md`/self-evolving SOUL, M4/M5 skills, M2 MCP, etc.).
-- **Context tax:** the recurring per-turn overhead (system prompt + tool schemas + skill
-  descriptions) paid on *every* model call. Maximal harness ≈ 7–10k tokens/turn; minimal
-  ≈ <1k. Neither is "wrong" — they're different **bets** (rich built-ins vs load-on-demand).
-- **Lazy skill loading:** keep each skill as a one-line `name: description` until invoked;
-  load the full body only on demand. 30 skills = ~750 tokens lazily vs ~45k eagerly.
-- **The open Agent Skills spec:** a `SKILL.md` (frontmatter `name`+`description`, then body)
-  that runs in every harness. **NVIDIA Verified Skills** (`github.com/NVIDIA/skills`) add
-  capability governance: SkillSpector scans, skill cards, OpenSSF Model Signing — *verify,
-  don't just publish*.
-- **GPU skills:** the model loop can run anywhere; **tools/skills execute locally**. The
-  cuDF skill teaches the model to reach for the GPU correctly (`cudf.pandas`, the 100K-row
-  gate). A subscription buys the brain; the muscles (your GPU) are yours.
+- **Harness design choices:** state, optional self-evolution, skills, tools, and context management. In-memory checkpoints do not provide durable storage after a process restart.
+- **Context tax:** the size of additional context included in requests. The lab estimates roughly 400 vs 3,922 tokens for its bundled setups; these are neither model billing totals nor vendor benchmarks.
+- **Lazy loading:** descriptions enter the initial index; full skill bodies load on request and may remain in history.
+- **Agent Skills:** a shared instruction format. Signed NVIDIA skills establish provenance and integrity of signed files, not safety in every environment.
+- **GPU execution:** tools run where their backend is configured. This lab uses the workshop machine; inspect actual code and results rather than assuming a speedup or data privacy.
 
 ## How to respond — playbook
 - **Concept question** (harness, the 5 responsibilities, context tax, lazy loading, the
@@ -131,7 +112,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
   trigger-worthy `description`, a numbered procedure, validating frontmatter before save —
   but never write the file for them.
 - **Verified skill / GPU** (Ex4): walk the install→verify→run→watch-`nvidia-smi` loop;
-  explain the division of labor; if no GPU, point to the skip message + the answers output.
+  explain the division of labor; if no GPU, explain the fallback message and inspect the actual execution.
 - **"Run it for me":** decline (rule 2); explain the step / what to watch.
 - **Quiz me / recap:** the 5 responsibilities, the context-tax bet, lazy-vs-eager, why the
   GPU runs locally, what's portable across harnesses.
@@ -139,7 +120,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/7-agent-harnesses/{secrets,intro_agent_harnesses,harness_landscape,agent_skills,gpu_skills,harness_lab,evaluating_harnesses}.md`
 - Code: `code/7-agent-harnesses/{harness_lab.py, harness_lab.ipynb}`; `maximal_system_prompt.txt`, `maximal_tool_schemas.json`; `scripts/{install_nvidia_skill.sh, make_test_data.py}`; example skills under the repo-root `skills/` and `code/7-agent-harnesses/skills/`
-- Answer keys `harness_lab.answers.{py,ipynb}` and the completed `code/7-agent-harnesses/skills/.examples/` — for *your* calibration only; never shown to the learner.
+- Answer keys `harness_lab.answers.{py,ipynb}` and `code/7-agent-harnesses/skills/.examples/` are contributor validation assets. Do not open or reveal them during tutoring.
 
 ## References
 - **`references/concepts.md`** — harness vs LLM, the five responsibilities, the context tax, lazy loading, the open Agent Skills spec, NVIDIA Verified Skills, GPU skills — in the workshop's framing, with source pointers.
@@ -150,23 +131,14 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **`references/quizzes.md`** — deeper "Check Your Understanding" feedback (the four in-page quizzes).
 
 ## Environment & hardware
-**No GPU required for the main path.** Exercises 1, 2, 3, and 5 run on **hosted** Nemotron
-(`integrate.api.nvidia.com`) + `tiktoken` on CPU — any machine with the NVIDIA key and
-network works. **Exercise 4 is the GPU one:** the `accelerated-computing-cudf` verified skill
-drives **cuDF/RAPIDS**, so the speedup needs an **NVIDIA GPU**; with no GPU the exercise prints
-a clear skip/fallback message (it runs pandas instead) and the answers notebook shows the
-expected output — so the concept still lands. The **optional closed-harness track** (install
-the same skill into Claude Code/Codex) needs a **subscription** and is explicitly optional —
-the whole lab runs in open harnesses with Nemotron. **Hermes** install pulls from the network
-(`curl … | bash`); `npx skills add` needs Node/`npx` (already in the DevX-Lab container).
-**Needs:** `NVIDIA_API_KEY`. If asked "can my machine run this?": Ex 1/2/3/5 yes (CPU + hosted);
-Ex 4's GPU speedup needs an NVIDIA GPU (else it falls back + skips, by design).
+Exercises 1, 2, 3, and 5 use hosted Nemotron and local CPU tools. Exercise 4 can use cuDF on a compatible NVIDIA GPU; without one the code announces a CPU fallback. A GPU and a skill do not guarantee that this workload will run faster—measure it.
+The core lab needs `NVIDIA_API_KEY` and network access. Hermes needs a separate installation and endpoint configuration. The optional Claude Code/Codex track needs its own model access. The verified-skill installer needs `git` and `model-signing`; the workshop image includes them.
 
 ## Handling diagram / NVIDIA-tech / quiz / hardware questions
 - **"What is this diagram showing?"** → `references/diagrams.md` (engine/car, context-tax meter, portability graph, GPU sequence).
 - **"Is Hermes/pi NVIDIA? what are Verified Skills? is cuDF NVIDIA?"** → `references/nvidia-tech.md`.
 - **"Explain this quiz / I want to go deeper"** → `references/quizzes.md`; encourage an attempt first, then deepen.
-- **"Do I need a GPU / a subscription for this module?"** → the Environment & hardware block above (only Ex 4's speedup wants a GPU; closed harnesses are optional).
+- **"Do I need a GPU / a subscription for this module?"** → the Environment & hardware block above (Ex 4 demonstrates GPU execution; the additional harnesses are optional).
 
 ## Shared workshop resources & cross-cutting help
 This skill is part of the workshop hub (the `workshop` skill). For cross-cutting needs, use

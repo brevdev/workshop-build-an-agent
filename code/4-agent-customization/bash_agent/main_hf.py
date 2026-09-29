@@ -79,6 +79,7 @@ def main(config: Config):
 
         # For the trained model, use clean prompts (no extra context)
         # The model was trained on simple natural language -> JSON
+        messages.clear()
         messages.add_user_message(user)
 
         # The tool-call/response loop
@@ -139,6 +140,7 @@ def main(config: Config):
                             tool_call_result = {"error": "The user declined the execution of this command."}
 
                     messages.add_tool_message(json.dumps(tool_call_result), tool_id)
+                break  # This model translates one request; do not translate tool output.
             else:
                 # No tool calls - display the assistant's message to the user
                 if response:

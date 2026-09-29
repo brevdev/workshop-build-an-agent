@@ -4,7 +4,7 @@ Five exercises that take apart the harness layer:
 
   1. Build the minimal harness  (build_bare_agent)
   2. Measure the context tax    (measure_context_tax, load_skills_lazily)
-  3. Author a portable skill    (skills/dataset_profiler/SKILL.md)
+  3. Author a portable skill    (skills/dataset-profiler/SKILL.md)
   4. Verified NVIDIA skill, real GPU (run_gpu_task)
   5. The self-evolving harness  (self_evolve_skill)
 
@@ -31,7 +31,7 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 # __file__ exists for `python harness_lab.py`; the notebook falls back to its
 # own directory (Jupyter kernels start in the notebook's folder).
-LAB_DIR = Path(__file__).parent if "__file__" in globals() else Path.cwd()
+LAB_DIR = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd().resolve()
 SKILLS_DIR = LAB_DIR / "skills"
 TEST_DATA = LAB_DIR / "test_data" / "sensor_readings.csv"
 REPO_ROOT = LAB_DIR.parents[1]
@@ -39,11 +39,12 @@ REPO_ROOT = LAB_DIR.parents[1]
 # The Secrets Manager persists keys to <repo>/secrets.env — load them here so
 # terminal runs and notebook kernels both see NVIDIA_API_KEY.
 load_dotenv(REPO_ROOT / "variables.env")
-load_dotenv(REPO_ROOT / "secrets.env")
-if not os.environ.get("LANGSMITH_API_KEY"):
-    os.environ["LANGSMITH_TRACING"] = "false"  # tracing without a key only 401-spams
-
-MODEL_NAME = "nvidia/nemotron-3-super-120b-a12b"
+import sys
+sys.path.insert(0, str(REPO_ROOT / "code"))
+sys.path.insert(0, str(LAB_DIR))
+from workshop_support import get_model, load_secrets
+load_secrets(REPO_ROOT)
+MODEL_NAME = get_model("chat")
 
 
 def ensure_test_data():
@@ -58,8 +59,7 @@ def ensure_test_data():
 MINIMAL_SYSTEM_PROMPT = """You are a capable agent operating a computer through four tools:
 read_file, write_file, edit_file, and run_bash.
 
-Environment: run Python as `python` (3.12, pandas/numpy preinstalled) — the
-bare `python3` is a different interpreter without those packages.
+Environment: run Python as `python` (the workshop's Python 3.12, with pandas/numpy preinstalled).
 
 Work step by step. Use tools to inspect before you act. When writing code,
 run it to confirm it works. When the task is complete, reply with a short
@@ -206,24 +206,12 @@ def measure_context_tax() -> dict:
     minimal = harness_overhead(MINIMAL_SYSTEM_PROMPT, CORE_TOOLS)
     maximal = harness_overhead(maximal_prompt, maximal_tools)
 
-    print(f"Minimal harness: {minimal:>7,} tokens/turn")
-    print(f"Maximal harness: {maximal:>7,} tokens/turn   ({maximal / minimal:.1f}x tax)")
+    print(f"Minimal harness: {minimal:>7,} estimated tokens")
+    print(f"Maximal harness: {maximal:>7,} estimated tokens   ({maximal / minimal:.1f}x tax)")
     return {"minimal": minimal, "maximal": maximal}
 
 
-def parse_frontmatter(skill_md: str) -> dict:
-    """Pull name/description out of a SKILL.md YAML frontmatter block."""
-    match = re.match(r"^---\n(.*?)\n---\n", skill_md, re.DOTALL)
-    if not match:
-        raise ValueError("SKILL.md missing frontmatter")
-    meta = {}
-    for line in match.group(1).splitlines():
-        if ":" in line:
-            key, _, value = line.partition(":")
-            meta[key.strip()] = value.strip()
-    if not meta.get("name") or not meta.get("description"):
-        raise ValueError("frontmatter needs both name and description")
-    return meta
+from skill_support import parse_frontmatter, skill_target, read_skill_text
 
 
 def load_skills_lazily(skills_dir: Path = SKILLS_DIR):
@@ -257,16 +245,16 @@ def load_skills_lazily(skills_dir: Path = SKILLS_DIR):
 
     eager = sum(count_tokens(b) for b in bodies.values())
     lazy = count_tokens(index_text)
-    print(f"{len(bodies)} eager skills: +{eager:,} tokens/turn")
-    print(f"{len(bodies)} lazy skills:  +{lazy:,} tokens/turn   ({eager / max(lazy, 1):.0f}x savings)")
+    print(f"{len(bodies)} eager skills: +{eager:,} estimated tokens")
+    print(f"{len(bodies)} lazy skills:  +{lazy:,} estimated tokens   ({eager / max(lazy, 1):.0f}x savings)")
     return index_text, load_skill
 
 
 # ---------------------------------------------------------------------------
 # Exercise 3 — author a portable skill
 #
-# No code TODO here: write skills/dataset_profiler/SKILL.md yourself,
-# following the format of skills/code_review/SKILL.md at the repo root.
+# No code TODO here: write skills/dataset-profiler/SKILL.md yourself,
+# following the format of skills/code-review/SKILL.md at the repo root.
 # (A completed example is in skills/.examples/ — try your own first.)
 # ---------------------------------------------------------------------------
 
@@ -298,11 +286,11 @@ def run_gpu_task() -> str:
     has_gpu = subprocess.run("nvidia-smi", shell=True, capture_output=True).returncode == 0
     has_cudf = subprocess.run(["python", "-c", "import cudf"], capture_output=True).returncode == 0
     if not has_gpu:
-        print("⚠️  No GPU detected — the agent will fall back to pandas. "
-              "On a GPU machine, watch `nvidia-smi` light up instead.")
+        print("⚠️  No GPU detected. Inspect the selected backend; "
+              "ask the agent to use pandas if needed.")
     elif not has_cudf:
-        print("⚠️  cuDF isn't importable — run `pip install cudf-cu12`, "
-              "or the agent will fall back to pandas.")
+        print("⚠️  cuDF isn't importable. Check Workshop Health; "
+              "ask the agent to use pandas if needed.")
 
     # The task asks for speed but never names the GPU — the skill supplies
     # the how; the receipt below catches the model skipping it.
@@ -329,7 +317,7 @@ Extract the reusable PROCEDURE (not the task-specific values) and write it as
 an agent skill in exactly this format — output ONLY the file content:
 
 ---
-name: <short_snake_case_name>
+name: <short-hyphenated-name>
 description: <one line stating when this skill should be used>
 ---
 
@@ -372,7 +360,7 @@ def self_evolve_skill(transcript: str, skills_dir: Path = SKILLS_DIR) -> Path:
     #   2. strip any ``` fences from the response content
     #   3. parse_frontmatter() to VALIDATE before saving — a malformed skill
     #      breaks the lazy loader on the next run (Module 6 lesson!)
-    #   4. save to skills_dir / meta["name"] / "SKILL.md" and return the path
+    #   4. get skill_target(skills_dir, meta["name"]), save there, and return the path
     raise NotImplementedError("Complete Exercise 5")
 
 

@@ -392,7 +392,7 @@
 }
 
 .log-entry.success {
-  border-left: 3px solid var(--accent-color);
+  border-left: 3px solid var(--text-secondary);
 }
 
 .log-entry.error {

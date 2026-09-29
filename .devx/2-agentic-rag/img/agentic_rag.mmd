@@ -24,6 +24,8 @@ flowchart LR
         rerank[Reranking<br />Model]
     end
 
+    rerank ==retrieved chunks==> tools
+
     has_tools -.no .-> Response
 
     classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;

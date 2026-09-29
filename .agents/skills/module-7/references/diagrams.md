@@ -5,8 +5,8 @@ means, the takeaway, and common confusions. Figures live in the teaching pages u
 `.devx/7-agent-harnesses/` (rendered by docsify — Mermaid graphs + HTML widgets).
 
 ## The harness flowchart — "engine vs car" (`intro_agent_harnesses.md`)
-- **Depicts:** a `THE HARNESS` box wrapping the agentic loop. Five capability nodes —
-  **Memory**, **Skills**, **Tool calling**, **Self-evolution**, **Token efficiency** — feed an
+- **Depicts:** a `THE HARNESS` box wrapping the agentic loop. Five possible capability nodes —
+  **State / Memory**, **Skills**, **Tool calling**, **Optional self-evolution**, **Token efficiency** — feed an
   inner `The Agentic Loop` containing the **LLM** ("stateless, tokens in → tokens out"). The
   **User** sits outside, talking to the whole harness, not the model.
 - **Takeaway:** the model is one stateless node *inside* a larger machine; everything that
@@ -20,24 +20,13 @@ means, the takeaway, and common confusions. Figures live in the teaching pages u
   harness's side — prompt → think → `[tool] read_file` → `tokens: …/128,000` → answer. The
   model only ever sees tokens; the harness does the reading, running, and counting.
 
-## The Context Tax Meter (`harness_landscape.md`)
-- **Depicts:** horizontal bars of **permanent per-turn overhead** (system prompt + always-loaded
-  tool schemas): pi ~1k (*minimal*) → OpenCode ~3.5k → LangChain Deep Agents ~4.5k → Hermes ~6k
-  → OpenClaw ~7.5k → Claude Code / Codex 7–10k (*maximal*).
-- **Takeaway:** a ~10× spread in what different designers consider "necessary" before the user
-  says a word. The *shape* is the lesson.
-- **Common confusions:** this is a **bet axis, not a quality ranking** — a higher tax is not
-  "worse"; maximal harnesses spend those tokens on built-in capability, minimal ones bet the
-  model loads capability on demand. And the numbers are **order-of-magnitude estimates that
-  shift every release** — which is exactly why the learner measures their own in Exercise 2
-  (the `PLACE YOUR BET` widget primes this).
+## Comparing context overhead (`harness_landscape.md`)
+The page compares design choices without a numerical vendor ranking. Exercise 2 estimates the two bundled configurations with one tokenizer and serialization method. Counts exclude model-specific formatting and are not billing measurements.
 
-## SKILL.md → every harness — portability (`agent_skills.md`)
+## SKILL.md → compatible harnesses — portability (`agent_skills.md`)
 - **Depicts:** one `SKILL.md` node fanning out to **OpenClaw, Hermes, Claude Code, Codex,
-  Cursor** — one portable skill, many harnesses.
-- **Takeaway:** the harness market is fiercely competitive (open vs. closed, minimal vs.
-  maximal), yet capability packaged as a skill is portable across *all* of it. Write once,
-  supercharge any agent — the open [agentskills.io](https://agentskills.io) spec at work.
+  Cursor** — one skill format, multiple compatible harnesses; runtime dependencies remain separate.
+- **Takeaway:** the file format is portable between compatible harnesses. Tool names, dependencies, permissions, and model behavior still matter.
 - **Common confusions:** the arrows flow *outward from* the skill — it's "one skill → many
   harnesses," not a harness aggregating skills. (Meta-note: these tutoring skills are that same
   format.)
@@ -46,12 +35,8 @@ means, the takeaway, and common confusions. Figures live in the teaching pages u
 - **Depicts:** a sequence diagram — **You** → **Harness (local)** → **LLM (cloud)** writes
   `cudf.pandas` code → **Harness** executes it on **Your GPU (local)** → results back to the
   model → analysis to you.
-- **Takeaway:** the cloud model never touches your data at GPU scale — it writes a few hundred
-  tokens of code; **your local GPU does the heavy compute.** True in every harness. A
-  subscription buys the brain; the muscles are yours.
-- **Common confusions:** learners assume a cloud/subscription harness means the GPU is idle —
-  the opposite is the page's whole point. The skill is what makes the model reach for the GPU
-  *correctly* (right library/API/patterns); without it the model just writes CPU pandas.
+- **Takeaway:** in this lab, the tool backend executes the proposed code on the workshop machine. Other backends may run remotely. Tool outputs can reach the hosted model, so local compute alone does not ensure privacy.
+- **Common confusions:** a skill can guide GPU use; it neither guarantees correctness nor makes every workload faster. Check the generated code and compare results and timings.
 
 ## Supporting widgets
 - **Gauges** (`intro`, `landscape`, `harness_lab` "YOUR TARGETS") — the same tax expressed as a

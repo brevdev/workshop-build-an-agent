@@ -4,8 +4,8 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import { skills as allSkills, type Skill } from './data/skills';
 import { models, type ModelDef } from './data/models';
-import { createAgentSession, deleteAgentSession } from './api/agent';
-import { useBlockyBits } from './hooks/useBlockyBits';
+import { createAgentSession, deleteAgentSession, getAvailableModels, type AgentSessionInfo } from './api/agent';
+import { useBlockyBits, type UseBlockyBitsResult } from './hooks/useBlockyBits';
 import { SoulPicker } from './components/SoulPicker';
 import { SkillPalette } from './components/SkillPalette';
 import { AgentBuilder } from './components/AgentBuilder';
@@ -37,12 +37,79 @@ function App() {
   const [showSandboxWarning, setShowSandboxWarning] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
   const [isExtendedBuild, setIsExtendedBuild] = useState(false);
+  const [availableModels, setAvailableModels] = useState<ModelDef[]>([]);
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [buildError, setBuildError] = useState<string | null>(null);
+  const [sessionInfo, setSessionInfo] = useState<AgentSessionInfo | null>(null);
+  const buildGeneration = useRef(0);
+  const modalRef = useRef<HTMLDivElement>(null);
   const ragInitializedRef = useRef(false);
 
-  // Blocky Bits — only polls when visual mode is active
-  const blocky = useBlockyBits(inputMode === 'visual' && (phase === 'soul' || phase === 'builder'));
+  const loadModels = useCallback(async () => {
+    try {
+      const configured = await getAvailableModels();
+      setAvailableModels(configured.flatMap(item => {
+        const style = models.find(model => model.id === item.id);
+        return style ? [{ ...style, name: item.name, backendModel: item.model }] : [];
+      }));
+      setModelError(null);
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : 'Could not load models. Try again.');
+    }
+  }, []);
+  useEffect(() => {
+    let active = true;
+    getAvailableModels().then(configured => {
+      if (!active) return;
+      setAvailableModels(configured.flatMap(item => {
+        const style = models.find(model => model.id === item.id);
+        return style ? [{ ...style, name: item.name, backendModel: item.model }] : [];
+      }));
+    }).catch(error => { if (active) setModelError(error.message); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!showSandboxInfo && !showSandboxWarning) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const focusable = () => Array.from(modalRef.current?.querySelectorAll<HTMLElement>('button, a[href]') ?? []);
+    focusable()[0]?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setShowSandboxInfo(false); setShowSandboxWarning(false); }
+      if (event.key === 'Tab') {
+        const items = focusable();
+        const first = items[0], last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('keydown', onKey); previous?.focus(); };
+  }, [showSandboxInfo, showSandboxWarning]);
+
   const prevBlockySkillsRef = useRef<string>('');
   const prevBlockyModelRef = useRef<string | null>(null);
+  const handleBlockyUpdate = useCallback((state: UseBlockyBitsResult) => {
+    if (!state.connected) return;
+    if (phase === 'soul' && state.modelId !== prevBlockyModelRef.current) {
+      const model = availableModels.find(item => item.id === state.modelId);
+      if (model) {
+        prevBlockyModelRef.current = state.modelId;
+        setSelectedModel(model);
+        setPhase('builder');
+      }
+    }
+    if (phase !== 'builder') return;
+    const key = [...state.skillIds].sort().join(',');
+    if (key === prevBlockySkillsRef.current) return;
+    prevBlockySkillsRef.current = key;
+    const detected = allSkills.filter(skill => state.skillIds.includes(skill.id));
+    setAddedSkills(previous => [...previous, ...detected.filter(skill => !previous.some(item => item.id === skill.id))]);
+    if (sandboxMode) setSandboxMap(previous => ({ ...previous,
+      ...Object.fromEntries(detected.filter(skill => skill.sandboxable).map(skill => [skill.id, true])),
+    }));
+  }, [phase, availableModels, sandboxMode]);
+  const blocky = useBlockyBits(inputMode === 'visual' && (phase === 'soul' || phase === 'builder'), handleBlockyUpdate);
 
   // Apply accent color CSS variables when model changes
   useEffect(() => {
@@ -59,59 +126,6 @@ function App() {
       root.style.setProperty('--accent-subtle', 'rgba(118, 185, 0, 0.1)');
     }
   }, [selectedModel]);
-
-  // Blocky Bits: auto-select model from physical blocks
-  useEffect(() => {
-    if (!blocky.connected || phase !== 'soul') return;
-    if (blocky.modelId && blocky.modelId !== prevBlockyModelRef.current) {
-      prevBlockyModelRef.current = blocky.modelId;
-      const model = models.find(m => m.id === blocky.modelId);
-      if (model) {
-        console.log('[BlockyBits] Auto-selecting model:', model.name);
-        setSelectedModel(model);
-        setPhase('builder');
-      }
-    }
-  }, [blocky.connected, blocky.modelId, phase]);
-
-  // Blocky Bits: auto-add/remove skills from physical blocks
-  useEffect(() => {
-    if (!blocky.connected || phase !== 'builder') return;
-    const key = blocky.skillIds.sort().join(',');
-    if (key === prevBlockySkillsRef.current) return;
-    prevBlockySkillsRef.current = key;
-
-    console.log('[BlockyBits] Syncing skills:', blocky.skillIds);
-
-    // Add skills that are in blocky but not in addedSkills
-    setAddedSkills(prev => {
-      const currentIds = new Set(prev.map(s => s.id));
-      const blockyIds = new Set(blocky.skillIds);
-      
-      // Keep manually added skills + add new blocky skills
-      let updated = [...prev];
-      
-      // Add new blocky skills
-      for (const id of blocky.skillIds) {
-        if (!currentIds.has(id)) {
-          const skill = allSkills.find(s => s.id === id);
-          if (skill) updated.push(skill);
-        }
-      }
-
-      // Remove skills that were added by blocky but are no longer detected
-      // (only remove if the skill ID is in our SKILL_BLOCK_MAP — don't remove manually dragged ones)
-      updated = updated.filter(s => {
-        // Keep if it's still detected by blocky
-        if (blockyIds.has(s.id)) return true;
-        // Keep if it was manually added (not a blocky-mappable skill)
-        // For simplicity, keep all — only add, don't auto-remove
-        return true;
-      });
-
-      return updated;
-    });
-  }, [blocky.connected, blocky.skillIds, phase]);
 
   const handleSoulSelect = useCallback((model: ModelDef) => {
     setSelectedModel(model);
@@ -143,6 +157,13 @@ function App() {
     setSandboxMap(prev => { const next = { ...prev }; delete next[skillId]; return next; });
   }, []);
 
+  const handleAddSkill = useCallback((id: string) => {
+    const skill = allSkills.find(item => item.id === id);
+    if (!skill || phase !== 'builder') return;
+    setAddedSkills(previous => previous.some(item => item.id === id) ? previous : [...previous, skill]);
+    if (sandboxMode && skill.sandboxable) setSandboxMap(previous => ({ ...previous, [id]: true }));
+  }, [phase, sandboxMode]);
+
   const handleToggleSandboxMode = useCallback(() => {
     if (!sandboxMode) {
       setShowSandboxInfo(true);
@@ -172,6 +193,9 @@ function App() {
       const isFirstRAG = hasRAG && !ragInitializedRef.current;
 
       setSessionReady(false);
+      setBuildError(null);
+      setSessionInfo(null);
+      const generation = ++buildGeneration.current;
       setIsExtendedBuild(isFirstRAG);
       setPhase('building');
 
@@ -179,26 +203,34 @@ function App() {
         const skillIds = addedSkills.map(s => s.id);
         console.log('[App] Creating agent session:', selectedModel.id, skillIds, 'sandboxMap:', sandboxMap);
         const info = await createAgentSession(selectedModel.id, skillIds, true, sandboxMap);
+        if (generation !== buildGeneration.current) { void deleteAgentSession(info.sessionId); return; }
         console.log('[App] Session created:', info.sessionId, 'sandbox:', info);
         setSessionId(info.sessionId);
+        setSessionInfo(info);
         setSandboxStatus({ requested: info.sandboxRequested, active: info.sandboxActive });
         if (hasRAG) ragInitializedRef.current = true;
         setSessionReady(true);
       } catch (err) {
+        if (generation !== buildGeneration.current) return;
         console.error('[App] Failed to create agent session:', err);
-        // Build failed → no working sandbox. Record it honestly so the badge
-        // reflects the intent-vs-reality gap rather than claiming isolation.
-        setSandboxStatus({ requested: Object.values(sandboxMap).some(Boolean), active: false });
-        setSessionReady(true); // Let animation finish even on error
+        setSessionId(null);
+        setSandboxStatus(null);
+        setSessionReady(false);
+        setBuildError(err instanceof Error ? err.message : 'Could not build your agent. Try again.');
+        setPhase('builder');
       }
     }
   }, [addedSkills, selectedModel, sandboxMap]);
 
   const handleBuildComplete = useCallback(() => {
-    setPhase('chat');
-  }, []);
+    if (sessionReady && sessionId) setPhase('chat');
+  }, [sessionReady, sessionId]);
 
   const handleReset = useCallback(() => {
+    buildGeneration.current += 1;
+    setBuildError(null);
+    setSessionReady(false);
+    setSessionInfo(null);
     if (sessionId) {
       deleteAgentSession(sessionId);
     }
@@ -216,6 +248,10 @@ function App() {
   // Reset when switching modes
   const handleModeSwitch = useCallback((mode: InputMode) => {
     if (mode === inputMode) return;
+    buildGeneration.current += 1;
+    setBuildError(null);
+    setSessionReady(false);
+    setSessionInfo(null);
     if (sessionId) deleteAgentSession(sessionId);
     setInputMode(mode);
     setSessionId(null);
@@ -283,7 +319,7 @@ function App() {
               const requested = sandboxStatus?.requested ?? sandboxMode;
               const cls = active ? 'on' : (requested ? 'failed' : 'off');
               const label = active
-                ? '🔒 Sandboxed'
+                ? '🔒 File / shell sandbox'
                 : (requested ? '⚠️ Sandbox unavailable' : '⚠️ No Sandbox');
               return <span className={`sandbox-mode-badge ${cls}`}>{label}</span>;
             })()}
@@ -305,7 +341,7 @@ function App() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3 }}
               >
-                <SoulPicker onSelect={handleSoulSelect} />
+                <SoulPicker onSelect={handleSoulSelect} models={availableModels} error={modelError} onRetry={loadModels} />
               </motion.div>
             )}
 
@@ -318,7 +354,7 @@ function App() {
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
               >
-                <SkillPalette addedSkillIds={addedSkillIds} selectedModel={selectedModel} />
+                <SkillPalette addedSkillIds={addedSkillIds} selectedModel={selectedModel} onAddSkill={handleAddSkill} />
                 
                 <div className="app-main">
                   <AgentBuilder 
@@ -329,6 +365,7 @@ function App() {
                     sandboxMap={sandboxMap}
                   />
                   
+                  {buildError && <div className="build-error" role="alert"><strong>Build did not finish.</strong> {buildError} Your selections are saved. Try Build Agent again.</div>}
                   <BuildButton
                     disabled={addedSkills.length === 0}
                     isBuilding={phase === 'building'}
@@ -355,6 +392,12 @@ function App() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
               >
+                {sessionInfo?.capabilities && <details className="session-capabilities">
+                  <summary>Active tools &amp; boundaries</summary>
+                  <p>File tools: {sessionInfo.capabilities.file_root ?? 'disabled'}. Shell: {sessionInfo.capabilities.execution}.
+                    {' '}Web search and RAG run in the app.</p>
+                  <p>Enabled: {sessionInfo.enabledTools.join(', ') || 'none'}</p>
+                </details>}
                 <ChatSection
                   isVisible={phase === 'chat'}
                   skills={addedSkills}
@@ -368,12 +411,12 @@ function App() {
         </div>
 
         {/* Build animation overlay */}
-        <BuildAnimation
+        {phase === 'building' && <BuildAnimation
           isActive={phase === 'building'}
           onComplete={handleBuildComplete}
           sessionReady={sessionReady}
           extendedBuild={isExtendedBuild}
-        />
+        />}
 
         {/* Sandbox info modal */}
         <AnimatePresence>
@@ -388,6 +431,10 @@ function App() {
               />
               <motion.div
                 className="sandbox-info-modal"
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="sandbox-info-title"
                 style={{ x: '-50%', y: '-50%' }}
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -395,23 +442,23 @@ function App() {
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
                 <div className="sandbox-info-icon">🔒</div>
-                <h2 className="sandbox-info-title">Enable Sandbox Mode?</h2>
+                <h2 id="sandbox-info-title" className="sandbox-info-title">Enable Sandbox Mode?</h2>
                 <p className="sandbox-info-desc">
-                  Sandbox mode runs your agent's tools inside an <strong>isolated <a href="https://www.docker.com/" target="_blank" rel="noreferrer">Docker</a> container</strong> — complete filesystem isolation.
+                  Run file and shell tools in an <strong>isolated <a href="https://www.docker.com/" target="_blank" rel="noreferrer">Docker</a> container</strong>.
                 </p>
                 <div className="sandbox-info-benefits">
                   <div className="sandbox-benefit">
                     <span className="benefit-icon">🛡️</span>
                     <div>
                       <strong>Isolated Execution</strong>
-                      <p>File writes, shell commands, and code run in a sandboxed container — not on your machine.</p>
+                      <p>File and shell tools use a separate workspace with no network access.</p>
                     </div>
                   </div>
                   <div className="sandbox-benefit">
                     <span className="benefit-icon">🔐</span>
                     <div>
                       <strong>Credential Protection</strong>
-                      <p>API keys and local files stay outside the sandbox. The agent can't access your host system.</p>
+                      <p>Host files and API keys are not mounted into the container. Web search and RAG run in the app.</p>
                     </div>
                   </div>
                   <div className="sandbox-benefit">
@@ -423,7 +470,7 @@ function App() {
                   </div>
                 </div>
                 <p className="sandbox-info-note">
-                  Requires Docker running locally. Without it, tools fall back to local execution.
+                  Requires Docker. If the sandbox cannot start, the build stops so you can fix it and retry.
                 </p>
                 <div className="sandbox-info-buttons">
                   <button className="sandbox-confirm" onClick={handleConfirmSandboxMode}>
@@ -451,6 +498,10 @@ function App() {
               />
               <motion.div
                 className="sandbox-warning-modal"
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="sandbox-warning-title"
                 style={{ x: '-50%', y: '-50%' }}
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -458,10 +509,10 @@ function App() {
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
                 <div className="sandbox-warning-icon">⚠️</div>
-                <h2 className="sandbox-warning-title">Disable Sandbox Mode?</h2>
+                <h2 id="sandbox-warning-title" className="sandbox-warning-title">Disable Sandbox Mode?</h2>
                 <p className="sandbox-warning-desc">
-                  Your agent's tools will run <strong>directly on your local machine</strong> without isolation. 
-                  File writes, shell commands, and code execution will have full access to your system.
+                  Shell commands will run <strong>as your workshop user</strong> and can access that user's files.
+                  File tools alone stay within their workspace.
                 </p>
                 <div className="sandbox-info-buttons">
                   <button className="sandbox-cancel" onClick={() => setShowSandboxWarning(false)}>

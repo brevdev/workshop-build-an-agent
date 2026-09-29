@@ -1,7 +1,7 @@
 """
 Deep Agent Factory — Module 5 Exercise File
 
-Complete the TODO exercises below to build a production-grade deep agent.
+Complete the TODO exercises below to build a deep agent with explicit tool permissions.
 Each exercise corresponds to a section in the Build a Deep Agent lesson.
 
 This file IS the factory the Deep Agents Client runs — demo/backend/agent.py
@@ -19,6 +19,7 @@ Run it in the UI (restart the backend so it re-reads this file):
 
 import os
 import sys
+from datetime import datetime, timezone
 
 from dotenv import load_dotenv
 
@@ -35,10 +36,11 @@ DEMO_BACKEND_DIR = os.path.join(REPO_ROOT, "demo", "backend")
 if os.path.isdir(DEMO_BACKEND_DIR) and DEMO_BACKEND_DIR not in sys.path:
     sys.path.insert(0, DEMO_BACKEND_DIR)
 
-# secrets.env is what the Secrets Manager writes; the environment wins over it.
-load_dotenv()
-load_dotenv(os.path.join(REPO_ROOT, "secrets.env"), override=False)
-load_dotenv(os.path.join(REPO_ROOT, "variables.env"), override=False)
+sys.path.insert(0, os.path.join(REPO_ROOT, "code"))
+from workshop_support import get_model, load_secrets
+load_secrets(REPO_ROOT)
+
+from capabilities import CapabilityMiddleware, enabled_tools, restrict_backend
 
 from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend, LocalShellBackend, CompositeBackend
@@ -49,7 +51,7 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 # ── Configuration ─────────────────────────────────────────────────────────────
 
 # Workspace directories
-WORKSPACE_DIR = "/tmp/deepagent_workspace"            # Local (has sensitive files for demo)
+WORKSPACE_DIR = os.environ.get("DEEPAGENT_WORKSPACE", "/tmp/deepagent_workspace")            # Local (has sensitive files for demo)
 SANDBOX_WORKSPACE_DIR = "/workspace"                  # Path INSIDE Docker container
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
 
@@ -60,20 +62,9 @@ SKILLS_DIR = os.path.join(DEMO_BACKEND_DIR, "skills")
 # Shared checkpointer for all sessions (in-memory, resets on server restart)
 checkpointer = MemorySaver()
 
-# Map UI model IDs to NVIDIA NIM model strings (verified available)
-MODEL_MAP = {
-    "nemotron": "nvidia/nemotron-3-super-120b-a12b",
-    "llama": "meta/llama-3.3-70b-instruct",
-    "deepseek": "deepseek-ai/deepseek-r1-0528",
-    "claude": "meta/llama-3.3-70b-instruct",
-}
-
-MODEL_DISPLAY_NAMES = {
-    "nemotron": "Nemotron (NVIDIA)",
-    "llama": "Llama 3.3 (Meta)",
-    "deepseek": "DeepSeek R1 (DeepSeek)",
-    "claude": "Claude-style (Anthropic fallback)",
-}
+# UI choices name the actual centrally configured model.
+MODEL_MAP = {"nemotron": get_model("chat"), "nemotron_fast": get_model("fast_chat")}
+MODEL_DISPLAY_NAMES = {"nemotron": "Nemotron Super", "nemotron_fast": "Nemotron Lightning"}
 
 # Tools that require human approval before executing
 INTERRUPT_TOOLS = {
@@ -88,10 +79,12 @@ INTERRUPT_TOOLS = {
 # TODO: Exercise 1
 # Fill in _get_model() to create a ChatNVIDIA instance.
 # Use MODEL_MAP to look up the model_id, and os.getenv("NVIDIA_API_KEY") for the api_key.
-# Set temperature to 0.3.
+# Set temperature to 0.3; keep the provided response and timeout limits.
 
-def _get_model(model_id: str = "llama"):
+def _get_model(model_id: str = "nemotron"):
     """Return an NVIDIA NIM chat model for the given model ID."""
+    if model_id not in MODEL_MAP:
+        raise ValueError(f"Unsupported model choice: {model_id}")
     api_key = ...
     model_name = ...
     print(f"[Agent] Using model: {model_name} (id={model_id})")
@@ -99,6 +92,9 @@ def _get_model(model_id: str = "llama"):
         model=...,
         api_key=...,
         temperature=0.3,
+        max_tokens=4096,
+        timeout=90,
+        model_kwargs={"chat_template_kwargs": {"enable_thinking": False}} if model_id == "nemotron_fast" else {},
     )
 
 
@@ -120,18 +116,21 @@ def _build_extra_tools(skill_ids: list[str]) -> list:
             if tavily_key:
                 tools.append(...)
                 print("[Agent] Added Tavily web search tool")
-        except ImportError:
-            print("[Agent] Tavily not available")
+        except ImportError as exc:
+            raise RuntimeError("Install the backend requirements to use Web Search.") from exc
+        if not tavily_key:
+            raise ValueError("Web Search requires TAVILY_API_KEY in secrets.env.")
 
     if "rag" in skill_ids:
         try:
             from rag import get_retriever_tool
             tool = get_retriever_tool()
-            if tool:
-                tools.append(tool)
-                print("[Agent] Added IT knowledge base RAG tool")
-        except Exception as e:
-            print(f"[Agent] RAG tool not available: {e}")
+            if tool is None:
+                raise RuntimeError("The IT knowledge base is missing.")
+            tools.append(tool)
+            print("[Agent] Added IT knowledge base RAG tool")
+        except Exception as exc:
+            raise RuntimeError("Could not load the selected RAG tool. Check the knowledge base, model setup and backend dependencies.") from exc
 
     return tools
 
@@ -157,13 +156,6 @@ def _load_skill_content(skill_ids: list[str]) -> str:
                     content_parts.append(f.read())
     return "\n\n---\n\n".join(content_parts)
 
-def _get_skill_sources() -> list[str]:
-    """Get list of skill source directories if any skills exist."""
-    if os.path.exists(SKILLS_DIR) and os.listdir(SKILLS_DIR):
-        return ["/skills/"]
-    return []
-
-
 # ── Exercise 3: Write the System Prompt ──────────────────────────────────────
 
 # TODO: Exercise 3
@@ -179,7 +171,7 @@ def _get_skill_sources() -> list[str]:
 def _build_system_prompt(skill_ids: list[str], model_id: str, hitl_enabled: bool, sandbox_enabled: bool = False) -> str:
     """Create a system prompt that includes the selected capabilities and skills."""
     model_name = MODEL_DISPLAY_NAMES.get(model_id, "AI Model")
-    workspace = SANDBOX_WORKSPACE_DIR if sandbox_enabled else WORKSPACE_DIR
+    workspace = SANDBOX_WORKSPACE_DIR if sandbox_enabled else "/"
 
     enabled = []
     if "websearch" in skill_ids:
@@ -193,7 +185,8 @@ def _build_system_prompt(skill_ids: list[str], model_id: str, hitl_enabled: bool
     if "rag" in skill_ids:
         enabled.append("- IT Knowledge Base (it_knowledge_base): search internal IT policies and procedures")
 
-    builtin = ["- Planning (write_todos): organize tasks"]
+    builtin = ["- Planning (write_todos): organize tasks",
+               "- Delegation (task): ask a subagent to handle a focused subtask with the same permissions"]
     all_capabilities = enabled + builtin if enabled else builtin
     caps_text = "\n".join(all_capabilities)
 
@@ -205,7 +198,7 @@ def _build_system_prompt(skill_ids: list[str], model_id: str, hitl_enabled: bool
     if hitl_enabled:
         hitl_note = """
 NOTE: Some tools (write_file, edit_file, execute) require human approval.
-The user will be asked to approve, edit, or reject your tool calls before they execute.
+The user will be asked to approve or reject your tool calls before they execute.
 Continue normally after approval — do not ask the user to approve manually."""
 
     # Load skill content if any skills are selected
@@ -213,16 +206,17 @@ Continue normally after approval — do not ask the user to approve manually."""
     skill_section = f"\n\n---\n\n{skill_content}" if skill_content else ""
 
     return f"""You are an NVIDIA Deep Agent — a powerful AI assistant built for GTC 2026.
+Current date (UTC): {datetime.now(timezone.utc):%Y-%m-%d}
 Your soul (foundation model) is: {...}
 
 Your enabled capabilities:
 {...}
 
 CRITICAL RULES:
-1. Answer the user's question DIRECTLY. Do NOT use the 'task' tool — respond yourself.
+1. Answer simple questions directly. For independent subtasks, use task and check its result.
 2. File tools require ABSOLUTE paths. Your workspace is: {...}
-   Always use paths like: {...}/hello.py
-3. Use web search when the user asks for current information.
+   For example, a file named hello.py goes under that root.
+3. Use web search for current information only when that tool is enabled. Include the current date for news, check publication dates, and cite only claims supported by retrieved text. If freshness or details are unverified, say so.
 4. Be concise and technically accurate.
 5. You are running on NVIDIA infrastructure.{...}
 {...}{...}"""
@@ -233,9 +227,9 @@ CRITICAL RULES:
 # TODO: Exercise 4
 # Fill in _build_backend() to return the right backend:
 #   - If "execute" is in skill_ids → 
-#         LocalShellBackend (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to True)
+#         LocalShellBackend (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to False, virtual_mode=True)
 #   - Otherwise → 
-#         FilesystemBackend (with root_dir as workspace)
+#         FilesystemBackend (with root_dir as workspace, virtual_mode=True)
 
 def _build_backend(skill_ids: list[str], sandbox_map: dict[str, bool]):
     """
@@ -244,28 +238,17 @@ def _build_backend(skill_ids: list[str], sandbox_map: dict[str, bool]):
     Otherwise use LocalShellBackend or FilesystemBackend.
     Returns (backend, sandbox_instance_or_None).
     """
+    unsupported = [sid for sid, on in sandbox_map.items() if on and sid not in {"fileio", "execute"}]
+    if unsupported:
+        raise ValueError("Only File I/O and Shell Execution run inside the Docker sandbox.")
     any_sandboxed = any(sandbox_map.get(sid, False) for sid in skill_ids)
-
     if any_sandboxed:
+        from docker_sandbox import DockerSandboxBackend
         try:
-            from docker_sandbox import DockerSandboxBackend
-
             backend = DockerSandboxBackend()
-            sandboxed_tools = [k for k, v in sandbox_map.items() if v]
-            print(f"[Agent] Docker sandbox created for tools: {sandboxed_tools}")
-            return backend, backend  # backend IS the sandbox (has .delete())
-        except Exception as e:
-            # Loud, unmissable warning. A requested sandbox that silently
-            # downgrades to local execution is exactly the "security theater"
-            # this module warns against — so we shout, and create_agent reports
-            # the real status (sandbox is None) so nothing claims isolation it
-            # doesn't have.
-            print("=" * 72)
-            print("[Agent] ⚠️  SANDBOX REQUESTED BUT UNAVAILABLE")
-            print(f"[Agent]     Docker sandbox failed to start: {e}")
-            print("[Agent]     Falling back to LOCAL execution — tools run on the host and")
-            print("[Agent]     are NOT isolated. Do not treat this as a security boundary.")
-            print("=" * 72)
+        except Exception as exc:
+            raise RuntimeError("Docker sandbox could not start. No agent was created; check Docker and retry.") from exc
+        return backend, backend
 
     # No sandbox — local execution
     workspace = WORKSPACE_DIR
@@ -287,12 +270,12 @@ def _build_backend(skill_ids: list[str], sandbox_map: dict[str, bool]):
 # Fill in create_agent() to:
 #   1. Call _get_model() with model_id, _build_extra_tools() with skill_ids
 #   2. Build the agent_kwargs dict with model, extra_tools (if it exists), system_prompt, backend, checkpointer
-#   3. If hitl_enabled, add interrupt_on=INTERRUPT_TOOLS
+#   3. If hitl_enabled, interrupt the enabled write/edit/execute tools
 #   4. Call create_deep_agent on **agent_kwargs and return the result
 
 def create_agent(
     skill_ids: list[str] | None = None,
-    model_id: str = "llama",
+    model_id: str = "nemotron",
     hitl_enabled: bool = False,
     sandbox_map: dict[str, bool] | None = None,
 ):
@@ -307,14 +290,17 @@ def create_agent(
 
     model = ...
     extra_tools = ...
-    skill_sources = _get_skill_sources()
 
-    # Build the backend FIRST so the system prompt reflects the ACTUAL sandbox
-    # state — a requested Docker sandbox that failed to start falls back to the
-    # local workspace, and the model must not be told it is sandboxed.
+    # A requested sandbox must start successfully before creating the agent.
     backend, sandbox = _build_backend(skill_ids, sandbox_map)
+    backend = restrict_backend(backend, skill_ids)
     sandbox_active = sandbox is not None
-    system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, sandbox_active)
+    try:
+        system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, sandbox_active)
+    except Exception:
+        if sandbox is not None:
+            sandbox.delete()
+        raise
 
     agent_kwargs: dict = {
         "model": ... ,
@@ -327,10 +313,14 @@ def create_agent(
     if hitl_enabled:
         agent_kwargs["interrupt_on"] = ...
 
-    if skill_sources:
-        agent_kwargs["skills"] = skill_sources
+    agent_kwargs["middleware"] = [CapabilityMiddleware(skill_ids)]
 
-    agent = ...
+    try:
+        agent = ...
+    except Exception:
+        if sandbox is not None:
+            sandbox.delete()
+        raise
     sandboxed = [k for k, v in sandbox_map.items() if v]
     print(f"[Agent] Created deep agent: skills={skill_ids}, hitl={hitl_enabled}, sandboxed={sandboxed}")
     return agent, sandbox
@@ -352,11 +342,11 @@ if __name__ == "__main__":
         )
         print("✅ Agent created successfully!")
         print(f"   Type:    {type(agent).__name__}")
-        print(f"   Sandbox: {'active' if sandbox else 'none (local execution)'}")
+        print(f"   Sandbox: {'active' if sandbox else 'none'}")
 
         # Test with a simple query
         result = await agent.ainvoke(
-            {"messages": [{"role": "user", "content": "List all files in /tmp/deepagent_workspace"}]},
+            {"messages": [{"role": "user", "content": "List files at the file-tool root /"}]},
             config={"configurable": {"thread_id": "test"}},
         )
 

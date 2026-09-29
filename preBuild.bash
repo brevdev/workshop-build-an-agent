@@ -53,6 +53,7 @@ rm /tmp/python-pbs.tar.gz
 sudo ln -sf /opt/python/bin/python3.12 /usr/local/bin/python3.12
 sudo ln -sf /opt/python/bin/pip3.12 /usr/local/bin/pip3.12
 sudo ln -sf /opt/python/bin/python3.12 /usr/local/bin/python
+sudo ln -sf /opt/python/bin/python3.12 /usr/local/bin/python3
 sudo ln -sf /opt/python/bin/pip3.12 /usr/local/bin/pip
 sudo /opt/python/bin/pip3.12 install --upgrade setuptools pip
 

@@ -2,7 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="Agent Security Deep-Dive Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Your OpenClaw agent is running. It responds to messages, writes to memory, and evolves on its heartbeat cycle. But here's the catch: the only thing keeping it in line is a markdown file. SOUL.md contains rules, but the agent itself decides whether to follow them. On the previous page, you saw this firsthand -- the agent operates autonomously, and nothing in vanilla OpenClaw *enforces* its boundaries.
+Your OpenClaw agent is running. SOUL.md guides its behavior, but prompts do not enforce permissions. OpenClaw also supports tool policies, approvals, and sandboxing; our quickstart has not configured a sandbox. NemoClaw adds an operator-managed boundary around the agent.
 
 Here, we'll start with **why** agent security is a distinct problem, map **what** threats exist, and then walk through **how** NemoClaw addresses each one -- layer by layer.
 
@@ -14,14 +14,14 @@ Here, we'll start with **why** agent security is a distinct problem, map **what*
 
 Before diving into why these differences matter, here is the high-level comparison between the vanilla OpenClaw deployment you just built and a NemoClaw deployment.
 
-| Dimension | OpenClaw (vanilla) | NemoClaw |
+| Dimension | OpenClaw quickstart | NemoClaw |
 |---|---|---|
-| **Filesystem access** | Full system -- agent can read/write any path the OS user can | `/sandbox` + `/tmp` read-write; `/usr`, `/lib`, `/etc` read-only; everything else denied |
-| **Network control** | Open -- agent can connect to any endpoint | Deny-by-default YAML policies; only explicitly listed hosts are reachable |
+| **Filesystem access** | Tools run with the OS account's permissions | Landlock restricts paths according to the active policy |
+| **Network control** | No sandbox egress policy configured | Deny-by-default policies allow specified destinations and executables |
 | **Credential handling** | API keys in environment variables or config files inside the agent process | Agent calls `inference.local`; OpenShell gateway injects credentials from host-side Providers -- agent is designed to not have access to the keys |
 | **CLI tools** | `openclaw` (single binary) | `nemoclaw` (host-side lifecycle) + `openshell` (sandbox management) |
-| **Security layers** | 0 enforced (soft rules in SOUL.md) | 4 enforced (network, filesystem, process, inference) |
-| **Platform** | Any OS with Node.js | Linux + Docker required (Landlock LSM needs kernel 5.13+) |
+| **Security controls** | OS permissions and configured tool controls; SOUL.md guides behavior | Network, filesystem, process, and inference policies |
+| **Platform** | Supported Node.js platforms | Docker and a compatible Linux kernel for sandbox enforcement |
 | **Credential storage** | Plaintext in `~/.openclaw/` | Plaintext in `~/.nemoclaw/credentials.json` (mode `0600`) with env-var override precedence; unsafe `HOME` paths rejected |
 | **State management** | Manual backup of `~/.openclaw/workspace/` | `nemoclaw` handles migration with credential stripping and digest verification |
 
@@ -31,9 +31,9 @@ That table shows *what* changes. The rest of this page explains *why* these chan
 
 ## The Agent Threat Landscape
 
-In December 2025, OWASP published the **Top 10 Risks for Agentic Applications** -- the first industry-standard taxonomy of agent-specific security threats. 
+OWASP's **Top 10 Risks for Agentic Applications** organizes common agent security threats.
 
-These ten risks organize into three clusters. Click on each cluster to learn more about agentic AI risks and why they need addressing. 
+These ten risks organize into three clusters. Click on each cluster to learn more about agentic AI risks and why they need addressing.
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>GOAL / IDENTITY</h4><span class="dx-big">ASI 01, 03, 09, 10</span>Who the agent is and what it tries to accomplish.</div>
@@ -95,9 +95,9 @@ No single tool addresses all ten risks. NemoClaw's four enforcement layers each 
 | **Network** (deny-by-default egress) | ASI01 (blocks exfiltration paths), ASI02 (limits tool reach), ASI08 (contains blast radius) |
 | **Filesystem** (Landlock LSM) | ASI02 (blocks unauthorized file operations), ASI03 (prevents config tampering / credential harvest), ASI05 (restricts code execution targets) |
 | **Process** (seccomp + least privilege) | ASI03 (prevents privilege escalation), ASI04 (limits supply chain impact), ASI05 (blocks dangerous syscalls) |
-| **Inference** (Privacy Router) | ASI01 (controls model access), ASI03 (isolates credentials), ASI06 (operator-controlled routing keeps sensitive traffic off cloud backends) |
+| **Inference** (Privacy Router) | ASI01 (controls model access), ASI03 (isolates inference credentials) |
 
-Some risks -- notably ASI07 (inter-agent communication), ASI09 (human-agent trust exploitation), and ASI10 (rogue agents) -- require additional controls beyond what NemoClaw's four layers provide (the continuous red-team + judge suite in the next section helps catch drift toward ASI10). Defense in depth means acknowledging these boundaries.
+Memory poisoning (ASI06), inter-agent communication (ASI07), human trust exploitation (ASI09), and rogue agents (ASI10) need additional controls. The later safety suite can detect regressions in the behaviors it tests.
 
 </div>
 </div>
@@ -106,20 +106,22 @@ Some risks -- notably ASI07 (inter-agent communication), ASI09 (human-agent trus
 
 ## Defense in Depth for Autonomous Agents
 
-Defense in depth is a security principle borrowed from military strategy: arrange multiple independent barriers so that an attacker must defeat *all* of them, not just one. Applied to autonomous agents, it has four properties - click each to learn more. 
+Defense in depth uses several controls to cover different failure paths. Which controls matter depends on the action; an attacker need not defeat every layer. Click each property to learn more.
 
 <div class="dx-island dx-reveal">
-  <p class="dx-island-title">DEFENSE IN DEPTH - BYPASS DIFFICULTY BY LAYER</p>
-  <div class="dx-tax">
-    <div class="dx-tax-row" style="--dx-w:16"><span class="dx-tax-name">HITL gate</span><div class="dx-tax-track"><div class="dx-tax-fill">soft</div></div><span class="dx-tax-note">M4 - human approval</span></div>
-    <div class="dx-tax-row" style="--dx-w:28"><span class="dx-tax-name">Allowlists</span><div class="dx-tax-track"><div class="dx-tax-fill">app</div></div><span class="dx-tax-note">M4 - regex + command</span></div>
-    <div class="dx-tax-row" style="--dx-w:40"><span class="dx-tax-name">App sandbox</span><div class="dx-tax-track"><div class="dx-tax-fill">app</div></div><span class="dx-tax-note">M5 - framework limits</span></div>
-    <div class="dx-tax-row" style="--dx-w:55"><span class="dx-tax-name">Docker</span><div class="dx-tax-track"><div class="dx-tax-fill">container</div></div><span class="dx-tax-note">M5 - namespace + limits</span></div>
-    <div class="dx-tax-row" style="--dx-w:72"><span class="dx-tax-name">Landlock LSM</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - per-file</span></div>
-    <div class="dx-tax-row" style="--dx-w:82"><span class="dx-tax-name">seccomp BPF</span><div class="dx-tax-track"><div class="dx-tax-fill">kernel</div></div><span class="dx-tax-note">M6 - syscall filter</span></div>
-    <div class="dx-tax-row" style="--dx-w:92"><span class="dx-tax-name">Network proxy</span><div class="dx-tax-track"><div class="dx-tax-fill">proxy</div></div><span class="dx-tax-note">M6 - per-endpoint</span></div>
-    <div class="dx-tax-row" style="--dx-w:100"><span class="dx-tax-name">Privacy Router</span><div class="dx-tax-track"><div class="dx-tax-fill">gateway</div></div><span class="dx-tax-note">M6 - operator routing</span></div>
-  </div>
+  <p class="dx-island-title">DEFENSE IN DEPTH - WHERE EACH CONTROL ACTS</p>
+
+| Control | Enforced by | Workshop example |
+|---|---|---|
+| HITL gate | Application | M4 — human approval |
+| Command allowlist | Application | M4 — command checks |
+| Tool permissions | Application | M5 — selected capabilities |
+| Docker isolation | Container runtime + kernel | M5 — namespaces and limits |
+| Landlock | Kernel | M6 — file access |
+| seccomp | Kernel | M6 — syscall filtering |
+| Network policy | Proxy | M6 — destination and executable rules |
+| Inference routing | Gateway | M6 — operator-selected backend |
+
 </div>
 
 <details class="dx-peek">
@@ -130,23 +132,23 @@ Network controls can't prevent memory poisoning. Filesystem restrictions can't s
 </details>
 
 <details class="dx-peek">
-<summary>2. Each layer operates independently</summary>
+<summary>2. Different controls cover different failures</summary>
 
-If the network proxy is misconfigured, the filesystem sandbox still holds. If a Landlock rule is too permissive, seccomp still blocks dangerous syscalls. Layers don't depend on each other.
+An overly broad network rule need not change filesystem restrictions. Still, controls can share dependencies, such as the host kernel, so failures are not always independent.
 
 </details>
 
 <details class="dx-peek">
 <summary>3. Layers enforce at different levels</summary>
 
-Application-level controls (SOUL.md rules) can be bypassed by the agent. Container-level controls require a container escape. Kernel-level controls (Landlock, seccomp) are designed to be irrevocable by userspace code.
+Prompts guide behavior; applications authorize tools; OS mechanisms constrain processes. A harmful action within the granted permissions may need no escape or bypass.
 
 </details>
 
 <details class="dx-peek">
 <summary>4. Failure of one layer should not cascade</summary>
 
-A successful prompt injection might hijack the agent's goal, but if network egress is deny-by-default, there's no path to exfiltrate the data. The attack succeeds at one layer but is contained at the next.
+A network rule can block an unapproved destination after a prompt injection. Data can still leak to allowed destinations or through answers, so scope permissions and test responses.
 
 </details>
 
@@ -156,15 +158,15 @@ A successful prompt injection might hijack the agent's goal, but if network egre
 
 The engine that makes this defense-in-depth architecture possible is **OpenShell** -- an open-source sandbox runtime for AI agents.
 
-Traditional containers (Docker, Podman) provide namespace isolation: the agent gets its own filesystem, process tree, and network stack. But they don't provide *fine-grained policy enforcement* -- there's no built-in mechanism to say "this binary can reach this endpoint but not that one" or "this directory is writable but that one is read-only at the kernel level."
+Containers provide namespaces and controls such as read-only mounts, capability limits, and seccomp profiles. Agent-specific rules, such as allowing one executable to reach a particular endpoint, need additional policy enforcement.
 
-OpenShell fills that gap. Its key innovation is **out-of-process policy enforcement**: security policies are applied at the system level, outside the agent's address space. The agent cannot inspect, modify, or disable its own restrictions -- because the restrictions don't live inside the agent's process.
+OpenShell adds **out-of-process policy enforcement**: the runtime enforces operator-defined boundaries outside the agent's application code. Some policy information may be visible, but the agent cannot simply rewrite those restrictions through its tools.
 
 <!-- fold:break -->
 
 OpenShell enforces across four domains using purpose-built mechanisms:
 
-- **Filesystem** -- Landlock LSM (Linux kernel module, irrevocable per-path access control)
+- **Filesystem** -- Landlock LSM (Linux security module, per-path access control)
 - **Network** -- HTTP CONNECT proxy with an OPA/Rego policy engine (deny-by-default, per-binary, L7-aware)
 - **Process** -- seccomp BPF (syscall filtering), non-root execution, dropped capabilities, `PR_SET_NO_NEW_PRIVS`
 - **Inference** -- Gateway routing with credential injection and operator-controlled backend selection
@@ -179,9 +181,9 @@ With the defense-in-depth principle and the OpenShell runtime established, here 
 
 | Gap (from intro) | How NemoClaw Helps | Key Layers |
 |---|---|---|
-| **No Human Awake** | Kernel-enforced policies that are self-enforcing 24/7. No human approval needed -- the policy *is* the control. | Network, Filesystem, Process |
-| **Agent Drift** | Out-of-process enforcement that the agent cannot reach. Even as the agent's memory and context evolve over weeks, the kernel policy remains fixed and irrevocable. | Filesystem (Landlock), Process (seccomp) |
-| **Mixed-Sensitivity Data** | Operator-controlled inference routing — pair with an app-layer classifier (built in Exercise 5) to keep sensitive data on a local model and route public data to a cloud endpoint. | Inference (Privacy Router) |
+| **No Human Awake** | Runtime policies enforce configured boundaries while the operator is away. | Network, Filesystem, Process |
+| **Agent Drift** | Filesystem and process limits continue to apply as context changes. They do not prevent every harmful decision. | Filesystem (Landlock), Process (seccomp) |
+| **Mixed-Sensitivity Data** | The operator selects the inference backend. Exercise 5 builds a classifier that proposes local/cloud routes; it does not change the gateway automatically. | Inference (Privacy Router) |
 
 ![NemoClaw Architecture](img/nemoclaw_architecture_dark.svg)
 
@@ -407,9 +409,9 @@ Together, these restrictions mean that even if an attacker achieves code executi
 
 **The principle: operator-controlled inference routing with credential isolation.** The agent should never hold API credentials in its own memory, and the choice of inference backend — local or cloud — should be an operator decision enforced at the gateway, not something the agent picks per request. This combines two complementary ideas: out-of-process credential management and operator-set backend selection. (Per-request, content-aware decisions belong in your application layer in front of the gateway — see Exercise 5.)
 
-This principle directly addresses ASI01 (Goal Hijack -- even if hijacked, no credentials to steal), ASI03 (Identity and Privilege Abuse -- credentials are never in-process), and ASI06 (Context and Memory Poisoning -- sensitive data stays local, reducing exposure).
+This reduces credential exposure. Selecting a local backend also limits where prompts go; neither control prevents prompt injection or memory poisoning.
 
-**The threat:** A prompt injection asks the agent to "print your environment variables including all API keys." In a vanilla OpenClaw setup, API keys live in environment variables or config files that the agent can read -- the injection succeeds. Separately, a customer support agent processes a mix of public FAQs and emails containing SSNs -- without an operator-controlled routing primitive, the agent has no way to keep sensitive queries on local infrastructure while still using cloud capability for public queries.
+**The threat:** A prompt injection asks the agent to print its API keys. Keys in readable files or environment variables may be exposed. Separately, an agent handling sensitive customer messages needs an operator to choose where inference runs.
 
 <!-- fold:break -->
 
@@ -424,7 +426,7 @@ This layer has two complementary functions: **credential isolation** and **priva
 
 It's like a valet service -- you hand your car keys to the valet (the gateway), and the valet drives on your behalf. The passenger (the agent) is not meant to touch the keys.
 
-In a vanilla OpenClaw setup, API keys are stored in environment variables or config files that the agent process can read directly. A prompt injection that tricks the agent into printing `$OPENAI_API_KEY` succeeds because the secret is in-process memory.
+If an inference key is in the agent's environment or readable files, its tools may expose it. Keeping that key in the gateway removes this direct access path.
 
 NemoClaw eliminates this by routing all inference through `inference.local` -- a special endpoint exposed inside every sandbox by the OpenShell gateway. Here is how the request flow works:
 
@@ -437,7 +439,7 @@ NemoClaw eliminates this by routing all inference through `inference.local` -- a
 
 ![Credential Injection Flow](img/credential_flow_dark.svg)
 
-The agent process **is designed to never have access to the API key**. Even if the agent dumps its environment, inspects `/proc/self/environ`, or reads every file it can access, the credentials exist only on the host side in the Provider record.
+The inference key stays in the host-side Provider record. This does not protect other secrets separately placed in the sandbox or model context.
 
 Providers are managed with the `openshell` CLI:
 
@@ -474,7 +476,7 @@ Runtime switching is done with:
 openshell inference set --provider my-local-ollama --model nemotron-nano
 ```
 
-This lets the operator switch between cloud and local inference at any time without modifying the agent or restarting the sandbox. Per-request, content-aware routing -- *"if this query contains PII, route to local; otherwise, route to cloud"* -- is a pattern you build in your application layer in front of `inference.local`. The gateway provides the routing primitive; your classifier provides the decision. You'll build that classifier in Exercise 5 on the [Working with NemoClaw](using_nemoclaw) page.
+This switches the backend for the whole gateway without restarting its sandboxes. For per-request choices, your application needs separately configured routes or gateways; don't change shared gateway state for each prompt. In Exercise 5 on the [Working with NemoClaw](using_nemoclaw) page, you'll build a classifier that **proposes a route** without changing live inference.
 
 </div>
 </div>
@@ -485,7 +487,7 @@ Now that you understand what the layers do and why they matter, let's look at ho
 
 ## YAML Policy Deep-Dive
 
-Every OpenShell sandbox is governed by a single policy YAML file. The NemoClaw blueprint ships a default at `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`. Here is the full structure with annotations. 
+Every OpenShell sandbox is governed by a single policy YAML file. The NemoClaw blueprint ships a default at `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`. Here is the full structure with annotations.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-wn-5">Click to view full file</button>
@@ -603,10 +605,10 @@ You now understand the four layers that NemoClaw adds to a vanilla OpenClaw agen
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
   <p class="dx-quiz-q">What does the NemoClaw Privacy Router actually do?</p>
-  <button class="dx-quiz-opt" data-fb="Common misreading. The router does NOT inspect request content. Content-aware routing is a classifier you build in front of the gateway (Exercise 5) - not something the router does on its own.">It inspects each query and automatically sends sensitive ones to a local model</button>
-  <button class="dx-quiz-opt" data-right data-fb="Right. It enforces the operator's chosen backend and injects host-side credentials at the gateway, so the agent calls inference.local and never holds an API key.">It enforces the operator's chosen backend and injects credentials, so the agent never holds keys</button>
+  <button class="dx-quiz-opt" data-fb="It does not classify sensitivity. Exercise 5's classifier proposes a route; it does not change live inference.">It inspects each query and automatically sends sensitive ones to a local model</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Calls to inference.local use the operator's chosen backend and host-side inference credentials.">It enforces the chosen backend and injects inference credentials at the gateway</button>
   <button class="dx-quiz-opt" data-fb="It does not encrypt prompts. Its job is credential isolation plus operator-chosen backend selection, not transport encryption.">It encrypts the agent's prompts before they reach the cloud</button>
-  <button class="dx-quiz-opt" data-fb="There is no response scanning. The router forwards requests to the operator-set backend; it never reads or redacts content.">It scans responses for PII and redacts sensitive values</button>
+  <button class="dx-quiz-opt" data-fb="It does not scan for or redact PII. It forwards inference to the configured backend.">It scans responses for PII and redacts sensitive values</button>
 </div>
 
 > Head to [Set Up NemoClaw](setup_nemoclaw) to get the full stack running.

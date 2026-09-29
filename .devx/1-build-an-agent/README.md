@@ -17,7 +17,7 @@ This workshop will help you get started building AI agents from scratch. Here's 
 
 By the end of this module, you'll understand:
 - Why agents exist and what problems they solve
-- The four core components of any AI agent (model, tools, memory, routing)
+- Four useful components of this workshop’s agents (model, tools, memory, routing)
 - How agents differ from simple LLM calls and workflows
 - The ReAct pattern for reasoning and acting
 - How system prompts shape agent behavior
@@ -29,7 +29,7 @@ By the end of this module, you'll understand:
 
 This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
 
-<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+<button onclick="launch('Claude Code', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
 
 Ask for this module by name — `/module-1` in Claude Code, `$module-1` in Codex — or just describe what you're stuck on and the right skill loads on its own.
 

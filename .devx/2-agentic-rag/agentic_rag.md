@@ -61,7 +61,7 @@ Embeddings convert text into numerical vectors that capture semantic meaning. Te
 
 These chunks need to be embedded into vectors for the database. This is done with the `RETRIEVER_EMBEDDING_MODEL` defined before.
 
-Use the [NVIDIAEmbeddings](https://build.nvidia.com/nvidia/llama-nemotron-embed-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'embeddings = ');"><i class="fas fa-code"></i> embeddings</button>. The API Key has already been configured, it does not need to be specified. Set truncate to `END`.
+Use the [NVIDIAEmbeddings](https://build.nvidia.com/nvidia/nemotron-3-embed-1b?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'embeddings = ');"><i class="fas fa-code"></i> embeddings</button>. The API Key has already been configured, it does not need to be specified. Set truncate to `END`.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -101,7 +101,7 @@ LangChain allows us to easily create a basic retrieval chain from our Vector Dat
 
 ### Reranking Model
 
-NVIDIA offers a Reranker model to improve the relevance and order of retrieved documents. Use the [NVIDIARerank](https://build.nvidia.com/nvidia/llama-nemotron-rerank-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'reranker = ');"><i class="fas fa-code"></i> reranker</button>.
+NVIDIA offers a Reranker model to improve the relevance and order of retrieved documents. Use the [NVIDIARerank](https://build.nvidia.com/nvidia/llama-nemotron-rerank-vl-1b-v2?snippet_tab=LangChain) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'reranker = ');"><i class="fas fa-code"></i> reranker</button>.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -124,13 +124,13 @@ LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.p
 
 </center>
 
-We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= create_retriever_tool');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` fields help the agent decide when to use this tool during multi-step reasoning.
+We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= create_retriever_tool');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` help the agent choose this tool. Its provided formatter displays `[KB:source_id]` labels and retains the same chunks as tool artifacts, so Module 3 can evaluate the evidence the agent actually saw.
 
 <!-- fold:break -->
 
 ## Create the Agent
 
-With our vector database and retriever chain in place, we're ready to construct the agent graph. Think of this graph as a flowchart that maps out the possible steps the model can take to solve a task. In traditional, step-by-step LLM applications, these are called "chains." When the workflow involves more dynamic, non-linear decision-making, like with agents, we refer to them as "graphs."
+With our vector database and retriever chain in place, we're ready to construct the agent graph. Think of this graph as a flowchart that maps out the possible steps the model can take to solve a task. A graph can express branches and loops for either a developer-defined workflow or a model-directed agent.
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>MODEL</h4>NVIDIA Nemotron Super via ChatNVIDIA - the agent's reasoning and language.</div>
@@ -145,7 +145,7 @@ With our vector database and retriever chain in place, we're ready to construct 
 
 <img src="_static/robots/gitfu.png" alt="Graphs!" style="float:right;max-width:300px;margin:25px;" />
 
-Every agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Super model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
+This agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Super model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>

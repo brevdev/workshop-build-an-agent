@@ -144,16 +144,16 @@ truth and no repo file needs syncing). Exact YAML in
 |---|---|---|
 | `github_git_clone` | git smart-HTTP on `github.com`, scoped to the one workshop repo, for the git binaries | cloning the repo (skip if already cloned) |
 | `pypi_install` | read-only `GET` to `pypi.org` + `files.pythonhosted.org` | `uv pip install` of the workshop deps |
-| `nvidia_retrieval` | `POST /v1/retrieval/**` on `ai.api.nvidia.com` | modules 2/3 `NVIDIARerank` — ⚠️ the legacy `/v1/ranking` rule on `integrate.api.nvidia.com` does NOT cover `llama-nemotron-rerank-1b-v2` |
+| `nvidia_retrieval` | `POST /v1/retrieval/**` on `ai.api.nvidia.com` | modules 2/3 `NVIDIARerank` — ⚠️ the legacy `/v1/ranking` rule on `integrate.api.nvidia.com` does NOT cover `llama-nemotron-rerank-vl-1b-v2` |
 | `tavily_search` | `POST /search`+`/extract` on `api.tavily.com` | module-1 docgen, module-2 local-MCP web search, module-5 search (key: `TAVILY_API_KEY`) |
 | `langsmith_api` | all methods on `api.smith.langchain.com` | module-3 eval/tracing AND silencing tracing-retry spam in every notebook (`variables.env` turns tracing on globally; key: `LANGSMITH_API_KEY`) |
 | `tiktoken_encodings` | `GET /encodings/**` on `openaipublic.blob.core.windows.net` | module-7 harness_lab (tiktoken BPE download at first use) |
-| `npm_install` | read-only `GET` to `registry.npmjs.org` (binary: `/usr/local/bin/node`) | module-5 "Deep Agents Client" tile — `demo/` needs `npm install` or the tile only serves its "setup required" page; also fetches the `mcp-remote` transport for the block below |
-| `mcp_tavily` | `GET`/`POST`/`DELETE` on `mcp.tavily.com` (binary: `/usr/local/bin/node`) | module-2 PART 2A remote MCP — the shipped default. ⚠️ Policy alone is not enough: the MCP stdio transport drops the proxy env, so the in-sandbox `tune_remote_mcp_env.py` is also required |
+| `npm_install` | read-only `GET` to `registry.npmjs.org` (binary: `/usr/local/bin/node`) | builds the Module 5 client frontend |
+| `mcp_tavily` | `GET`/`POST`/`DELETE` on `mcp.tavily.com` for the Python binaries | Module 2's header-authenticated remote MCP; add Python to an older Node-only grant |
 | `/dev/pts` fs grant | rw on the devpts filesystem (PTY allocation) — under `filesystem_policy`, not `network_policies` | JupyterLab's Terminal tile (terminado → `pty.fork`); without it the tile pops "Launcher Error: Unhandled error" |
 
-Not needed: `build.nvidia.com` (notebook prose only — every model call goes to
-`integrate.api.nvidia.com`), torch/conda mirrors, npm.
+Not needed: `build.nvidia.com` (lesson links only) or torch/conda mirrors.
+Reranking uses `ai.api.nvidia.com`; chat and embeddings use `integrate.api.nvidia.com`.
 
 ⚠️ The supervisor parses `filesystem_policy` ONCE at container **boot** —
 `openshell policy set` hot-reloads network rules but NOT filesystem grants
@@ -329,6 +329,11 @@ Agent processes live in an inner network namespace — a server bound even to
 #    forward list`/`stop` do NOT track `forward service` tunnels — stop it
 #    with Ctrl-C or pkill -f "forward service $SANDBOX".
 openshell forward service "$SANDBOX" --target-port 8888 --local 8888
+# Agent-driven runs (e.g. Claude Code): a session-tied background task dies
+# with the session, silently cutting the user's access (happened live).
+# Start it detached instead, so it outlives the session:
+#   setsid nohup openshell forward service "$SANDBOX" \
+#     --target-port 8888 --local 8888 >/tmp/forward-"$SANDBOX".log 2>&1 </dev/null &
 
 # 2. Sanity check from another host shell (302 = alive, auth redirect):
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8888/lab
@@ -349,9 +354,23 @@ tsh ssh -N -L 8888:localhost:8888 <user>@<node-name>         # Teleport: NODE NA
 browser before assuming a hang. Finally open the token URL:
 `http://localhost:8888/lab?token=…`.
 
-If the deployment's `.env` configured Slack (or Outlook), hand the user an
-optional pointer alongside the URL — the resident agent carries the workshop
-tutor skills on every channel it serves:
+**Hand-off rule — the final access-steps message ALWAYS includes the
+host-side forward command,** even when a forward is already up and serving.
+The forward is the one leg the user cannot see: `forward list` does not
+track it, and it dies silently with whatever shell or agent session spawned
+it (a Claude Code exit cut a user's access exactly this way). Alongside the
+laptop tunnel + token URL, hand the user something like:
+
+> FYI — the JupyterLab URL depends on a port-forward running on the sandbox
+> host. If the URL stops responding, restart it there:
+> `openshell forward service <sandbox> --target-port 8888 --local 8888`
+> (leave it running; stop with `pkill -f "forward service <sandbox>"`), then
+> reload the page. Re-read the token URL any time with:
+> `docker exec <container> cat /sandbox/workshop-url.txt`.
+
+If the deployment's `.env` configured Slack (or Outlook), append an optional
+pointer — the resident agent carries the workshop tutor skills on every
+channel it serves:
 
 > Optional: your deployment's Slack bot is the same sandboxed agent — DM it
 > a workshop question (e.g. "quiz me on module 1") to meet your tutor

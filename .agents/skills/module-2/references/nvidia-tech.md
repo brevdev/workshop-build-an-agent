@@ -7,8 +7,8 @@ about NVIDIA vs not.
 - **Nemotron 3 Super (120B)** — `nvidia/nemotron-3-super-120b-a12b`, via **`ChatNVIDIA`**
   (temp 0.6, max_tokens 4096). The agent's reasoning LLM.
 - **NVIDIA NeMo Retriever** — NVIDIA's retrieval-model family. Two are used:
-  - **Embeddings:** `nvidia/llama-nemotron-embed-1b-v2` (`NVIDIAEmbeddings`, `truncate="END"`).
-  - **Reranking:** `nvidia/llama-nemotron-rerank-1b-v2` (`NVIDIARerank`).
+  - **Embeddings:** `nvidia/nemotron-3-embed-1b` (`NVIDIAEmbeddings`, `truncate="END"`).
+  - **Reranking:** `nvidia/llama-nemotron-rerank-vl-1b-v2` (`NVIDIARerank`).
   These are the **current** ids; older `*embedqa*`/`*rerankqa*` endpoints are retired (HTTP
   410). Resource: https://developer.nvidia.com/nemo-retriever, https://build.nvidia.com.
 - **NIM (NVIDIA Inference Microservices)** — the hosted catalog (default) *and* the **local
@@ -23,7 +23,7 @@ about NVIDIA vs not.
   (text splitter, `ContextualCompressionRetriever`, `create_retriever_tool`); the `langgraph
   dev` server.
 - **MCP (Model Context Protocol)** — an open standard from **Anthropic** (not NVIDIA).
-  `langchain_mcp_adapters` (`MultiServerMCPClient`); `mcp-remote` (the `npx` stdio↔HTTP bridge).
+  `langchain_mcp_adapters` (`MultiServerMCPClient` with direct Streamable HTTP).
 - **FAISS** — Meta's vector-similarity library (the in-memory vector DB).
 - **Tavily** — web search, via its hosted MCP server (default) or the local `mcp_server.py`.
 - **Voila / uvicorn / Starlette** — the Secrets Manager (Voila) and the local MCP server.

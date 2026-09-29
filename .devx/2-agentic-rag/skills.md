@@ -19,7 +19,7 @@ Skills teach your agent how to complete specific tasks:
 - Automating personal tasks with specific patterns
 - Following coding standards for your team
 
-Unlike MCP (which provides *tools* and *data*), Skills provide *instructions* and *knowledge*. They're complementary:
+Unlike MCP (which exposes tools, resources, and prompt templates), Skills provide *instructions* and *knowledge*. They're complementary:
 
 | MCP | Skills |
 |-----|--------|
@@ -33,11 +33,11 @@ Unlike MCP (which provides *tools* and *data*), Skills provide *instructions* an
 
 Every skill is simply a folder containing a `SKILL.md` file. The file has two parts:
 
-**Header:** The YAML frontmatter must be at the very top of the file, enclosed between triple dashes (---). This part is always loaded into the agent's memory so it knows when to trigger the skill.
+**Header:** The YAML frontmatter must be at the very top of the file, enclosed between triple dashes (---). Compatible skill runtimes expose this metadata for discovery. Our small teaching loader lists directory names and reads the full file only when `get_skill` is called; it does not automatically preload frontmatter.
 
 ```yaml
 ---
-name: code-reviewer
+name: code-review
 description: Reviews code following team standards and best practices
 ---
 ```
@@ -68,7 +68,7 @@ That's it! Skills are intentionally simple.
 
 <!-- fold:break -->
 
-Take a look at the <button onclick="goToLineAndSelect('skills/code_review/SKILL.md', 'name: code_review');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical_writing/SKILL.md', 'name: technical_writing');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.  
+Take a look at the <button onclick="goToLineAndSelect('skills/code-review/SKILL.md', 'name: code-review');"><i class="fas fa-code"></i> Code Review </button> and the <button onclick="goToLineAndSelect('skills/technical-writing/SKILL.md', 'name: technical-writing');"><i class="fas fa-code"></i> Technical Writing</button> skill files that have already been preconfigured for you.
 
 <!-- fold:break -->
 
@@ -146,15 +146,15 @@ This separation of concerns makes agents more maintainable and adaptable.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="dx-quiz-q">Your agent needs to follow your team's code-review standards. Is that a job for MCP or a Skill?</p>
-  <button class="dx-quiz-opt" data-fb="MCP provides tools and data access - the ability to do things (call an API, query a DB). Coding standards are instructions, not a tool to invoke.">MCP - it exposes the code-review standards as a callable tool</button>
-  <button class="dx-quiz-opt" data-right data-fb="Right. Skills provide instructions and know-how - the how. The review standards are domain guidance the agent loads, then applies using whatever tools MCP provides.">A Skill - it loads the standards as instructions the agent follows</button>
+  <p class="dx-quiz-q">Which mechanism in this workshop packages reusable code-review instructions?</p>
+  <button class="dx-quiz-opt" data-fb="MCP exposes tools, resources, and prompt templates, but configuring its transport does not package these reusable instructions as a Skill.">The MCP transport configuration</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Skills provide instructions and know-how - the how. The review standards are domain guidance the agent loads, then applies using its available tools.">A Skill - it loads the standards as instructions the agent follows</button>
   <button class="dx-quiz-opt" data-fb="Hardcoding into the system prompt is exactly what Skills improve on: modularity, reuse, and on-demand loading instead of bloating every prompt.">Neither - just hardcode the standards into the system prompt permanently</button>
 </div>
 
 <!-- fold:break -->
 
-## Skills: A Hands-On Implementation with MCP
+## Skills: A Hands-On File Loader
 
 <img src="_static/robots/magician.png" alt="Skills Magic Robot" style="float:right;max-width:300px;margin:25px;" />
 
@@ -169,8 +169,8 @@ Add two new tools:
 - `get_skill` — Load a skill for expertise
 
 **Available Skills:**
-- `code_review` — Systematic code review with checklist
-- `technical_writing` — Guidelines for clear documentation
+- `code-review` — Systematic code review with checklist
+- `technical-writing` — Guidelines for clear documentation
 
 Some skills have been preconfigured for your agent's use and are stored in the ``skills`` directory at the project root. 
 
@@ -249,10 +249,10 @@ Restart your agent and try these prompts in the <button onclick="launch('Simple 
 
 | Prompt | Expected Behavior |
 |--------|-------------------|
-| "How do I reset my password?" | Uses knowledge base [KB] |
-| "What's happening in the news today?" | Uses web search [Web] |
-| "What skills do you have?" | Lists `code_review`, `technical_writing` |
-| "Review this code: `def add(a,b): return a+b`" | Loads code_review skill, gives structured feedback |
+| "How do I reset my password?" | Uses knowledge base [KB:source_id] |
+| "What's happening in the news today?" | Uses web search source URLs |
+| "What skills do you have?" | Lists `code-review`, `technical-writing` |
+| "Review this code: `def add(a,b): return a+b`" | Loads code-review skill, gives structured feedback |
 
 <!-- fold:break -->
 

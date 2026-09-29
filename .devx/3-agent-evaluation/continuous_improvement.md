@@ -47,7 +47,7 @@ system_prompt = "You are a helpful assistant."
 
 # After - more specific
 system_prompt = """You are an IT help desk assistant.
-- Always cite sources with [KB]
+- Always cite sources with [KB:source_id]
 - Provide step-by-step instructions
 - If information is missing, clearly state what you need
 - Keep responses concise and actionable"""
@@ -73,7 +73,7 @@ retriever = vectordb.as_retriever(
     search_type="similarity",
     search_kwargs={
         "k": 6,  # Try different values: 3, 6, 10
-        "score_threshold": 0.7  # Filter low-quality matches
+        "score_threshold": 0.7  # FAISS maximum distance; calibrate for the embedding/index metric
     }
 )
 ```
@@ -87,7 +87,7 @@ splitter = RecursiveCharacterTextSplitter(
 )
 ```
 
-**Enhance Metadata**:
+**Enhance Metadata** (pseudocode: supply your own categorization functions and rebuild the index):
 ```python
 # Add metadata for filtering
 for doc in docs:
@@ -118,8 +118,8 @@ Different models have different strengths. Choose the right model for each task.
 **Considerations**:
 
 **For Main LLM**:
-- **Nano models**: Fast and cost-effective, good for straightforward tasks
-- **Larger models**: Better reasoning for complex tasks
+- **Smaller models**: May reduce latency and cost; measure task quality
+- **Larger models**: May improve some tasks; compare on the same cases
 - **Specialized models**: Some models excel at specific domains
 
 **For Embeddings**:
@@ -127,13 +127,11 @@ Different models have different strengths. Choose the right model for each task.
 - **Domain-specific**: Better for specialized content
 - **Multilingual**: If you need multiple languages
 
-**Example**:
+**Illustrative pseudocode** (`evaluate_agent` is not a workshop helper):
 ```python
 # Try different models
-llm_options = [
-    "nvidia/nemotron-3-nano-30b-a3b",  # Fast, efficient
-    "nvidia/nemotron-3-super-120b-a12b",  # More capable
-]
+from workshop_support import get_model
+llm_options = [get_model("fast_chat"), get_model("chat")]
 
 for model_name in llm_options:
     llm = ChatNVIDIA(model=model_name)
@@ -154,7 +152,7 @@ Sometimes you need to modify the agent's structure.
 
 **Techniques**:
 
-**Add Validation Steps**:
+**Add Validation Steps** (pseudocode: define the state, graph, and revision node):
 ```python
 # Add a validation node to your graph
 def validate_response(state):
@@ -163,13 +161,14 @@ def validate_response(state):
     return {"needs_revision": False}
 
 workflow.add_node("validate", validate_response)
+workflow.add_edge("generate", "validate")
 workflow.add_conditional_edges(
-    "generate",
+    "validate",
     lambda x: "revise" if x["needs_revision"] else "end"
 )
 ```
 
-**Implement Multi-Step Reasoning**:
+**Implement Multi-Step Reasoning** (pseudocode):
 ```python
 # Break complex tasks into steps
 workflow.add_node("understand_question", understand_question)
@@ -177,7 +176,7 @@ workflow.add_node("gather_information", gather_information)
 workflow.add_node("synthesize_answer", synthesize_answer)
 ```
 
-**Add Self-Correction**:
+**Add Self-Correction** (pseudocode; feedback alone is not fact verification):
 ```python
 # Let agent review and improve its own output
 def self_review(state):
@@ -275,12 +274,12 @@ CRITICAL RULES:
 1. ONLY use information from retrieved context
 2. DO NOT add information from your general knowledge
 3. If context doesn't cover something, say "I don't have that information in our knowledge base"
-4. Cite EVERY fact with [KB]
+4. Cite EVERY fact with [KB:source_id]
 5. Better to say "I don't know" than to guess
 
 When answering:
 - Check: Is this fact in my retrieved context?
-- If yes: Include it with [KB] citation
+- If yes: Include it with [KB:source_id] citation
 - If no: Don't include it
 """
 ```
@@ -289,21 +288,19 @@ When answering:
 
 ### Step 3: Re-evaluate
 
-Run evaluation again:
+Restart the evaluation notebook’s kernel after editing `rag_agent.py`, then rerun the same saved dataset. The notebook uses its `SYSTEM_PROMPT` and saves each run separately. Compare two actual directories:
 
 ```python
-# Re-run evaluation with updated agent
-updated_results = evaluate_agent(updated_agent, test_cases)
-
-print("Improvement Analysis:")
-print(f"Faithfulness: {original_results['faithfulness']:.2f} → {updated_results['faithfulness']:.2f}")
-print(f"Citation Rate: {original_results['citation_rate']:.1%} → {updated_results['citation_rate']:.1%}")
+from evaluation_support import compare_runs
+comparison = compare_runs("runs/rag-<before>", "runs/rag-<after>")
+print(comparison["configuration_changes"])
+display(comparison["scores"])
 ```
 
 **Results**:
 ```
 Faithfulness: 0.65 → 0.85 (+0.20 ✅)
-Citation Rate: 45% → 82% (+37% ✅)
+Citation Rate: 45% → 82% (+37 percentage points)
 Relevancy: 0.78 → 0.76 (-0.02, acceptable)
 ```
 
@@ -311,27 +308,7 @@ Relevancy: 0.78 → 0.76 (-0.02, acceptable)
 
 ### Step 4: Address Remaining Issues, Iterate
 
-Citation rate still below 90%. Add enforcement:
-
-```python
-def validate_response(response: str, contexts: str) -> dict:
-    """Validate response quality before returning."""
-    issues = []
-    
-    # Check for citations
-    if "[KB]" not in response:
-        issues.append("Missing knowledge base citation")
-    
-    # Check faithfulness
-    if len(response) > 100 and response.count("[KB]") < 2:
-        issues.append("Insufficient citations for response length")
-    
-    if issues:
-        # Regenerate with stricter prompt
-        return regenerate_with_emphasis(response, contexts, issues)
-    
-    return {"response": response, "validated": True}
-```
+For unresolved citations, use `citation_check(answer, retrieval_trace)` from `evaluation_support.py`. It checks whether each source ID appeared in that answer’s actual tool artifacts. Inspect whether the cited passage supports the claim separately: counting citation markers does not measure faithfulness. If adding a revision loop, bound its attempts and evaluate it for regressions.
 
 <!-- fold:break -->
 
@@ -349,7 +326,7 @@ After 3 iterations of offline evaluation, the scores tell the story:
   </div>
 </div>
 
-Three iterations, about four hours of work: **+35% faithfulness**, **+23pp citation rate**, **+18% helpfulness**, and zero regressions.
+In this illustrative example, faithfulness rises by **0.23** (about 35% relative), citation rate by **49 percentage points**, and helpfulness by **0.13** (about 18% relative). These numbers are invented for teaching; they are not measured workshop results.
 
 Your offline metrics look great! But how do you know these improvements translate to real-world performance? Time for the final validation step.
 
@@ -360,18 +337,18 @@ Your offline metrics look great! But how do you know these improvements translat
 Before rolling out the improved agent to all users, deploy an A/B test to validate real-world impact:
 
 ```
-7-Day A/B TEST RESULTS (10% traffic to improved agent):
+ILLUSTRATIVE A/B OUTCOMES (not measured workshop results):
 
                           Control (v1)    Treatment (v2)    Change
-Task Completion Rate:        72%              84%           +12% ✅
+Task Completion Rate:        72%              84%           +12 pp
 User Satisfaction:           3.2/5            4.1/5         +0.9 ✅
-Escalation Rate:             18%              11%           -7%  ✅
+Escalation Rate:             18%              11%           -7 pp
 Avg Session Length:          4.2 min          3.1 min       -26% ✅
 
-Statistical Significance: p < 0.01 for all metrics
+Sample sizes and uncertainty are not specified; statistical significance cannot be inferred.
 ```
 
-The A/B test confirms that offline improvements translate to real-world gains. Ship it!
+A real rollout decision also needs sample sizes, an appropriate analysis of uncertainty, stable assignment, and checks for regressions. These illustrative averages alone cannot establish a treatment effect.
 
 <!-- fold:break -->
 

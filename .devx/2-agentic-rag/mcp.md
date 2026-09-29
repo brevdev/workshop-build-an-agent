@@ -1,6 +1,6 @@
 <div class="dx-hero" data-eyebrow="MODULE 02 / 04 - MCP" data-title="Implementing MCP" data-meta="TIME::35 min|CONCEPTS::4|EXERCISES::3"></div>
 
-The Model Context Protocol (MCP) is an open standard developed by Anthropic that defines how AI agents connect to external tools, data sources, and services. Think of it as a universal adapter that lets your agent plug into anything.
+The Model Context Protocol (MCP) is an open standard introduced by Anthropic for connecting applications to tools, data sources, and services through compatible servers.
 
 In this lesson, we'll explore what MCP is, why it matters, and how it transforms the way we build agent capabilities.
 
@@ -46,8 +46,8 @@ MCP follows a client-server model:
 The protocol defines three core primitives:
 
 1. **Tools** — Functions the model can invoke (like our Tavily search)
-2. **Resources** — Data the model can read (files, database records, API responses)
-3. **Prompts** — Reusable prompt templates with arguments
+2. **Resources** — Data an application can read and include in model context
+3. **Prompts** — Reusable templates users can select through the host application
 
 <!-- fold:break -->
 
@@ -57,7 +57,7 @@ MCP is transforming the agent ecosystem:
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>FOR DEVELOPERS</h4>Build a tool once, use it everywhere. Tap a growing library of pre-built MCP servers. Standardized patterns cut boilerplate.</div>
-  <div class="dx-cell"><h4>FOR ORGANIZATIONS</h4>Centralized tool governance and security. Consistent integration across teams. Update tools without redeploying agents.</div>
+  <div class="dx-cell"><h4>FOR ORGANIZATIONS</h4>Consistent integrations across teams. Hosts still need authorization, appropriate permissions, and approval rules.</div>
   <div class="dx-cell is-wide"><h4>FOR THE ECOSYSTEM</h4>Open-source MCP servers for databases, APIs, and file systems; commercial servers for enterprise; a shared language for agent capabilities.</div>
 </div>
 
@@ -65,13 +65,13 @@ MCP is transforming the agent ecosystem:
 
 ### MCP in Practice
 
-You may already be using MCP without realizing it. If you've used:
+You use MCP when a host is configured to connect to an MCP server, for example:
 
-- **Claude Desktop** with file access or web browsing
-- **Cursor** with its built-in browser or terminal tools
+- **Claude Desktop** connected to a filesystem MCP server
+- **Cursor** configured with an external MCP server
 - **Custom integrations** via the MCP SDK
 
-...you've experienced MCP in action.
+Built-in browser or terminal tools do not by themselves establish that MCP is involved.
 
 The tools appear seamlessly in the model's context, ready to be invoked when needed, just like the ReAct pattern you learned earlier.
 
@@ -91,7 +91,7 @@ The tools appear seamlessly in the model's context, ready to be invoked when nee
 
 Your RAG agent is great for answering questions from the knowledge base. But what about questions it can't answer? Let's **add web search** to your agent using the MCP pattern.
 
-1. **Remote MCP Server** — Connect to Tavily's hosted MCP server at `mcp.tavily.com` via stdio.
+1. **Remote MCP Server** — Connect to Tavily's hosted MCP server at `mcp.tavily.com` via Streamable HTTP.
 2. **Local MCP Server** — Spin up your own MCP server locally using `mcp_server.py` and connect to it. 
 
 We'll see how to do both. 
@@ -118,9 +118,9 @@ Open <button onclick="openOrCreateFileInJupyterLab('code/2-agentic-rag/rag_agent
 
 #### Exercise: Configure the MCP Connection
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'MCP_CONFIG = ');"><i class="fas fa-code"></i> MCP_CONFIG</button> — Configure the MCP client to connect to Tavily's remote MCP server using stdio transport.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'MCP_CONFIG = ');"><i class="fas fa-code"></i> MCP_CONFIG</button> — Configure the MCP client to connect directly to Tavily's remote MCP server using Streamable HTTP.
 
-The mcp-remote package acts as a bridge, allowing stdio-based clients to connect to remote MCP servers over HTTP.
+Pass the key in an Authorization header, as supported by [Tavily's MCP server](https://github.com/tavily-ai/tavily-mcp#remote-mcp-server). This keeps it out of request URLs and subprocess arguments.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -128,9 +128,9 @@ The mcp-remote package acts as a bridge, allowing stdio-based clients to connect
 ```python
 MCP_CONFIG = {
     "tavily": {
-        "transport": "stdio",
-        "command": "npx",
-        "args": ["-y", "mcp-remote", f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}"]
+        "transport": "streamable_http",
+        "url": "https://mcp.tavily.com/mcp/",
+        "headers": {"Authorization": f"Bearer {TAVILY_API_KEY}"}
     }
 }
 ```
@@ -188,7 +188,7 @@ After filling in these blanks, your agent can now differentiate between the foll
   <span class="dx-term-line" data-kind="prompt">How do I reset my password?</span>
   <span class="dx-term-line" data-kind="think" data-delay="300">Internal IT policy - the knowledge base should have this.</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[action] company_llc_it_knowledge_base("reset password")</span>
-  <span class="dx-term-line" data-kind="answer" data-delay="350">...follow the self-service reset steps. [KB]</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="350">...follow the self-service reset steps. [KB:source_id]</span>
   <span class="dx-term-line" data-kind="prompt" data-delay="500">What are the latest AI trends?</span>
   <span class="dx-term-line" data-kind="think" data-delay="300">Not in our IT policies, and it needs current info - use web search.</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[action] web_search("latest AI trends 2025")</span>
@@ -217,7 +217,7 @@ langgraph dev
 
 In the <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-rocket"></i> Simple Agents Client</button>, try:
 
-- "How do I connect to VPN?" → Should use [KB]
+- "How do I connect to VPN?" → Should use [KB:source_id]
 - "What's happening in AI news today?" → Should use [Web]
 
 Wow! Remember that custom, complicated Tavily tool implementation from Module 1? Now, we can eliminate the need for that by decoupling the tool from the agent. Build once, use anywhere - That's the value of MCP!

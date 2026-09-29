@@ -12,46 +12,36 @@ diagnose, then let them act.
 - `ModuleNotFoundError: deepagents` (or `langchain_nvidia_ai_endpoints`) → the demo `.venv`
   isn't activated, or deps aren't installed there. Activate it first.
 - The **Deep Agents Client** tile (launcher) is the frontend; "can't connect" → the backend
-  isn't running on :8000, or wasn't restarted after copying `deep_agent.py` → `demo/backend/agent.py`.
+  isn't running on :8000, or wasn't restarted after editing `deep_agent.py`.
 
 ## Using your code in the Client
-The Client runs `demo/backend/agent.py`, **not** `code/5-deep-agents/deep_agent.py`. To use
-your completed version in the UI you must **copy your file's contents into
-`demo/backend/agent.py`** and restart the backend. (The dry-run, however, runs your file
-directly.)
+The Client adapter imports the completed `code/5-deep-agents/deep_agent.py`; while blanks remain it loads the reference solution and reports that choice. Restart the backend after edits; nothing needs copying.
 
 ## Docker sandbox
 - Sandbox mode uses `DockerSandboxBackend` (from the `docker_sandbox` module) → a
   `python:3.11-slim` container, no host mounts, 512 MB / 1 CPU, auto-cleanup. It needs a
   working **Docker** (the workshop provides the host docker socket via the `/var/host-run/`
   mount; see the `setup-workshop` skill).
-- `_build_backend` **falls back to local** if the Docker sandbox fails to start (prints a
-  WARNING). So "sandbox didn't isolate" can mean Docker was unavailable and it silently fell
-  back — check the log for the fallback message and that Docker works (`docker ps`).
+- If a requested Docker sandbox cannot start, creation fails. Check `docker ps` and the backend error, then retry; it never switches to local execution.
 - First sandbox start pulls `python:3.11-slim` (one-time). Slow first run is normal.
 
 ## Models
-- `MODEL_MAP`: `nemotron`→`nvidia/nemotron-3-super-120b-a12b`, `llama`→`meta/llama-3.3-70b-instruct`,
-  `deepseek`→`deepseek-ai/deepseek-r1-0528`, `claude`→llama fallback. All via `ChatNVIDIA` (NIM).
+- `nemotron` and `nemotron_fast` resolve the shared model roles. Check `/api/models` or `code/workshop_support/models.json` for the current catalog IDs.
 - **401/auth** → `NVIDIA_API_KEY` missing/invalid in `secrets.env` (repo root).
 - **404 / model-not-found** → that catalog id changed; confirm on build.nvidia.com. Deep
   agents need a **tool-calling** model — don't swap in one that can't emit tool calls.
 
 ## HITL interrupts
 - `interrupt_on=INTERRUPT_TOOLS` (`write_file`/`edit_file`/`execute`) pauses those tools for
-  human approve/edit/reject. In the Client the user is prompted; programmatically the graph
+  human approval or rejection. In the Client the user is prompted; programmatically the graph
   raises an interrupt that must be resumed. "Agent hangs after proposing a write/exec" → it's
   *waiting for approval*, by design — approve/reject in the UI.
 
 ## Web search / Tavily
-- `_build_extra_tools` only adds Tavily when `"websearch"` is selected **and**
-  `TAVILY_API_KEY` is set — otherwise it's silently skipped (and the agent has no web tool).
-  Missing search results → check the key and that the tool was selected.
+- Selecting Web Search requires `TAVILY_API_KEY`; a missing key stops creation with a clear error. Web Search and RAG execute in the application, outside the file/shell Docker sandbox.
 
 ## Workspace & file paths
-- File tools require **absolute** paths. Local workspace: `/tmp/deepagent_workspace`
-  (seeded with fake demo files). Inside a sandbox: `/workspace`. "File not found" / writes
-  in the wrong place → relative path, or wrong workspace for the sandbox mode in use.
+- File tools use virtual `/` for the local workspace and `/workspace` for Docker. Traversal, outside paths, and escaping symlinks are rejected. Local shell execution, when selected, still runs as the host user.
 
 ## The fake demo files (not an incident)
 `/tmp/deepagent_workspace/{passwords.txt, ssn_records.txt}` are **seeded by `postBuild` on
@@ -63,7 +53,7 @@ print them.
 ## deepagents library
 - Imports: `from deepagents import create_deep_agent`; backends `from deepagents.backends
   import FilesystemBackend, LocalShellBackend, CompositeBackend`. Import errors → wrong
-  venv / version (`deepagents>=0.3.11` in `requirements.txt`).
+  venv / version (`deepagents==0.3.11` in `requirements.txt`).
 - It returns a compiled **LangGraph** graph; `.ainvoke({"messages": [...]}, config={"configurable": {"thread_id": ...}})`. A `thread_id` is needed for the checkpointer/memory.
 
 ## Recursion / runaway

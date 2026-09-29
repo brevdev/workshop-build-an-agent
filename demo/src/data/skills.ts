@@ -17,7 +17,7 @@ export const skills: Skill[] = [
     category: 'tools',
     icon: '🌐',
     sampleQuestions: ['What is in the news for today?', "What's new at GTC 2026?"],
-    sandboxable: true,
+    sandboxable: false,
   },
   {
     id: 'fileio',

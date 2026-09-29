@@ -1,30 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 210" width="920" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace">
-  <!-- Hand-authored dark continuous-safety-evaluation pipeline for the DevX dark theme.
-       Mirrors the evaluating_safety.md mermaid; colors match index.html mermaid themeVariables. -->
-  <defs>
-    <marker id="ah" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L9,4 L0,8 Z" fill="#8a8a8a"/>
-    </marker>
-  </defs>
-
-  <!-- edges -->
-  <line x1="200" y1="98" x2="270" y2="98" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
-  <line x1="430" y1="98" x2="490" y2="98" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
-  <line x1="670" y1="98" x2="760" y2="98" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
-  <path d="M840,126 C 840,178 840,182 760,182 L 230,182 C 150,182 115,160 115,126" fill="none" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
-  <rect x="455" y="173" width="90" height="18" rx="4" fill="#0c0c0c"/>
-  <text x="500" y="183" fill="#8fcb2b" font-size="11" text-anchor="middle" dominant-baseline="central">regression</text>
-
-  <!-- nodes -->
-  <rect x="30" y="70" width="170" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
-  <text x="115" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Red-team probes</text>
-
-  <rect x="270" y="70" width="160" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
-  <text x="350" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">LLM-as-judge</text>
-
-  <rect x="490" y="70" width="180" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
-  <text x="580" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">Weighted aggregate</text>
-
-  <rect x="760" y="70" width="160" height="56" rx="6" fill="#161616" stroke="#3a3a3a" stroke-width="1.5"/>
-  <text x="840" y="98" fill="#f2f2f2" font-size="13" text-anchor="middle" dominant-baseline="central">CI/CD gate</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 240" role="img" aria-labelledby="title desc" font-family="'JetBrains Mono',ui-monospace,monospace">
+<title id="title">Safety evaluation pipeline</title><desc id="desc">Check policy hazards, compare sensitivity labels, run probes, optionally judge every completed answer, and report results. Failures block a pass; missing measurements remain incomplete.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#76b900" stroke-width="1.5"/></marker></defs>
+<rect width="1000" height="240" rx="5" fill="#0c0c0c"/>
+<g fill="#161616" stroke="#454545"><rect x="18" y="40" width="168" height="104" rx="4"/><rect x="216" y="40" width="168" height="104" rx="4"/><rect x="414" y="40" width="168" height="104" rx="4"/><rect x="612" y="40" width="168" height="104" rx="4"/><rect x="810" y="40" width="172" height="104" rx="4"/></g>
+<g stroke="#76b900" stroke-width="1.5" marker-end="url(#arrow)"><path d="M186 92H209"/><path d="M384 92H407"/><path d="M582 92H605"/><path d="M780 92H803"/></g>
+<g text-anchor="middle" font-size="14" fill="#f2f2f2"><text x="102" y="71">Policy check</text><text x="300" y="71">Label check</text><text x="498" y="71">Probe runner</text><text x="696" y="71">Optional judge</text><text x="896" y="71">Result</text></g>
+<g text-anchor="middle" font-size="11" fill="#c6c6c6"><text x="102" y="100">Root user?</text><text x="102" y="121">Broad writes?</text><text x="300" y="100">Level + route vs.</text><text x="300" y="121">expected labels</text><text x="498" y="100">Screen responses</text><text x="498" y="121">Record errors</text><text x="696" y="100">Every completed</text><text x="696" y="121">answer + rubric</text><text x="896" y="100">Cases + status</text><text x="896" y="121">Score if complete</text></g>
+<path d="M102 154V172H896V154" stroke="#454545" fill="none"/>
+<text x="500" y="198" text-anchor="middle" font-size="12" fill="#a5d75a">Known failures block a pass. Missing measurements stay missing.</text>
+<text x="500" y="222" text-anchor="middle" font-size="11" fill="#c6c6c6">Response text alone cannot prove which enforcement layer acted.</text>
 </svg>

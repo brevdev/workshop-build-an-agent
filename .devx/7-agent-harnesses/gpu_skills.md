@@ -1,10 +1,10 @@
-<div class="dx-hero" data-eyebrow="MODULE 07 / 04 - GPU SKILLS" data-title="Your GPU works in every harness." data-sub="Skills execute locally on your silicon while the model loop runs anywhere - your datacenter, someone else's, it does not matter." data-meta="SKILL::accelerated-computing-cudf|PROOF::nvidia-smi"></div>
+<div class="dx-hero" data-eyebrow="MODULE 07 / 04 - GPU SKILLS" data-title="Put your GPU to work." data-sub="A skill can guide a cloud model to use tools on your GPU machine." data-meta="SKILL::accelerated-computing-cudf|PROOF::nvidia-smi"></div>
 
 Here's a question that trips up almost everyone:
 
 > *"If I pay for Claude Code or Codex, isn't my GPU just sitting idle while some cloud model does all the work?"*
 
-**No — and this page is about why.** The model loop may run in someone else's datacenter, but tools and skills execute **locally, on your machine**. A subscription buys the brain; the muscles are yours. Skills are how you teach that brain to flex *your* GPU.
+A cloud model can write code for your GPU. The harness must run that code on a machine with GPU access — here, the workshop machine. A remote sandbox or MCP server may run tools somewhere else.
 
 <!-- fold:break -->
 
@@ -12,7 +12,7 @@ Here's a question that trips up almost everyone:
 
 ![The Division of Labor](img/gpu_division_of_labor_dark.svg)
 
-The cloud model never touches your data at GPU scale — it writes a few hundred tokens of code. Your GPU does the heavy compute. This is true in **every** harness: OpenClaw, pi, Claude Code, Codex. The skill is what makes the model reach for the GPU *correctly* — right library, right API, right performance patterns.
+In this lab, the model proposes code and the harness runs it locally. Tool output goes back to the model, so local computation alone does not guarantee that data stays local.
 
 <!-- fold:break -->
 
@@ -20,12 +20,12 @@ The cloud model never touches your data at GPU scale — it writes a few hundred
 
 <img src="_static/robots/datacenter.png" alt="Datacenter Robot" style="float:right;max-width:240px;margin:20px;" />
 
-Without the skill, a model asked to process a big DataFrame writes... pandas. Single-threaded, CPU-bound pandas. It doesn't know your machine has a GPU, and it doesn't know the patterns that make cuDF fast.
+A model may reach for pandas by default. The skill adds guidance on when cuDF helps and how to use it.
 
 The `accelerated-computing-cudf` verified skill teaches it, among other things:
 
 - Use `cudf.pandas` for minimal-change acceleration; explicit cuDF for hot ETL paths
-- The 100K-row size gate (below that, transfer overhead beats the speedup)
+- Size and transfer overhead — measure whether the GPU helps your workload
 - Keep intermediate data on GPU; convert at boundaries only
 - Scale past GPU memory with dask-cuDF and spilling
 
@@ -41,7 +41,7 @@ In the lab, you'll prove the GPU is working with the bluntest possible instrumen
 watch -n 0.5 nvidia-smi
 ```
 
-Keep it visible while your agent runs the cuDF exercise. When the agent hits the aggregation step, you'll see GPU utilization and memory jump — your subscription-or-otherwise agent, doing real work on your silicon.
+Keep it visible while your agent runs the cuDF exercise. GPU activity can be brief; also inspect the executed code and output to confirm that cuDF performed the aggregation.
 
 <!-- fold:break -->
 
@@ -73,14 +73,14 @@ Then, inside Codex, with `watch nvidia-smi` running:
 
 <!-- tabs:end -->
 
-Same SKILL.md. Same GPU. Different harness. **That's the open skills layer doing its job** — and it's why NVIDIA publishes skills for every harness rather than betting on one: rising GPU capability in every agent lifts the whole ecosystem.
+The same instructions can guide different compatible harnesses. Each still needs the required libraries and a tool backend with GPU access.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="dx-quiz-q">You ask Claude Code (cloud model) to aggregate a 10M-row CSV with the cuDF skill installed. Where does the heavy compute run?</p>
-  <button class="dx-quiz-opt" data-fb="The model only writes a few hundred tokens of code - it never touches your data at GPU scale.">In Anthropic's datacenter</button>
+  <p class="dx-quiz-q">Your workshop harness runs generated cuDF code on this GPU machine. Where does the aggregation run?</p>
+  <button class="dx-quiz-opt" data-fb="The cloud model proposes the code; this lab executes it on the workshop GPU.">In Anthropic's datacenter</button>
   <button class="dx-quiz-opt" data-right data-fb="The harness executes the generated cudf code on your machine - watch nvidia-smi.">On your local GPU</button>
-  <button class="dx-quiz-opt" data-fb="Tools and skills execute locally by design; that is the whole point of this page.">Nowhere - subscriptions cannot use local hardware</button>
+  <button class="dx-quiz-opt" data-fb="Execution location follows the tool setup. This lab runs its tools locally.">Nowhere - subscriptions cannot use local hardware</button>
   <button class="dx-quiz-opt" data-fb="There is a clean division: cloud writes code, your GPU runs it.">Split 50/50</button>
 </div>
 

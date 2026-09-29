@@ -1,219 +1,78 @@
-# Deep Agent Builder — NVIDIA GTC 2026 Demo
+# Deep Agent Builder
 
-A full-stack AI agent builder where users pick a foundation model, drag-and-drop tools and skills onto an agent, and chat with it in real-time. Built on [langchain-ai/deepagents](https://github.com/langchain-ai/deepagents) with NVIDIA NIM models.
+Module 5's interactive builder uses React, FastAPI, and [deepagents](https://github.com/langchain-ai/deepagents). Pick a model, add tools and instructions, then chat with your agent and review its tool calls.
 
-**Sandbox Mode** runs agent tools inside real Docker containers — complete filesystem isolation.
+## Start in the workshop
 
-## Quick Start
+Save your NVIDIA key in **Workshop Utilities → Secrets Manager**. Add a Tavily key if you want Web Search. The backend reads the project's `secrets.env`.
 
-### Prerequisites
-
-- **Node.js 18+**
-- **Python 3.11+** (required by deepagents)
-- **Docker** — via [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Colima](https://github.com/abiosoft/colima) (for sandbox mode)
-- **NVIDIA API key** — free from [build.nvidia.com](https://build.nvidia.com)
-- **Tavily API key** (optional, for web search) — free from [tavily.com](https://tavily.com)
-
-### 1. Clone
+From the project root, start the backend:
 
 ```bash
-git clone https://github.com/PicoNVIDIA/DeepAgentsDemo.git
-cd DeepAgentsDemo
-```
-
-### 2. Backend Setup
-
-```bash
-cd backend
-python3.11 -m venv .venv
+cd demo/backend
+python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
-Create your `.env` file with API keys:
+In another terminal, starting at the project root:
 
 ```bash
-cat > .env << 'EOF'
-NVIDIA_API_KEY=nvapi-your-key-here
-TAVILY_API_KEY=tvly-your-key-here
-EOF
-```
-
-**For Sandbox Mode** — add your Docker socket path:
-
-```bash
-# Colima users:
-echo "DOCKER_HOST=unix://$HOME/.colima/default/docker.sock" >> .env
-
-# Docker Desktop users (usually auto-detected):
-# echo "DOCKER_HOST=unix:///var/run/docker.sock" >> .env
-```
-
-Pull the sandbox image (one-time):
-
-```bash
-docker pull python:3.11-slim
-```
-
-Start the backend:
-
-```bash
-uvicorn server:app --host 127.0.0.1 --port 8000
-```
-
-### 3. Frontend Setup (new terminal)
-
-```bash
-cd DeepAgentsDemo
+cd demo
 npm install
-npm run dev
 ```
 
-### 4. Open
+Open **Deep Agents Client** from the JupyterLab launcher. For standalone frontend development, run `npm run dev` and open the URL it prints.
 
-```
-http://localhost:5173
-```
+The backend uses the reference implementation while Module 5's exercises have blanks. After completing them, restart the backend to load your implementation. It prints which file it loaded.
 
-Pick a model → drag tools onto the agent → click Build → chat!
+## Models, tools, and approvals
+
+The picker offers Nemotron Super and Nemotron Lightning, configured in [`models.json`](../code/workshop_support/models.json). Add tools with their **Add** button or drag them onto the agent.
+
+| Selection | What it enables |
+|---|---|
+| File I/O | Read, write, edit, list, and search workspace files |
+| Shell Execution | Run commands; local mode runs as the backend's user |
+| Web Search | Search through Tavily from the application |
+| RAG | Retrieve and rerank the supplied IT knowledge base |
+| Skills | Add the selected methodology to the system prompt |
+
+Planning and delegation are built in. File access remains disabled unless selected, including for delegated work. Shell access can also read and write files through commands. The client asks for approval before writes, edits, and execution. After building, expand **Session capabilities** to inspect the actual tool set and execution mode.
 
 ## Sandbox Mode
 
-Toggle **Sandbox Mode** ON in the Settings panel (right side of the builder). When enabled:
+Docker must be available; the backend creates a `python:3.11-slim` container per sandboxed session. If it cannot start the container, agent creation fails.
 
-- A real `python:3.11-slim` **Docker container** is created per agent session
-- All file I/O (`read_file`, `write_file`, `edit_file`, `ls`, `glob`, `grep`) runs **inside the container**
-- All shell execution (`execute`) runs **inside the container**
-- The container has **no host mounts** — the agent cannot see your filesystem
-- Container is automatically destroyed when the session ends
-
-### Sandbox vs Local
-
-| | Sandbox OFF | Sandbox ON |
+| | Local mode | Sandbox Mode |
 |---|---|---|
-| **Where tools run** | Your machine (`/tmp/deepagent_workspace`) | Docker container (`/workspace`) |
-| **File access** | Full local filesystem | Isolated container filesystem |
-| **Sensitive data** | Visible to agent | Invisible — doesn't exist |
-| **Container** | None | `python:3.11-slim` with 512MB RAM, 1 CPU |
-| **Cleanup** | Manual | Auto-destroyed on session end |
+| File tools | Virtual paths under `/tmp/deepagent_workspace` | Paths under `/workspace` in the container |
+| Shell tools | Backend user; the working directory is not a jail | Nonroot container process |
+| Container limits | Not applicable | 512 MiB memory, 1 CPU, 64 processes, 60-second commands |
+| Host mounts / container network | Host permissions apply | No host mounts or network |
+| Cleanup | Local workspace remains | Resetting the session removes its container |
 
-### Requirements for Sandbox Mode
+Web Search and RAG run in the application, outside the execution container. Tool outputs can enter the hosted model's context. Docker shares the host kernel; it is not a separate machine.
 
-1. Docker daemon running (`docker ps` should work)
-2. `DOCKER_HOST` set in `backend/.env` (see setup above)
-3. `python:3.11-slim` image pulled
-
-If Docker isn't available, the backend falls back to local execution with a warning.
-
-## Features
-
-### LLM Picker
-Choose your foundation model — each has a brand color that themes the entire UI:
-- **Nemotron** (NVIDIA) — `nvidia/nemotron-3-super-120b-a12b` with variant picker (General, Finance, Code, Legal)
-- **Llama** (Meta) — `meta/llama-3.3-70b-instruct`
-- **DeepSeek** — `deepseek-ai/deepseek-r1-0528`
-- **Claude** (Anthropic) — fallback to Llama
-
-### Tools (drag-and-drop)
-| Tool | What it does | Sandboxable |
-|---|---|---|
-| 🌐 **Web Search** | Real-time internet search via Tavily | ✅ |
-| 📁 **File I/O** | Read, write, edit files + ls, glob, grep | ✅ |
-| 💻 **Shell Execution** | Run shell commands and Python scripts | ✅ |
-
-### Skills (drag-and-drop)
-| Skill | What it does |
-|---|---|
-| ⚡ **Superpowers** | TDD, planning & debugging methodology ([obra/superpowers](https://github.com/obra/superpowers)) |
-| 🟩 **cuDF** | GPU-accelerated DataFrames (NVIDIA RAPIDS) |
-
-### Human-in-the-Loop
-When the agent wants to write a file, edit code, or run a command, it pauses and asks for your approval before executing.
-
-### Live Tool Traces
-See which tools the agent calls in real-time — inline traces in chat + a dedicated tool calls panel.
-
-## Architecture
-
-```
-React Frontend (Vite + TypeScript)
-  → LLM Picker (model selection + Nemotron variants)
-  → Skill Builder (drag & drop)
-  → Settings Panel (Sandbox Mode toggle)
-  → Build Animation
-  → Chat (SSE streaming + Markdown rendering)
-  → Tool Calls Panel
-  → Human-in-the-loop approval UI
-
-FastAPI Backend (Python)
-  → langchain-ai/deepagents (LangGraph agent)
-  → NVIDIA NIM models
-  → Session management (in-memory)
-  → SSE streaming
-  → Checkpointer for HITL interrupt/resume
-  → DockerSandboxBackend (real Docker containers)
-```
-
-### How the Build Flow Works
-
-1. **UI** builds specs: `{ model_id, skill_ids, hitl_enabled, sandbox_map }`
-2. **Frontend** sends `POST /api/agent` with the specs
-3. **Backend** (`server.py`) calls `create_agent()`, re-exported by `agent.py` from `code/5-deep-agents/deep_agent.py`
-4. **Agent factory** resolves each spec into real components:
-   - `model_id` → NVIDIA NIM model
-   - `skill_ids` → tools (Tavily, file ops, shell) + skill files (markdown → system prompt)
-   - `hitl_enabled` → interrupt config + checkpointer
-   - `sandbox_map` → `DockerSandboxBackend` (Docker container) or `LocalShellBackend` (local)
-5. Returns a `session_id` — all chat goes through `POST /api/agent/{id}/chat`
-
-### Backend Files
+## Backend files
 
 | File | Purpose |
 |---|---|
-| `server.py` | FastAPI routes, SSE streaming, session management |
-| `agent.py` | Adapter — re-exports `create_agent()` from `code/5-deep-agents/deep_agent.py` (or `.answers.py` while its exercises are unfinished) |
-| `code/5-deep-agents/deep_agent.py` | The agent factory — builds models, tools, backends, prompts |
-| `docker_sandbox.py` | Docker-based sandbox backend (implements `SandboxBackendProtocol`) |
-| `skills/` | Markdown skill files injected into system prompts |
+| `backend/server.py` | Session API and streamed responses |
+| `backend/agent.py` | Loads the learner or reference factory |
+| `../code/5-deep-agents/deep_agent.py` | Module 5 exercises and agent factory |
+| `backend/capabilities.py` | Tool and backend permission checks |
+| `backend/docker_sandbox.py` | Container lifecycle, file transfer, and execution |
+| `backend/skills/` | Instruction presets added to the system prompt |
 
-## Adding New Skills
+## API
 
-Drop a `.md` file in `backend/skills/`, then:
-
-1. Add the mapping in `code/5-deep-agents/deep_agent.py` → `skill_files` (and mirror it in `deep_agent.answers.py`):
-   ```python
-   skill_files = {
-       "superpowers": "superpowers.md",
-       "cudf": "cudf.md",
-       "your_skill": "your_skill.md",  # ← add here
-   }
-   ```
-
-2. Add the frontend entry in `src/data/skills.ts`:
-   ```typescript
-   {
-     id: 'your_skill',
-     name: 'Your Skill',
-     description: 'What it does',
-     category: 'skills',
-     icon: '🎯',
-     sandboxable: false,
-   },
-   ```
-
-## API Endpoints
-
-| Method | Path | Description |
+| Method | Path | Purpose |
 |---|---|---|
-| `GET` | `/api/health` | Health check |
-| `POST` | `/api/agent` | Create agent session (accepts `sandbox_map`) |
-| `DELETE` | `/api/agent/{id}` | Delete session (destroys Docker container if sandboxed) |
-| `POST` | `/api/agent/{id}/chat` | Chat (SSE streaming) |
-| `POST` | `/api/agent/{id}/approve` | Approve/reject interrupted tool call |
-
-## Tech Stack
-
-- **Frontend**: React 19, Vite, TypeScript, Framer Motion, @dnd-kit, react-markdown
-- **Backend**: FastAPI, deepagents, LangGraph, NVIDIA NIM, Tavily, SSE
-- **Sandbox**: Docker (`python:3.11-slim` containers via Docker SDK)
-- **Styling**: NVIDIA Kaizen Design System tokens, CSS variables for dynamic theming
+| GET | `/api/health` | Backend readiness |
+| GET | `/api/models` | Configured model choices |
+| POST | `/api/agent` | Create a session and return its capabilities |
+| DELETE | `/api/agent/{id}` | Delete the session and its container |
+| POST | `/api/agent/{id}/chat` | Stream a response |
+| POST | `/api/agent/{id}/approve` | Approve or reject a pending tool call |

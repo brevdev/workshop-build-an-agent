@@ -1,10 +1,10 @@
 flowchart TB
     subgraph HARNESS["🔧 THE HARNESS"]
         direction TB
-        MEM["📁 Memory<br/><i>persistence across sessions</i>"]
+        MEM["📁 State / Memory<br/><i>history and saved context</i>"]
         SKILLS["📚 Skills<br/><i>on-demand knowledge</i>"]
         TOOLS["🛠️ Tool Calling<br/><i>execution, sandboxing, permissions</i>"]
-        EVOLVE["🌱 Self-Evolution<br/><i>agent improves its own scaffolding</i>"]
+        EVOLVE["🌱 Self-Evolution<br/><i>optional reusable procedures</i>"]
         TOKENS["⚡ Token Efficiency<br/><i>context budget management</i>"]
         subgraph LOOP["The Agentic Loop"]
             LLM(("🧠 LLM<br/>stateless<br/>tokens in → tokens out"))

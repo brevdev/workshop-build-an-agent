@@ -1,0 +1,27 @@
+{
+  "chat": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "label": "Agent model",
+    "modules": [1, 2, 3, 5, 6, 7]
+  },
+  "fast_chat": {
+    "id": "nvidia/nemotron-3.5-lightning-30b-a3b",
+    "label": "Fast agent and data model",
+    "modules": [4, 5, 6]
+  },
+  "judge": {
+    "id": "nvidia/nemotron-3-super-120b-a12b",
+    "label": "Evaluation judge",
+    "modules": [3, 6]
+  },
+  "embedding": {
+    "id": "nvidia/nemotron-3-embed-1b",
+    "label": "Document embeddings",
+    "modules": [2, 3, 5]
+  },
+  "reranking": {
+    "id": "nvidia/llama-nemotron-rerank-vl-1b-v2",
+    "label": "Search reranking",
+    "modules": [2, 3, 5]
+  }
+}

@@ -108,7 +108,7 @@ Here's what that first turn looks like under the hood:
   <span class="dx-term-line" data-kind="tool" data-delay="250">[action] company_llc_it_knowledge_base("reset password")</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[observation] 6 chunks retrieved, reranked; top match: Password Reset Procedure</span>
   <span class="dx-term-line" data-kind="think" data-delay="300">The KB has the procedure. Summarize it and cite the source.</span>
-  <span class="dx-term-line" data-kind="answer" data-delay="400">Open the self-service portal, choose Reset Password, verify via email, then set a new one. [KB]</span>
+  <span class="dx-term-line" data-kind="answer" data-delay="400">Open the self-service portal, choose Reset Password, verify via email, then set a new one. [KB:source_id]</span>
 </div>
 
 <!-- fold:break -->

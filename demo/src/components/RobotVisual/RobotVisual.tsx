@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Skill } from '../../data/skills';
 import './RobotVisual.css';
@@ -14,13 +14,10 @@ export function RobotVisual({ skills, isBuilding, isReady, accentColor = '#76B90
   const hasSkills = skills.length > 0;
   const c = accentColor;
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
-  const containerRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) containerNodeRef.current = node;
-  }, []);
-  const containerNodeRef = { current: null as HTMLDivElement | null };
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    const el = document.querySelector('.robot-container');
+    const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
     // Use the robot's center as reference

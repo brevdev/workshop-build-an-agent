@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / 04 - HANDS ON" data-title="Running Evaluations" data-meta="TIME::50 min|NOTEBOOKS::2|MODEL::Super (LLM-judge)"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / 04 - HANDS ON" data-title="Running Evaluations" data-meta="TIME::50 min|NOTEBOOKS::2|MODEL::Nemotron (LLM-judge)"></div>
 
 <img src="_static/robots/blueprint.png" alt="Running Evaluations" style="float:right;max-width:300px;margin:25px;" />
 
@@ -11,7 +11,7 @@ It's time to put everything together and run comprehensive evaluations on your a
 Before starting, ensure you have:
 
 **Evaluation datasets ready** - You should have created or reviewed test datasets from the previous lesson ([Creating Evaluation Datasets](evaluation_data.md)). You can use:
-- Your own generated datasets from the `generate_rag_eval_dataset.ipynb` and `generate_report_eval_dataset.ipynb` notebooks
+- Your reviewed generated cases from the `generate_rag_eval_dataset.ipynb` and `generate_report_eval_dataset.ipynb` notebooks
 - The pre-made datasets: `rag_agent_test_cases.json` and `report_agent_test_cases.json`
 
 **Agents built** - Your RAG agent from Module 2 and Report Generation agent from Module 1 should be built and functional. 
@@ -64,7 +64,7 @@ Is this a good answer?
 ```
 Evaluate this answer on the following criteria:
 1. Relevance: Does it directly address the question?
-2. Accuracy: Are all factual claims correct?
+2. Evidence support: Does the supplied source evidence support the factual claims?
 3. Completeness: Does it cover all aspects of the question?
 4. Clarity: Is it easy to understand?
 ```
@@ -160,7 +160,7 @@ Let's start by evaluating the IT Help Desk agent from Module 2. Open the <button
 
 Load your evaluation dataset - either the one you generated in the previous lesson or the pre-made dataset provided. 
 
-The dataset should be located at `data/evaluation/rag_agent_test_cases.json` (or use your custom-generated file).
+The notebook selects the reviewed `synthetic_rag_agent_test_cases.json` subset, or falls back to `data/evaluation/rag_agent_test_cases.json`. Check the printed filename before running.
 
 Load the dataset under the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', 'test_dataset =');"><i class="fas fa-code"></i> Load Test Dataset</button> section.
 
@@ -176,7 +176,7 @@ For each test case, we'll:
 3. Record which contexts were retrieved
 4. Store the results for evaluation
 
-Execute the cell under <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Run Agent on Test Cases');"><i class="fas fa-code"></i> Run Agent on Test Cases</button>.
+Execute the cell under <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Run the agent');"><i class="fas fa-code"></i> Run Agent on Test Cases</button>.
 
 This may take a few minutes as the agent processes each question.
 
@@ -184,7 +184,7 @@ This may take a few minutes as the agent processes each question.
 
 Once this completes, we can use the results to evaluate the agent's responses in comparison to the expected retrieved contexts and ground truth answers in our test dataset.
 
-Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Evaluate with LLM-as-a-Judge');"><i class="fas fa-code"></i> Evaluate with LLM-as-a-Judge</button> to evaluate each response.
+Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Evaluate with a rubric-based judge');"><i class="fas fa-code"></i> Evaluate with LLM-as-a-Judge</button> to evaluate each response.
 
 Let's get used to what it means to use an LLM as a judge for agent evaluation. For this first pass, we'll evaluate these qualities: 
 1. **Faithfulness**: Whether responses are grounded in the retrieved context
@@ -193,12 +193,12 @@ Let's get used to what it means to use an LLM as a judge for agent evaluation. F
 
 This may take a few minutes as the judge processes each response.
 
-Here's what a single judge call looks like under the hood - the same faithfulness/relevancy/helpfulness scoring you just triggered, on one IT Help Desk response:
+This illustrative example shows one answer receiving three rubric judgments, one call per metric:
 
 <div class="dx-term dx-reveal">
   <span class="dx-term-title">llm-as-a-judge</span>
   <span class="dx-term-line" data-kind="prompt">Score this IT Help Desk response on faithfulness, relevancy, helpfulness.</span>
-  <span class="dx-term-line" data-kind="think" data-delay="300">Judge: nvidia/nemotron-3-super-120b-a12b at temperature 0 for consistent grading.</span>
+  <span class="dx-term-line" data-kind="think" data-delay="300">Judge: configured judge model, temperature 0; JSON output validated separately.</span>
   <span class="dx-term-line" data-kind="tool" data-delay="250">[context] Password resets take 5-10 minutes to propagate. Use the self-service portal.</span>
   <span class="dx-term-line" data-kind="tool" data-delay="200">[question] How long until my password reset takes effect?</span>
   <span class="dx-term-line" data-kind="tool" data-delay="200">[response] Your reset takes effect in 5-10 minutes via the self-service portal.</span>
@@ -222,17 +222,17 @@ Let's explore and evaluate the agent's performance using RAGAS metrics. We'll us
 - **Faithfulness**: Is the answer grounded in the context?
 - **Answer Relevancy**: Does the answer address the question?
 
-Run the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Compute RAGAS Metrics');"><i class="fas fa-code"></i> Compute RAGAS Metrics</button>.
+Run the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Compute RAGAS metrics');"><i class="fas fa-code"></i> Compute RAGAS Metrics</button>.
 
 <!-- fold:break -->
 
 ### Judge Calibration Check
 
-Before fully trusting our LLM judge scores, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores to verify alignment with human judgment.
+Before fully trusting our LLM judge scores, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores as an initial agreement check. A few displayed examples do not establish calibration; compare independent ratings on a larger varied set.
 
 This is a critical step! If the judge mechanism we use systematically disagrees with human intuition, our entire evaluation pipeline can become unreliable. 
 
-Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Judge Calibration Check');"><i class="fas fa-code"></i> Judge Calibration Check</button>. Take a moment to review these and consider: Do you agree with the judge's scores?
+Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Judge calibration review');"><i class="fas fa-code"></i> Judge Calibration Check</button>. Take a moment to review these and consider: Do you agree with the judge's scores?
 
 <!-- fold:break -->
 
@@ -240,9 +240,9 @@ Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluatio
 
 Let's dig into the evaluation results to understand how well your RAG agent is performing.
 
-First, let's review the mean scores across all test cases. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Analyze Results');"><i class="fas fa-code"></i> Analyze Results </button> to view a nicely formatted overview of the evaluation results.
+First, let's review the mean scores across all test cases. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Analyze measured quality and coverage');"><i class="fas fa-code"></i> Analyze Results </button> to view a nicely formatted overview of the evaluation results.
 
-Check the overall results. These scores range from 0-1, where 1 represents "perfect" performance. As a rule of thumb, "good" starts around 0.75 for generation metrics (faithfulness, answer relevancy) and 0.70 for retrieval metrics (context precision, recall) — see the exact score bands in [Evaluation Metrics](evaluation_metrics.md). How well did your agent perform in each category?
+Read means alongside successful-measurement counts and missing results. Custom rubric scores range from 0.2–1.0; RAGAS uses different definitions, mostly on a 0–1 scale; cosine-based answer relevancy can be negative. A high score on this small dataset does not establish deployment readiness.
 
 Next, check the statistical distribution to understand:
 - How consistent is the agent's performance?
@@ -251,7 +251,7 @@ Next, check the statistical distribution to understand:
 
 <!-- fold:break -->
 
-Finally, run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Performance by Category');"><i class="fas fa-code"></i> Performance by Category </button> to break down scores by question type.
+Finally, run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Compare categories');"><i class="fas fa-code"></i> Performance by Category </button> to break down scores by question type.
 
 View the results. Which categories does the agent handle well? Which categories need improvement?
 
@@ -269,15 +269,15 @@ By now, you have a pretty good set of metrics to use to understand your IT Help 
 
 However, the metrics we discussed so far alone may miss key performance indicators specific to your use case. 
 
-For example, you may need your agent to properly cite knowledge base sources with `[KB]` tags, so users can verify crucial information. This specific requirement won't be captured by general RAG system metrics.
+For example, you may need your agent to cite exact `[KB:source_id]` labels that resolve to the actual retrieved chunks. This specific requirement won't be captured by general RAG system metrics.
 
-To address these use-case-specific needs, let's explore some final custom evaluations. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom Evaluation: Citation Quality');"><i class="fas fa-code"></i> Citation Quality </button> to see the results. 
+To address these use-case-specific needs, let's explore some final custom evaluations. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom metric: citation validity');"><i class="fas fa-code"></i> Citation Quality </button> to see the results.
 
-Your results should contain the percent of responses that include citations. Is your agent regularly citing its sources?
+The result shows how many successful answers have citations that all resolve. Check claim support separately; a valid source ID alone is not evidence of entailment.
 
-Next, evaluate the agent on a custom metric we define for actionability. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom Evaluation: Actionability');"><i class="fas fa-code"></i> Actionability </button> to see the results. 
+Next, evaluate the agent on a custom metric we define for actionability. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_rag_agent.ipynb', '## Custom metric: actionability');"><i class="fas fa-code"></i> Actionability </button> to see the results.
 
-Your results should score the responses on a raw scale of 1-5. Do your agent's responses contain clear, actionable steps for the user?
+The judge uses a 1–5 rubric; saved scores are divided by 5, with failures left missing. Do your agent's responses contain clear, actionable steps for the user?
 
 <!-- fold:break -->
 
@@ -297,7 +297,7 @@ Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_
 
 ### Generate Reports
 
-Let's gather some agent responses to evaluate. Run the agent on each test topic by executing the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Generate Reports');"><i class="fas fa-code"></i> Generate Reports</button> cell.
+Let's gather some agent responses to evaluate. Run the agent on each test topic by executing the <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Generate reports');"><i class="fas fa-code"></i> Generate Reports</button> cell.
 
 This may take a few minutes as the agent processes each task.
 
@@ -314,24 +314,24 @@ For report evaluation, we'll use LLM-as-a-judge with specific criteria:
 - Are sections well-connected?
 
 **Content Evaluation**:
-- Is the information accurate and relevant?
+- Is the information substantive and relevant?
 - Is each section substantive (not just placeholders)?
-- Are claims supported by the research?
+- Are claims supported by the actual search excerpts? The `accuracy` key measures this support, not independent factual truth; no evidence means not applicable.
 
 **Writing Evaluation**:
 - Is the writing clear and professional?
 - Is the tone appropriate for the topic?
 - Are there grammatical or formatting issues?
 
-Once you're ready, run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Evaluate Report Quality');"><i class="fas fa-code"></i> Evaluate Report Quality </button> to evaluate your report generation agent's performance.
+Once you're ready, run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Evaluate report quality');"><i class="fas fa-code"></i> Evaluate Report Quality </button> to evaluate your report generation agent's performance.
 
 <!-- fold:break -->
 
 ### Judge Calibration Check
 
-Once again, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores to verify alignment with human judgment.
+Once again, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores as an initial agreement check. A few displayed examples do not establish calibration; compare independent ratings on a larger varied set.
 
-Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Judge Calibration Check');"><i class="fas fa-code"></i> Judge Calibration Check</button>. Take a moment to review these and consider: Do you agree with the judge's scores?
+Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Judge review');"><i class="fas fa-code"></i> Judge Calibration Check</button>. Take a moment to review these and consider: Do you agree with the judge's scores?
 
 <!-- fold:break -->
 
@@ -339,23 +339,23 @@ Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluatio
 
 <img src="_static/robots/wrench.png" alt="Tool Analysis" style="float:right;max-width:300px;margin:25px;" />
 
-Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Analyze Results');"><i class="fas fa-code"></i> Analyze Results</button> to create a readable overview of your evaluation results. 
+Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Analyze quality and coverage');"><i class="fas fa-code"></i> Analyze Results</button> to create a readable overview of your evaluation results.
 
-Check the overall results. Like in the previous example, the final scores should range from 0-1. How did your agent perform in each category?
+Check each metric’s coverage and valid 0.2–1.0 rubric scores. Which criteria need closer inspection?
 
 Examine the statistical breakdown to identify:
 - Consistency across different report topics
 - Which dimensions show the most variance
 - Whether certain types of topics are harder for the agent
 
-Next, let's review any low-scoring responses. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Identify Problem Areas');"><i class="fas fa-code"></i> Identify Problem Areas</button>.
+Next, let's review any low-scoring responses. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Inspect low scores and failures');"><i class="fas fa-code"></i> Identify Problem Areas</button>.
 
 Consider:
 - Are there missing sections?
 - Do reports contain placeholder content, like "will be drafted"?
 - Are there overly vague or unsupported claims?
 
-Finally, let's check the length of the generated reports. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Report Length Analysis');"><i class="fas fa-code"></i> Report Length Analysis</button>.
+Finally, let's check the length of the generated reports. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Report length and placeholders');"><i class="fas fa-code"></i> Report Length Analysis</button>.
 
 Consider:
 - Reports under 5,000 characters may be too superficial.

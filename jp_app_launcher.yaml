@@ -6,7 +6,7 @@
   cwd: "/project/.devx/1-build-an-agent"
   type: local-server
   args:
-    - "python3"
+    - "python"
     - "-m"
     - "http.server"
     - $PORT
@@ -19,7 +19,7 @@
   cwd: "/project/.devx/2-agentic-rag"
   type: local-server
   args:
-    - "python3"
+    - "python"
     - "-m"
     - "http.server"
     - $PORT
@@ -32,7 +32,7 @@
   cwd: "/project/.devx/3-agent-evaluation"
   type: local-server
   args:
-    - "python3"
+    - "python"
     - "-m"
     - "http.server"
     - $PORT
@@ -45,7 +45,7 @@
   cwd: "/project/.devx/4-agent-customization"
   type: local-server
   args:
-    - "python3"
+    - "python"
     - "-m"
     - "http.server"
     - $PORT
@@ -58,7 +58,7 @@
   cwd: "/project/.devx/5-deep-agents"
   type: local-server
   args:
-    - "python3"
+    - "python"
     - "-m"
     - "http.server"
     - $PORT
@@ -71,7 +71,7 @@
   cwd: "/project/.devx/6-agent-safety"
   type: local-server
   args:
-    - "python3"
+    - "python"
     - "-m"
     - "http.server"
     - $PORT
@@ -84,7 +84,7 @@
   cwd: "/project/.devx/7-agent-harnesses"
   type: local-server
   args:
-    - "python3"
+    - "python"
     - "-m"
     - "http.server"
     - $PORT
@@ -93,11 +93,25 @@
 
 - title: "Secrets Manager"
   source: /project/code/secrets_management/secrets_management_master.ipynb
-  cwd: /projects
+  cwd: /project
   args: {}
   type: notebook-voila
   icon: /project/.devx/_static/img/key.svg
-  catalog: NVIDIA DevX Learning Path
+  catalog: Workshop Utilities
+
+- title: "Workshop Health"
+  description: "Check your environment, API endpoints, and local services."
+  source: http://localhost:$PORT/
+  cwd: /project/code
+  type: local-server
+  args:
+    - python
+    - -m
+    - workshop_support.health
+    - --port
+    - $PORT
+  icon: /project/.devx/_static/img/health.svg
+  catalog: Workshop Utilities
 
 - title: "Simple Agents Client"
   source: http://localhost:$PORT/
@@ -170,7 +184,7 @@
   type: terminal
   args: {}
   icon: /project/.devx/_static/img/claude-icon.svg
-  catalog: Workshop Assistants
+  catalog: Workshop Utilities
 
 - title: "Codex CLI"
   description: "OpenAI's agentic CLI, preloaded with this workshop's tutor skills. Authenticate on first run, then use $workshop or $module-1..7 — or just ask."
@@ -179,4 +193,4 @@
   type: terminal
   args: {}
   icon: /project/.devx/_static/img/openai-icon.svg
-  catalog: Workshop Assistants
+  catalog: Workshop Utilities

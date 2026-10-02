@@ -6,8 +6,7 @@
 are fair to give directly; they aren't the learning content.
 
 ## API keys / `secrets.env`
-Both notebooks load keys at the top:
-`load_dotenv("../../variables.env")` then `load_dotenv("../../secrets.env")`.
+Both notebooks discover the project root and call the shared `load_secrets(PROJECT_ROOT)` helper at the top.
 `secrets.env` lives at the **repo root** and is **gitignored**, so it won't exist on
 a fresh clone.
 
@@ -16,7 +15,7 @@ a fresh clone.
   `NVIDIA_API_KEY=nvapi-…` (free at https://build.nvidia.com → "Get API Key"), or
   use the workshop's **Secrets Manager**
   (`code/secrets_management/secrets_management_1.ipynb`, opens via Voila). **Restart
-  the kernel** after adding keys so `load_dotenv` re-reads them.
+  the kernel** after adding keys so the helper re-reads them.
 - **Tavily error / empty results / `TAVILY_API_KEY` missing** → Module 1's search
   tool needs a Tavily key (free at https://tavily.com). Add `TAVILY_API_KEY=tvly-…`
   to `secrets.env`. **Module 1 requires both** the NVIDIA and Tavily keys; LangSmith
@@ -25,9 +24,7 @@ a fresh clone.
   whole workshop locally, the `setup-workshop` skill writes `secrets.env`.
 
 ## Dependencies / imports
-- The first cell runs `%pip install -r ../../requirements.txt`. If imports fail
-  (`langchain`, `langchain_openai`, `tavily`, `openai`, `dotenv`), have them run
-  that cell, then restart the kernel.
+- Dependencies are preinstalled in Workbench. If imports fail, open Workshop Health and confirm that the selected kernel is the workshop environment. Avoid reinstalling unrelated packages into a different Python.
 - **`ImportError: cannot import name 'create_agent'`** → needs LangChain v1
   (`langchain>1,<2`). Confirm the right kernel/environment (the DevX-Lab container
   has it); they may be on the wrong kernel or a stale venv.
@@ -55,6 +52,7 @@ a fresh clone.
   they fill the blanks themselves rather than auto-running solutions.
 
 ## Agent behavior (teaching moments, not bugs)
+- **A direct answer or multiple tool requests in the arithmetic notebook** is valid. The provided routing loops handle zero or several calls. If the next model reply requests another tool, repeat the routing cells; this notebook manually steps the loop.
 - **No citations / made-up sources** → tie to hallucination + the system prompt's
   citation rules; have them inspect `state["messages"]` and consider prompt tweaks.
 - **Repeated identical searches / very many searches** → repeated-query /

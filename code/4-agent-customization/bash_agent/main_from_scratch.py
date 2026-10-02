@@ -40,9 +40,9 @@ def main(config: Config):
                 if "</think>" in response:
                     response = response.split("</think>")[-1].strip()
 
-                # Add the (non-empty) response to the context
-                if response:
-                    messages.add_assistant_message(response)
+            # Tool responses must follow the assistant message that requested them.
+            if response or tool_calls:
+                messages.add_assistant_message(response or "", tool_calls=tool_calls)
 
             # Process tool calls
             if tool_calls:

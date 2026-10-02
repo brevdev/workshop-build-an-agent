@@ -5,12 +5,10 @@ Help a learner read the deep-agent figures. Diagrams in `.devx/5-deep-agents/img
 ## shallow_agent_pattern (`shallow_agent_pattern_dark.svg`, `deep_agents.md`)
 - **Depicts:** `User → Model → (ReAct Loop: Model ↔ Tool) → Response`.
 - **Takeaway:** the baseline from Modules 1–2 — a single loop, everything in one context.
-  Deep agents *extend* this; a deep agent's sub-agents are themselves shallow agents.
+  Deep agents extend this with planning, delegation and context management.
 
 ## middleware_pipeline (`middleware_pipeline_dark.svg`, `deep_agents.md`)
-- **Depicts:** the deep-agent "batteries-included" stack — `User Message → Summarization →
-  PatchToolCalls → Model → TodoList → {Filesystem, Execute, Tools/Skills}`, where Tools/Skills
-  can spawn a `SubAgent` (`task`), all passing through an optional `HITL` gate, then looping.
+- **Depicts:** `User → Context → Model → Permission Check → Optional Approval → Tool/Subagent → Result → Model`. Direct replies leave the loop; approval happens before a side effect.
 - **Takeaway:** `create_deep_agent` builds *this* — each middleware adds a capability
   (planning/filesystem/shell/sub-agents/context-management) without you writing orchestration.
   The four pillars are visible: TodoList (planning), SubAgent (delegation), Filesystem +
@@ -29,9 +27,9 @@ Help a learner read the deep-agent figures. Diagrams in `.devx/5-deep-agents/img
 - **sandbox_as_tool** (`sandbox_as_tool_dark.svg`): `Your Server { Agent, Keys, Orchestration }
   ↔ Remote Sandbox { Sandbox API, Code Execution, Isolated Env }`. **Pattern 2** — the agent
   runs on your server and **delegates execution** to an isolated sandbox; **keys stay out**,
-  updates are instant, failures isolated. **deepagents uses Pattern 2** (Docker).
+  updates are instant, failures isolated. **This demo uses Pattern 2** (Docker).
 - **Takeaway:** the contrast is a security/ops trade-off table — where do credentials live,
-  how fast can you update, what happens on failure. Pattern 2 wins for production.
+  how fast can you update, what happens on failure. Choose the boundary and credential design for the threat model.
 
 ## Common confusions
 - The middleware pipeline is *not* a fixed chain — the loop + sub-agents make it dynamic;

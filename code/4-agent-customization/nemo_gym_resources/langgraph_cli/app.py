@@ -11,8 +11,8 @@ Architecture follows NeMo Gym patterns:
 - verify() function returns reward signals for RLVR training
 """
 
-from typing import Dict, Any, Optional, List, Union
-from pydantic import BaseModel, Field
+from typing import Dict, Any, Optional, List, Literal
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 import json
 import re
 import unicodedata
@@ -71,17 +71,12 @@ def normalize_path(p: str) -> str:
     # Remove trailing slashes
     p = p.rstrip('/')
 
-    # Extract just the filename/relative path (remove absolute path prefixes that look like data leakage)
-    if p.startswith('/') and any(x in p.lower() for x in ['home/', 'users/', 'user/', 'documents/']):
-        # This looks like an absolute path that shouldn't be here - extract basename
-        p = Path(p).name
-
-    return p
+    return p or '/'
 
 
 def normalize_value(value: Any, key: str = None) -> Any:
     """
-    Normalize a value for comparison, handling type coercion and formatting.
+    Normalize equivalent string formatting after strict type validation.
 
     Args:
         value: The value to normalize
@@ -93,13 +88,9 @@ def normalize_value(value: Any, key: str = None) -> Any:
     if value is None:
         return None
 
-    # Handle port: convert float to int
-    if key == 'port':
-        if isinstance(value, float):
-            return int(value)
-        if isinstance(value, str) and value.replace('.', '').isdigit():
-            return int(float(value))
-        return value
+    # False boolean switches are equivalent to omitting the flag.
+    if key in ("no_browser", "watch") and value is False:
+        return None
 
     # Handle paths
     if key in ('path', 'output_path'):
@@ -138,10 +129,11 @@ def normalize_cli_output(data: Dict[str, Any]) -> Dict[str, Any]:
 
 class CLIToolCall(BaseModel):
     """Expected structure for LangGraph CLI tool calls."""
-    command: str = Field(..., description="CLI command: new, dev, up, build, or dockerfile")
+    model_config = ConfigDict(extra="forbid", strict=True)
+    command: Literal["new", "dev", "up", "build", "dockerfile"] = Field(..., description="CLI command")
     template: Optional[str] = Field(None, description="Template name for 'new' command")
     path: Optional[str] = Field(None, description="Project path for 'new' command")
-    port: Optional[int] = Field(None, description="Port for 'dev' or 'up' command")
+    port: Optional[int] = Field(None, ge=1, le=65535, description="Port for 'dev' or 'up' command")
     no_browser: Optional[bool] = Field(None, description="Skip browser for 'dev' command")
     watch: Optional[bool] = Field(None, description="Watch mode for 'up' command")
     tag: Optional[str] = Field(None, description="Image tag for 'build' command")
@@ -207,7 +199,8 @@ def extract_json_from_response(response: str) -> Optional[Dict[str, Any]]:
 
     # Try direct JSON parse first
     try:
-        return json.loads(response.strip())
+        parsed = json.loads(response.strip())
+        return parsed if isinstance(parsed, dict) else None
     except json.JSONDecodeError:
         pass
 
@@ -216,7 +209,8 @@ def extract_json_from_response(response: str) -> Optional[Dict[str, Any]]:
     matches = re.findall(code_block_pattern, response)
     for match in matches:
         try:
-            return json.loads(match.strip())
+            parsed = json.loads(match.strip())
+            return parsed if isinstance(parsed, dict) else None
         except json.JSONDecodeError:
             continue
 
@@ -225,7 +219,8 @@ def extract_json_from_response(response: str) -> Optional[Dict[str, Any]]:
     matches = re.findall(answer_pattern, response)
     for match in matches:
         try:
-            return json.loads(match.strip())
+            parsed = json.loads(match.strip())
+            return parsed if isinstance(parsed, dict) else None
         except json.JSONDecodeError:
             continue
 
@@ -246,7 +241,7 @@ def score_cli_output(predicted: Dict[str, Any], reference: Dict[str, Any]) -> tu
     Compare predicted CLI JSON vs reference, returning reward and metrics.
 
     Uses normalization to handle:
-    - Type coercion (float ports -> int)
+    - Strict schema validation (fractional or string ports are invalid)
     - Unicode normalization (non-breaking hyphens, etc.)
     - Path normalization (./ prefixes, trailing slashes)
 
@@ -271,7 +266,14 @@ def score_cli_output(predicted: Dict[str, Any], reference: Dict[str, Any]) -> tu
         "total_flags": 0
     }
 
-    # Normalize both inputs for fair comparison
+    # Invalid reference data is a setup error; invalid model output gets -1.
+    CLIToolCall.model_validate(reference)
+    try:
+        CLIToolCall.model_validate(predicted)
+    except ValidationError:
+        return -1.0, metrics
+
+    # Normalize only equivalent surface forms, never paths/types with new meaning.
     predicted = normalize_cli_output(predicted)
     reference = normalize_cli_output(reference)
 
@@ -393,9 +395,6 @@ class LangGraphCLIResourceServer:
             VerifyResponse with reward signal and metrics
         """
         # Parse model response
-        # Debug: show what the model generated
-        response_preview = body.model_response if body.model_response else "(empty)"
-        print(f"\n[VERIFY] Model output: {response_preview!r}")
         parsed_output = extract_json_from_response(body.model_response)
 
         if parsed_output is None:
@@ -406,7 +405,7 @@ class LangGraphCLIResourceServer:
                 exact_match=False,
                 command_correct=False,
                 flag_accuracy=0.0,
-                feedback="Failed to parse JSON from model response.",
+                feedback="Expected a JSON object with a valid command and flags.",
                 parsed_output=None
             )
 
@@ -468,7 +467,7 @@ def cli_correctness_reward(
     Reward function for Unsloth GRPOTrainer.
 
     Evaluates whether completions match expected CLI tool calls.
-    Returns reward of 2.0 for exact match, partial rewards for correct command,
+    Returns reward of 1.0 for exact match, partial rewards for correct command,
     and -1.0 for wrong command or invalid JSON.
 
     Args:
@@ -495,11 +494,7 @@ def cli_correctness_reward(
         # Score against expected
         reward, metrics = score_cli_output(parsed, expected)
 
-        # Scale reward: exact match gets 2.0, partial gets proportional reward
-        if metrics["exact_match"]:
-            rewards.append(2.0)
-        else:
-            rewards.append(reward)
+        rewards.append(reward)
 
     return rewards
 
@@ -729,4 +724,4 @@ if __name__ == "__main__":
             for err in stats['errors'][:10]:
                 print(f"  {err}")
     else:
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+        uvicorn.run(app, host="127.0.0.1", port=8001)

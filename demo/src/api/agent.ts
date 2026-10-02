@@ -5,7 +5,7 @@
 
 export interface TokenEvent { type: 'token'; content: string; }
 export interface ToolStartEvent { type: 'tool_start'; id: string; name: string; skillId: string; icon: string; action: string; input: string; }
-export interface ToolEndEvent { type: 'tool_end'; id: string; name: string; output: string; duration: number; }
+export interface ToolEndEvent { type: 'tool_end'; id: string; name: string; output: string; duration: number; status: 'success' | 'error'; }
 export interface ErrorEvent { type: 'error'; message: string; }
 export interface DoneEvent { type: 'done'; }
 export interface InterruptEvent {
@@ -19,15 +19,27 @@ export type AgentEvent = TokenEvent | ToolStartEvent | ToolEndEvent | ErrorEvent
 
 
 /**
- * Result of creating an agent session. `sandboxActive` reflects the ACTUAL
- * backend state — a requested sandbox that failed to start (Docker
- * unavailable) reports `sandboxRequested: true, sandboxActive: false` so the
- * UI never claims isolation it doesn't have.
+ * Actual capabilities of a successfully created session.
  */
 export interface AgentSessionInfo {
   sessionId: string;
   sandboxRequested: boolean;
   sandboxActive: boolean;
+  enabledTools: string[];
+  capabilities: {
+    file_root: string | null;
+    execution: 'container' | 'host user' | 'disabled';
+    container_network: string | null;
+    web_and_rag: string;
+  };
+}
+
+export async function getAvailableModels(): Promise<Array<{ id: string; name: string; model: string }>> {
+  const response = await fetch('api/models');
+  if (!response.ok) throw new Error('Could not load models. Check that the Deep Agents backend is running.');
+  const data = await response.json();
+  if (!Array.isArray(data.models) || !data.models.length) throw new Error('No models are configured.');
+  return data.models;
 }
 
 /**
@@ -44,12 +56,19 @@ export async function createAgentSession(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model_id: modelId, skill_ids: skillIds, hitl_enabled: hitlEnabled, sandbox_map: sandboxMap }),
   });
-  if (!response.ok) throw new Error(`Failed to create agent: ${await response.text()}`);
+  if (!response.ok) {
+    const failure = await response.json().catch(() => ({}));
+    throw new Error(typeof failure.detail === 'string' ? failure.detail
+      : 'Could not build your agent. Check the backend terminal and try again.');
+  }
   const data = await response.json();
+  if (typeof data.session_id !== 'string' || !data.session_id) throw new Error('The backend did not create a session. Try again.');
   return {
     sessionId: data.session_id,
     sandboxRequested: Boolean(data.sandbox_requested),
     sandboxActive: Boolean(data.sandbox_active),
+    enabledTools: data.enabled_tools ?? [],
+    capabilities: data.capabilities,
   };
 }
 
@@ -123,13 +142,14 @@ async function _parseSSE(response: Response, onEvent: (event: AgentEvent) => voi
 
   const decoder = new TextDecoder();
   let buffer = '';
+  let finished = false;
 
   try {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
-      buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
+      buffer = (buffer + decoder.decode(value, { stream: true })).replace(/\r\n/g, '\n');
 
       let blockEnd: number;
       while ((blockEnd = buffer.indexOf('\n\n')) !== -1) {
@@ -137,20 +157,22 @@ async function _parseSSE(response: Response, onEvent: (event: AgentEvent) => voi
         buffer = buffer.substring(blockEnd + 2);
 
         let eventType = '';
-        let eventData = '';
+        const dataLines: string[] = [];
         for (const line of block.split('\n')) {
           if (line.startsWith('event:')) eventType = line.substring(6).trim();
-          else if (line.startsWith('data:')) eventData = line.substring(5).trim();
+          else if (line.startsWith('data:')) dataLines.push(line.substring(5).trim());
         }
+        const eventData = dataLines.join('\n');
 
         if (!eventType || !eventData) continue;
 
         try {
           const parsed = JSON.parse(eventData);
+          if (['done', 'error', 'interrupt'].includes(eventType)) finished = true;
           switch (eventType) {
             case 'token': onEvent({ type: 'token', content: parsed.content || '' }); break;
             case 'tool_start': onEvent({ type: 'tool_start', id: parsed.id, name: parsed.name, skillId: parsed.skillId || 'api', icon: parsed.icon || '🔧', action: parsed.action || parsed.name, input: parsed.input || '' }); break;
-            case 'tool_end': onEvent({ type: 'tool_end', id: parsed.id, name: parsed.name, output: parsed.output || '', duration: parsed.duration || 0 }); break;
+            case 'tool_end': onEvent({ type: 'tool_end', id: parsed.id, name: parsed.name, output: parsed.output || '', duration: parsed.duration || 0, status: parsed.status === 'error' ? 'error' : 'success' }); break;
             case 'error': onEvent({ type: 'error', message: parsed.message || 'Unknown error' }); break;
             case 'done': onEvent({ type: 'done' }); break;
             case 'interrupt':
@@ -173,6 +195,7 @@ async function _parseSSE(response: Response, onEvent: (event: AgentEvent) => voi
         } catch { /* skip malformed */ }
       }
     }
+    if (!finished) onEvent({ type: 'error', message: 'The connection ended before the agent finished. Check the backend terminal.' });
   } finally {
     reader.releaseLock();
   }

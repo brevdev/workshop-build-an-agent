@@ -1,16 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { models, type ModelDef } from '../../data/models';
+import { type ModelDef } from '../../data/models';
 import { ModelIcon } from './ModelIcons';
 import './SoulPicker.css';
 
 interface SoulPickerProps {
   onSelect: (model: ModelDef) => void;
+  models: ModelDef[];
+  error: string | null;
+  onRetry: () => void;
 }
 
-export function SoulPicker({ onSelect }: SoulPickerProps) {
+export function SoulPicker({ onSelect, models, error, onRetry }: SoulPickerProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const selectionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (selectionTimer.current) clearTimeout(selectionTimer.current); }, []);
 
   const activeColor = hoveredId
     ? models.find(m => m.id === hoveredId)?.primaryColor
@@ -20,15 +26,13 @@ export function SoulPicker({ onSelect }: SoulPickerProps) {
 
   const handleSelect = (model: ModelDef) => {
     setSelectedId(model.id);
-    setTimeout(() => onSelect(model), 900);
+    selectionTimer.current = setTimeout(() => onSelect(model), 900);
   };
 
   // Position cards around the center robot
   const positions = [
-    { x: 0, y: -1 },   // top
-    { x: 1, y: 0 },    // right
-    { x: 0, y: 1 },    // bottom
     { x: -1, y: 0 },   // left
+    { x: 1, y: 0 },    // right
   ];
 
   return (
@@ -47,7 +51,9 @@ export function SoulPicker({ onSelect }: SoulPickerProps) {
         transition={{ delay: 0.2 }}
       >
         <h1>Choose the <span className="soul-accent" style={{ color: activeColor }}>LLM</span> of Your Agent</h1>
-        <p>Select the foundation model that powers your Deep Agent</p>
+        <p>Select the model that powers your Deep Agent</p>
+        {error && <p role="alert">{error} <button onClick={onRetry}>Retry</button></p>}
+        {!error && models.length === 0 && <p role="status">Loading available models…</p>}
       </motion.div>
 
       {/* Center area with robot and cards */}
@@ -259,15 +265,20 @@ export function SoulPicker({ onSelect }: SoulPickerProps) {
         {models.map((model, i) => {
           const isHovered = hoveredId === model.id;
           const isSelected = selectedId === model.id;
-          const isDisabled = model.id !== 'nemotron';
+          const isDisabled = Boolean(selectedId && selectedId !== model.id);
 
           return (
             <div
               key={model.id}
               className="soul-card-anchor"
-              data-position={i === 0 ? 'top' : i === 1 ? 'right' : i === 2 ? 'bottom' : 'left'}
+              data-position={i === 0 ? 'left' : 'right'}
             >
-              <motion.div
+              <motion.button
+                type="button"
+                disabled={isDisabled}
+                aria-pressed={isSelected}
+                onFocus={() => setHoveredId(model.id)}
+                onBlur={() => setHoveredId(null)}
                 className={`soul-card ${isHovered ? 'hovered' : ''} ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
                 style={{
                   '--card-color': model.primaryColor,
@@ -285,12 +296,13 @@ export function SoulPicker({ onSelect }: SoulPickerProps) {
                 onClick={() => !selectedId && !isDisabled && handleSelect(model)}
               >
                 <div className="soul-card-icon">
-                    <ModelIcon modelId={model.id} size={52} />
+                    <ModelIcon modelId="nemotron" size={52} />
                   </div>
                 <div className="soul-card-info">
                   <h3 className="soul-card-name">{model.name}</h3>
                   <span className="soul-card-provider">{model.provider}</span>
                   <p className="soul-card-tagline">{model.tagline}</p>
+                  <span className="soul-model-id">{model.backendModel}</span>
                 </div>
                 {isSelected && (
                   <motion.div
@@ -302,7 +314,7 @@ export function SoulPicker({ onSelect }: SoulPickerProps) {
                     ✓
                   </motion.div>
                 )}
-              </motion.div>
+              </motion.button>
             </div>
           );
         })}

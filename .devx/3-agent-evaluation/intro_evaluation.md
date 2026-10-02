@@ -87,7 +87,7 @@ We generally rely on three approaches:
     <li>If alignment is poor, refine the evaluation prompt or add examples.</li>
   </ol>
   <p>Even a quick spot-check on 5 samples can reveal a judge that is too lenient, too harsh, or misreads your criteria. We'll practice this in the hands-on notebooks.</p>
-  <p><b>Watch for self-enhancement bias.</b> In this module the judge is the <i>same</i> Nemotron model that powers the agent under test — and LLM judges tend to favor outputs in their own style. That's a real reason to calibrate against humans, and to try a different judge model when a score looks suspiciously generous.</p>
+  <p><b>Check judge bias.</b> Agent and judge models are configured separately, but may use the same model. Even different models can share blind spots or prefer particular writing styles. Compare judgments with your own source-based ratings, especially when scores look unusually generous.</p>
 </div>
 
 <!-- fold:break -->
@@ -107,7 +107,7 @@ We generally rely on three approaches:
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
   <p class="dx-quiz-q">Your IT Help Desk RAG agent gives a wrong answer. Where should you look first?</p>
   <button class="dx-quiz-opt" data-fb="Not necessarily. The wrong answer may come from bad RETRIEVAL - the agent never saw the right document. Rewriting generation prompts cannot fix a retrieval miss.">Assume it hallucinated and rewrite the system prompt</button>
-  <button class="dx-quiz-opt" data-right data-fb="Right. RAG failures split into two independent causes: the agent did not find the right docs (retrieval), or it found them but answered poorly (generation). Localize before you fix.">Measure retrieval and generation separately - the fault could be in either</button>
+  <button class="dx-quiz-opt" data-right data-fb="Inspect what the agent actually retrieved and how it used that evidence. Also check the source, reference answer, and judge before choosing a fix.">Measure retrieval and generation separately - the fault could be in either</button>
   <button class="dx-quiz-opt" data-fb="That only helps if the cause is missing information (low context recall). If retrieval ranking or generation is the real problem, a bigger knowledge base will not move the score.">Add more documents to the knowledge base</button>
   <button class="dx-quiz-opt" data-fb="A reasonable generation tweak, but it does nothing if the real failure is retrieval - the agent never had the right context to ground on.">Lower the model temperature</button>
 </div>

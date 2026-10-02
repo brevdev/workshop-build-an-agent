@@ -7,14 +7,14 @@ Congratulations, you've now completed the customization pipeline:
 2. ✅ Generated training data (SDG for LangGraph CLI)
 3. ✅ Trained with GRPO (verifiable rewards)
 
-Now you have a **specialized agent**. The training baked LangGraph CLI knowledge directly into the model's weights—it doesn't need to consult tools or documentation to know LangGraph CLI commands.
+The saved model is a candidate **specialized agent**. Use its held-out results to check what improved, and continue reviewing commands before execution.
 
 <!-- fold:break -->
 
 But how do we actually *use* the trained model? The training notebook saved a merged model checkpoint. Now we need to:
 1. **Load the trained model** instead of the generic base model
 2. **Use the right prompt format** — the model was trained with a specific JSON system prompt, and we need to match that at inference time
-3. **Wire up the same HITL execution** — the model is smarter, but safety patterns still apply
+3. **Wire up the same HITL execution** — review commands before running them
 
 <!-- fold:break -->
 
@@ -52,11 +52,11 @@ llm = HuggingFaceLLM(config)
 
 ### Exercise: System Prompt
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Initialize conversation with the JSON system prompt.
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Initialize with the JSON system prompt. Each request produces one CLI translation; after approval, the program shows the command result and returns control to you.
 
 Implement `messages` by creating a `Messages` instance with `config.json_system_prompt`.
 
-This is a subtle but critical detail: the model was trained with `config.json_system_prompt`, which instructs it to produce **structured JSON tool calls**. If you use the generic `config.system_prompt` instead, the model's output format won't match what it learned during GRPO training, and performance will degrade.
+This is a subtle but critical detail: the model was trained with `config.json_system_prompt`, which instructs it to produce **structured JSON tool calls**. If you use the generic `config.system_prompt` instead, the model's output format won't match what it learned during GRPO training, and the format can change; keep the prompt fixed for a fair comparison.
 
 > 💡 **Why this matters**: During training, the system prompt was part of every input. The model learned to produce correct outputs *conditioned on that specific prompt*. Changing the prompt at inference time is like studying for one exam and sitting for a different one.
 
@@ -74,7 +74,7 @@ messages = Messages(config.json_system_prompt)
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'tool_result = bash.exec_bash_command');"><i class="fas fa-code"></i> exec_bash_command</button> — Execute the command after user confirmation.
 
-Even though the trained model is more accurate, the HITL pattern from `bash_agent.md` still applies. A smarter model reduces the frequency of errors but doesn't eliminate them—especially for edge cases outside the training distribution. The `confirm_execution()` function prompts the user before any command runs.
+Whether or not held-out accuracy improves, the HITL pattern from `bash_agent.md` still applies. Training does not guarantee safe commands. The `confirm_execution()` function prompts the user before any command runs.
 
 Implement the execution block: if the user confirms the command, execute it with `bash.exec_bash_command(command)` and store the result in `tool_result`.
 
@@ -109,37 +109,15 @@ python3.12 -m bash_agent.main_hf
 
 ### Test the Customized Agent
 
-Try some of the following commands and compare how the trained agent performs versus the base agent you ran earlier:
-
-<div class="dx-island dx-reveal">
-  <p class="dx-island-title">BEFORE vs AFTER TRAINING</p>
-  <ul>
-    <li><b>List files</b> - both get it right: <code>ls</code> (generic bash was never the gap).</li>
-    <li><b>Create a react agent</b> - base: hallucinated &rarr; trained: <code>langgraph new ./myapp --template react-agent-python</code></li>
-    <li><b>Start dev server on 8080</b> - base: wrong parameters &rarr; trained: <code>langgraph dev --port 8080</code></li>
-    <li><b>Build image tagged v2</b> - base: missing flags &rarr; trained: <code>langgraph build --tag v2</code></li>
-  </ul>
-</div>
-
-Notice that generic bash commands (like `ls`) work the same — GRPO training added LangGraph expertise without destroying existing capabilities. This is because GRPO's exploration-based learning reinforces correct patterns rather than overwriting the model's knowledge wholesale.
+Try requests such as *“Create a react-agent project in ./myapp”*, *“Start the dev server on8080”*, and *“Build an image tagged v2”*. Check the proposed JSON and command before approving. Training can introduce regressions in generic Bash behavior too.
 
 <!-- fold:break -->
 
 ## Measuring the Improvement
 
-The reward function you built for GRPO training doubles as an evaluation metric. Run your validation set against both the base and trained models to quantify the improvement:
+Open `outputs/grpo_langgraph_cli/held_out_comparison.json`, written by the training notebook. It compares the **same local9B model before and after training** on untouched validation rows, using the same JSON prompt, greedy decoding, token budget and verifier. Compare exact-match rate and inspect the saved failures; an improvement is a result to measure, not a promise.
 
-<div class="dx-island dx-reveal">
-  <p class="dx-island-title">BASE vs TRAINED ON THE HELD-OUT SET (ILLUSTRATIVE)</p>
-  <div class="dx-gauges">
-    <div class="dx-gauge" data-pct="95"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>JSON Format</b><br>30% &rarr; 95%</p></div>
-    <div class="dx-gauge" data-pct="90"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Command Correct</b><br>10% &rarr; 90%</p></div>
-    <div class="dx-gauge" data-pct="85"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Flag Accuracy</b><br>5% &rarr; 85%</p></div>
-    <div class="dx-gauge" data-pct="90"><div class="dx-gauge-ring">0%</div><p class="dx-gauge-label"><b>Mean Reward</b><br>0.15 &rarr; 0.90</p></div>
-  </div>
-</div>
-
-This closes the loop with Module 3: the same evaluation mindset applies, but now your reward function provides **objective, automated scoring** rather than relying on an LLM judge.
+The hosted starter agent uses a different model and tool setup, so its chat demonstrations are not a fair training baseline. This carries Module3's evaluation approach into customization. The verifier checks labels, not whether running a command is safe.
 
 <!-- fold:break -->
 
@@ -150,7 +128,7 @@ If the trained model still makes mistakes, apply the iterative improvement cycle
 1. **Analyze failure patterns** — Which commands or flags fail most? The `/verify` response breaks out `command_correct` and `flag_accuracy` (and whether the output parsed as valid JSON at all), so you can pinpoint weak spots.
 2. **Generate targeted data** — SDG can oversample weak areas. If `dockerfile` commands have low accuracy, generate more examples with diverse `output_path` values so the reward signal on that command is denser.
 3. **Refine the reward signal** — the reward is *gate-then-grade* (invalid JSON or wrong command → −1; otherwise `(correct − wrong − extra) / total_flags`), so there are no weights to tune. If the model gets commands right but flags wrong, extend `score_cli_output`'s flag normalization (e.g. treat equivalent flag spellings as matches) or add more of those flag combinations to the training data.
-4. **Train longer** — 50 steps is a starting point. Extending to 100-200 steps often improves edge case handling.
+4. **Check training length** — 50 steps is a starting point. Try more steps only if held-out performance improves; longer runs can overfit.
 
 The pattern is always: **measure → diagnose → fix → retrain → re-measure**.
 
@@ -160,7 +138,7 @@ The pattern is always: **measure → diagnose → fix → retrain → re-measure
 
 <img src="_static/robots/finish.png" alt="Finish Line" style="float:right;max-width:250px;margin:15px;" />
 
-Training is powerful, but it's not the only way to customize an agent — and it's not always the right one. A well-prompted agent with the right tools solves most problems. Training fills the gap when the model fundamentally doesn't understand your domain, and no amount of prompting or tooling can bridge that gap. In practice, the best agents combine all of these: good prompts set the baseline, tools extend reach, training deepens expertise, and evaluation tells you when to invest in each.
+Prompts, tools, and training offer different ways to improve an agent. Use held-out results to decide which change helps, and check for regressions as well as gains.
 
 Congratulations! You've completed the Agent Customization module. Let's recap what you've accomplished. 
 
@@ -169,12 +147,12 @@ Congratulations! You've completed the Agent Customization module. Let's recap wh
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">WHAT YOU LEARNED</p>
   <ul>
-    <li><b>Why customize</b> - training beats Skills/MCP for depth; use both for breadth + depth.</li>
+    <li><b>Why customize</b> - training, prompts, and tools are complementary; measure which helps.</li>
     <li><b>The pipeline</b> - SDG to GRPO to deployment is a repeatable pattern.</li>
-    <li><b>Synthetic data</b> - schema-driven generation ensures coverage, diversity, and validity.</li>
-    <li><b>Verifiable rewards</b> - code-based verification is faster and more consistent than LLM judges.</li>
-    <li><b>GRPO training</b> - exploration-based learning discovers better solutions than imitation.</li>
-    <li><b>Safe execution</b> - allowlists and human-in-the-loop protect against dangerous commands.</li>
+    <li><b>Synthetic data</b> - samplers control the request space; schemas and label checks catch different errors.</li>
+    <li><b>Verifiable rewards</b> - code can check exact criteria, but only the criteria you define.</li>
+    <li><b>GRPO training</b> - relative rewards guide updates; measure whether they improve held-out tasks.</li>
+    <li><b>Reviewed execution</b> - check commands before approving them; the name allowlist is not a filesystem sandbox.</li>
   </ul>
 </div>
 
@@ -211,7 +189,7 @@ Each module in this workshop so far introduced a different customization lever w
   <div class="dx-cell"><h4>MODULE 4</h4>Customize through training - agent expertise. <span class="dx-chip">Training</span></div>
 </div>
 
-This is the same cycle production teams follow: build, extend, measure, improve. Each module's skills compound—evaluation informs customization, customization produces measurable improvement, and the cycle continues.
+This is the same cycle production teams follow: build, extend, measure, improve. Each module's skills compound—evaluation informs customization, customization is tested for measurable improvement, and the cycle continues.
 
 <!-- fold:break -->
 
@@ -219,7 +197,7 @@ This is the same cycle production teams follow: build, extend, measure, improve.
 
 **Immediate extensions:**
 - Expand SDG to cover more commands and edge cases
-- Increase training steps for better performance
+- Compare training lengths on held-out tasks
 - Add more sophisticated reward components
 
 **Production considerations:**
@@ -228,7 +206,7 @@ This is the same cycle production teams follow: build, extend, measure, improve.
 - Plan retraining schedule as CLI evolves
 
 **Advanced topics:**
-- Multi-turn conversations with trained models
+- Extending a single-request translator to multi-turn conversations
 - Combining Skills + trained models for breadth + depth
 - Distillation from larger models to smaller ones
 

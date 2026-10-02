@@ -1,8 +1,8 @@
 # ============================================================================
 # DELIBERATELY WEAK OpenShell Policy — For Exercise 1 Validation Testing
 # ============================================================================
-# This policy contains THREE intentional security violations.
-# Your job in Exercise 1 is to write a validator that catches all of them.
+# This policy contains TWO intentional security violations.
+# The supplied validator catches both before running probes.
 #
 # Format follows the OpenShell Policy Schema Reference:
 #   https://docs.nvidia.com/openshell/latest/reference/policy-schema
@@ -17,8 +17,8 @@ filesystem_policy:
     - /lib
   read_write:
     - /                          # VIOLATION 2: Write access to entire filesystem
-    - /tmp                       #   The agent can overwrite ANY file on the system,
-                                 #   including /etc/passwd, /usr/bin, and system configs.
+    - /tmp                       #   The policy permits writes across the filesystem;
+                                 #   normal filesystem permissions still apply.
 
 landlock:
   compatibility: best_effort
@@ -28,6 +28,5 @@ process:
   run_as_group: "root"           #   Agents must NEVER run as root — a compromised
                                  #   agent with root access owns the entire system.
 
-# VIOLATION 3: No network_policies section defined.
-# Without network policies, the agent can reach ANY endpoint on the internet,
-# exfiltrate data, download malicious payloads, or phone home to a C2 server.
+# No network allow rules: OpenShell denies outbound destinations by default.
+network_policies: {}

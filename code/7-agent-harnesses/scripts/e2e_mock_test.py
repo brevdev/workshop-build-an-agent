@@ -96,28 +96,28 @@ def run_test():
     if not (0 < tax["minimal"] < 1500 and tax["maximal"] > tax["minimal"] * 4):
         fail(f"Ex2 tax numbers implausible: {tax}")
     skills_dir = workdir / "skills"
-    (skills_dir / "demo_skill").mkdir(parents=True)
-    (skills_dir / "demo_skill" / "SKILL.md").write_text(
-        "---\nname: demo_skill\ndescription: A demo skill for testing\n---\n\n# Demo\n\nBody here.\n"
+    (skills_dir / "demo-skill").mkdir(parents=True)
+    (skills_dir / "demo-skill" / "SKILL.md").write_text(
+        "---\nname: demo-skill\ndescription: A demo skill for testing\n---\n\n# Demo\n\nBody here.\n"
     )
     index_text, load_skill = answers.load_skills_lazily(skills_dir)
-    if "demo_skill" not in index_text:
+    if "demo-skill" not in index_text:
         fail("Ex2 lazy index missing authored skill")
-    body = load_skill.invoke({"name": "demo_skill"})
+    body = load_skill.invoke({"name": "demo-skill"})
     if "Body here." not in body:
         fail("Ex2 load_skill did not return the full body")
     print("✅ Ex2: tax measured, lazy index 1-line/skill, on-demand body load works")
 
-    # ---- Ex3: example dataset_profiler skill loads --------------------------
-    example = Path(answers.SKILLS_DIR) / ".examples" / "dataset_profiler" / "SKILL.md"
+    # ---- Ex3: example dataset-profiler skill loads --------------------------
+    example = Path(answers.SKILLS_DIR) / ".examples" / "dataset-profiler" / "SKILL.md"
     meta = answers.parse_frontmatter(example.read_text())
-    if meta["name"] != "dataset_profiler":
+    if meta["name"] != "dataset-profiler":
         fail("Ex3 example skill frontmatter broken")
     print("✅ Ex3: example skill parses; format matches the loader contract")
 
     # ---- Ex5: self-evolution round trip -------------------------------------
     fake_skill = (
-        "---\nname: null_check_procedure\ndescription: Check a CSV for nulls and duplicates\n---\n\n"
+        "---\nname: null-check-procedure\ndescription: Check a CSV for nulls and duplicates\n---\n\n"
         "# Null Check\n\n1. Load the CSV\n2. df.isna().sum()\n3. df.duplicated().sum()\n4. Report one sentence.\n"
     )
     with patch.object(answers, "ChatNVIDIA", lambda **kw: MockModel([fake_skill])):
@@ -125,7 +125,7 @@ def run_test():
     if not saved.exists():
         fail("Ex5 did not save the authored skill")
     index2, load2 = answers.load_skills_lazily(skills_dir)
-    if "null_check_procedure" not in index2:
+    if "null-check-procedure" not in index2:
         fail("Ex5 evolved skill not picked up by lazy loader on next run")
     print("✅ Ex5: agent-authored skill validated, saved, and indexed on next run")
 

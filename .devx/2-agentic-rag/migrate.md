@@ -2,14 +2,14 @@
 
 [NVIDIA's API Catalog](https://build.nvidia.com) is an excellent resource for discovering and evaluating many different Generative AI models. There is a wide breadth of available models, and getting started is free.
 
-These APIs are useful for fast starts and experiments. However, for the unlimited performance and control needed in production, deploy models locally with NVIDIA NIM microservice containers.
+These APIs are useful for fast starts and experiments. Local NVIDIA NIM containers give you deployment control, with throughput limited by hardware, model size, and configuration.
 
 In this exercise, we will run our LLM model locally and transition our code to our private model.
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">API CATALOG vs LOCAL NIM</p>
   <p><span class="dx-chip">API CATALOG</span> Free, instant, and a huge model selection - ideal for fast starts, evaluation, and experiments.</p>
-  <p><span class="dx-chip">LOCAL NIM</span> Unlimited performance, full control, and data privacy - what you want for production. This exercise migrates your LLM to a local NIM container.</p>
+  <p><span class="dx-chip">LOCAL NIM</span> Control over model hosting and data handling. This exercise moves only the chat model: embeddings, reranking, and Tavily still use hosted services until you migrate or disable them too.</p>
 </div>
 
 <!-- fold:break -->
@@ -18,7 +18,7 @@ In this exercise, we will run our LLM model locally and transition our code to o
 
 <img src="_static/robots/relocate.png" alt="Box 'em up and bring 'em home." style="float:right;max-width:300px;margin:25px;" />
 
-Our agent has been running on **Nemotron 3 Super (120B)** through NVIDIA's hosted API Catalog - powerful, and no local GPU required. To run locally, we'll switch to the smaller, more accessible [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b), which fits comfortably on a single GPU. For any model you want to run locally, look for the *Deploy* tab on its API Catalog page for step-by-step container instructions.
+Our agent has been running on **Nemotron 3 Super (120B)** through NVIDIA's hosted API Catalog - powerful, and no local GPU required. To run locally, we'll switch to the smaller, more accessible [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b), whose deployment needs depend on the GPU, precision, and model profile. Check the *Deploy* tab’s supported hardware, container instructions, and memory requirements against the machine’s free memory before starting.
 
 For our model, you can find the relevant details on the [deployment page](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b/deploy), including Docker commands and environment setup.
 
@@ -226,9 +226,9 @@ So far, we've only migrated one of our three models to run locally.
 
 Recall that our agent also uses two additional models:
 
-  - [Reranker: llama-nemotron-rerank-1b-v2](https://build.nvidia.com/nvidia/llama-nemotron-rerank-1b-v2)
-  - [Embedding: llama-nemotron-embed-1b-v2](https://build.nvidia.com/nvidia/llama-nemotron-embed-1b-v2)
+  - [Reranker: llama-nemotron-rerank-vl-1b-v2](https://build.nvidia.com/nvidia/llama-nemotron-rerank-vl-1b-v2)
+  - [Embedding: nemotron-3-embed-1b](https://build.nvidia.com/nvidia/nemotron-3-embed-1b)
 
-If you have access to a second GPU, consider running these models locally as well. You can follow the same process as before: consult the official docs for each model, launch their NIM endpoints, and update your agent code to point to the new local URLs (using the `base_url` parameter).
+Local retrieval also requires supported embedding and reranking deployments. Check each model's deployment availability, GPU profiles, and free memory before running it; configure its endpoint separately with `base_url`.
 
 Running all three models locally will give you full control over your agent's stack and may improve performance. Give it a try!

@@ -70,81 +70,55 @@ code=$(curl -sS -m 15 -o /dev/null -w '%{http_code}' https://files.pythonhosted.
 code=$(python3 -c "import urllib.request,ssl;print(urllib.request.urlopen('https://integrate.api.nvidia.com/v1/models',context=ssl.create_default_context(cafile='$CA'),timeout=15).status)" 2>/dev/null)
 if [ "$code" = "200" ]; then pass "integrate.api.nvidia.com reachable (200)"; else
   failf "integrate.api.nvidia.com blocked (python probe: ${code:-no-response})"
-  ask  "allow the NIM routes on integrate.api.nvidia.com incl. POST /v1/ranking (module-2 reranker) for the python binaries"
+  ask  "allow chat/embedding routes on integrate.api.nvidia.com for the Python binaries"
 fi
 
 # 5. Secrets — NON-BLOCKING by design.
-# NVIDIA_API_KEY is EXPECTED to be absent at setup time: the learner sets it in
-# the workshop's Secrets Manager tile. Leaving it unset at launch is what keeps
-# load_dotenv() authoritative — start-jupyter.sh sources secrets.env into the
-# server env, and load_dotenv() will not override an already-set variable, so a
-# key baked in here would shadow every later Secrets Manager edit until a
-# restart. Absent = correct; do NOT block setup on it.
+# Keys can be entered later in Secrets Manager. Notebook setup reloads saved keys;
+# existing agent processes must restart to load changes.
 if [ -s "$REPO/secrets.env" ] && grep -q '^NVIDIA_API_KEY=' "$REPO/secrets.env" 2>/dev/null; then
   pass "secrets.env carries NVIDIA_API_KEY (contents not read)"
 else
-  warnf "no NVIDIA_API_KEY in $REPO/secrets.env — expected default; the learner sets it in the Secrets Manager tile (no restart needed). Notebook API cells 401 until then."
+  warnf "no NVIDIA_API_KEY in $REPO/secrets.env — add it in Secrets Manager before model calls."
 fi
 
-# 5b. Workshop integration egress (module coverage; 2026-07-21 audit).
-# Key-authenticated where possible for definitive 200s. All four blocks are
-# part of the operator skill's Phase 1 apply — a failure here means policy
-# drift or a missing key, and names exactly which modules degrade.
-if [ -s "$REPO/secrets.env" ]; then
-  set -a; . "$REPO/secrets.env" >/dev/null 2>&1; set +a
-fi
-code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST https://api.tavily.com/search \
-  -H 'Content-Type: application/json' \
-  -d "{\"api_key\":\"${TAVILY_API_KEY:-}\",\"query\":\"ping\",\"max_results\":1}" 2>/dev/null)
-if [ "$code" = "200" ]; then pass "api.tavily.com POST /search: 200 (modules 1/2/5 web search)"
-elif [ "$code" = "401" ] || [ "$code" = "422" ] || [ "$code" = "432" ]; then
-  # A 4xx FROM Tavily proves the request traversed the proxy — the
-  # tavily_search policy block is LIVE; only the key is missing/invalid.
-  # Do NOT report this as a policy gap to the operator.
-  warnf "api.tavily.com POST /search: HTTP $code — route OPEN, TAVILY_API_KEY missing/invalid (expected default; the learner sets it in the Secrets Manager tile). Search flows (modules 1/2/5) degrade to no-search output until then."
-else
-  warnf "api.tavily.com POST /search: HTTP ${code:-000} — route BLOCKED at the proxy; module-1 docgen, module-2 web_search, module-5 search degrade to no-search output"
-  ask  "add the tavily_search policy block (POST /search + /extract on api.tavily.com; see operator skill policy-blocks.md) and stage TAVILY_API_KEY in secrets.env"
-fi
-code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' https://api.smith.langchain.com/info \
-  -H "x-api-key: ${LANGSMITH_API_KEY:-}" 2>/dev/null)
-if [ "$code" = "200" ]; then pass "api.smith.langchain.com /info: 200 (tracing + module 3)"; else
-  warnf "api.smith.langchain.com /info: HTTP ${code:-000} — EVERY notebook spams tracing retry errors (variables.env sets LANGSMITH_TRACING=true) and module-3 tracing lessons are dark"
-  ask  "add the langsmith_api policy block (all methods on api.smith.langchain.com) and stage LANGSMITH_API_KEY in secrets.env"
-fi
-code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -r 0-64 \
-  "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken" 2>/dev/null)
-if [ "$code" = "200" ] || [ "$code" = "206" ]; then pass "tiktoken BPE host reachable (module 7)"; else
-  warnf "openaipublic.blob.core.windows.net: HTTP ${code:-000} — module-7 harness_lab dies at tiktoken.get_encoding (log shows the real ProxyError only in the raised chain)"
-  ask  "add the tiktoken_encodings policy block (GET /encodings/** on openaipublic.blob.core.windows.net)"
-fi
-# npm registry — module-5 "Deep Agents Client" tile. Probe with node, NOT curl:
-# the npm_install block scopes egress to /usr/local/bin/node, so a curl probe
-# reports a false negative (denied on the binary, not on the host).
+# 5b. Reachability only: capability and credential checks run in Workshop Health
+# after setup. Keep keys out of subprocess arguments and diagnostics.
+python3 - "$CA" <<'PY_CHECK'
+import ssl, sys, urllib.error, urllib.request
+context = ssl.create_default_context(cafile=sys.argv[1])
+warning = False
+for name, url, data in (
+    ("Tavily search", "https://api.tavily.com/search", b"{}"),
+    ("Tavily MCP", "https://mcp.tavily.com/mcp/", b"{}"),
+    ("Optional LangSmith", "https://api.smith.langchain.com/info", None),
+    ("Token encodings", "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken", None),
+):
+    try:
+        request = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(request, context=context, timeout=15) as response:
+            status = response.status
+    except urllib.error.HTTPError as error:
+        status = error.code
+    except OSError:
+        status = None
+    if status is None or status == 403:
+        warning = True
+        print(f"  WARN  {name}: check the network, proxy CA and Python egress rules.")
+    else:
+        print(f"  PASS  {name}: reached HTTP {status}; this does not test credentials or model capability.")
+sys.exit(1 if warning else 0)
+PY_CHECK
+[ "$?" -eq 0 ] || warn=1
+# The frontend downloads through Node, whose egress is checked separately.
 if command -v node >/dev/null 2>&1; then
   code=$(node -e 'const h=require("https");const r=h.get("https://registry.npmjs.org/react",x=>{console.log(x.statusCode);x.destroy();});r.on("error",()=>console.log("000"));r.setTimeout(20000,()=>{console.log("000");r.destroy();});' 2>/dev/null | tail -1)
   if [ "$code" = "200" ]; then pass "registry.npmjs.org reachable via node (module-5 client)"; else
-    warnf "registry.npmjs.org: HTTP ${code:-000} — demo/ cannot npm install, so the Deep Agents Client tile only serves its setup page"
-    ask  "add the npm_install policy block (GET /** on registry.npmjs.org, binary /usr/local/bin/node)"
-  fi
-  # Tavily remote MCP host (module-2 PART 2A). GET /mcp/ answers 405 (the
-  # endpoint wants POST) — 405 proves reachability, which is what we're testing.
-  code=$(node -e 'const h=require("https");const r=h.get("https://mcp.tavily.com/mcp/",x=>{console.log(x.statusCode);x.destroy();});r.on("error",()=>console.log("000"));r.setTimeout(20000,()=>{console.log("000");r.destroy();});' 2>/dev/null | tail -1)
-  if [ "$code" != "000" ] && [ -n "$code" ]; then pass "mcp.tavily.com reachable via node (module-2 PART 2A, HTTP $code)"; else
-    warnf "mcp.tavily.com: unreachable — module-2 PART 2A web_search dies at 'getaddrinfo EAI_AGAIN' after ~70s"
-    ask  "add the mcp_tavily policy block (GET/POST/DELETE on mcp.tavily.com, binary /usr/local/bin/node)"
+    warnf "registry.npmjs.org: HTTP ${code:-000} — the client frontend needs its build dependencies"
+    ask "check the npm_install policy block for /usr/local/bin/node"
   fi
 fi
-if [ -n "${NVIDIA_API_KEY:-}" ]; then
-  code=$(curl -sS -m 25 -o /dev/null -w '%{http_code}' -X POST \
-    "https://ai.api.nvidia.com/v1/retrieval/nvidia/llama-nemotron-rerank-1b-v2/reranking" \
-    -H "Authorization: Bearer $NVIDIA_API_KEY" -H 'Content-Type: application/json' \
-    -d '{"model":"nvidia/llama-nemotron-rerank-1b-v2","query":{"text":"ping"},"passages":[{"text":"pong"}]}' 2>/dev/null)
-  if [ "$code" = "200" ]; then pass "ai.api.nvidia.com reranking: 200 (modules 2/3 retriever)"; else
-    warnf "ai.api.nvidia.com reranking: HTTP ${code:-000} — NVIDIARerank (modules 2/3) fails. NOTE: the integrate.api.nvidia.com /v1/ranking rule does NOT cover llama-nemotron-rerank-1b-v2"
-    ask  "add the nvidia_retrieval policy block (POST /v1/retrieval/** on ai.api.nvidia.com)"
-  fi
-fi
+printf '  INFO  After setup, open Workshop Utilities → Workshop Health and run endpoint checks.\n'
 
 # 6. Port 8888
 if curl -s -m 3 -o /dev/null "http://127.0.0.1:$PORT/"; then

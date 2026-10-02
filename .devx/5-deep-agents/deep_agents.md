@@ -2,7 +2,7 @@
 
 **Deep agents** are AI agents equipped with planning tools, file system access, shell execution, and sub-agent spawning, operating through an autonomous reasoning loop to handle complex, multi-step tasks. They use the same LLM-in-a-loop foundation as the ReAct agents you built in earlier modules, but with a **middleware pipeline** around every interaction.
 
-**The result?** Agents that can reliably operate across hundreds of steps and extended time horizons — from minutes to hours — where shallow agents would lose focus, overflow their context, or fail to recover from mistakes.
+**The result?** Agents with explicit support for longer tasks. Reliability still depends on the model, tools, context budget and evaluation.
 
 In this section, we'll first explore the conceptual framework — the "four pillars" that make deep agents work — and then look at how the deepagents library implements them.
 
@@ -10,7 +10,7 @@ In this section, we'll first explore the conceptual framework — the "four pill
 
 ## The Four Pillars
 
-Deep agents enhance the ReAct loop with four architectural pillars. Each one addresses a specific limitation of shallow agents.
+Deep agents enhance the ReAct loop with four architectural pillars. Each addresses a common coordination or context-management need.
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>PILLAR 1</h4><span class="dx-big">Planning</span>Explicit plan documents the agent reviews and updates between steps.</div>
@@ -116,9 +116,9 @@ This is what enables deep agents to work on tasks that span hundreds of steps. T
 
 | | Shallow Agent | Deep Agent |
 |---|---|---|
-| **Where state lives** | Context window | Files, databases, plan documents |
-| **What happens at step 50** | Context overflows, early state lost | Agent reads relevant files on demand |
-| **Cross-session memory** | None — starts fresh each time | Files and databases persist knowledge |
+| **Where state lives** | Context plus any configured stores | Context plus configured files, stores and plans |
+| **When context fills** | Requires a context-management strategy | Summarizes and reads saved results; can still lose details |
+| **Cross-session memory** | Depends on storage and checkpoints | Also depends on storage; this demo checkpoint is in memory |
 
 <!-- fold:break -->
 
@@ -142,7 +142,7 @@ A deep research agent might have skill instructions like:
 
 > "When researching a topic, first create a plan document with 3-7 sub-topics. For each sub-topic, spawn a researcher sub-agent with web search tools. If a sub-agent returns fewer than 3 relevant sources, expand the search query and retry once. If the retry also fails, mark the sub-topic as 'insufficient data' in the plan and proceed. After all sub-agents complete, synthesize results into a structured report with citations. If any section has fewer than 2 citations, flag it for human review."
 
-This level of detail is what separates a deep agent from a shallow one using the same model. The model's capabilities are identical — the difference is in the instructions.
+Any agent can use detailed skills; this library combines them with planning, delegation and context support. The model's capabilities are identical — the difference is in the instructions.
 
 </div>
 </div>
@@ -157,13 +157,13 @@ Here's a comprehensive comparison of the two architectures:
 |-----------|--------------|------------|
 | **Planning** | Implicit (chain-of-thought) | Explicit (plan documents) |
 | **Delegation** | Single agent does everything | Orchestrator + specialized sub-agents |
-| **Memory** | Context window only | File system + external stores |
-| **System Prompt** | Brief instructions | Detailed skills with protocols |
-| **Task Horizon** | 5-15 steps | 10-100+ steps |
-| **Error Recovery** | Retry or fail | Adapt strategy, try alternatives |
+| **Memory** | Context and optional external stores | Explicit file/store workflow |
+| **System Prompt** | Task-dependent instructions | Task-dependent instructions and reusable skills |
+| **Task Horizon** | Depends on the task and limits | Often longer; no fixed step threshold |
+| **Error Recovery** | Can retry, revise or stop | Can retry, revise or delegate |
 | **Best For** | Focused, short tasks | Complex, multi-step workflows |
 
-The key insight: deep agents don't replace shallow agents. They **extend** them. A deep agent's sub-agents are themselves shallow agents — focused, single-loop executors. The deep agent architecture adds the coordination layer that lets them work together on larger problems.
+The key insight: deep agents don't replace shallow agents. They **extend** them. Subagents can be focused loops or more structured agents of their own. The deep agent architecture adds the coordination layer that lets them work together on larger problems.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-deep_agents-4">Where do the agents you built fit?</button>
@@ -304,7 +304,7 @@ To see how the four pillars work in concert, consider a deep research task: "Ana
 3. **Persistent Memory** — Each researcher writes findings to files; the orchestrator reads them for synthesis
 4. **Agent Skills** — Detailed instructions load dynamically to tell each researcher how many sources to gather, what format to use, and how to handle conflicting information
 
-No single pillar is sufficient on its own — together, they enable reliable autonomous operation at a scale shallow agents can't reach.
+Combine the capabilities your task needs, then evaluate whether their benefit justifies the extra calls and complexity.
 
 Now let's see how the **deepagents library** implements these pillars.
 

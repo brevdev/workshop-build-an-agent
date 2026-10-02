@@ -7,6 +7,6 @@ __pycache__/
 # ignore everything but the shipped examples.
 skills/*
 !skills/README.md
-!skills/code_review/
-!skills/technical_writing/
+!skills/code-review/
+!skills/technical-writing/
 !skills/.examples/

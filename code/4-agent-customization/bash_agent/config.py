@@ -1,6 +1,13 @@
 import os
+import sys
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import List, Optional
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from workshop_support import get_model, load_secrets
+
+load_secrets()
 
 
 @dataclass
@@ -18,7 +25,7 @@ class Config:
     # -------------------------------------
 
     llm_base_url: str = "https://integrate.api.nvidia.com/v1"
-    llm_model_name: str = "nvidia/nvidia-nemotron-nano-9b-v2"
+    llm_model_name: str = field(default_factory=lambda: get_model("fast_chat"))
     llm_api_key: str = field(default_factory=lambda: os.environ.get("NVIDIA_API_KEY", ""))
     
     # Sampling parameters (reduced temperature for deterministic outputs)
@@ -52,7 +59,7 @@ class Config:
     # Agent configuration
     # -------------------------------------
 
-    # The directory path that the agent can access and operate in
+    # Initial working directory; this is not a filesystem sandbox.
     root_dir: str = field(default_factory=lambda: os.path.dirname(os.path.abspath(__file__)))
 
     # The list of commands that the agent can execute.
@@ -97,7 +104,7 @@ ALWAYS load the relevant skill first and follow its instructions.
 
 ## Bash Commands
 
-You are only allowed to execute the following commands. Break complex tasks into shorter commands from this list:
+Execute one command at a time from this list. Shell operators, pipes, and redirections are not supported:
 
 ```
 {self.allowed_commands}

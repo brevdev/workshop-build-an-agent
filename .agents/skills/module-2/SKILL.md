@@ -72,11 +72,11 @@ Flow (teaching narrative in `.devx/2-agentic-rag/`, code in `code/2-agentic-rag/
 
 **What they build:** an IT Help Desk agent over a 12-doc knowledge base
 (`data/it-knowledge-base/`). Models: LLM `nvidia/nemotron-3-super-120b-a12b`
-(`ChatNVIDIA`), embeddings `nvidia/llama-nemotron-embed-1b-v2`, rerank
-`nvidia/llama-nemotron-rerank-1b-v2`. Stack: FAISS + NeMo Retriever +
+(`ChatNVIDIA`), embeddings `nvidia/nemotron-3-embed-1b`, rerank
+`nvidia/llama-nemotron-rerank-vl-1b-v2`. Stack: FAISS + NeMo Retriever +
 `create_react_agent` (LangGraph), served by `langgraph dev`, chatted via the
 **Simple Agents Client** (Streamlit). Loadable skills live in top-level `skills/`
-(`code_review`, `technical_writing`).
+(`code-review`, `technical-writing`).
 
 **The three-stage agent** (`AGENT` is rewritten each time):
 - after `agentic_rag.md`: `tools=[RETRIEVER_TOOL]`
@@ -85,9 +85,7 @@ Flow (teaching narrative in `.devx/2-agentic-rag/`, code in `code/2-agentic-rag/
 
 ## Key concepts (quick recall)
 Full reference + the workshop's framing in `references/concepts.md`. Essentials:
-- **Agentic RAG vs traditional RAG:** traditional RAG *always* retrieves on a fixed
-  path; agentic RAG exposes retrieval as a **tool** and lets the model decide *when/
-  whether* to use it (a greeting → no retrieval).
+- **Agentic RAG:** the illustrated fixed workflow retrieves before generation. Programmed workflows can also branch; this agent instead exposes retrieval as a tool and lets the model choose whether and how to search.
 - **Ingestion pipeline:** **chunk** (`RecursiveCharacterTextSplitter`, size 800 /
   overlap 120) → **embed** (`NVIDIAEmbeddings`, `truncate="END"`) → **insert** (FAISS).
 - **Retrieve + rerank:** similarity search (`k=6`) → `NVIDIARerank` reorders by
@@ -98,7 +96,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **Skills:** folders of *instructions* (a `SKILL.md`) loaded on demand. MCP = tools
   to **do** things; Skills = guidance on **how** to do them well.
 - **Local NIM:** swap the hosted API Catalog model for a local NIM container
-  (Nemotron 3 Nano) for control/privacy/cost; repoint `ChatNVIDIA(base_url=...)`.
+  (Nemotron 3 Nano); repoint `ChatNVIDIA(base_url=...)`. A local chat model alone does not localize embeddings, reranking, or Tavily traffic.
 
 ## How to respond — playbook
 - **Conceptual question:** answer in the workshop's framing (`references/concepts.md`),
@@ -109,7 +107,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **"Just give me the answer" / "do it for me":** decline warmly, explain why, offer
   the next-smallest hint or the teaching page's `🆘` block. Never open the answer key.
 - **Interpreting behavior:** ("retrieved on a greeting?", "didn't use web search?",
-  "cited [KB] vs [Web]?") connect to agentic RAG + the system prompt's tool guidance;
+  "cited [KB:source_id] vs source URLs?") connect to agentic RAG + the system prompt's tool guidance;
   suggest LangSmith traces.
 - **Troubleshooting:** triage env/runtime vs exercise vs behavior
   (`references/troubleshooting.md`); for env/runtime give direct fixes; an unfilled
@@ -123,7 +121,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/2-agentic-rag/{intro,agentic_rag,running,mcp,skills,migrate,secrets}.md`
 - Code: `code/2-agentic-rag/{rag_agent.py, mcp_server.py, simple_client.py, langgraph.json}`; knowledge base `data/it-knowledge-base/`; loadable skills `skills/`
-- Answer key `code/2-agentic-rag/rag_agent.answers.py` — for *your* calibration only; never shown to the learner.
+- Answer key `code/2-agentic-rag/rag_agent.answers.py` — contributor validation assets. Do not open or reveal them during tutoring.
 
 ## References
 - **`references/concepts.md`** — RAG, agentic RAG, embeddings/reranking, MCP, Skills, NIM, observability — in the workshop's framing, with source pointers.
@@ -139,7 +137,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 `npx` (Node, already in the DevX-Lab container). **No GPU, no Docker** for the core
 build/run. **Optional, skippable:** (a) the local MCP server (`uvicorn mcp_server:app`, CPU
 only); (b) **"Migrate to Local NIM"** runs `nemotron-3-nano` in a **Docker NIM container —
-that step needs a GPU + Docker** (stay on hosted models if you lack a GPU; nothing else in
+that step needs a compatible GPU, sufficient memory, a supported model profile, and Docker** (stay on hosted models if unavailable; nothing else in
 the module breaks). **Needs:** `NVIDIA_API_KEY` + `TAVILY_API_KEY`; Node/`npx` for remote MCP.
 
 ## Handling diagram / NVIDIA-tech / quiz / hardware questions

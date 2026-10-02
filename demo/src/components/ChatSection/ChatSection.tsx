@@ -15,7 +15,7 @@ interface TraceItem {
   id: string;
   name: string;
   icon: string;
-  status: 'running' | 'done';
+  status: 'running' | 'done' | 'error';
   duration?: number;
 }
 
@@ -39,6 +39,16 @@ function formatTokens(count: number): string {
   return count >= 1000 ? `${(count / 1000).toFixed(1)}k` : String(count);
 }
 
+function streamIdleTimeout(controller: AbortController) {
+  let timeout: ReturnType<typeof setTimeout>;
+  const refresh = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => controller.abort(), 120000);
+  };
+  refresh();
+  return { refresh, clear: () => clearTimeout(timeout) };
+}
+
 export function ChatSection({ isVisible, skills, onReset, sessionId, model }: ChatSectionProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -55,6 +65,9 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
   const interruptRef = useRef<boolean>(false); // ref copy for capturing into messages
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const streamRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => streamRef.current?.abort(), []);
 
   // Greeting on first show
   useEffect(() => {
@@ -136,12 +149,14 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
     interruptRef.current = false;
     setPendingInterrupt(null);
 
-    // Timeout: abort after 60s
+    // Allow long turns while the agent is still sending progress.
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000);
+    streamRef.current = controller;
+    const timeout = streamIdleTimeout(controller);
 
     try {
       await sendMessage(sessionId, currentInput, (event) => {
+        timeout.refresh();
         switch (event.type) {
           case 'token':
             rawContent += event.content;
@@ -185,7 +200,7 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
               tc.id === event.id
                 ? {
                     ...tc,
-                    status: 'success' as const,
+                    status: event.status,
                     endTime: new Date(),
                     duration: event.duration,
                     output: event.output,
@@ -197,7 +212,7 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
             // Update inline trace (state + ref)
             tracesRef.current = tracesRef.current.map(t =>
               t.id === event.id
-                ? { ...t, status: 'done' as const, duration: event.duration }
+                ? { ...t, status: event.status === 'error' ? 'error' as const : 'done' as const, duration: event.duration }
                 : t
             );
             setActiveTraces(tracesRef.current);
@@ -228,14 +243,12 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
       }, controller.signal);
     } catch (err) {
       console.error('[Chat] Stream error:', err);
-      const errorMsg = err instanceof Error ? err.message : 'Connection failed';
-      if (controller.signal.aborted && !fullContent) {
-        fullContent = '⚠️ Request timed out after 60 seconds. The backend may be overloaded — try again.';
-      } else {
-        fullContent = fullContent || `⚠️ Could not reach the agent backend.\n\n${errorMsg}`;
-      }
+      fullContent += controller.signal.aborted
+        ? '\n\n⚠️ No updates for 2 minutes. Check the backend terminal before retrying.'
+        : '\n\n⚠️ Connection lost. Check the backend terminal before retrying.';
     } finally {
-      clearTimeout(timeout);
+      timeout.clear();
+      if (streamRef.current === controller) streamRef.current = null;
     }
 
     // If interrupted, keep typing state — we'll resume after approval
@@ -249,7 +262,9 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
     }
 
     // Capture traces from ref (always up-to-date, unlike state)
-    const finalTraces = tracesRef.current.map(t => ({ ...t, status: 'done' as const }));
+    const finalTraces = tracesRef.current.map(t => ({ ...t, status: t.status === 'running' ? 'error' as const : t.status }));
+    setToolCalls(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'error' as const } : t));
+    setActiveToolId(null);
     setMessages(prev => [...prev, {
       id: `agent-${Date.now()}`,
       role: 'agent',
@@ -273,10 +288,12 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
     let rawContent = '';
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000);
+    streamRef.current = controller;
+    const timeout = streamIdleTimeout(controller);
 
     try {
       await sendApproval(sessionId, decision, (event) => {
+        timeout.refresh();
         switch (event.type) {
           case 'token':
             rawContent += event.content;
@@ -296,9 +313,9 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
             break;
           }
           case 'tool_end':
-            setToolCalls(prev => prev.map(tc => tc.id === event.id ? { ...tc, status: 'success' as const, endTime: new Date(), duration: event.duration, output: event.output } : tc));
+            setToolCalls(prev => prev.map(tc => tc.id === event.id ? { ...tc, status: event.status, endTime: new Date(), duration: event.duration, output: event.output } : tc));
             setActiveToolId(null);
-            tracesRef.current = tracesRef.current.map(t => t.id === event.id ? { ...t, status: 'done' as const, duration: event.duration } : t);
+            tracesRef.current = tracesRef.current.map(t => t.id === event.id ? { ...t, status: event.status === 'error' ? 'error' as const : 'done' as const, duration: event.duration } : t);
             setActiveTraces(tracesRef.current);
             break;
           case 'usage':
@@ -323,22 +340,26 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
       }, undefined, controller.signal);
     } catch (err) {
       console.error('[Chat] Approval stream error:', err);
+      fullContent += '\n\n⚠️ Could not confirm the approval request. Check the backend terminal before retrying.';
     } finally {
-      clearTimeout(timeout);
+      timeout.clear();
+      if (streamRef.current === controller) streamRef.current = null;
     }
 
     // If another interrupt fired, don't finalize
     if (interruptRef.current) return;
 
     // Finalize
-    const finalTraces = tracesRef.current.map(t => ({ ...t, status: 'done' as const }));
+    const finalTraces = tracesRef.current.map(t => ({ ...t, status: t.status === 'running' ? 'error' as const : t.status }));
+    setToolCalls(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'error' as const } : t));
+    setActiveToolId(null);
     if (decision === 'reject') {
       fullContent = fullContent || '🚫 Tool execution was rejected by the user.';
     }
     setMessages(prev => [...prev, {
       id: `agent-${Date.now()}`,
       role: 'agent',
-      content: fullContent || '✅ Done.',
+      content: fullContent || 'The turn ended without a reply. Check the tool results.',
       timestamp: new Date(),
       traces: finalTraces.length > 0 ? finalTraces : undefined,
     }]);
@@ -395,14 +416,11 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
                   <button
                     className="export-btn"
                     onClick={() => setShowExportModal(true)}
-                    disabled={sessionTokens.total === 0}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
+                      <path d="M8 4H5v17h14V4h-3M8 2h8v4H8zM8 11h8M8 16h5" />
                     </svg>
-                    Export
+                    Session summary
                   </button>
                 </div>
               </div>
@@ -425,10 +443,10 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
                       {message.traces && message.traces.length > 0 && (
                         <div className="tool-traces saved">
                           {message.traces.map((trace) => (
-                            <div key={trace.id} className="tool-trace done">
+                            <div key={trace.id} className={`tool-trace ${trace.status}`}>
                               <span className="trace-icon">{trace.icon}</span>
                               <span className="trace-name">{trace.name}</span>
-                              <span className="trace-check">✓</span>
+                              <span className="trace-check">{trace.status === 'done' ? 'Completed' : 'Failed'}</span>
                               {trace.duration !== undefined && (
                                 <span className="trace-duration">{trace.duration}ms</span>
                               )}
@@ -451,6 +469,9 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
                   {pendingInterrupt && (
                     <motion.div
                       className="approval-prompt"
+                      role="region"
+                      aria-label="Tool approval"
+                      aria-live="polite"
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
@@ -501,7 +522,7 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
                           {trace.status === 'running' ? (
                             <span className="trace-spinner" />
                           ) : (
-                            <span className="trace-check">✓</span>
+                            <span className="trace-check">{trace.status === 'done' ? 'Completed' : 'Failed'}</span>
                           )}
                           {trace.duration !== undefined && (
                             <span className="trace-duration">{trace.duration}ms</span>
@@ -589,6 +610,7 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
                     ref={inputRef}
                     type="text"
                     className="chat-input"
+                    aria-label="Message your Deep Agent"
                     placeholder="Message your Deep Agent..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -597,6 +619,7 @@ export function ChatSection({ isVisible, skills, onReset, sessionId, model }: Ch
                   />
                   <button 
                     className="send-btn"
+                    aria-label="Send message"
                     onClick={() => handleSend()}
                     disabled={!input.trim() || isTyping}
                   >

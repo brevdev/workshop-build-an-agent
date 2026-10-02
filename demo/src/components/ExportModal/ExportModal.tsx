@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import type { ModelDef } from '../../data/models';
@@ -23,14 +23,29 @@ const WORKSHOP_URL = 'https://github.com/brevdev/workshop-build-an-agent';
 const LAUNCHABLE_URL = 'https://brev.nvidia.com/launchable/deploy?launchableID=env-32kC34ErT9wsqTcJyaKMxBEuhr2';
 
 export function ExportModal({ isOpen, onClose, model, skills, sessionTokens, toolCalls }: ExportModalProps) {
-  // Escape key listener
+  const dialogRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const frame = requestAnimationFrame(() => dialogRef.current?.focus());
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'Tab') {
+        const controls = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button, a[href]') ?? []);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+          e.preventDefault(); last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault(); first?.focus();
+        }
+      }
     };
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('keydown', handleKey);
+      previous?.focus();
+    };
   }, [isOpen, onClose]);
 
   // Compute tool breakdown from toolCalls
@@ -64,6 +79,11 @@ export function ExportModal({ isOpen, onClose, model, skills, sessionTokens, too
           {/* Modal */}
           <motion.div
             className="export-modal"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="session-summary-title"
+            tabIndex={-1}
             style={{ x: '-50%', y: '-50%' }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -75,11 +95,12 @@ export function ExportModal({ isOpen, onClose, model, skills, sessionTokens, too
             <div className="export-header">
               <motion.h2
                 className="export-title"
+                id="session-summary-title"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                Session Export
+                Session summary
               </motion.h2>
               <motion.p
                 className="export-subtitle"
@@ -228,6 +249,7 @@ export function ExportModal({ isOpen, onClose, model, skills, sessionTokens, too
             {/* Close button */}
             <motion.button
               className="export-close"
+              aria-label="Close session summary"
               onClick={onClose}
               whileHover={{ scale: 1.15, rotate: 90 }}
               whileTap={{ scale: 0.85 }}

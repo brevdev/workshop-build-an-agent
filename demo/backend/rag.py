@@ -6,6 +6,12 @@ LangChain tool that the Deep Agent can call.
 """
 
 import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "code"))
+from workshop_support import get_model, load_secrets
+load_secrets()
 
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_community.vectorstores import FAISS
@@ -19,8 +25,8 @@ from langchain_core.tools.retriever import create_retriever_tool
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data", "it-knowledge-base")
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
-EMBEDDING_MODEL = "nvidia/llama-nemotron-embed-1b-v2"
-RERANK_MODEL = "nvidia/llama-nemotron-rerank-1b-v2"
+EMBEDDING_MODEL = get_model("embedding")
+RERANK_MODEL = get_model("reranking")
 
 # ── Lazy singleton ────────────────────────────────────────────────────────────
 
@@ -34,8 +40,7 @@ def get_retriever_tool():
         return _retriever_tool
 
     if not os.path.isdir(DATA_DIR):
-        print(f"[RAG] Knowledge base directory not found: {DATA_DIR}")
-        return None
+        raise FileNotFoundError(f"Knowledge base directory not found: {DATA_DIR}")
 
     print("[RAG] Building IT knowledge-base retriever ...")
 

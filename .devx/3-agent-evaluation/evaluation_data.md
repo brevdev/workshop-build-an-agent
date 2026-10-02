@@ -79,7 +79,7 @@ We recommend generating your own datasets using the notebooks above to get hands
 - <button onclick="openOrCreateFileInJupyterLab('data/evaluation/rag_agent_test_cases.json');"><i class="fa-brands fa-python"></i> RAG Agent Test Cases</button> - 12 IT help desk questions across common categories
 - <button onclick="openOrCreateFileInJupyterLab('data/evaluation/report_agent_test_cases.json');"><i class="fa-brands fa-python"></i> Report Agent Test Cases</button> - 6 report topics with quality criteria
 
-These pre-made datasets can also serve as reference examples when you create your own.
+The generators save candidates for review. Inspect each source and reference, record the accepted indices in `reviewed_indices`, and rerun the save cell. Evaluation uses the reviewed subset; until then, it falls back to these starter datasets.
 
 </details>
 

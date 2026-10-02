@@ -453,9 +453,11 @@
 }
 
 .tool-trace.done {
-  border-left-color: var(--accent-color);
-  opacity: 0.7;
+  border-left-color: var(--text-secondary);
 }
+
+.tool-trace.error { border-left-color: #ffba9d; }
+.tool-trace.error .trace-check { color: #ffba9d; }
 
 .trace-icon {
   font-size: 0.9rem;
@@ -482,7 +484,7 @@
 }
 
 .trace-check {
-  color: var(--accent-color);
+  color: var(--text-secondary);
   font-weight: var(--font-bold);
   font-size: var(--text-xs);
 }

@@ -12,6 +12,16 @@
 
 // Helper functions used for jupyter interactions //
 
+async function openExistingFileInJupyterLab(path) {
+    const app = window.parent.jupyterapp;
+    if (!app) return;
+    if (!await checkFileExists(app.serviceManager.contents, path)) {
+        window.alert('This file is not here yet. Run the preceding setup step, then try again.');
+        return;
+    }
+    await openFile(app, path);
+}
+
 async function openOrCreateFileInJupyterLab(path, factory = null, initialContent = '') {
     const app = window.parent.jupyterapp;
     if (!app) {
@@ -20,7 +30,8 @@ async function openOrCreateFileInJupyterLab(path, factory = null, initialContent
     }
 
     // Resolve tilde paths by creating a symlink in the corresponding code/<module>/ directory
-    if (path.startsWith('~/')) {
+    const fromHome = path.startsWith('~/');
+    if (fromHome) {
         path = await resolveTildePath(app, path);
         if (!path) return;
     }
@@ -28,6 +39,11 @@ async function openOrCreateFileInJupyterLab(path, factory = null, initialContent
     const contentsManager = app.serviceManager.contents;
 
     const fileExists = await checkFileExists(contentsManager, path);
+
+    if (!fileExists && fromHome) {
+        window.alert('The workspace file is missing. Finish the OpenClaw setup, then try again.');
+        return;
+    }
 
     if (!fileExists) {
         // Ensure parent directories exist
@@ -295,7 +311,8 @@ async function findLauncherCommand(itemLabel = "Secrets Manager", sectionName = 
 }
 
 
-async function launch(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX Learning Path") {
+async function launch(itemLabel = "Secrets Manager", sectionName = null) {
+    sectionName ??= itemLabel === "Secrets Manager" ? "Workshop Utilities" : "NVIDIA DevX Learning Path";
     const app = window.parent.jupyterapp;
     if (!app) {
         console.error('JupyterLab app is not available on window.jupyterapp');
@@ -308,7 +325,7 @@ async function launch(itemLabel = "Secrets Manager", sectionName = "NVIDIA DevX 
         return;
     }
 
-    app.commands.execute(command);
+    return app.commands.execute(command);
 }
 
 
@@ -338,69 +355,83 @@ async function getModuleDir() {
  * The symlink is created via a hidden terminal session if it doesn't already exist.
  */
 async function resolveTildePath(app, tildePath) {
-    const withoutTilde = tildePath.slice(2); // ".openclaw/workspace/SOUL.md"
-    const parts = withoutTilde.split('/');
-    const fileName = parts.pop(); // "SOUL.md"
-    const dirPath = parts.join('/'); // ".openclaw/workspace"
-    const symlinkName = parts[parts.length - 1] || dirPath.replace(/[\/\.]/g, '-'); // "workspace"
-
-    const moduleDir = await getModuleDir(); // "code/6-agent-safety"
-    const symlinkBase = moduleDir ? moduleDir + '/' + symlinkName : symlinkName;
-    const resolvedPath = symlinkBase + '/' + fileName; // "code/6-agent-safety/workspace/SOUL.md"
-
-    // Check if the file is already accessible through an existing symlink
-    const contentsManager = app.serviceManager.contents;
+    const parts = tildePath.slice(2).split('/');
+    const fileName = parts.pop();
+    const dirPath = parts.join('/');
+    const linkName = parts[parts.length - 1];
+    if (!fileName || !linkName || parts.includes('..')) return null;
+    const moduleDir = await getModuleDir();
+    const linkPath = moduleDir ? `${moduleDir}/${linkName}` : linkName;
+    const resolvedPath = `${linkPath}/${fileName}`;
+    const script = [
+        'from pathlib import Path',
+        'import sys',
+        'source = Path.home() / sys.argv[1]',
+        'dest = Path("/project") / sys.argv[2]',
+        'assert (source / sys.argv[3]).is_file(), "Workspace file does not exist"',
+        'if dest.is_symlink():',
+        '    assert dest.resolve() == source.resolve(), "Workspace link points elsewhere"',
+        'else:',
+        '    assert not dest.exists(), "A project folder already uses the workspace name"',
+        '    dest.symlink_to(source, target_is_directory=True)',
+    ].join('\n');
     try {
-        await contentsManager.get(resolvedPath);
-        console.log(`Tilde path resolved via existing symlink: ${resolvedPath}`);
+        await runShellCommand(app, 'python -c ' + shellQuote(script) + ' ' +
+            [dirPath, linkPath, fileName].map(shellQuote).join(' '));
+        await app.serviceManager.contents.get(resolvedPath);
         return resolvedPath;
-    } catch {
-        // Symlink doesn't exist yet — create it
-    }
-
-    console.log(`Creating symlink: /project/${symlinkBase} → ~/${dirPath}`);
-    try {
-        await runShellCommand(app, `ln -sfn ~/${dirPath} /project/${symlinkBase}`);
-    } catch (err) {
-        console.error('Failed to create symlink for tilde path:', err);
+    } catch (error) {
+        console.error('Could not link the workspace file:', error);
+        window.alert('Could not open the workspace file. Check that OpenClaw setup is complete and no project folder is using the workspace name.');
         return null;
     }
-
-    return resolvedPath;
 }
 
-/**
- * Executes a shell command via a hidden JupyterLab terminal session.
- * Uses app.serviceManager.terminals (from the parent JupyterLab frame)
- * which handles authentication automatically — avoids 403 errors from
- * cross-frame fetch calls.
- */
+function shellQuote(value) {
+    return "'" + value.replace(/'/g, "'\\''") + "'";
+}
+
 async function runShellCommand(app, command) {
     const session = await app.serviceManager.terminals.startNew();
-
-    return new Promise((resolve, reject) => {
-        let done = false;
-
-        const onMessage = (_, msg) => {
-            if (msg.type === 'stdout' && msg.content.some(s => s.includes('__SYMLINK_DONE__'))) {
-                done = true;
+    const marker = '__WORKSHOP_DONE_' + Math.random().toString(36).slice(2) + '__';
+    // Paste one line; terminal line editing can split a multiline Python script.
+    const encoded = btoa(Array.from(new TextEncoder().encode(command), byte => String.fromCharCode(byte)).join(''));
+    try {
+        await new Promise((resolve, reject) => {
+            let output = '';
+            let sent = false;
+            const cleanup = () => {
+                clearTimeout(timer);
                 session.messageReceived.disconnect(onMessage);
-                session.shutdown();
-                resolve();
-            }
-        };
-
-        session.messageReceived.connect(onMessage);
-        session.send({ type: 'stdin', content: [`${command} && echo __SYMLINK_DONE__\r`] });
-
-        // Timeout safety net
-        setTimeout(() => {
-            if (!done) {
-                done = true;
-                session.messageReceived.disconnect(onMessage);
-                session.shutdown();
-                resolve(); // Resolve anyway — symlink may still have been created
-            }
-        }, 10000);
-    });
+                session.connectionStatusChanged.disconnect(onConnection);
+            };
+            const onMessage = (_, msg) => {
+                if (msg.type !== 'stdout') return;
+                output = (output + msg.content.join('')).slice(-16384);
+                const match = output.match(new RegExp('(?:^|[\\r\\n])' + marker + ':([0-9]+)(?:[\\r\\n]|$)'));
+                if (!match) return;
+                cleanup();
+                if (Number(match[1]) === 0) resolve();
+                else reject(new Error('Workspace command failed (exit ' + match[1] + ').'));
+            };
+            const onConnection = () => {
+                if (sent || session.connectionStatus !== 'connected') return;
+                sent = true;
+                // The echoed command never contains a standalone marker:exit line.
+                session.send({ type: 'stdin', content: [
+                    'printf %s ' + shellQuote(encoded) + ' | base64 --decode | bash; workshop_status=$?; printf "\\n%s:%s\\n" ' +
+                    shellQuote(marker) + ' "$workshop_status"\r'
+                ] });
+            };
+            const timer = setTimeout(() => {
+                cleanup();
+                reject(new Error('Workspace command timed out.'));
+            }, 15000);
+            session.messageReceived.connect(onMessage);
+            session.connectionStatusChanged.connect(onConnection);
+            onConnection();
+        });
+    } finally {
+        await session.shutdown();
+    }
 }

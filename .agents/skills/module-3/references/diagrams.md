@@ -9,20 +9,12 @@ Help a learner read the evaluation figures. Diagrams in `.devx/3-agent-evaluatio
   it, metrics score the output, analysis turns scores into action.
 
 ## rag_evaluation_flow (`rag_evaluation_flow.mmd`) — the RAG 2×2, as a flow
-- **Depicts:** `User Question → RAG Agent → Retrieval → Retrieved Contexts → (back to agent)
-  → Generated Response`, then the split: **Contexts → Context Metrics → Context Precision +
-  Context Recall** (retrieval side) and **Question + Response → Generation Metrics →
-  Faithfulness + Answer Relevancy** (generation side), all rolling up to an **Overall Score**.
-- **Takeaway:** this is the retrieval-vs-generation split made visual — the same 2×2 from
-  `concepts.md`. Context metrics judge *what was retrieved*; generation metrics judge *what
-  was written*. Localize a failure to one side before fixing.
+- **Depicts:** the agent’s retrieval tool returns actual contexts to the agent. Contexts, question, and reviewed reference feed context precision/recall; contexts and response feed faithfulness; question and response feed answer relevancy. Results retain per-metric coverage rather than implying a universal overall RAGAS score.
+- **Takeaway:** the same observed contexts used to answer must be used to evaluate. A second independent retrieval can measure different evidence.
 
 ## llm_as_judge (`llm_as_judge.mmd`)
-- **Depicts:** `Question + Agent Response + Context/Criteria → Judge LLM → Evaluation Prompt
-  → Score + Explanation`.
-- **Takeaway:** the judge needs *three* inputs (the question, the response, and the
-  context/criteria) to score well — that's why eval prompts must "provide context." Maps to
-  `evaluation_framework.py`'s `evaluate_*` functions (`PROMPT | judge_llm`).
+- **Depicts:** `Question + Response + Observed Context/Criteria → Evaluation Prompt → Judge LLM → Validated Score + Explanation`, with invalid output recorded as a measurement error.
+- **Takeaway:** `PROMPT | judge_llm` supplies instructions before the judge runs; a valid JSON score is bounded and still needs calibration.
 
 ## improvement_cycle (`improvement_cycle.mmd`)
 - **Depicts:** a loop — `Measure → Analyze → Hypothesize → Implement → Validate → (back to
@@ -34,5 +26,5 @@ Help a learner read the evaluation figures. Diagrams in `.devx/3-agent-evaluatio
 - *Context* metrics (precision/recall) grade **retrieval**, not the answer; *Faithfulness/
   Relevancy* grade the **answer**. Mixing these up is the #1 misread (and the
   `evaluation_metrics.md` quiz).
-- The Judge LLM is the *same* Nemotron model used elsewhere, run at **temperature 0** for
-  consistent grading — it judges, it isn't a separate "evaluator model."
+- The shared `judge` role selects the configured Nemotron model, with **temperature 0**
+  and JSON output mode. A separate model choice does not make its judgments objective; inspect calibration cases.

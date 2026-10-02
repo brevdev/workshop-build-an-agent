@@ -1,31 +1,31 @@
 [
   {
     "id": "pub-001",
-    "text": "NVIDIA announced the Blackwell Ultra GPU architecture at GTC 2026, featuring 208 billion transistors and a new NVLink interconnect capable of 1.8TB/s bandwidth between GPUs.",
+    "text": "The public workshop page explains how to build an AI agent with a model, tools, memory, and routing.",
     "expected_level": "public",
     "expected_route": "cloud"
   },
   {
     "id": "pub-002",
-    "text": "The latest research from arXiv shows that chain-of-thought prompting improves reasoning accuracy by 40% on GSM8K benchmarks compared to direct prompting methods.",
+    "text": "The public reading list links to papers about language models and reasoning.",
     "expected_level": "public",
     "expected_route": "cloud"
   },
   {
     "id": "pub-003",
-    "text": "Python 3.13 introduces a new JIT compiler that improves performance by up to 30% for compute-intensive workloads. The release also includes improved error messages.",
+    "text": "The public Python tutorial covers functions, lists, dictionaries, and error handling.",
     "expected_level": "public",
     "expected_route": "cloud"
   },
   {
     "id": "pub-004",
-    "text": "The open-source LangChain framework has surpassed 100,000 GitHub stars, making it one of the most popular AI agent development tools available today.",
+    "text": "The public project README explains how to install dependencies and run the examples.",
     "expected_level": "public",
     "expected_route": "cloud"
   },
   {
     "id": "pub-005",
-    "text": "A new study in Nature demonstrates that transformer-based models can predict protein folding structures with 95% accuracy, surpassing previous AlphaFold benchmarks.",
+    "text": "The public research seminar agenda lists talks about machine learning and protein structures.",
     "expected_level": "public",
     "expected_route": "cloud"
   },

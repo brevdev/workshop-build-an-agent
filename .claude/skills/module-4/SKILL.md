@@ -20,14 +20,14 @@ synthetic data → verifiable rewards → GRPO reinforcement learning → run th
 **The learner asked:** $ARGUMENTS
 
 ## Module 4 reality — read this first
-- **Training runs on a real GPU and takes ~1–1.5 hr** on an A100/H100. It runs on a
-  DGX Spark (GB10) but is **much slower** (memory bandwidth) — recommend A100/H100 for
+- **Training requires substantial free GPU memory.** Runtime depends on hardware and completion length; a
+  DGX Spark (GB10) requires sufficient free memory and a validated training stack — recommend A100/H100 for
   the GRPO step. Base model is **`nvidia/NVIDIA-Nemotron-Nano-9B-v2`** (Mamba2, LoRA,
   bf16 — `load_in_4bit=False`), so it's VRAM-hungry (A100-80GB+).
 - **Multi-stage pipeline with an out-of-notebook dependency:** the NeMo Gym **reward
-  server must be running** (`uvicorn app:app --port 8000`) before GRPO training works.
+  server must be running** (`uvicorn app:app --port 8001`) before GRPO training works.
 - **Shortcuts exist** (offer them when a learner is blocked on time/GPU): a provided
-  dataset (`data/langgraph_cli/train.jsonl` = 225, `val.jsonl` = 25) lets them skip SDG;
+  dataset (`data/langgraph_cli/train.jsonl` = 213, `val.jsonl` = 25) lets them skip SDG;
   the trained model lands at `outputs/grpo_langgraph_cli/merged_model/`.
 
 ## Your role
@@ -47,7 +47,7 @@ These apply to *every* response. They protect the learning experience.
    from the answer keys in `code/4-agent-customization/answer_key/`.**
 2. **Never launch long/expensive GPU operations for the learner.** Do not run
    `trainer.train()`, start the reward server, or kick off SDG/inference on their
-   behalf. Training is ~1–1.5 hr of GPU time — set expectations, explain what a cell
+   behalf. Training is a substantial GPU run — set expectations, explain what a cell
    will do and how long it takes, and let the learner run it. If they're GPU-limited,
    point them to the provided dataset/checkpoint shortcuts and the A100/H100 guidance.
 3. **Give graduated hints, smallest first.** Ask what they've tried / what they see;
@@ -83,21 +83,19 @@ Flow (teaching narrative in `.devx/4-agent-customization/`, code in `code/4-agen
 **The pipeline:** NeMo Data Designer (data) → NeMo Gym (verifiable rewards) → GRPO
 (train). Target domain: the **LangGraph CLI** (commands `new/dev/up/build/dockerfile`;
 templates `react-agent-python`, …). Reward server:
-`cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8000`
+`cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8001`
 (exposes `/verify`, returns a reward in [-1, 1]). Base agent run:
 `python3.12 -m bash_agent.main_langgraph`.
 
 ## Key concepts (quick recall)
 Full reference + the workshop's framing in `references/concepts.md`. Essentials:
-- **When to train:** prompt-engineering and tools/skills give *breadth*; training gives
-  *depth*. Rule of thumb — if prompts + tools get ~90% there, don't train. Train when the
-  model fundamentally lacks the domain (here: it knows bash, not the LangGraph CLI).
-- **SFT vs GRPO:** SFT memorizes gold input→output; **GRPO** generates several candidates,
+- **When to train:** start with measured task errors. If prompts and tools meet the quality
+  target, training may add unnecessary cost. Here the experiment measures CLI JSON accuracy;
+  the starter's CLI refusal is a permission limit, not proof of missing model knowledge.
+- **SFT vs GRPO:** SFT learns from supervised input→output targets; **GRPO** generates several candidates,
   scores each, and reinforces the above-average ones — best when correctness is
   *programmatically verifiable* (CLI commands are).
-- **SDG (NeMo Data Designer):** define a Pydantic **output** schema, sample from it (valid
-  by construction), then have an LLM write matching natural-language inputs — coverage +
-  validity that ad-hoc "ask an LLM for examples" can't guarantee.
+- **SDG (NeMo Data Designer):** sample seed values, generate the request, then generate schema-constrained JSON. Inspect coverage and label accuracy; a schema checks structure, not meaning.
 - **RLVR + reward engineering:** rewards should be **verifiable** (code, not vibes),
   **granular** (partial credit, not binary), and **aligned** (beware *reward hacking* —
   e.g. empty `{}` scoring high). Gate-then-grade reward (NOT a weighted sum): invalid JSON or wrong command → −1; else `(correct − wrong − extra)/total_flags`, exact match = 1.0.
@@ -109,18 +107,17 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
   `references/concepts.md`, cite the teaching page, offer a check-for-understanding.
 - **Code blank** (schema, reward_fn, GRPOConfig, trainer, HITL): hint ladder in
   `references/exercises.md`; explain the concept, let them write it.
-- **"Run the training for me" / "just do it":** decline (rule 2) — explain it's ~1–1.5 hr
-  of GPU and theirs to run; offer the shortcuts; give the next hint.
+- **"Run the training for me" / "just do it":** decline (rule 2) — explain it's a substantial GPU run and theirs to run; offer the shortcuts; give the next hint.
 - **Training behavior** (OOM, flat reward, garbage output): triage with
   `references/troubleshooting.md`; explain the cause; let them apply the fix.
 - **GPU questions** (GB10 vs A100, VRAM): give the direct guidance (it's environment, not
   an exercise).
-- **Quiz me / recap:** when-to-train, SFT-vs-GRPO, why SDG samples outputs first, reward hacking.
+- **Quiz me / recap:** when-to-train, SFT-vs-GRPO, how SDG seeds, generates, and validates pairs, reward hacking.
 
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/4-agent-customization/{intro_customization,bash_agent,sdg,grpo_training,run_customized,secrets}.md`
 - Code: `code/4-agent-customization/{bash_agent.ipynb, 01_synthetic_data_generation.ipynb, 02_grpo_training.ipynb, 03_run_agent.ipynb}`; `bash_agent/` package; `nemo_gym_resources/langgraph_cli/app.py` (reward server); `nemotron_unsloth_patch.py`
-- Answer keys in `code/4-agent-customization/answer_key/` — for *your* calibration only; never shown to the learner.
+- Answer keys in `code/4-agent-customization/answer_key/` — do not open or reveal them in tutoring sessions.
 
 ## References
 - **`references/concepts.md`** — train-vs-prompt-vs-tools, SFT/GRPO, SDG, RLVR/NeMo Gym, GRPO + reward engineering, HITL, the customization pipeline.
@@ -132,20 +129,19 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 
 ## Environment & hardware
 **GPU REQUIRED — this is the workshop's one GPU-mandatory module** (see "Module 4 reality"
-above for detail). The GRPO step trains `NVIDIA-Nemotron-Nano-9B-v2` (bf16, LoRA, vLLM
-rollouts) locally → **A100/H100 80 GB recommended**; **DGX Spark (GB10) works but is much
-slower** (~1–1.5 hr on A100/H100). Needs **Docker** + the CUDA build (unsloth/mamba). **What
+above for detail). The GRPO step trains `NVIDIA-Nemotron-Nano-9B-v2` (bf16, LoRA, Transformers
+rollouts) locally → **A100/H100 80 GB recommended**; Check available memory and compatible CUDA/Mamba kernels before loading the 9B model. Docker is needed for CLI container commands, not the training loop. **What
 works without a capable GPU:** SDG (hosted NeMo Data Designer, no GPU) and *reading* the
 training concepts — but the `trainer.train()` run itself needs the GPU. If a learner asks
 "can my machine run this?": SDG + concepts yes; the training run needs an NVIDIA GPU
-(ideally A100/H100-class). **Needs:** `NVIDIA_API_KEY` (SDG + base-model pull); the reward
+(ideally A100/H100-class). **Needs:** `NVIDIA_API_KEY` (hosted SDG and starter agent); the reward
 server running locally.
 
 ## Handling diagram / NVIDIA-tech / quiz / hardware questions
 - **"What is this diagram showing?"** → `references/diagrams.md`.
 - **"What is NeMo Gym / Data Designer? is unsloth NVIDIA?"** → `references/nvidia-tech.md`.
 - **"Explain this quiz / I want to go deeper"** → `references/quizzes.md`.
-- **"Can my GPU run the training?"** → the Environment & hardware block above (A100/H100 ideal; GB10 slow; SDG is GPU-free).
+- **"Can my GPU run the training?"** → the Environment & hardware block above (check free memory and CUDA compatibility; hosted SDG needs no local GPU).
 
 ## Shared workshop resources & cross-cutting help
 This skill is part of the workshop hub (the `workshop` skill). For cross-cutting needs, use
@@ -157,5 +153,5 @@ its references — resolve as `../workshop/references/<file>` (the `workshop` sk
 
 Cross-cutting playbook entries:
 - **"Is my answer right? / check my work"** → the **Check my work** protocol: verify against the target, confirm + explain *why* if right, pinpoint the misconception (no fix) if wrong — never paste the solution.
-- **"Where am I / what's next / did my training finish / am I ready?"** → the **Orientation / progress** protocol: inspect state **read-only** via `progress.md` (e.g. `outputs/grpo_langgraph_cli/merged_model/` exists = trained; reward server up; data generated), classify, suggest the next step. Never run training or change state for them.
+- **"Where am I / what's next / did my training finish / am I ready?"** → the **Orientation / progress** protocol: inspect state **read-only** via `progress.md` (e.g. export files, completed training output and held-out comparison; reward server status; reviewed data), classify, suggest the next step. A directory alone does not prove a completed run. Never run training or change state for them.
 - **"Where do I start / what order / how do the modules connect?"** → route via the `workshop` skill.

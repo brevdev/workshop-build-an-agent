@@ -28,13 +28,13 @@ Invalid JSON      → -1.0
 ### Run Server
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000
+uvicorn app:app --host 0.0.0.0 --port 8001
 ```
 
 ### Test Verification
 
 ```bash
-curl -X POST http://localhost:8000/verify \
+curl -X POST http://localhost:8001/verify \
   -H "Content-Type: application/json" \
   -d '{
     "task_id": "test-1",
@@ -48,7 +48,7 @@ curl -X POST http://localhost:8000/verify \
 
 ## Integration with Unsloth
 
-The reward functions can be used directly with Unsloth's GRPOTrainer:
+The notebook uses the HTTP callback. The standalone alternative below needs a dataset column named `expected_outputs` containing the reference JSON:
 
 ```python
 from nemo_gym_resources.langgraph_cli import cli_correctness_reward
@@ -57,6 +57,7 @@ trainer = GRPOTrainer(
     model=model,
     processing_class=tokenizer,
     reward_funcs=[cli_correctness_reward],
+    train_dataset=train_dataset.rename_column("answer", "expected_outputs"),
     ...
 )
 ```

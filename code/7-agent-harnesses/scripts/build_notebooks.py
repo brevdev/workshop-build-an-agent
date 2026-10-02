@@ -26,15 +26,16 @@ SECTION_TITLES = {
 SECTION_BLURBS = {
     1: "pi proves a complete harness needs surprisingly little: a short system "
        "prompt, four tools, and a loop. Build exactly that around Nemotron.",
-    2: "Count what your harness pays per turn — prompt plus tool schemas — "
-       "against a maximal configuration, then implement lazy skill loading.",
-    3: "Write `skills/dataset_profiler/SKILL.md` (format: `skills/code_review/SKILL.md` "
+    2: "Estimate prompt-plus-tool overhead for two bundled configurations with "
+       "`cl100k_base`, then implement lazy loading. These are comparison proxies, "
+       "not Nemotron billing counts.",
+    3: "Write `skills/dataset-profiler/SKILL.md` (format: `skills/code-review/SKILL.md` "
        "at the repo root), then run it through the lazy loader. The same folder also "
        "drops unchanged into Hermes's `~/.hermes/skills/` — one skill, two harnesses.",
     4: "Install and signature-verify the NVIDIA `accelerated-computing-cudf` skill:\n\n"
        "```bash\nbash scripts/install_nvidia_skill.sh accelerated-computing-cudf\n```\n\n"
        "Then open a terminal, keep `watch -n 0.5 nvidia-smi` visible, and run the next "
-       "cell — you'll see your GPU light up while the agent works.",
+       "cell. Inspect the executed code and output as well as GPU activity.",
     5: "The pi finale: after finishing a task, the agent reviews its own transcript, "
        "writes a new SKILL.md, and uses it on the next run.",
 }

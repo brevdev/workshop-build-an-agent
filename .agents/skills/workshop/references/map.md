@@ -19,7 +19,7 @@ Teaching narrative for module N is in `.devx/<N>-<slug>/`; code in `code/<N>-<sl
 
 ## Module 3 — Agent Evaluation  (`$module-3`, `3-agent-evaluation`)
 - **Build:** an evaluation pipeline for the M1 + M2 agents (RAGAS + LLM-as-judge + custom metrics + a continuous suite).
-- **Concepts:** retrieval-vs-generation 2×2, RAGAS metrics + score bands, the judge problem + calibration, dataset design (SDG), the improvement cycle.
+- **Concepts:** retrieval-vs-generation 2×2, RAGAS metrics, measurement coverage, the judge problem + calibration, dataset design (SDG), the improvement cycle.
 - **Code:** `evaluation_framework.py`, `evaluate_{rag,report}_agent.ipynb`, `generate_*_eval_dataset.ipynb`.
 - **Prereq:** **M1 + M2 agents must be built** (it evaluates them).  **Time:** 2–3 h.  **Hardware:** none (all hosted; some steps are slow but CPU/network-bound).
 
@@ -27,25 +27,25 @@ Teaching narrative for module N is in `.devx/<N>-<slug>/`; code in `code/<N>-<sl
 - **Build:** customize a bash agent into a LangGraph-CLI expert via SDG → reward → GRPO training.
 - **Concepts:** train-vs-prompt-vs-tools, SFT vs GRPO, SDG (NeMo Data Designer), RLVR (NeMo Gym), reward engineering, HITL.
 - **Code:** `bash_agent.ipynb`, `01_synthetic_data_generation.ipynb`, `02_grpo_training.ipynb`, `03_run_agent.ipynb` (+ `answer_key/`).
-- **Prereq:** M1–M3 concepts.  **Time:** 3–4 h.  **Hardware:** **GPU required** (A100/H100 80 GB ideal; GB10 works but slow); Docker + CUDA build. SDG is GPU-free.
+- **Prereq:** M1–M3 concepts.  **Time:** 3–4 h.  **Hardware:** **GPU required** (A100/H100 80 GB ideal; GB10 needs sufficient free unified memory); Docker + CUDA build. SDG is GPU-free.
 
 ## Module 5 — Deep Agents  (`$module-5`, `5-deep-agents`)
-- **Build:** a production deep agent (planning, delegation, memory, skills) with Docker sandboxing.
+- **Build:** a deep-agent prototype (planning, delegation, memory, skills) with Docker sandboxing.
 - **Concepts:** the four pillars, shallow vs deep, the deepagents middleware, backends, the security spectrum + patterns, defense in depth.
 - **Code:** `deep_agent.py` (+ `.answers.py`); runs via the demo backend + Deep Agents Client.
 - **Prereq:** M1–M2 concepts.  **Time:** 1–2 h.  **Hardware:** Docker (for the sandbox backend); no GPU (hosted inference).
 
 ## Module 6 — Agent Safety  (`$module-6`, `6-agent-safety`)
 - **Build:** harden an OpenClaw agent with NVIDIA NemoClaw — kernel enforcement (Landlock/seccomp/network proxy), operator-controlled inference routing, and a red-team + LLM-judge safety suite.
-- **Concepts:** why app/container controls aren't enough for autonomous agents, the four enforcement layers, the operator role, the Privacy Router (operator routing + credential injection, **not** content classification), defense in depth, safety evaluation.
-- **Code:** `agent_safety.py` / `.ipynb`, `safety_eval_framework.py`, the NemoClaw wrappers, `policies/*.yaml`, `scripts/`.
-- **Prereq:** M4 (HITL) + M5 (sandboxing) concepts; extends M3's eval framework.  **Time:** 2–2.5 h.  **Hardware:** Docker + Linux kernel ≥ 5.13 for the live stack; no GPU on the main path (the Python eval sidekicks run on the mock agent even if the live control plane is down).
+- **Concepts:** how approval, container and kernel controls complement each other, the four enforcement layers, the operator role, the Privacy Router (operator routing + credential injection, **not** content classification), defense in depth, safety evaluation.
+- **Code:** `agent_safety.py`, `safety_eval_framework.py`, the NemoClaw wrappers, `policies/*.yaml`, `scripts/`.
+- **Prereq:** M4 (HITL) + M5 (sandboxing) concepts; extends M3's eval framework.  **Time:** 2–2.5 h.  **Hardware:** Docker + a Linux kernel with Landlock enabled for the live stack; no GPU on the main path (the Python eval sidekicks run on the mock agent even if the live control plane is down).
 
 ## Module 7 — Agent Harnesses & Skills  (`$module-7`, `7-agent-harnesses`)
 - **Build:** a minimal pi-style harness (4 tools + a loop) around Nemotron, a context-tax meter, a hand-authored portable Agent Skill, a GPU-accelerated NVIDIA Verified Skill (cuDF), and a self-evolving harness.
 - **Concepts:** harness vs LLM (engine/car), the five harness responsibilities, the context tax + lazy skill loading, the seven-harness landscape, the open Agent Skills spec, NVIDIA Verified Skills, GPU skills.
 - **Code:** `harness_lab.py` / `.ipynb` (5 exercises — `build_bare_agent`, `harness_overhead`, `load_skills_lazily`, `self_evolve_skill`, + author a `SKILL.md`) (+ `.answers.*`); `scripts/install_nvidia_skill.sh`.
-- **Prereq:** M1–M6 concepts — the **capstone**; it names the harness layer used in every prior module.  **Time:** 2–3 h.  **Hardware:** none for the main path (hosted Nemotron + `tiktoken`, CPU); **Exercise 4's GPU speedup needs an NVIDIA GPU** (cuDF) — clean fallback + skip message without one.
+- **Prereq:** M1–M6 concepts — the **capstone**; it names the harness layer used in every prior module.  **Time:** 2–3 h.  **Hardware:** none for the main path (hosted Nemotron + `tiktoken`, CPU); **Exercise 4's cuDF path needs an NVIDIA GPU** (cuDF) — clean fallback + skip message without one.
 
 ## Routing shorthand
 RAG → M2 · evaluation/metrics → M3 · training/GRPO/GPU → M4 · deep agents/planning/sandbox → M5 ·

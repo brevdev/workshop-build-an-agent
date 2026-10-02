@@ -37,16 +37,15 @@ Identify *which* blank from the traceback line and **point them to it — don't 
 - **401 / auth** on any NVIDIA call → key missing/invalid; set it in `secrets.env`
   (https://build.nvidia.com) and restart `langgraph dev`.
 - **404 / HTTP 410 on embeddings or rerank** → an out-of-date model id. The **current**
-  models are `nvidia/llama-nemotron-embed-1b-v2` and `nvidia/llama-nemotron-rerank-1b-v2`
+  models are `nvidia/nemotron-3-embed-1b` and `nvidia/llama-nemotron-rerank-vl-1b-v2`
   (the older `*embedqa*` / `*rerankqa*` endpoints are retired and return 410). The repo
   already uses the current ids — if a learner changed them, restore the constants.
 - Embeddings error about input length → ensure `truncate="END"` is set (A2).
 
 ## MCP web search
-- **Remote (default):** uses `npx -y mcp-remote …`, so **Node/`npx` must be available**
-  (the DevX-Lab container installs Node via `apt.txt` + `postBuild`). "Search failed" /
-  spawn errors → `npx` missing, no network egress to `mcp.tavily.com`, or an invalid
-  `TAVILY_API_KEY` in the URL. First call can be slow while `npx` fetches `mcp-remote`.
+- **Remote (default):** direct `streamable_http` to `https://mcp.tavily.com/mcp/`,
+  with the key in the Authorization header. Check network egress, the key in
+  `secrets.env`, and Workshop Health. Do not print headers or put the key in a URL.
 - **Local (optional, PART 2B):** run `cd code/2-agentic-rag && uvicorn mcp_server:app
   --reload --port 8000`; the agent connects via SSE at `http://localhost:8000/sse`.
   "Is the server running?" errors → the uvicorn server isn't up, or PART 2A wasn't
@@ -54,8 +53,8 @@ Identify *which* blank from the traceback line and **point them to it — don't 
 
 ## Skills (Part 3)
 - `get_skill` returning "Skill 'X' not found" → wrong skill name or `SKILLS_DIR` path.
-  Available skills live in the **top-level `skills/`** dir: `code_review`,
-  `technical_writing` (each is a folder with a `SKILL.md`).
+  Available skills live in the **top-level `skills/`** dir: `code-review`,
+  `technical-writing` (each is a folder with a `SKILL.md`).
 - "what skills do you have?" returning nothing → `list_available_skills` (C2) still
   `...`, or `AGENT` not yet rebuilt to include the skills tools (C3).
 
@@ -81,7 +80,7 @@ Identify *which* blank from the traceback line and **point them to it — don't 
   the model *should* be free to skip retrieval. Check the system prompt and the trace.
 - **Won't use web search for current info** → the agent only got `web_search` after the
   MCP section; confirm `AGENT` was rebuilt (B3) and the tool is wired.
-- **Wrong/missing `[KB]` vs `[Web]` citation** → the system prompt asks for citations;
+- **Wrong/missing `[KB:source_id]` vs `source URLs` citation** → the system prompt asks for citations;
   inspect a LangSmith trace to see which tool actually fired.
 - **Weak/irrelevant retrieval** → talk through chunking (size/overlap) and reranking;
   this previews Module 3 (evaluation). Treat as a tuning discussion, not a bug.

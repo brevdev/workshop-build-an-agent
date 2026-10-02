@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 const proxyConfig = {
   '/api': {
-    target: 'http://localhost:8000',
+    target: process.env.WORKSHOP_BACKEND_URL || 'http://localhost:8000',
     changeOrigin: true,
   },
   '/blocks': {

@@ -1,4 +1,10 @@
 import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workshop_support import load_secrets
+load_secrets()
 from mcp.server import Server
 from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette

@@ -17,13 +17,14 @@ Usage:
     # result = {"text": "...", "meta": {...}, "error": None}
 """
 
-import json as _json
 import os
 import re
 import shutil
 import subprocess
 import sys
 from typing import Callable, Optional
+
+from openclaw_response import normalize_openclaw_response
 
 
 _PHASE_READY_RE = re.compile(r"^\s*Phase:\s*Ready\b", re.MULTILINE | re.IGNORECASE)
@@ -184,16 +185,7 @@ def _send_via_nemoclaw_cli(prompt: str, sandbox: str = SANDBOX_NAME, timeout: in
         error = (result.stderr or result.stdout or "Unknown error").strip()
         return {"text": f"[Sandbox agent error: {error}]", "meta": None, "error": error}
 
-    stdout = (result.stdout or "").strip()
-    try:
-        data = _json.loads(stdout)
-        result_data = data.get("result", {})
-        payloads = result_data.get("payloads", [])
-        text = payloads[0].get("text", "") if payloads else str(data)
-        meta = result_data.get("meta")
-        return {"text": text, "meta": meta, "error": None}
-    except (ValueError, TypeError):
-        return {"text": stdout, "meta": None, "error": None}
+    return normalize_openclaw_response(result.stdout)
 
 
 def create_nemoclaw_agent_fn(sandbox: str = SANDBOX_NAME) -> Callable[[str], dict]:

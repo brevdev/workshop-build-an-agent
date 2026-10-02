@@ -24,7 +24,7 @@ This installs `deepagents`, `fastapi`, `langchain`, and all other dependencies. 
 
 ### Start the Backend
 
-> **Important:** If you already set up secrets in the Secrets Manager, your API keys may already be available as environment variables. You can check with `echo $NVIDIA_API_KEY`.
+> The backend loads the project's `secrets.env` automatically. Check your keys in **Workshop Utilities → Workshop Health**.
 
 ```bash
 uvicorn server:app --host 0.0.0.0 --port 8000
@@ -59,7 +59,7 @@ cd demo && npm install
 
 <img src="_static/robots/magician.png" alt="UI Robot" style="float:right;max-width:250px;margin:15px;" />
 
-Open the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button>. You can also launch this directly from the Jupyterlab Launcher screen. This may take a few moments to initialize. 
+Open the <button onclick="launch('Deep Agents Client');"><i class="fa-solid fa-rocket"></i> Deep Agents Client</button>. You can also launch this directly from the Jupyterlab Launcher screen. This may take a few moments to initialize.
 
 You'll see the **LLM Picker** — a robot in the center with model cards around it.
 
@@ -74,7 +74,7 @@ The full demo has four phases. Click on each to learn more.
 <details class="dx-peek">
 <summary>1. Pick Your Model</summary>
 
-Click a model card to select it. **Nemotron** (NVIDIA's flagship) is recommended — it handles deepagents' middleware stack reliably. The model's brand color will theme the entire UI.
+Click a model card to select it. The cards show the configured **Nemotron Super** and **Nemotron Lightning** models. Both support tool calling; availability and response quality can vary. The model's brand color will theme the entire UI.
 
 </details>
 
@@ -124,7 +124,7 @@ Try these to verify everything works:
 <details class="dx-peek">
 <summary>5. (Optional) Docker for Sandbox Mode</summary>
 
-In the Deep Agent Client, you can enable **Sandbox Mode** in the Settings panel. This runs the agent's tools inside an isolated Docker container — the agent can't see your host files. 
+In the Deep Agent Client, you can enable **Sandbox Mode** in the Settings panel. This runs selected file and shell tools in a Docker container with no host mounts or network. Model, Web Search, and RAG calls remain in the application.
 
 You may consider pulling the sandbox image ahead of time (one-time process) to have it cached for later:
 
@@ -132,7 +132,7 @@ You may consider pulling the sandbox image ahead of time (one-time process) to h
 docker pull python:3.11-slim
 ```
 
-Then toggle Sandbox Mode ON in the Settings panel when building your agent. We'll talk about why this mode is important shortly. 
+Then toggle Sandbox Mode ON in the Settings panel when building your agent. We'll talk about why this mode is important shortly.
 
 </details>
 
@@ -142,9 +142,10 @@ Then toggle Sandbox Mode ON in the Settings panel when building your agent. We'l
 
 | Problem | Fix |
 |---|---|
-| Backend won't start | Check `.env` has valid API keys. Run `python -c "from server import app; print('OK')"` to test imports. |
+| Backend won't start | Check the project's `secrets.env` has valid API keys. Run `python -c "from server import app; print('OK')"` to test imports. |
 | Frontend shows blank page | Run `npx tsc --noEmit` to check for TypeScript errors. |
 | "DEGRADED function" error | NVIDIA NIM API may be temporarily down. Wait a few minutes and retry. |
+| Retrieval returns an endpoint error after updating | Run `pip install -r requirements.txt` in the backend environment, then restart it. |
 | Agent times out | The NIM endpoint might be slow. Try again — first calls can take longer. |
 | Sandbox mode hangs | Make sure Docker/Colima is running: `docker ps` should work. |
 

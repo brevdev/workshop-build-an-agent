@@ -6,9 +6,8 @@ go deeper. (These quizzes are conceptual — fair game to explain fully once eng
 
 ## `intro_evaluation.md` — "Your RAG agent gives a wrong answer. Where to look first?"
 - **Correct:** *Measure retrieval and generation separately — the fault could be in either.*
-- **Why:** a RAG failure has two independent causes — the agent never found the right docs
-  (**retrieval**), or it found them but answered poorly (**generation**). **Localize before
-  you fix.**
+- **Why:** inspect the actual retrieved documents and how generation used them. Also
+  check source quality, the reference answer, and judge decisions before choosing a fix.
 - **Distractors:** *assume hallucination, rewrite the prompt* → can't fix a retrieval miss;
   *add more docs* → only helps if the cause is low recall; *lower temperature* → a generation
   tweak that does nothing if retrieval is the problem.

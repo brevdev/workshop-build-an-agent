@@ -39,7 +39,7 @@ export function AgentBuilder({ skills, isBuilding, isReady, onRemoveSkill, sandb
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          Drag skills onto the agent to add capabilities
+          Drag a tool or select + to add it
         </motion.p>
       </div>
 
@@ -63,7 +63,7 @@ export function AgentBuilder({ skills, isBuilding, isReady, onRemoveSkill, sandb
               exit={{ opacity: 0, scale: 0.9 }}
             >
               <div className="drop-indicator-ring" />
-              <span>Drop to add skill</span>
+              <span>Drop to add tool</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -79,7 +79,7 @@ export function AgentBuilder({ skills, isBuilding, isReady, onRemoveSkill, sandb
               transition={{ delay: 0.5 }}
             >
               <div className="empty-hint-icon">↖</div>
-              <p>Drag skills from the palette</p>
+              <p>Add tools from the palette</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -94,7 +94,7 @@ export function AgentBuilder({ skills, isBuilding, isReady, onRemoveSkill, sandb
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
           >
-            <h3 className="added-skills-title">Added Skills ({skills.length})</h3>
+            <h3 className="added-skills-title">Added Tools ({skills.length})</h3>
             <div className="added-skills-list">
               {skills.map((skill) => {
                 const isSandboxed = sandboxMap[skill.id] || false;

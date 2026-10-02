@@ -6,10 +6,11 @@ import './SkillPalette.css';
 
 interface SkillPaletteProps {
   addedSkillIds: string[];
+  onAddSkill: (id: string) => void;
   selectedModel?: ModelDef | null;
 }
 
-export function SkillPalette({ addedSkillIds, selectedModel }: SkillPaletteProps) {
+export function SkillPalette({ addedSkillIds, selectedModel, onAddSkill }: SkillPaletteProps) {
   const availableSkills = skills.filter(skill => !addedSkillIds.includes(skill.id));
   const recommendedIds = new Set(selectedModel?.recommendedSkills || []);
 
@@ -29,7 +30,7 @@ export function SkillPalette({ addedSkillIds, selectedModel }: SkillPaletteProps
     >
       <div className="skill-palette-header">
         <h2 className="skill-palette-title">Tools</h2>
-        <p className="skill-palette-subtitle">Drag to add capabilities</p>
+        <p className="skill-palette-subtitle">Drag or select + to add tools</p>
       </div>
       
       <div className="skill-palette-content">
@@ -55,6 +56,7 @@ export function SkillPalette({ addedSkillIds, selectedModel }: SkillPaletteProps
                 >
                   <SkillCard
                     skill={skill}
+                    onAdd={() => onAddSkill(skill.id)}
                     isInPalette
                     isRecommended
                     accentColor={selectedModel?.primaryColor}
@@ -87,7 +89,7 @@ export function SkillPalette({ addedSkillIds, selectedModel }: SkillPaletteProps
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 + 0.45 }}
                 >
-                  <SkillCard skill={skill} isInPalette />
+                  <SkillCard skill={skill} isInPalette onAdd={() => onAddSkill(skill.id)} />
                 </motion.div>
               ))}
             </div>

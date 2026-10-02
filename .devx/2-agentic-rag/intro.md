@@ -2,7 +2,7 @@
 
 <img src="_static/robots/bluegrass.png" alt="The tall tale of RAG" style="float:right;max-width:300px;margin:25px;" />
 
-Retrieval Augmented Generation (RAG) is a powerful approach for working with unstructured data in LLM-powered applications. As the AI field evolves, RAG continues to see use, but its implementation is different. Agentic RAG provides flexibility, scalability, and accuracy that would not be practical with traditional RAG.
+Retrieval Augmented Generation (RAG) is a powerful approach for working with unstructured data in LLM-powered applications. As the AI field evolves, RAG continues to see use, but its implementation is different. Agentic RAG lets the model decide when and how to retrieve; evaluate whether that flexibility improves your task enough to justify added calls and complexity.
 
 In this lesson, we will go over a brief history of LLM use and understand why agentic RAG is so important.
 
@@ -10,7 +10,7 @@ In this lesson, we will go over a brief history of LLM use and understand why ag
 
 ## LLM Inference
 
-The simplest method for interacting with LLMs is directly prompting them and allowing the model to provide a response. The architecture is simple, but you are limited to only what the model knew at training time.
+The simplest method for interacting with LLMs is directly prompting them and allowing the model to provide a response. The architecture is simple. The model can use training knowledge and any fresh information supplied in its prompt; this diagram shows no external lookup.
 
 <center>
 
@@ -36,10 +36,10 @@ Unstructured documents can be indexed and saved into the Vector Database. They a
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">WHERE TRADITIONAL RAG HITS LIMITS</p>
-  <p>RAG works well, but the LLM has no say in how retrieval happens:</p>
+  <p>In the simple retrieval pipeline above, the developer controls retrieval:</p>
   <p><span class="dx-chip">NO CONTROL</span> The LLM can't control how data is retrieved or choose between different data sources.</p>
   <p><span class="dx-chip">ALWAYS RETRIEVES</span> It runs the same retrieval step every time, whether the query needs it or not.</p>
-  <p><span class="dx-chip">HARD TO SCALE</span> Supporting multiple datasets or sources gets unwieldy.</p>
+  <p><span class="dx-chip">HARD TO SCALE</span> Additional sources need explicit orchestration.</p>
   <p><b>Agentic RAG</b> fixes this by letting the model decide <i>when and how</i> to use retrieval as a tool - looking things up only when it needs more context to answer a question.</p>
 </div>
 
@@ -74,9 +74,9 @@ You can also add more tools for different data sources if needed. This makes you
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
   <p class="dx-quiz-q">A user sends your agentic RAG system a simple greeting like "Hi there!". What happens?</p>
-  <button class="dx-quiz-opt" data-fb="That's traditional RAG - it runs the same retrieval step for every query. The whole point of agentic RAG is that the model decides whether retrieval is even needed.">It runs the knowledge-base retrieval step, as it does for every query</button>
-  <button class="dx-quiz-opt" data-right data-fb="Right. In agentic RAG the model treats retrieval as a tool and only invokes it when the query needs outside context - a greeting doesn't, so it just responds.">The model can skip retrieval entirely and just respond, since no lookup is needed</button>
-  <button class="dx-quiz-opt" data-fb="Embeddings are computed to store documents during ingestion, not to answer a greeting. At query time the model decides whether to call the retrieval tool at all.">It must embed the greeting and search the vector database before replying</button>
+  <button class="dx-quiz-opt" data-fb="That is the simple fixed RAG pipeline shown above. The whole point of agentic RAG is that the model decides whether retrieval is even needed.">It runs the knowledge-base retrieval step, as it does for every query</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Retrieval is a tool the model can choose to skip. Inspect its actual calls to check whether it made an appropriate choice.">The model can skip retrieval entirely and just respond, since no lookup is needed</button>
+  <button class="dx-quiz-opt" data-fb="Embeddings are computed during ingestion and when a vector-search query runs; a greeting need not invoke that search. At query time the model decides whether to call the retrieval tool at all.">It must embed the greeting and search the vector database before replying</button>
 </div>
 
 <!-- fold:break -->

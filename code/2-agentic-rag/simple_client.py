@@ -13,11 +13,12 @@ import httpx
 import streamlit as st
 import streamlit.components.v1 as components
 from langgraph_sdk import get_sync_client
+from client_messages import normalize_message, stream_error
 
 BASE_URL = os.getenv("LANGGRAPH_API_URL", "http://127.0.0.1:2024")
 CLIENT = get_sync_client(url=BASE_URL)
 AVATARS = {"ai": "assistant", "user": "user", "tool": "🛠️"}
-STREAMING = False  # Not all models support streaming with tool calling
+
 
 
 # Configure Streamlit page
@@ -34,15 +35,8 @@ def list_assistants() -> List[Dict[str, Any]]:
     """Fetch available assistants from the server."""
     try:
         return CLIENT.assistants.search(limit=50)
-    except httpx.ConnectError as e:
-        st.markdown(
-            """
-            # Uh oh! 😱
-
-            It looks like the LangGraph API server is not reachable. Please check if the server is running.
-            """
-        )
-        e
+    except httpx.HTTPError:
+        st.error("The LangGraph API is unavailable. Start the agent server or check Workshop Health, then reload this page.")
         st.stop()
 
 
@@ -73,8 +67,12 @@ with st.sidebar:
         ASSISTANT_ID not in st.session_state.threads
         or st.session_state.threads[ASSISTANT_ID] is None
     ):
-        st.session_state.threads[ASSISTANT_ID] = CLIENT.threads.create()["thread_id"]
-        st.session_state.history[ASSISTANT_ID] = []
+        try:
+            st.session_state.threads[ASSISTANT_ID] = CLIENT.threads.create()["thread_id"]
+            st.session_state.history[ASSISTANT_ID] = []
+        except httpx.HTTPError:
+            st.error("Could not create a conversation. Check the agent server and reload this page.")
+            st.stop()
     THREAD_ID = st.session_state.threads[ASSISTANT_ID]
     st.markdown(f"**Current Thread ID: `{THREAD_ID[:8]}...`**")
 
@@ -121,7 +119,10 @@ for msg in st.session_state.history.get(ASSISTANT_ID, []):
     if "think" in msg:
         reasoning_expander = reasoning_contents.expander("🧠 Reasoning", expanded=False)
         reasoning_expander.markdown(msg["think"])
-    message_contents.markdown(msg["content"])
+    if msg["role"] == "error":
+        message_contents.error(msg["content"])
+    else:
+        message_contents.markdown(msg["content"])
 
 
 # Handle user input
@@ -133,93 +134,35 @@ if USER_INPUT:
     with CHAT.chat_message("user"):
         st.markdown(USER_INPUT)
 
-    # Stream the response
-    message_contents = None
-    reasoning_contents = None
-    reasoning_expanded_state_key = None
-    stream_mode = ["updates", "messages"] if STREAMING else ["updates", "values"]
-    for msg in CLIENT.runs.stream(
-        thread_id=THREAD_ID,
-        assistant_id=ASSISTANT_ID,
-        input={"messages": [{"role": "user", "content": USER_INPUT}]},
-        stream_mode=stream_mode,
-    ):
-        # Extract the event and data
-        event = msg.event.split("/")
-        if "metadata" in event:
-            continue
-        data = msg.data
-
-        # Handle final model responses by emulating the streaming responses
-        if event[0] == "values":
-            # Ensure a message is present
-            if not data.get("messages"):
+    # State snapshots include full history. Message IDs prevent duplicate turns.
+    history = st.session_state.history[ASSISTANT_ID]
+    seen = {message.get("id") for message in history if message.get("id")}
+    try:
+        for event in CLIENT.runs.stream(
+            thread_id=THREAD_ID,
+            assistant_id=ASSISTANT_ID,
+            input={"messages": [{"role": "user", "content": USER_INPUT}]},
+            stream_mode=["values"],
+        ):
+            event_type = event.event.split("/")[0]
+            if event_type == "error":
+                error = {"role": "error", "content": stream_error(event.data)}
+                history.append(error)
+                st.error(error["content"])
+                break
+            if event_type != "values" or not isinstance(event.data, dict):
                 continue
-            new_data = [data.get("messages")[-1]]
-
-            # Skip user messages, they have already been displayed
-            if new_data[0].get("type") == "human":
-                continue
-
-            # Post-process the content
-            raw_content = new_data[0].get("content", "").split("</think>")
-            new_data[0]["content"] = raw_content[-1].strip() or None
-            if len(raw_content) > 1:
-                new_data[0]["additional_kwargs"] = {"reasoning_content": raw_content[0].strip()}
-
-            # Emulate streaming responses
-            event[0] = "messages"
-            data = new_data
-
-        # Handle streaming message responses
-        if event[0] == "messages":
-            persona = data[0].get("type", "ai")
-            graph_node_name = data[0].get("name", "")
-
-            # Ensure message boxes exist
-            if reasoning_contents is None or message_contents is None:
-                reasoning_contents, message_contents = _create_message_box(
-                    persona, graph_node_name
-                )
-
-            # Display model reasoning messages
-            reasoning_content = (
-                data[0].get("additional_kwargs", {}).get("reasoning_content", "")
-            )
-            if reasoning_content:
-                reasoning_expander = reasoning_contents.expander(
-                    "🧠 Reasoning",
-                    expanded=True,
-                )
-                reasoning_expander.markdown(reasoning_content)
-
-            # Display the model responses
-            content = data[0].get("content", "")
-            if content:
-                message_contents.markdown(content)
-
-        # Message is complete, update history and move to the next one
-        elif event[0] == "updates":
-            message_contents = None
-            reasoning_contents = None
-
-            # Add tool call messages to the chat history
-            for tool_call in data.get("tools", {}).get("messages", []):
-                tool_message = {
-                    "role": "tool",
-                    "content": tool_call["content"],
-                    "name": tool_call["name"],
-                }
-                st.session_state.history[ASSISTANT_ID].append(tool_message)
-
-            # Add agent messages to the chat history
-            for agent_message in data.get("agent", {}).get("messages", []):
-                agent_message = {
-                    "role": "ai",
-                    "content": agent_message["content"],
-                    "name": agent_message["name"],
-                    "think": agent_message.get("additional_kwargs", {}).get(
-                        "reasoning_content", ""
-                    ),
-                }
-                st.session_state.history[ASSISTANT_ID].append(agent_message)
+            for raw_message in event.data.get("messages", []):
+                message = normalize_message(raw_message)
+                if message is None or message["id"] in seen:
+                    continue
+                seen.add(message["id"])
+                history.append(message)
+                reasoning_contents, message_contents = _create_message_box(message["role"], message["name"])
+                if message["think"]:
+                    reasoning_contents.expander("🧠 Reasoning", expanded=False).markdown(message["think"])
+                message_contents.markdown(message["content"])
+    except Exception as exc:
+        error = {"role": "error", "content": stream_error({"error": type(exc).__name__, "message": str(exc)})}
+        history.append(error)
+        st.error(error["content"])

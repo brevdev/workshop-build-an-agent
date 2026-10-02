@@ -65,11 +65,11 @@ Always start by asking what they've tried and reading the `langgraph dev` log wi
 ## Section B — `mcp.md` (add web search via MCP)
 
 ### B1 · `MCP_CONFIG`
-- **Goal:** configure a stdio MCP client that bridges to Tavily's remote server.
-- **L1:** "The page hints: `transport` is `stdio`, `command` is `npx`. What does `npx` run to bridge to a remote MCP server?"
-- **L2:** "`args` runs `mcp-remote` against Tavily's URL with your key: `['-y', 'mcp-remote', f'https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}']`, under a top-level `"tavily"` key."
-- **Common mistakes:** wrong transport (`sse` is for the *local* server); forgetting the `-y`; dropping the f-string for the key.
-- **Target:** `{"tavily": {"transport": "stdio", "command": "npx", "args": ["-y", "mcp-remote", f"https://mcp.tavily.com/mcp/?tavilyApiKey={TAVILY_API_KEY}"]}}`
+- **Goal:** connect directly to Tavily over Streamable HTTP, with header authentication.
+- **L1:** "Which transport connects to an HTTP MCP endpoint? Where can a credential go without becoming part of its URL?"
+- **L2:** "Use `transport`, `url`, and `headers` under the top-level `tavily` key. Authorization uses the `Bearer` scheme."
+- **Common mistakes:** using `sse` (the optional local example); placing the key in the URL; printing the headers.
+- **Target:** `{"tavily": {"transport": "streamable_http", "url": "https://mcp.tavily.com/mcp/", "headers": {"Authorization": f"Bearer {TAVILY_API_KEY}"}}}`
 
 ### B2 · Call the tool via MCP
 - **Goal:** invoke the remote tool through the open MCP session.
@@ -114,9 +114,9 @@ This connects to `mcp_server.py` instead of Tavily's hosted server.
 - **Common mistakes:** forgetting earlier tools; wrong tool names.
 - **Target (final):** `create_react_agent(model=llm, tools=[RETRIEVER_TOOL, web_search, get_skill, list_available_skills], prompt=SYSTEM_PROMPT)`
 
-> Test prompts (from `skills.md`): "reset my password" → [KB]; "news today" → [Web];
-> "what skills do you have?" → lists `code_review`, `technical_writing`; "review this
-> code …" → loads `code_review`.
+> Test prompts (from `skills.md`): "reset my password" → [KB:source_id]; "news today" → source URLs;
+> "what skills do you have?" → lists `code-review`, `technical-writing`; "review this
+> code …" → loads `code-review`.
 
 ---
 ## Section D — `migrate.md` (local NIM) — mostly ops, one code change

@@ -5,13 +5,13 @@ plus retrieval-chain detail. Diagrams in `.devx/2-agentic-rag/img/`.
 
 ## The progression (`intro.md`)
 1. **basic_llm** (`basic_llm_dark.svg`) — `Prompt → LLM → Response`. A plain call: no
-   outside data, bounded by training knowledge.
+   outside lookup shown; the prompt itself may contain fresh context.
 2. **basic_rag** (`basic_rag_dark.svg`) — `Prompt → Embedding → Vector DB Search →
    Reranking → LLM → Response`. **Traditional RAG**: the retrieval chain *always* runs
    before the LLM. The path is fixed; the model has no say in whether to retrieve.
 3. **react_agent** (`react_agent_dark.svg`) — the Module 1 ReAct loop (LLM ↔ tools until done).
 4. **agentic_rag** (`agentic_rag_dark.svg`) — the ReAct loop where a **tool call routes
-   into the Retrieval Chain**. The model *decides when* to retrieve. **This is the module's
+   into the Retrieval Chain**, whose reranked chunks return through the tool to the LLM. The model *decides when* to retrieve. **This is the module's
    payoff:** retrieval is a tool, not a mandatory step (a greeting → no retrieval).
 
 ## Retrieval-chain detail (`agentic_rag.md`)
@@ -23,10 +23,10 @@ plus retrieval-chain detail. Diagrams in `.devx/2-agentic-rag/img/`.
   via `create_retriever_tool`.
 
 ## What each node represents
-- *Embedding Model* = `NVIDIAEmbeddings` (`llama-nemotron-embed-1b-v2`): text → vector.
+- *Embedding Model* = `NVIDIAEmbeddings` (`nemotron-3-embed-1b`): text → vector.
 - *Vector DB Search* = FAISS similarity over the ingested chunks.
-- *Reranking Model* = `NVIDIARerank` (`llama-nemotron-rerank-1b-v2`): reorders candidates by
-  true relevance (embeddings get you *close*; rerank gets the *order* right).
+- *Reranking Model* = `NVIDIARerank` (`llama-nemotron-rerank-vl-1b-v2`): reorders candidates by
+  estimated relevance (evaluate whether the new ordering helps).
 - *LLM* = `ChatNVIDIA` (Nemotron 3 Super).
 
 ## Common confusions

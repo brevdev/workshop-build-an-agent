@@ -1,5 +1,5 @@
 ---
-name: dataset_profiler
+name: dataset-profiler
 description: Systematic procedure for profiling, summarizing, or exploring an unfamiliar CSV file or DataFrame
 ---
 

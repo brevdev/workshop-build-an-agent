@@ -17,7 +17,7 @@ Here's a quick recap of what you've accomplished across the workshop:
   <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>Domain specialization via SDG + RLVR</div>
 </div>
 
-But all of these agents share a common architecture: a **single model in a single loop**, with all state living inside the context window. We call these "shallow" agents — not because they're simple, but because their reasoning stays within a single layer of execution.
+The earlier modules mostly use a **single agent loop**. They already include retrieval, checkpoint state, files or skills. Here, “deep” describes adding explicit planning, delegation and context management around that loop; it is a design pattern, not a strict boundary between kinds of agents.
 
 <!-- fold:break -->
 
@@ -46,12 +46,12 @@ These capabilities cover a wide range of real-world tasks. For focused problems 
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">WHERE SHALLOW AGENTS BREAK DOWN</p>
-  <p>For simple tasks, the flat loop is fine. But real production work - research a topic, write code, test it, fix the bugs, and document it - outgrows the architecture, because a shallow agent can't:</p>
-  <p><span class="dx-chip">NO PLANNING</span> Break down a complex task or track progress over long time horizons.</p>
-  <p><span class="dx-chip">NO DELEGATION</span> Spawn a sub-agent to handle a sub-task in parallel.</p>
-  <p><span class="dx-chip">NO FILE MEMORY</span> Read, write, edit, search, and organize files across a project.</p>
-  <p><span class="dx-chip">NO CONTEXT MGMT</span> Summarize long conversations to avoid running out of tokens.</p>
-  <p>These four gaps map directly onto the four pillars of deep agents - exactly what the next page covers.</p>
+  <p>Long tasks put pressure on a basic loop. Add support when the task needs it:</p>
+  <p><span class="dx-chip">PLANNING</span> Break down a complex task or track progress over long time horizons.</p>
+  <p><span class="dx-chip">DELEGATION</span> Spawn a sub-agent to handle a sub-task in parallel.</p>
+  <p><span class="dx-chip">FILE MEMORY</span> Read, write, edit, search, and organize files across a project.</p>
+  <p><span class="dx-chip">CONTEXT</span> Summarize long conversations to avoid running out of tokens.</p>
+  <p>These capabilities can also be added to a single agent. The next page shows how this library packages them.</p>
 </div>
 
 <div class="dx-aside">
@@ -69,7 +69,7 @@ Here's what would likely happen:
 4. The comparison table becomes inconsistent (some frameworks have pricing info, others don't)
 5. The final report is patchy — strong on the last few frameworks researched, weak on the first ones
 
-A human researcher would take notes, organize by subtopic, and check their work against their outline. The shallow agent can't do any of this.
+A human researcher would take notes, organize by subtopic, and check their work against their outline. An agent needs appropriate tools and instructions to do the same.
 
 </div>
 </div>
@@ -90,12 +90,12 @@ A **deep agent** goes beyond the flat ReAct loop. It has built-in capabilities t
 
 | Capability | Shallow Agent | Deep Agent |
 |---|---|---|
-| **Planning** | Limited to CoT reasoning | `write_todos` for task breakdown and tracking |
-| **File System** | Limited tooling (e.g., read) | Full suite: `read`, `write`, `edit`, `ls`, `glob`, `grep` |
+| **Planning** | Task-dependent prompts or plans | `write_todos` for task breakdown and tracking |
+| **File System** | Whatever tools are provided | Full suite: `read`, `write`, `edit`, `ls`, `glob`, `grep` |
 | **Shell Access** | Possible with custom implementation | Built-in `execute` with sandboxing |
-| **Sub-Agents** | None | `task` tool to delegate work to specialized agents |
-| **Context Management** | Fixed window, truncation | Auto-summarization when conversations get long |
-| **Skills** | Primarily relies on system prompts | Loadable markdown methodology files |
+| **Sub-Agents** | Optional, explicitly wired | `task` tool to delegate work to specialized agents |
+| **Context Management** | Depends on the implementation | Auto-summarization when conversations get long |
+| **Skills** | Can use reusable instructions | Loadable markdown methodology files |
 
 Deep agents aren't just agents with more tools — they're agents with an **architecture** designed for complex, autonomous work.
 
@@ -141,7 +141,7 @@ One function call gives you an agent with planning, filesystem access, shell exe
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
   <p class="dx-quiz-q">What actually makes an agent deep rather than shallow?</p>
-  <button class="dx-quiz-opt" data-fb="A bigger model reasons better, but a deep agent built on the same model still beats a shallow one. The difference is architecture, not raw model size.">It runs on a larger, more capable model</button>
+  <button class="dx-quiz-opt" data-fb="A bigger model reasons better, but additional structure may help with long tasks, but must be evaluated. The difference is architecture, not raw model size.">It runs on a larger, more capable model</button>
   <button class="dx-quiz-opt" data-fb="More tools help, but a shallow agent can have many tools too. Depth comes from how the agent is structured, not the size of its toolbox.">It is given access to many more tools</button>
   <button class="dx-quiz-opt" data-right data-fb="Right. Planning, delegation, external memory, and skills are capabilities layered around the loop - the same model becomes a deep agent through structure.">It adds planning, delegation, memory, and skills around the loop</button>
   <button class="dx-quiz-opt" data-fb="A longer window delays overflow but does not solve it. Deep agents manage context with external memory and summarization, not just a bigger window.">It uses a much longer context window</button>

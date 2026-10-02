@@ -39,15 +39,15 @@
   <text x="455" y="172" fill="#cfcfcf" font-size="12" text-anchor="middle">&#8220;Run this cudf.pandas code&#8221;</text>
   <line x1="580" y1="180" x2="334" y2="180" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
 
-  <text x="565" y="214" fill="#8fcb2b" font-size="12" text-anchor="middle">executes locally &#8212; GPU lights up &#128293;</text>
+  <text x="565" y="214" fill="#8fcb2b" font-size="12" text-anchor="middle">runs cuDF on workshop GPU</text>
   <line x1="330" y1="222" x2="796" y2="222" stroke="#76b900" stroke-width="1.6" marker-end="url(#ahg)"/>
 
-  <text x="565" y="256" fill="#cfcfcf" font-size="12" text-anchor="middle">results in milliseconds</text>
+  <text x="565" y="256" fill="#cfcfcf" font-size="12" text-anchor="middle">measured results</text>
   <line x1="800" y1="264" x2="334" y2="264" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
 
-  <text x="455" y="298" fill="#cfcfcf" font-size="12" text-anchor="middle">results</text>
+  <text x="455" y="298" fill="#cfcfcf" font-size="12" text-anchor="middle">tool output (may include data)</text>
   <line x1="330" y1="306" x2="576" y2="306" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
 
-  <text x="335" y="340" fill="#cfcfcf" font-size="12" text-anchor="middle">analysis, GPU-fast</text>
+  <text x="335" y="340" fill="#cfcfcf" font-size="12" text-anchor="middle">final analysis</text>
   <line x1="580" y1="348" x2="94" y2="348" stroke="#6e6e6e" stroke-width="1.6" marker-end="url(#ah)"/>
 </svg>

@@ -1,307 +1,223 @@
-"""
-Docker-based sandbox backend for deepagents.
+"""Docker backend for the workshop: no host mounts or container network.
 
-Implements the SandboxBackendProtocol by routing all file I/O and shell
-execution through an isolated Docker container.  When sandbox mode is ON
-the agent literally cannot see or touch the host filesystem.
+File arguments travel as JSON data, never interpolated into shell source.
+Only the explicitly selected execute tool accepts shell commands.
 """
-
 import asyncio
+import base64
 import json
 import os
-import time
-from dataclasses import dataclass
 
 import docker
-
 from deepagents.backends.protocol import (
-    BackendProtocol,
-    SandboxBackendProtocol,
-    ExecuteResponse,
-    EditResult,
-    WriteResult,
-    FileInfo,
+    SandboxBackendProtocol, ExecuteResponse, EditResult, WriteResult,
+    FileDownloadResponse, FileUploadResponse,
 )
-
 
 DOCKER_IMAGE = "python:3.11-slim"
 WORKSPACE_IN_CONTAINER = "/workspace"
 
 
-def _default_docker_host() -> str:
-    """Resolve a sensible Docker endpoint for the current environment.
-
-    Preference order:
-      1. ``DOCKER_HOST`` if the operator set it (honored verbatim).
-      2. The workshop's mounted host socket ``/var/host-run/docker.sock`` —
-         ``.project/spec.yaml`` maps it in and ``preBuild.bash`` points
-         ``DOCKER_HOST`` at it.
-      3. The standard Linux daemon socket ``/var/run/docker.sock``.
-
-    Falls back to the Linux default socket string if neither socket is present,
-    so a misconfiguration surfaces as a connection error against a real path
-    rather than a macOS-only Colima path that can never exist in this Linux
-    container.
-    """
-    explicit = os.getenv("DOCKER_HOST")
-    if explicit:
-        return explicit
-    for candidate in ("/var/host-run/docker.sock", "/var/run/docker.sock"):
-        if os.path.exists(candidate):
-            return f"unix://{candidate}"
+def _default_docker_host():
+    if os.getenv("DOCKER_HOST"):
+        return os.environ["DOCKER_HOST"]
+    for path in ("/var/host-run/docker.sock", "/var/run/docker.sock"):
+        if os.path.exists(path):
+            return "unix://" + path
     return "unix:///var/run/docker.sock"
 
 
+# Runs inside the container. Keeping paths/content in argv avoids heredoc,
+# quote, command-substitution, newline and binary-content injection.
+_FILE_RPC = r'''
+import base64, glob, json, os, pathlib, sys
+args = json.loads(sys.argv[1]); root = pathlib.Path('/workspace').resolve()
+def path(value):
+    value = value or '/workspace'
+    if value in ('.', '/'): value = '/workspace'
+    p = pathlib.Path(value)
+    if '..' in p.parts: raise PermissionError('Parent traversal is not allowed')
+    p = (p if p.is_absolute() else root / p).resolve()
+    if not p.is_relative_to(root): raise PermissionError('Path is outside /workspace')
+    return p
+
+def info(p):
+    p = path(str(p))
+    return {'path': str(p), 'is_dir': p.is_dir(), 'size': p.stat().st_size}
+
+def read(p):
+    if p.stat().st_size > 65536: raise ValueError('File exceeds the 64 KiB lab limit')
+    return p.read_bytes()
+try:
+    p = path(args.get('path')); op = args['op']
+    if op == 'ls': result = [info(x) for x in sorted(p.iterdir()) if not x.is_symlink()][:1000]
+    elif op == 'read':
+        lines = read(p).decode('utf-8').splitlines(keepends=True)
+        start = args.get('offset',0); limit = args.get('limit',2000)
+        if start < 0 or limit < 0: raise ValueError('offset and limit must be nonnegative')
+        result = ''.join(lines[start:start+limit])
+    elif op in ('write', 'upload'):
+        data = base64.b64decode(args['data'], validate=True)
+        if len(data) > 65536: raise ValueError('File exceeds the 64 KiB lab limit')
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with p.open('xb' if op == 'write' else 'wb') as f: f.write(data)
+        result = str(p)
+    elif op == 'edit':
+        current = read(p).decode('utf-8'); old = args['old']; new = args['new']
+        if not old: raise ValueError('old_string must not be empty')
+        count = current.count(old)
+        if not count: raise ValueError('String not found')
+        if count > 1 and not args['all']: raise ValueError('Multiple matches; use replace_all or a unique string')
+        data = current.replace(old, new, -1 if args['all'] else 1).encode('utf-8')
+        if len(data) > 65536: raise ValueError('File exceeds the 64 KiB lab limit')
+        p.write_bytes(data); result = count if args['all'] else 1
+    elif op == 'glob':
+        pattern = args['pattern']
+        if pathlib.Path(pattern).is_absolute() or '..' in pathlib.Path(pattern).parts:
+            raise PermissionError('Use a relative glob pattern within the workspace')
+        result = [info(x) for x in sorted(p.glob(pattern)) if not x.is_symlink()][:1000]
+    elif op == 'grep':
+        result = []
+        files = [p] if p.is_file() else sorted(p.rglob(args.get('glob') or '*'))
+        for f in files:
+            if not f.is_file() or f.is_symlink(): continue
+            f = path(str(f))
+            for n, line in enumerate(read(f).decode('utf-8',errors='replace').splitlines(),1):
+                if args['pattern'] in line: result.append({'path':str(f),'line':n,'text':line})
+                if len(result) >= 1000: break
+            if len(result) >= 1000: break
+    elif op == 'download': result = base64.b64encode(read(p)).decode('ascii')
+    else: raise ValueError('Unknown file operation')
+    print(json.dumps({'result': result}))
+except Exception as e:
+    print(json.dumps({'error': str(e), 'kind': type(e).__name__}))
+'''
+
+_EXEC_RPC = r'''
+import json, os, selectors, signal, subprocess, sys, time
+p = subprocess.Popen(['bash','-c',sys.argv[1]],cwd='/workspace',stdout=subprocess.PIPE,
+                     stderr=subprocess.STDOUT,start_new_session=True)
+s = selectors.DefaultSelector(); s.register(p.stdout,selectors.EVENT_READ)
+output = bytearray(); truncated = False; deadline = time.monotonic()+60; timed_out = False
+while s.get_map():
+    if time.monotonic() > deadline:
+        os.killpg(p.pid,signal.SIGKILL); timed_out = True
+    for key,_ in s.select(.1):
+        chunk = os.read(key.fd,8192)
+        if not chunk: s.unregister(key.fileobj); continue
+        remaining = max(0,50000-len(output))
+        output.extend(chunk[:remaining]); truncated |= len(chunk)>remaining
+    if timed_out: break
+p.wait()
+text = output.decode('utf-8',errors='replace')
+if timed_out: text += '\nCommand stopped after 60 seconds.'
+if truncated: text += '\n... (truncated)'
+print(json.dumps({'output':text,'exit_code':124 if timed_out else p.returncode,'truncated':truncated}))
+'''
+
+
 class DockerSandboxBackend(SandboxBackendProtocol):
-    """
-    A deepagents-compatible backend that runs *everything* inside a Docker
-    container.  The host filesystem is completely invisible to the agent.
-    """
+    """Disposable nonroot container; this is not a separate-kernel VM."""
 
-    def __init__(self, docker_host: str | None = None):
-        socket = docker_host or _default_docker_host()
-        self._client = docker.DockerClient(base_url=socket)
-        self._container = self._client.containers.run(
-            DOCKER_IMAGE,
-            command="sleep infinity",
-            detach=True,
-            working_dir=WORKSPACE_IN_CONTAINER,
-            # No host mounts — fully isolated
-            mem_limit="512m",
-            nano_cpus=1_000_000_000,  # 1 CPU
-            labels={"gtc-demo": "sandbox"},
-        )
-        # Pre-create workspace dir inside the container
-        self._exec("mkdir -p /workspace")
-        print(f"[DockerSandbox] Container {self._container.short_id} started ({DOCKER_IMAGE})")
+    def __init__(self, docker_host=None):
+        self._container = None
+        self._client = docker.DockerClient(base_url=docker_host or _default_docker_host(), timeout=75)
+        try:
+            self._container = self._client.containers.run(
+                DOCKER_IMAGE, command="sleep infinity", detach=True,
+                working_dir=WORKSPACE_IN_CONTAINER, user="65534:65534",
+                network_mode="none", read_only=True, cap_drop=["ALL"],
+                security_opt=["no-new-privileges:true"], pids_limit=64,
+                tmpfs={"/workspace": "rw,nosuid,size=64m,mode=1777", "/tmp": "rw,nosuid,size=32m,mode=1777"},
+                environment={"PYTHONDONTWRITEBYTECODE": "1"},
+                mem_limit="512m", nano_cpus=1_000_000_000,
+                labels={"build-an-agent": "sandbox"},
+            )
+            self._call("ls", path="/workspace")
+        except Exception:
+            self.delete()
+            raise
 
-    # ── internal helpers ──────────────────────────────────────────────────
+    def _run(self, code, argument):
+        result = self._container.exec_run(["python", "-c", code, argument], demux=True)
+        stdout, stderr = result.output
+        if result.exit_code:
+            raise RuntimeError((stderr or stdout or b"Container operation failed").decode(errors="replace")[:1000])
+        return json.loads(stdout)
 
-    def _exec(self, cmd: str, workdir: str | None = None) -> tuple[int, str]:
-        """Run a command inside the container and return (exit_code, output)."""
-        wd = workdir or WORKSPACE_IN_CONTAINER
-        result = self._container.exec_run(
-            ["bash", "-c", cmd],
-            workdir=wd,
-            demux=True,
-        )
-        stdout = (result.output[0] or b"").decode("utf-8", errors="replace") if result.output else ""
-        stderr = (result.output[1] or b"").decode("utf-8", errors="replace") if result.output else ""
-        combined = stdout
-        if stderr:
-            combined = f"{stdout}\n{stderr}" if stdout else stderr
-        return result.exit_code, combined.strip()
+    def _call(self, op, **kwargs):
+        result = self._run(_FILE_RPC, json.dumps({"op": op, **kwargs}))
+        if "error" in result:
+            raise ValueError(result["error"])
+        return result["result"]
 
-    def _resolve(self, path: str) -> str:
-        """Ensure paths are absolute inside the container workspace."""
-        if not path or path == ".":
-            return WORKSPACE_IN_CONTAINER
-        if path.startswith("/workspace"):
-            return path
-        if path.startswith("/"):
-            return path  # Absolute container path
-        return f"{WORKSPACE_IN_CONTAINER}/{path}"
+    def execute(self, command):
+        return ExecuteResponse(**self._run(_EXEC_RPC, command))
 
-    # ── SandboxBackendProtocol: execute ───────────────────────────────────
-
-    def execute(self, command: str) -> ExecuteResponse:
-        exit_code, output = self._exec(command)
-        truncated = len(output) > 50000
-        if truncated:
-            output = output[:50000] + "\n... (truncated)"
-        return ExecuteResponse(output=output, exit_code=exit_code, truncated=truncated)
-
-    async def aexecute(self, command: str) -> ExecuteResponse:
+    async def aexecute(self, command):
         return await asyncio.to_thread(self.execute, command)
 
-    # ── BackendProtocol: ls ───────────────────────────────────────────────
+    def ls_info(self, path):
+        return self._call("ls", path=path)
 
-    def ls_info(self, path: str) -> list[FileInfo]:
-        resolved = self._resolve(path)
-        # Use stat to get proper file info
-        code, output = self._exec(
-            f'find "{resolved}" -maxdepth 1 -printf "%p\\t%s\\t%T@\\t%y\\n" 2>/dev/null || '
-            f'ls -la "{resolved}" 2>&1'
-        )
-        if code != 0:
-            return []
+    def read(self, file_path, offset=0, limit=2000):
+        try:
+            return self._call("read", path=file_path, offset=offset, limit=limit)
+        except ValueError as e:
+            return f"Error: {e}"
 
-        results: list[FileInfo] = []
-        for line in output.strip().split("\n"):
-            if not line or line.startswith("total"):
-                continue
-            parts = line.split("\t")
-            if len(parts) >= 4:
-                fpath, size_str, mtime_str, ftype = parts[0], parts[1], parts[2], parts[3]
-                if fpath == resolved:
-                    continue  # skip the directory itself
-                name = os.path.basename(fpath)
-                if not name:
-                    continue
-                results.append(FileInfo(
-                    path=fpath,
-                    is_dir=(ftype == "d"),
-                    size=int(size_str) if size_str.isdigit() else 0,
-                ))
-            else:
-                # Fallback: just return file names
-                results.append(FileInfo(path=line.strip()))
-        if not results:
-            return [FileInfo(path=f"{resolved}/ (empty directory)")]
-        return results
+    def write(self, file_path, content):
+        try:
+            path = self._call("write", path=file_path, data=base64.b64encode(content.encode()).decode())
+            return WriteResult(path=path)
+        except ValueError as e:
+            return WriteResult(error=str(e))
 
-    async def als_info(self, path: str) -> list[FileInfo]:
-        return await asyncio.to_thread(self.ls_info, path)
+    def edit(self, file_path, old_string, new_string, replace_all=False):
+        try:
+            count = self._call("edit", path=file_path, old=old_string, new=new_string, all=replace_all)
+            return EditResult(path=file_path, occurrences=count)
+        except ValueError as e:
+            return EditResult(error=str(e))
 
-    # ── BackendProtocol: read ─────────────────────────────────────────────
+    def glob_info(self, pattern, path="/"):
+        return self._call("glob", path=path, pattern=pattern)
 
-    def read(self, file_path: str, offset: int = 0, limit: int = 2000) -> str:
-        resolved = self._resolve(file_path)
-        if offset > 0 or limit < 2000:
-            start = offset + 1
-            end = offset + limit
-            code, output = self._exec(f'sed -n "{start},{end}p" "{resolved}"')
-        else:
-            code, output = self._exec(f'cat "{resolved}"')
-        if code != 0:
-            return f"Error reading file: {output}"
-        return output
-
-    async def aread(self, file_path: str, offset: int = 0, limit: int = 2000) -> str:
-        return await asyncio.to_thread(self.read, file_path, offset, limit)
-
-    # ── BackendProtocol: write ────────────────────────────────────────────
-
-    def write(self, file_path: str, content: str) -> WriteResult:
-        resolved = self._resolve(file_path)
-        # Ensure parent directory exists
-        parent = os.path.dirname(resolved)
-        self._exec(f'mkdir -p "{parent}"')
-
-        # Use heredoc to write content (handles special chars)
-        escaped = content.replace("\\", "\\\\").replace("'", "'\"'\"'")
-        code, output = self._exec(f"cat > \"{resolved}\" << 'DEEPAGENT_EOF'\n{content}\nDEEPAGENT_EOF")
-        if code != 0:
-            return WriteResult(error=f"Write failed: {output}", path=None, files_update=None)
-        return WriteResult(error=None, path=resolved, files_update={resolved: {"status": "created"}})
-
-    async def awrite(self, file_path: str, content: str) -> WriteResult:
-        return await asyncio.to_thread(self.write, file_path, content)
-
-    # ── BackendProtocol: edit ─────────────────────────────────────────────
-
-    def edit(self, file_path: str, old_string: str, new_string: str, replace_all: bool = False) -> EditResult:
-        resolved = self._resolve(file_path)
-        # Read current content
-        code, current = self._exec(f'cat "{resolved}"')
-        if code != 0:
-            return EditResult(error=f"File not found: {resolved}", path=None, files_update=None, occurrences=0)
-
-        count = current.count(old_string)
-        if count == 0:
-            return EditResult(error=f"String not found in {resolved}", path=resolved, files_update=None, occurrences=0)
-
-        if replace_all:
-            new_content = current.replace(old_string, new_string)
-        else:
-            new_content = current.replace(old_string, new_string, 1)
-
-        # Write back
-        write_result = self.write(file_path, new_content)
-        if write_result.error:
-            return EditResult(error=write_result.error, path=resolved, files_update=None, occurrences=0)
-
-        return EditResult(
-            error=None,
-            path=resolved,
-            files_update={resolved: {"status": "edited"}},
-            occurrences=count if replace_all else 1,
-        )
-
-    async def aedit(self, file_path: str, old_string: str, new_string: str, replace_all: bool = False) -> EditResult:
-        return await asyncio.to_thread(self.edit, file_path, old_string, new_string, replace_all)
-
-    # ── BackendProtocol: glob ─────────────────────────────────────────────
-
-    def glob_info(self, pattern: str, path: str = "/") -> list[FileInfo]:
-        resolved = self._resolve(path)
-        code, output = self._exec(f'find "{resolved}" -name "{pattern}" -printf "%p\\t%s\\t%y\\n" 2>/dev/null')
-        if code != 0 or not output:
-            return []
-
-        results: list[FileInfo] = []
-        for line in output.strip().split("\n"):
-            if not line:
-                continue
-            parts = line.split("\t")
-            if len(parts) >= 3:
-                results.append(FileInfo(
-                    path=parts[0],
-                    is_dir=(parts[2] == "d"),
-                    size=int(parts[1]) if parts[1].isdigit() else 0,
-                ))
-        return results
-
-    async def aglob_info(self, pattern: str, path: str = "/") -> list[FileInfo]:
-        return await asyncio.to_thread(self.glob_info, pattern, path)
-
-    # ── BackendProtocol: grep ─────────────────────────────────────────────
-
-    def grep_raw(self, pattern: str, path: str | None = None, glob: str | None = None) -> list:
-        search_path = self._resolve(path) if path else WORKSPACE_IN_CONTAINER
-        cmd = f'grep -rn "{pattern}" "{search_path}"'
-        if glob:
-            cmd += f' --include="{glob}"'
-        code, output = self._exec(cmd)
-        if not output:
-            return []
-        # Return raw grep output as GrepMatch dicts. The deepagents backend
-        # protocol (GrepMatch TypedDict) expects the keys `path`, `line`, `text`;
-        # the formatter (build_grep_results_dict) reads m["line"]/m["text"], so
-        # these names must match exactly or grep errors on every match.
-        results = []
-        for line in output.strip().split("\n"):
-            if ":" in line:
-                parts = line.split(":", 2)
-                if len(parts) >= 3:
-                    results.append({
-                        "path": parts[0],
-                        "line": int(parts[1]) if parts[1].isdigit() else 0,
-                        "text": parts[2],
-                    })
-        return results
-
-    async def agrep_raw(self, pattern: str, path: str | None = None, glob: str | None = None) -> list:
-        return await asyncio.to_thread(self.grep_raw, pattern, path, glob)
-
-    # ── BackendProtocol: upload / download (stubs for demo) ───────────────
+    def grep_raw(self, pattern, path=None, glob=None):
+        return self._call("grep", path=path, pattern=pattern, glob=glob)
 
     def upload_files(self, files):
-        return []
-
-    async def aupload_files(self, files):
-        return []
+        results = []
+        for path, content in files:
+            try:
+                self._call("upload", path=path, data=base64.b64encode(content).decode())
+                results.append(FileUploadResponse(path=path))
+            except ValueError:
+                results.append(FileUploadResponse(path=path, error="invalid_path"))
+        return results
 
     def download_files(self, paths):
-        return []
-
-    async def adownload_files(self, paths):
-        return []
-
-    # ── Lifecycle ─────────────────────────────────────────────────────────
-
-    def delete(self):
-        """Stop and remove the Docker container."""
-        try:
-            self._container.stop(timeout=5)
-            self._container.remove(force=True)
-            print(f"[DockerSandbox] Container {self._container.short_id} destroyed")
-        except Exception as e:
-            print(f"[DockerSandbox] Cleanup error: {e}")
+        results = []
+        for path in paths:
+            try:
+                data = base64.b64decode(self._call("download", path=path))
+                results.append(FileDownloadResponse(path=path, content=data))
+            except ValueError:
+                results.append(FileDownloadResponse(path=path, error="invalid_path"))
+        return results
 
     @property
-    def container_id(self) -> str:
+    def id(self):
+        return self._container.id
+
+    @property
+    def container_id(self):
         return self._container.short_id
 
-    def __repr__(self):
-        return f"<DockerSandboxBackend container={self._container.short_id}>"
+    def delete(self):
+        if self._container is not None:
+            try:
+                self._container.remove(force=True)
+            finally:
+                self._container = None
+        self._client.close()

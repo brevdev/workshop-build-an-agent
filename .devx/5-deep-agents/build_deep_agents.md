@@ -18,6 +18,8 @@ Our deep agent factory has five core functions:
   <div class="dx-cell is-wide"><h4>STEP 5</h4><span class="dx-big">Assemble</span>create_agent() wires it all together with create_deep_agent().</div>
 </div>
 
+The provided permission guard hides disabled tools and also protects delegated file access. File-only mode confines paths to its workspace; local shell execution can access your OS account. A requested Docker sandbox must start or creation fails. Web Search and RAG run in the application, outside that container.
+
 Let's build each one.
 
 <!-- fold:break -->
@@ -33,7 +35,7 @@ The first step is connecting to an NVIDIA NIM model. Deep agents need a model th
 Fill in `_get_model()` to create a ChatNVIDIA instance.
 
 Use `MODEL_MAP` to look up the `model_id`, and `os.getenv("NVIDIA_API_KEY")` for the `api_key`.
-Set temperature to 0.3.
+Set temperature to 0.3. Keep the provided response limit and 90-second network timeout.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -41,12 +43,15 @@ Set temperature to 0.3.
 ```python
 ...
 api_key = os.getenv("NVIDIA_API_KEY")
-model_name = MODEL_MAP.get(model_id, MODEL_MAP["llama"])
+model_name = MODEL_MAP[model_id]
 print(f"[Agent] Using model: {model_name} (id={model_id})")
 return ChatNVIDIA(
     model=model_name,
     api_key=api_key,
     temperature=0.3,
+    max_tokens=4096,
+    timeout=90,
+    model_kwargs={"chat_template_kwargs": {"enable_thinking": False}} if model_id == "nemotron_fast" else {},
 )
 ...
 ```
@@ -110,10 +115,10 @@ Your enabled capabilities:
 {caps_text}
 
 CRITICAL RULES:
-1. Answer the user's question DIRECTLY. Do NOT use the 'task' tool — respond yourself.
+1. Answer simple questions directly. For independent subtasks, use task and check its result.
 2. File tools require ABSOLUTE paths. Your workspace is: {workspace}
    Always use paths like: {workspace}/hello.py
-3. Use web search when the user asks for current information.
+3. Use web search for current information only when that tool is enabled.
 4. Be concise and technically accurate.
 5. You are running on NVIDIA infrastructure.{rag_rule}
 {hitl_note}{skill_section}"""
@@ -129,14 +134,14 @@ The **backend** determines where file operations and shell commands execute. Dee
 
 - `FilesystemBackend` — File-only operations (read, write, edit, ls, glob, grep)
 - `LocalShellBackend` — File operations **plus** shell execution (extends FilesystemBackend)
-- `DockerSandboxBackend` — Everything runs inside an isolated Docker container
+- `DockerSandboxBackend` — File and shell tools run in a disposable container with no network or host mounts
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 4');"><i class="fas fa-code"></i> # TODO: Exercise 4</button>
 
 Fill in ``_build_backend()`` to return the right backend:
 
-* If "execute" is in ``skill_ids`` → ``LocalShellBackend`` (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to True)
-* Otherwise → ``FilesystemBackend`` (with root_dir as workspace)
+* If "execute" is in ``skill_ids`` → ``LocalShellBackend`` (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to False, virtual_mode=True)
+* Otherwise → ``FilesystemBackend`` (with root_dir as workspace, virtual_mode=True)
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -148,11 +153,11 @@ if "execute" in skill_ids:
         root_dir=workspace,
         timeout=60.0,
         max_output_bytes=50000,
-        inherit_env=True,
+        inherit_env=False, virtual_mode=True,
     )
     print("[Agent] Shell execution enabled via LocalShellBackend")
 else:
-    backend = FilesystemBackend(root_dir=workspace)
+    backend = FilesystemBackend(root_dir=workspace, virtual_mode=True)
     print("[Agent] Using FilesystemBackend")
 ...
 ```
@@ -171,7 +176,7 @@ Fill in ``create_agent()`` to:
 
 1. Call ``_get_model()`` with model_id, ``_build_extra_tools()`` with skill_ids
 2. Build the ``agent_kwargs`` dict with model, extra_tools (if it exists), system_prompt, backend, checkpointer
-3. If ``hitl_enabled``, add interrupt_on=INTERRUPT_TOOLS
+3. If ``hitl_enabled``, add interrupt_on={name: True for name in INTERRUPT_TOOLS if name in enabled_tools(skill_ids)}
 4. Call ``create_deep_agent`` on **agent_kwargs and return the result
 
 <details class="dx-peek is-solution">
@@ -181,10 +186,10 @@ Fill in ``create_agent()`` to:
 ...
 model = _get_model(model_id)
 extra_tools = _build_extra_tools(skill_ids)
-skill_sources = _get_skill_sources()
 
 # Build the backend first so the prompt reflects the ACTUAL sandbox state.
 backend, sandbox = _build_backend(skill_ids, sandbox_map)
+backend = restrict_backend(backend, skill_ids)
 sandbox_active = sandbox is not None
 system_prompt = _build_system_prompt(skill_ids, model_id, hitl_enabled, sandbox_active)
 
@@ -197,10 +202,9 @@ agent_kwargs: dict = {
 }
 
 if hitl_enabled:
-    agent_kwargs["interrupt_on"] = INTERRUPT_TOOLS
+    agent_kwargs["interrupt_on"] = {name: True for name in INTERRUPT_TOOLS if name in enabled_tools(skill_ids)}
 
-if skill_sources:
-    agent_kwargs["skills"] = skill_sources
+agent_kwargs["middleware"] = [CapabilityMiddleware(skill_ids)]
 
 agent = create_deep_agent(**agent_kwargs)
 ...

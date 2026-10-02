@@ -10,9 +10,10 @@ interface SkillCardProps {
   isInPalette?: boolean;
   isRecommended?: boolean;
   accentColor?: string;
+  onAdd?: () => void;
 }
 
-export function SkillCard({ skill, isInPalette = true, isRecommended = false, accentColor }: SkillCardProps) {
+export function SkillCard({ skill, isInPalette = true, isRecommended = false, accentColor, onAdd }: SkillCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: skill.id,
     data: skill,
@@ -43,6 +44,8 @@ export function SkillCard({ skill, isInPalette = true, isRecommended = false, ac
       style={{ ...style, ...recommendedStyle }}
       {...listeners}
       {...attributes}
+      role={onAdd ? "group" : attributes.role}
+      tabIndex={onAdd ? -1 : attributes.tabIndex}
       className={`skill-card ${isDragging ? 'dragging' : ''} ${isInPalette ? 'in-palette' : 'in-agent'} ${isRecommended ? 'recommended' : ''}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -62,6 +65,10 @@ export function SkillCard({ skill, isInPalette = true, isRecommended = false, ac
       <div className="skill-card-category" data-category={skill.category}>
         {isRecommended ? '★ REC' : skill.category.toUpperCase()}
       </div>
+      {onAdd && <button className="skill-add" type="button" aria-label={`Add ${skill.name}`}
+        onPointerDown={event => event.stopPropagation()}
+        onKeyDown={event => event.stopPropagation()}
+        onClick={event => { event.stopPropagation(); onAdd(); }}>+</button>}
       <div className="skill-card-glow" />
       <div className="skill-card-tooltip" ref={tooltipRef}>{skill.description}</div>
     </motion.div>

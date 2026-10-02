@@ -1,9 +1,9 @@
 <div class="dx-hero" data-eyebrow="MODULE 05 / DEEP AGENTS" data-title="Deep Agents Workshop" data-meta="DURATION::1-2 hrs|MODEL::Nemotron 3 Super|GPU::Hosted API endpoint"></div>
 
-In Modules 1 through 4, you built agents that reason, call tools, retrieve knowledge, and even execute shell commands. In this capstone module, you'll graduate from those shallow ReAct agents to **deep agents** — autonomous systems that can plan, code, execute, delegate, and self-manage. These are the same architectural patterns behind products like deep research assistants and AI coding agents. You'll build a production-grade deep agent using NVIDIA models, secure it with Docker sandboxing, and understand the architecture that makes it all work.
+In Modules 1 through 4, you built agents that reason, call tools, retrieve knowledge, and even execute shell commands. In this module, you'll combine those building blocks into **deep agents** — autonomous systems that can plan, code, execute, delegate, and self-manage. These are the same architectural patterns behind products like deep research assistants and AI coding agents. You'll build a deep agent with explicit permissions using NVIDIA models, secure it with Docker sandboxing, and understand the architecture that makes it all work.
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide is-tall"><h4>YOU WILL BUILD</h4><span class="dx-big">A production deep agent</span>Planning, file I/O, shell execution, and sub-agent delegation - then locked down with Docker sandboxing.</div>
+  <div class="dx-cell is-wide is-tall"><h4>YOU WILL BUILD</h4><span class="dx-big">A learning deep agent</span>Planning, file I/O, shell execution, and sub-agent delegation - then bounded by explicit tool permissions and Docker sandboxing.</div>
   <div class="dx-cell"><h4>DURATION</h4><span class="dx-big">1-2 h</span>self-paced</div>
   <div class="dx-cell"><h4>BUILT WITH</h4>deepagents - LangGraph - NVIDIA Nemotron</div>
   <div class="dx-cell"><h4>YOU'LL TAKE HOME</h4>The four pillars of deep agents and the patterns for running them safely.</div>
@@ -26,7 +26,7 @@ At the end of this module, you will take home:
 
 This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
 
-<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+<button onclick="launch('Claude Code', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
 
 Ask for this module by name — `/module-5` in Claude Code, `$module-5` in Codex — or just describe what you're stuck on and the right skill loads on its own.
 

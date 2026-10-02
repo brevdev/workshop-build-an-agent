@@ -8,20 +8,24 @@ This workshop provides everything you need to become proficient in agentic AI de
 * **Module 2 - Agentic RAG**: Build an IT Help Desk agent using RAG with NVIDIA NeMo Retriever
 * **Module 3 - Agent Evaluation**: Learn to measure and improve agent quality using RAGAS metrics and LLM-as-a-judge techniques
 * **Module 4 - Agent Customization**: Customize your agent beyond prompt engineering and tools with agent skills and reinforcement learning (RL).
-* **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and learn to run them safely and securely in production with sandboxing and isolation.
+* **Module 5 - Deep Agents**: Build deep agents that autonomously handle complex, multi-step tasks—and use sandboxing to restrict their access.
 * **Module 6 - Agent Safety**: Secure autonomous agents with kernel-level enforcement (via OpenShell) and privacy routing using NVIDIA's NemoClaw stack.
 * **Module 7 - Agent Harnesses & Skills**: Separate the harness layer from the LLM, survey harness architectures from OpenClaw to pi to Claude Code, and supercharge any of them with portable, GPU-accelerated NVIDIA Verified Skills.
 
 At the end of this workshop, you will take home:
 
 * Deep understanding of agent architecture and design patterns
-* Seven working agents demonstrating different capabilities
+* Working agents and evaluation workflows demonstrating different capabilities
 * Knowledge of NVIDIA NIM, NeMo models, and evaluation tools
 * Comprehensive evaluation framework for production agents
 * A turn-key, portable development environment
 * Best practices for continuous agent improvement
 
 The entire workshop can take anywhere from 14 to 21 hours to complete, depending on depth of exploration.
+
+## Check your setup
+
+Open **Workshop Utilities → Workshop Health** in the JupyterLab launcher to check your environment, keys, model endpoints, and local services. Use **Secrets Manager** in the same section to save or update keys.
 
 ## 🤖 Learn with an AI tutor (optional)
 
@@ -105,7 +109,7 @@ Specialize agents for specific domains using synthetic data and reinforcement le
 
 Build autonomous agents that handle complex, multi-step tasks with planning and delegation.
 
-**What you'll build**: A production-grade deep agent with explicit planning, hierarchical sub-agent delegation, persistent memory, and sandboxed execution using Docker.
+**What you'll build**: A deep-agent prototype with planning, sub-agent delegation, file-backed memory, and Docker sandboxing.
 
 **Key concepts**:
 - The four pillars of deep agents (planning, delegation, memory, skills)
@@ -121,7 +125,7 @@ Secure autonomous agents with kernel-level enforcement, data routing, and contin
 **What you'll build**: An OpenClaw personal assistant agent that executes inside and outside of an Openshell sandbox, complete with network and filesystem policies that demonstrate how the NVIDIA NemoClaw reference stack improves agent security.
 
 **Key concepts**:
-- Why application-level controls (M4) and container isolation (M5) are insufficient for always-on agents
+- How approval (M4), container controls (M5), and kernel restrictions work together
 - Setting up and running an OpenClaw autonomous agent
 - Kernel-level enforcement with OpenShell (Landlock LSM, seccomp BPF, OPA proxy)
 - Improved security for routing inference via a privacy router

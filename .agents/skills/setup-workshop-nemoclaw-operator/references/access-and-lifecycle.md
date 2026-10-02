@@ -23,6 +23,14 @@ openshell forward service "$SANDBOX" --target-port 8888 --local 8888
 - `openshell forward list` / `forward stop` do **NOT** track `forward service`
   tunnels (they manage `forward start` ones). Stop with Ctrl-C or
   `pkill -f "forward service $SANDBOX"`.
+- Agent-driven runs (e.g. Claude Code): a background task dies with the
+  session that spawned it — on session exit the user silently loses access
+  (observed live). Start it detached so it outlives the session:
+  `setsid nohup openshell forward service "$SANDBOX" --target-port 8888
+  --local 8888 >/tmp/forward-"$SANDBOX".log 2>&1 </dev/null &`
+- However it was started, ALWAYS include the forward command in the final
+  access steps handed to the user, as a restart-it-yourself FYI (SKILL.md
+  Phase 4 hand-off rule) — it is the one leg the user cannot see running.
 - Sanity check from another host shell:
   `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8888/lab` →
   `302` (auth redirect = alive; with the token appended it is `200`;

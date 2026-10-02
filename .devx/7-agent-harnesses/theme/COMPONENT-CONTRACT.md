@@ -61,10 +61,10 @@ competing with the module pitch.
 
 ```html
 <div class="dx-island">
-  <p class="dx-island-title">CONTEXT TAX METER - PERMANENT PER-TURN OVERHEAD</p>
+  <p class="dx-island-title">CONTEXT TAX METER - BUNDLED CONFIGURATION ESTIMATES</p>
   <div class="dx-tax">
-    <div class="dx-tax-row" style="--dx-w:10"><span class="dx-tax-name">pi</span><div class="dx-tax-track"><div class="dx-tax-fill">~1k</div></div><span class="dx-tax-note">minimal</span></div>
-    <div class="dx-tax-row" data-tier="max" style="--dx-w:95"><span class="dx-tax-name">Claude Code / Codex</span><div class="dx-tax-track"><div class="dx-tax-fill">7-10k</div></div><span class="dx-tax-note">maximal</span></div>
+    <div class="dx-tax-row" style="--dx-w:10"><span class="dx-tax-name">Bundled minimal</span><div class="dx-tax-track"><div class="dx-tax-fill">~400</div></div><span class="dx-tax-note">minimal</span></div>
+    <div class="dx-tax-row" data-tier="max" style="--dx-w:95"><span class="dx-tax-name">Bundled maximal</span><div class="dx-tax-track"><div class="dx-tax-fill">~3,900</div></div><span class="dx-tax-note">maximal</span></div>
   </div>
 </div>
 ```

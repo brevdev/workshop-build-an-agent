@@ -30,7 +30,7 @@ function getStatusColor(status: ToolCall['status']) {
   switch (status) {
     case 'pending': return 'var(--text-tertiary)';
     case 'running': return 'var(--nvidia-green)';
-    case 'success': return 'var(--nvidia-green)';
+    case 'success': return 'var(--text-secondary)';
     case 'error': return 'var(--r400)';
   }
 }
@@ -39,7 +39,7 @@ function getStatusIcon(status: ToolCall['status']) {
   switch (status) {
     case 'pending': return '○';
     case 'running': return '◉';
-    case 'success': return '✓';
+    case 'success': return '•';
     case 'error': return '✕';
   }
 }
@@ -63,7 +63,7 @@ export function ToolCallsPanel({ toolCalls, skills, activeToolId }: ToolCallsPan
             <path d="M2 3h12v1H2V3zm0 4h12v1H2V7zm0 4h8v1H2v-1z"/>
           </svg>
           <span>Tool Calls</span>
-          <div className="tool-panel-count">
+          <div className="tool-panel-count" title="Completed tool calls">
             {toolCalls.filter(t => t.status === 'success').length}/{toolCalls.length}
           </div>
         </div>
@@ -209,7 +209,7 @@ export function ToolCallsPanel({ toolCalls, skills, activeToolId }: ToolCallsPan
                               <span className="log-entry-icon">{call.skillIcon}</span>
                               <span>{call.skillName}</span>
                             </div>
-                            <div className="log-entry-action">{call.action}</div>
+                            <div className="log-entry-action">{call.action}{call.status === 'success' ? ' · Completed' : call.status === 'error' ? ' · Failed' : ''}</div>
                           </div>
                           {call.duration !== undefined && (
                             <div className="log-entry-duration">{call.duration}ms</div>
@@ -224,7 +224,7 @@ export function ToolCallsPanel({ toolCalls, skills, activeToolId }: ToolCallsPan
                                 <code className="log-detail-value">{call.input}</code>
                               </div>
                             )}
-                            {call.output && call.status === 'success' && (
+                            {call.output && (
                               <div className="log-detail">
                                 <span className="log-detail-label">Output</span>
                                 <code className="log-detail-value">{call.output}</code>

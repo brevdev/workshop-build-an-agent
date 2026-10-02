@@ -125,7 +125,7 @@ Try printing `state["messages"]` to see the complete trace of your agent's work.
 
 <img src="_static/robots/surf.png" alt="Research Agent Robot" style="float:right; max-width:300px;margin:25px;" />
 
-In this exercise, you were introduced to production-ready agent code with LangChain and wrote the client code that invokes that agent. This code is simpler than our first agent, but it's doing the same steps under the hood!
+In this exercise, you were introduced to framework-managed agent code with LangChain and wrote the client code that invokes that agent. This code is simpler than our first agent, but it's doing the same steps under the hood!
 
 > **Note on Terminology**: This workshop uses both "LangChain" and "LangGraph" - they're related. LangGraph is a low-level orchestration framework from the LangChain team - usable on its own - for building stateful, multi-step applications like agents. When we use `create_agent`, we're using a LangChain utility that's built on LangGraph under the hood.
 

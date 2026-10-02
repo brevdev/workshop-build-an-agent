@@ -1,80 +1,25 @@
 # Module 3 Troubleshooting — tutor reference
 
-**Triage first.** Environment/runtime problem (give direct fixes), exercise blank
-(guide — see `exercises.md`), or interpretation (a teaching moment — see `concepts.md`)?
-Runtime fixes below are fair to give directly; they aren't the learning content.
+Distinguish environment failures (give direct help), unfinished exercise blanks (guide), and interpretation (ask for evidence).
 
-## Prerequisite agents (Modules 1 & 2)
-Module 3 evaluates the M1 and M2 agents, so they must be **built and importable**.
-- The RAG notebook imports Module 2's *components* (`llm`, `RETRIEVER`, `RETRIEVER_TOOL`)
-  and assembles its own retrieval-only agent from them; the report notebook imports the
-  Module 1 `agent`. A `RuntimeError` naming an unfilled blank → that module's code is
-  incomplete.
-- Only Module 2's **RAG** exercises are required (`splitter`, `embeddings`, `reranker`,
-  `llm`). MCP and Skills are optional for Module 3.
-- **Do not tell them to strip tools out of their Module 2 agent** — that used to be the
-  advice and it is no longer needed. The eval notebook never edits `rag_agent.py`; it
-  builds a separate one-tool agent so faithfulness / context precision / context recall are
-  measured against knowledge-base context only. Their four-tool agent keeps working in the
-  Simple Agents Client.
-- It's still fine to tell a stuck learner to paste `code/2-agentic-rag/rag_agent.answers.py`
-  into `rag_agent.py` to get a runnable agent-under-test (the workshop says to).
+## Setup and prerequisites
 
-## API keys
-Keys load from repo-root **`secrets.env`** (gitignored). Needs **`NVIDIA_API_KEY`** (the
-judge `nemotron-3-super-120b-a12b`, the embeddings, and both agents) and **`TAVILY_API_KEY`**
-(the report agent's web search runs during report generation). LangSmith optional.
-- **401 / auth** on the judge or agents → key missing/invalid; set it and restart the kernel.
+Start with Workshop Health for credentials, packages, and endpoint availability. Setup cells discover the project root and load `secrets.env`; LangSmith is optional. Missing/invalid keys commonly produce HTTP 401/403. HTTP 410 can mean a retired endpoint: inspect the shared model registry rather than treating it as an exercise error.
 
-## RAGAS
-- The RAG notebook guards the import: if `ragas`/`datasets` aren't importable it sets
-  `RAGAS_AVAILABLE = False` and **continues with LLM-as-judge metrics only** — so a
-  missing RAGAS isn't fatal, just narrower. `ragas` and `datasets` ship in
-  `requirements.txt`, so RAGAS is installed.
-- **Compat shim (important):** every current `ragas` (through 0.4.x) hard-imports
-  `langchain_community.chat_models.vertexai`, a path that was **removed** when
-  langchain-community split into standalone packages (0.4+, which the workshop's
-  langchain 1.x stack requires). Without a fix, `import ragas` raises
-  `ModuleNotFoundError: No module named 'langchain_community.chat_models.vertexai'`
-  even though ragas is installed. The RAGAS cell registers a lightweight `sys.modules`
-  stub for that unused path **before** importing ragas — that's the shim at the top of
-  the cell; it must run before `from ragas import evaluate`. The workshop never uses
-  VertexAI, so the stub is safe. If a learner sees the vertexai ModuleNotFoundError,
-  they deleted/skipped the shim — restore it, don't "pip install ragas".
-- RAGAS needs each row to have **question, answer, contexts, and ground_truth** — if
-  context_recall/precision error, a field is missing/empty (often empty
-  `retrieved_contexts` because the agent didn't actually retrieve).
-- RAGAS calls the judge/embeddings under the hood, so it also needs the NVIDIA key and is
-  **slow** (many model calls); a few minutes is normal.
+The RAG notebook imports Module 2’s splitter, embeddings, reranker, model, retriever tool, and prompt. Its KB-only evaluation graph is separate from the four-tool app. MCP and Skills are optional for evaluation. An ellipsis-related exception generally means an unfinished blank; provider errors require separate diagnosis. Restart the kernel after editing imported Python files.
 
-## The judge
-- `create_judge_llm()` uses `nvidia/nemotron-3-super-120b-a12b` at **temperature 0** for
-  consistent grading — don't raise the temperature "to be creative"; that makes scores noisy.
-- Judge returns a score + explanation; if scores look random, suspect the **prompt** (e.g.
-  the `FAITHFULNESS_PROMPT` rubric left as the `TODO` placeholder) before blaming the model.
+The report agent also needs Tavily. An agent failure or empty answer has a separate status and is skipped by the judge. It must not be treated as a low-quality answer.
 
-## Synthetic data generation (`generate_*_eval_dataset.ipynb`)
-- Uses **NVIDIA NeMo Data Designer** (`data-designer` / `nemo-microservices`). If SDG
-  errors or the service is unreachable, the learner can **skip it and use the pre-made
-  datasets** (`data/evaluation/rag_agent_test_cases.json`, `report_agent_test_cases.json`)
-  — the eval notebooks fall back to these when `synthetic_*` files are absent.
-- Generated files are written as `data/evaluation/synthetic_*_test_cases.json`; the eval
-  notebooks prefer those if present, else the pre-made ones.
+## Judge and RAGAS
 
-## Long run times
-- "Run Agent on Test Cases" / "Generate Reports" call the agents live (the report agent
-  even web-searches per topic) — **the report eval can take ~30 minutes**. This is
-  expected, not a hang; watch the per-item progress prints.
+Complete the faithfulness rubric before grading. The provided judge uses JSON mode, disables reasoning for these short rubrics, and paces requests. A malformed score, missing explanation, or score outside 1–5 becomes a measurement error, not zero. A null value means no valid measurement: inspect its status and explanation. Valid low scores deserve content review; failed calls deserve runtime diagnosis. HTTP 429 means the provider is limiting requests; bounded backoff helps, but a quota limit may require waiting before another run.
 
-## Data paths
-- Notebooks run from `code/3-agent-evaluation/` and reference `../../data/evaluation/…`.
-  `FileNotFoundError` → wrong working dir, or they expected a `synthetic_*` file they
-  never generated (it falls back to the pre-made file only if the code path matches).
+The pinned RAGAS environment requires the notebook’s compatibility shim before import. RAGAS failures are saved in `ragas.json` while custom scores remain available. The notebook runs one RAGAS worker with bounded retries; many judge calls can take several minutes. Each mean is accompanied by its successful count. Do not upgrade individual packages blindly.
 
-## Interpretation confusion (teaching moments, not bugs)
-- "All my scores are low" → first check the judge prompt is complete and the agent
-  actually ran/retrieved (empty contexts tank RAGAS); then localize retrieval vs generation.
-- "Faithfulness high, relevancy low" → the faithful-but-irrelevant trap (see `concepts.md`).
-- "The judge seems too lenient/harsh" → calibration; compare to human reads on a few samples.
-- "Which metric should I trust?" → none alone; combine retrieval + generation signals.
-These are learning conversations — guide with questions, don't hand the conclusion.
+RAGAS needs question, answer, contexts, and reference. Contexts come from actual tool artifacts; an empty list can mean the agent did not retrieve. Do not retrieve again to fill them in. The judge uses a configured token cap and disables Nemotron 3 thinking mode for structured output. Truncated output is a measurement failure. Temperature zero reduces sampling variation but does not guarantee identical scores.
+
+## Synthetic data and saved results
+
+Both generators run without code blanks, but human review remains a task. RAG cases whose supporting quote is absent are saved separately for correction. A matched quote still requires checking the complete reference and any qualifiers. `reviewed_indices` records only reviews the learner actually performed.
+
+Evaluation selects `synthetic_*_test_cases.json` only when all included cases are recorded as reviewed; otherwise it explains the fallback to the provided file. Verify the selected filename and reference review status. Run outputs are checkpointed under unique `runs/` directories; different runs no longer overwrite each other. `compare_runs` rejects different dataset hashes and omits unpaired or failed cases; also inspect coverage before drawing a conclusion.

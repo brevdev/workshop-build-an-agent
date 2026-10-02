@@ -60,13 +60,13 @@ The four notebooks run in order: `bash_agent` → `01_synthetic_data_generation`
 - **Common mistakes:** wrong split direction; no seed (non-reproducible).
 - **Target:** `train_df, val_df = train_test_split(dataset_df, test_size=0.1, random_state=42)`
 
-> SDG is optional for progress — if Data Designer is unavailable or slow, the provided `data/langgraph_cli/{train,val}.jsonl` (225/25) can be used. Encourage spot-checking the data (coverage/diversity/validity) before training.
+> SDG is optional for progress — if Data Designer is unavailable or slow, the provided `data/langgraph_cli/{train,val}.jsonl` (213/25) can be used. Encourage spot-checking the data (coverage/diversity/validity) before training.
 
 ---
 ## Notebook 3 — `02_grpo_training.ipynb` (GRPO) — **reward server must be running**
 
 Start it first (in a terminal, leave it running):
-`cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8000`
+`cd code/4-agent-customization/nemo_gym_resources/langgraph_cli && uvicorn app:app --host 0.0.0.0 --port 8001`
 
 ### G1 · `reward_fn` — call `/verify` (the GRPO↔rewards bridge)
 - **Goal:** POST each model completion to the NeMo Gym server and get its reward.
@@ -89,7 +89,7 @@ Start it first (in a terminal, leave it running):
 - **Common mistakes:** `reward_funcs=reward_fn` (must be a list); forgetting `processing_class`.
 - **Target:** the `GRPOTrainer(...)` above.
 
-> **`trainer.train()` is the long run (~1–1.5 hr on A100/H100; slower on GB10). Do NOT
+> **`trainer.train()` is the long run (runtime depends on hardware and completion length). Do NOT
 > run it for the learner.** Explain what it does, set the time expectation, and let them
 > start it. The merged model lands at `outputs/grpo_langgraph_cli/merged_model/`.
 

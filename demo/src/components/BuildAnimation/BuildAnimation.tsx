@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import './BuildAnimation.css';
 
 interface BuildAnimationProps {
@@ -10,73 +10,23 @@ interface BuildAnimationProps {
 }
 
 export function BuildAnimation({ isActive, onComplete, sessionReady = false, extendedBuild = false }: BuildAnimationProps) {
-  const [phase, setPhase] = useState<'idle' | 'charging' | 'burst' | 'complete'>('idle');
-  const [statusMessage, setStatusMessage] = useState('Initializing neural pathways...');
   const [minChargingDone, setMinChargingDone] = useState(false);
-  const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
+  const [burstDone, setBurstDone] = useState(false);
+  const phase = !isActive ? 'idle' : minChargingDone && sessionReady ? burstDone ? 'complete' : 'burst' : 'charging';
+  const statusMessage = extendedBuild ? 'Preparing your agent and knowledge base…' : 'Preparing your agent…';
 
-  // Main animation control
   useEffect(() => {
-    if (!isActive) {
-      setPhase('idle');
-      setMinChargingDone(false);
-      setStatusMessage('Initializing neural pathways...');
-      return;
-    }
+    if (!isActive) return;
+    const timer = setTimeout(() => setMinChargingDone(true), 1500);
+    return () => clearTimeout(timer);
+  }, [isActive]);
 
-    setPhase('charging');
-    setStatusMessage('Initializing neural pathways...');
-    setMinChargingDone(false);
-
-    if (!extendedBuild) {
-      // Original behavior: fixed timers
-      const burstTimer = setTimeout(() => setPhase('burst'), 1500);
-      const completeTimer = setTimeout(() => {
-        setPhase('complete');
-        onCompleteRef.current();
-      }, 2500);
-      return () => {
-        clearTimeout(burstTimer);
-        clearTimeout(completeTimer);
-      };
-    } else {
-      // Extended build: mark min charging done after 1.5s
-      const timer = setTimeout(() => setMinChargingDone(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isActive, extendedBuild]);
-
-  // Extended build: trigger burst when both minChargingDone and sessionReady
+  // Every build waits for a real session, including builds without RAG.
   useEffect(() => {
-    if (!extendedBuild || !minChargingDone || !sessionReady || phase !== 'charging') return;
-    setPhase('burst');
-  }, [extendedBuild, minChargingDone, sessionReady, phase]);
-
-  // Extended build: complete after burst plays
-  useEffect(() => {
-    if (!extendedBuild || phase !== 'burst') return;
-    const completeTimer = setTimeout(() => {
-      setPhase('complete');
-      onCompleteRef.current();
-    }, 1000);
-    return () => clearTimeout(completeTimer);
-  }, [extendedBuild, phase]);
-
-  // Cycle status messages during extended charging
-  useEffect(() => {
-    if (!extendedBuild || !isActive) return;
-
-    setStatusMessage('Initializing neural pathways...');
-
-    const timers = [
-      setTimeout(() => setStatusMessage('Loading knowledge base...'), 1500),
-      setTimeout(() => setStatusMessage('Indexing documents...'), 4000),
-      setTimeout(() => setStatusMessage('Calibrating retrieval...'), 7000),
-    ];
-
-    return () => timers.forEach(clearTimeout);
-  }, [extendedBuild, isActive]);
+    if (!isActive || !minChargingDone || !sessionReady) return;
+    const timer = setTimeout(() => { setBurstDone(true); onComplete(); }, 1000);
+    return () => clearTimeout(timer);
+  }, [isActive, minChargingDone, sessionReady, onComplete]);
 
   return (
     <AnimatePresence>
@@ -130,7 +80,7 @@ export function BuildAnimation({ isActive, onComplete, sessionReady = false, ext
               <div className="particle-explosion">
                 {[...Array(24)].map((_, i) => {
                   const angle = (i / 24) * Math.PI * 2;
-                  const distance = 200 + Math.random() * 100;
+                  const distance = 200 + (i * 37) % 100;
                   return (
                     <motion.div
                       key={i}

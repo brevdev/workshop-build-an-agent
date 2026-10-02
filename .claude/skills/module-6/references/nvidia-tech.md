@@ -26,7 +26,7 @@ projects, an open agent framework, and Linux-kernel primitives.
 - **OpenClaw** — the **config-first autonomous agent framework** (SOUL.md/MEMORY.md,
   heartbeat) that NemoClaw *wraps*. It's the base agent; NemoClaw + OpenShell add the
   enforcement. docs.openclaw.ai.
-- **Landlock LSM** — a **Linux kernel** security module (≥ 5.13) for per-path access control.
+- **Landlock LSM** — a **Linux kernel** security module (introduced in 5.13; runtime ABI requirements vary) for per-path access control.
   Kernel feature, not NVIDIA.
 - **seccomp BPF** — **Linux kernel** syscall filtering. Kernel feature.
 - **OPA / Rego** — Open Policy Agent (CNCF), the policy engine behind the network proxy.

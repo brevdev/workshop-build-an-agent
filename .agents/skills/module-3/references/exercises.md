@@ -36,30 +36,39 @@ learner's escape hatch is the teaching page's `🆘 Need some help?` block.
 
 ### R3 · `evaluate_rag_agent.ipynb` cell 13 — score with the LLM judge
 - **Goal:** call the framework's metric function(s) on each response (faithfulness / relevancy / helpfulness).
-- **L1:** "The framework gives you `evaluate_faithfulness`, `evaluate_relevancy`, `evaluate_helpfulness`. What three inputs does a judge need — the answer, the question, and …?"
+- **L1:** "The framework gives you `evaluate_rag_response`, which applies the three rubrics. What three inputs does a judge need — the answer, the question, and …?"
 - **L2:** "Pass the agent's response, the question, and the joined `context_str`; reuse the `judge_llm` you created. Check the function signatures in `evaluation_framework.py`."
 - **Common mistakes:** re-creating a judge per call (pass the existing one); forgetting the context argument.
 - **Target:** calls to the `evaluate_*` functions with `(response, question/context, judge_llm=judge_llm)` per their signatures.
 
+### R4 · cell 15 — RAGAS evaluation
+- **Goal:** pass the four metrics, the prepared dataset, judge, embeddings, and conservative `RunConfig` to `evaluate`.
+- **L1:** "Which metrics assess retrieval, and which assess the answer?"
+- **L2:** "Use the notebook hint to match the imported metric objects and supplied request limits. Inspect missing values and counts afterward."
+
+### R5 · cell 27 — custom actionability chain
+- **Goal:** connect `custom_prompt` and `judge_llm`.
+- **L1:** "Which operator composed the other prompt/model chains?"
+- **L2:** "The prompt is the first stage and the model is the second. The provided parser validates the returned rubric score."
+
 ### P1 · `evaluate_report_agent.ipynb` cell 6 — load the dataset
 - Same as R1: `report_test_cases = json.load(f)`.
 
-### P2 · `evaluate_report_agent.ipynb` cell 10 — generate a report per topic
-- **Goal:** invoke the **async** Module 1 agent on each topic.
-- **L1:** "It's the report agent from Module 1 — async. Which field is the report subject, and how do you ask the agent to write about it?"
-- **L2:** "`await agent.ainvoke({'messages': [{'role':'user','content': <a request referencing test_case['topic']>}]})`."
-- **Common mistakes:** forgetting `await`/`.ainvoke`; using `test_case['question']` (report cases use `topic`).
-- **Target:** an `await agent.ainvoke(...)` whose message content asks for a report on `test_case["topic"]`.
+### P2 · `evaluate_report_agent.ipynb` cell 10 — record a report case
+- **Goal:** preserve the topic and expected sections in the result row; async invocation is provided.
+- **L1:** "Which fields describe the report request and its required structure?"
+- **L2:** "Look in `test_case` for `topic` and `expected_sections`. Keep both alongside the generated report."
+- **Common mistakes:** using the RAG field `question`, or dropping expected sections.
 
 ### P3 · `evaluate_report_agent.ipynb` cell 12 — score report quality
 - **Goal:** call `evaluate_report_quality` with the right fields.
-- **L1:** "The TODO hint lists what `result` contains: `topic`, `report`, `expected_sections`, `quality_criteria`. Which does the report-quality judge need?"
+- **L1:** "The TODO hint lists what `result` contains: `topic`, `report`, `expected_sections`, `quality_criteria`, and `source_context`. Which does the report-quality judge need?"
 - **L2:** "`evaluate_report_quality(report=result['report'], expected_sections=result['expected_sections'], …)` — confirm the signature in `evaluation_framework.py`."
 - **Target:** `evaluate_report_quality(...)` populated from the `result` fields.
 
 > The `generate_*_eval_dataset.ipynb` notebooks are **run-as-is** (synthetic data
 > generation with NeMo Data Designer) — no blanks. If a learner is stuck there, it's a
-> runtime/Data-Designer issue (see `troubleshooting.md`), not an exercise.
+> runtime/Data-Designer issue (see `troubleshooting.md`) or a source-review task, rather than a missing code answer.
 
 ---
 ## Part 2 — Helping with interpretation (the real work, no code to write)
@@ -68,10 +77,7 @@ This is where most learners want help. **Explain the concept; guide them to the
 conclusion about their own data — don't state it.**
 
 ### Reading scores
-- All RAGAS scores are **0–1**, but bands differ by metric type (per `evaluation_metrics.md`):
-  **retrieval** (precision/recall) — Poor `<0.50` / Fair `0.50–0.69` / Good `0.70–0.89` / Excellent `0.90+`;
-  **generation** (faithfulness/relevancy) is stricter — Poor `<0.60` / Fair `0.60–0.74` / Good `0.75–0.89` / Excellent `0.90+`.
-  Ask: "Which band is your score in for *that* metric, and what does it imply about readiness?" — let them place it.
+- Most RAGAS metrics here use 0–1; cosine-based relevancy can be negative. Custom 1–5 rubrics are divided by 5 (valid 0.2–1.0). Ask what the metric measures and how many cases were successfully measured. A failed or not-applicable score is missing, not zero. Do not infer readiness from a universal band.
 
 ### Diagnosing a low metric
 - First localize: "Is this a **retrieval** metric (context precision/recall) or a

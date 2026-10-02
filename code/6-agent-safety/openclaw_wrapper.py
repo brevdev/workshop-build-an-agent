@@ -18,6 +18,8 @@ import shutil
 import subprocess
 from typing import Callable, Optional
 
+from openclaw_response import normalize_openclaw_response
+
 
 def _find_openclaw_binary() -> Optional[str]:
     """Find the openclaw binary, checking PATH then common npm install locations.
@@ -138,8 +140,6 @@ def _send_via_cli(prompt: str, timeout: int = 600) -> dict:
         "meta": dict | None — token usage, model, duration, etc.
         "error": str | None — error message if the call failed
     """
-    import json as _json
-
     framed_prompt = _CHAT_FRAMING + prompt
     cmd = [
         _OPENCLAW_BIN, "agent", "--agent", "main",
@@ -158,18 +158,7 @@ def _send_via_cli(prompt: str, timeout: int = 600) -> dict:
         error = result.stderr.strip() or "Unknown error"
         return {"text": f"[Agent error: {error}]", "meta": None, "error": error}
 
-    # Parse JSON output
-    # Structure: { "result": { "payloads": [{ "text": "..." }], "meta": { ... } } }
-    stdout = result.stdout.strip()
-    try:
-        data = _json.loads(stdout)
-        result_data = data.get("result", {})
-        payloads = result_data.get("payloads", [])
-        text = payloads[0].get("text", "") if payloads else str(data)
-        meta = result_data.get("meta")
-        return {"text": text, "meta": meta, "error": None}
-    except (ValueError, TypeError):
-        return {"text": stdout, "meta": None, "error": None}
+    return normalize_openclaw_response(result.stdout)
 
 
 def create_openclaw_agent_fn(fallback_to_mock: bool = True) -> Callable[[str], dict]:

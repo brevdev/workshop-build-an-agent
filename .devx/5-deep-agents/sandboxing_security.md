@@ -2,7 +2,7 @@
 
 <img src="_static/robots/spyglass.png" alt="Security Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Your deep agent can read files, write code, and execute shell commands. That's incredibly powerful — and incredibly dangerous. In this section, we'll see exactly *why* sandboxing matters, explore different approaches, and understand the security principles that make agents production-ready.
+Your deep agent can read files, write code, and execute shell commands. That's incredibly powerful — and incredibly dangerous. In this section, we'll see exactly *why* sandboxing matters, explore different approaches, and understand the security principles for evaluating an agent's execution boundary.
 
 <!-- fold:break -->
 
@@ -10,13 +10,13 @@ Your deep agent can read files, write code, and execute shell commands. That's i
 
 Three characteristics of deep agents amplify security concerns compared to the shallow agents you built in earlier modules:
 
-1. **Extended autonomy** — Deep agents run for minutes to hours without human oversight. A shallow agent completes in seconds, giving you time to catch mistakes. A deep agent might execute dozens of steps before you see any output.
+1. **Extended autonomy** — Longer tasks can involve many actions between human reviews. Planning and delegation can increase that scope; runtime alone does not define a deep agent.
 
 2. **Code execution** — Deep agents run shell commands, write files, install packages, and spawn sub-processes. A hallucinated `rm -rf /` or a fabricated `pip install malicious-package` isn't a hypothetical — it's a well-documented risk.
 
 3. **Cascading effects** — In a multi-agent system, a single sub-agent error can propagate through the entire hierarchy. A researcher sub-agent that follows a malicious link could compromise the orchestrator's entire workspace.
 
-The key insight: **once an agent passes control to a subprocess, only OS-level enforcement can ensure containment**. Application-level controls — prompt instructions like "don't delete files" — are insufficient because the model can hallucinate past them, and subprocess execution bypasses them entirely.
+The key insight: **subprocesses inherit the permissions of their execution environment**. Prompts can guide behavior, but containment requires enforced permissions such as filesystem, process and network restrictions.
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">WHAT CAN GO WRONG</p>
@@ -29,9 +29,9 @@ The key insight: **once an agent passes control to a subprocess, only OS-level e
 
 <!-- fold:break -->
 
-### The Problem: Agents See Everything
+### The Problem: Host Shell Access
 
-Without sandboxing, your agent operates directly on the host system. It has the same access as the process running it. Let's see what that means.
+With Shell Execution enabled and sandboxing off, commands run with the backend user's host access. File I/O alone is confined to its configured file-tool root.
 
 #### Demo: No Sandbox
 
@@ -54,7 +54,7 @@ Now ask it to read one:
 
 > *"Read the contents of passwords.txt"*
 
-The agent will happily return:
+The provided fictional fixture can produce:
 
 <div class="dx-term dx-reveal">
   <span class="dx-term-title">no sandbox - reading a host file</span>
@@ -65,13 +65,13 @@ The agent will happily return:
   <span class="dx-term-line" data-kind="answer" data-delay="120">db_user:mysql_prod_xK9#mN2</span>
 </div>
 
-**This is the problem.** The agent can see — and exfiltrate — every file on the host system that the process has access to.
+Shell commands can read host files that the backend user can access. Network access can also provide a route to send that data elsewhere.
 
 <!-- fold:break -->
 
 ### The Solution: Sandboxing
 
-**Sandboxing** isolates the agent's execution environment from the host system. The agent operates inside a container or VM that has no access to the host's files, network, or credentials.
+**Sandboxing** isolates the agent's execution environment from the host system. The boundary depends on mounts, networking and credentials. This demo puts file and shell tools in a nonroot container with no host mounts, no network, and no inherited vendor keys; the model and Web/RAG tools remain in the application.
 
 #### Demo: With Sandbox
 
@@ -90,7 +90,7 @@ The agent responds:
   <span class="dx-term-line" data-kind="answer" data-delay="350">The workspace at /workspace is empty - no files present. The host filesystem is not visible from inside the container.</span>
 </div>
 
-**The sensitive files don't exist inside the sandbox.** The agent runs in a fresh Docker container with no host mounts. It literally cannot see your files.
+**The sensitive files don't exist inside the sandbox.** The agent runs in a fresh Docker container with no host mounts. Host files are not mounted into it; containers still share the host kernel.
 
 <!-- fold:break -->
 
@@ -99,7 +99,7 @@ The agent responds:
 Not all isolation is equal. Approaches range from trusting the model entirely to full hardware virtualization. Understanding this spectrum helps you choose the right level for your use case.
 
 <div class="dx-island dx-reveal">
-  <p class="dx-island-title">THE SECURITY SPECTRUM - ISOLATION STRENGTH</p>
+  <p class="dx-island-title">COMMON EXECUTION BOUNDARIES — NOT A SECURITY SCORE</p>
   <div class="dx-tax">
     <div class="dx-tax-row" style="--dx-w:8"><span class="dx-tax-name">Prompt-only</span><div class="dx-tax-track"><div class="dx-tax-fill">none</div></div><span class="dx-tax-note">dev/testing only</span></div>
     <div class="dx-tax-row" style="--dx-w:28"><span class="dx-tax-name">Deno runtime</span><div class="dx-tax-track"><div class="dx-tax-fill">grants</div></div><span class="dx-tax-note">lightweight scripting</span></div>
@@ -116,13 +116,13 @@ Not all isolation is equal. Approaches range from trusting the model entirely to
 
 ### Choosing an Isolation Level
 
-As you move down the table, isolation increases but so does complexity and overhead. The right choice depends on your **threat model**: who is running the agent, what data it can access, and what the consequences of a breach would be.
+These approaches enforce different boundaries; configuration matters within every category. Choose based on your **threat model**: who controls inputs, what data is accessible, and what a breach would affect.
 
 Ask these questions:
 
 1. **Who controls the agent's inputs?** If only trusted developers, you can use lighter isolation. If end users can influence prompts, you need stronger boundaries.
 2. **What data can the agent access?** PII, credentials, or financial data demands stronger isolation than public information.
-3. **Does the agent execute code?** Any code execution — even "just" shell commands — requires at minimum container-level isolation.
+3. **Does the agent execute code?** Choose an enforced execution boundary appropriate to the code and data it can reach.
 4. **What are the consequences of a breach?** A leaked API key is bad. A deleted production database is catastrophic. Match isolation to impact.
 
 <!-- fold:break -->
@@ -218,7 +218,7 @@ Docker is a common approach for agent sandboxing in development. It provides:
 - **Namespace isolation** — Each container has its own filesystem, process tree, and network stack
 - **Seccomp profiles** — Restrict which system calls the container can make
 - **Read-only filesystems** — Prevent the agent from modifying the container image
-- **Resource limits** — Cap CPU, memory, and network bandwidth
+- **Resource limits** — This demo caps CPU, memory, PIDs, command time and returned output
 
 **Strengths:** Fast startup (~1s), massive ecosystem, familiar to most developers.
 
@@ -273,7 +273,7 @@ Here are the layers, from closest to the user to closest to the hardware:
 | 5 | **Network controls** | Default-deny egress, DNS monitoring |
 | 6 | **Audit logging** | Record all agent actions for post-hoc review |
 
-The key principle: assume any single layer can fail. HITL can be bypassed by batch operations. Permission systems can have gaps. Containers can have escape vulnerabilities. But all six failing simultaneously is extraordinarily unlikely.
+The key principle: assume any single layer can fail. HITL can be bypassed by batch operations. Permission systems can have gaps. Containers can have escape vulnerabilities. Layers can share failure modes. Test the actual configuration and the routes that can bypass each layer.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-sandboxing_security-1">Show me an example of a layered defense.</button>
@@ -289,7 +289,7 @@ Consider a deep research agent deployed in production:
 5. **Network** — Egress is limited to the LLM API and approved search domains; all other traffic is blocked
 6. **Audit** — Every tool call, API request, and file write is logged with timestamps
 
-If the agent is tricked by a prompt injection attack into trying to exfiltrate data, it would need to bypass the application file path restriction, escape the container's filesystem boundary, evade network egress controls, and avoid detection in the audit logs — all simultaneously.
+If the agent is tricked by a prompt injection attack into trying to exfiltrate data, the required defenses depend on the attack path. An allowed network tool can leak readable data without a container escape; logs help detection but do not block the request.
 
 </div>
 </div>
@@ -360,7 +360,7 @@ Use distinct configurations for development, staging, and production. Never test
   <p class="dx-quiz-q">Your agent keeps generating dangerous shell commands. What is the right way to contain it?</p>
   <button class="dx-quiz-opt" data-fb="The model can hallucinate right past any instruction, and a subprocess bypasses prompt rules entirely. Application-level controls are necessary but never sufficient.">Add a rule to the system prompt telling it never to run destructive commands</button>
   <button class="dx-quiz-opt" data-fb="Lowering temperature reduces randomness but not capability - one bad command is still catastrophic. Enforce limits at the infrastructure level.">Lower the model temperature so it behaves more predictably</button>
-  <button class="dx-quiz-opt" data-right data-fb="Right. Once an agent passes control to a subprocess, only OS-level enforcement can guarantee containment. A sandbox with no host mounts means the dangerous command has nothing to destroy.">Run it in a sandbox with no host mounts and resource limits</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Once an agent passes control to a subprocess, OS-level controls bound subprocess access. With no host mounts, the container cannot directly modify the host workspace; its own writable files can still be damaged.">Run it in a sandbox with no host mounts and resource limits</button>
   <button class="dx-quiz-opt" data-fb="A bigger model is still a model - it will still occasionally hallucinate. Safety comes from the boundary around the agent, not the agent's own judgment.">Switch to a larger, more capable model</button>
 </div>
 

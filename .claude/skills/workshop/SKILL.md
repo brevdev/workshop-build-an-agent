@@ -32,7 +32,7 @@ Each module adds a capability *and* a matching discipline. Detailed version in `
 | 3 | Agent Evaluation | an eval pipeline (RAGAS + LLM-judge) | `/module-3` | **M1 + M2 agents built** | 2–3 h | none (cloud) |
 | 4 | Agent Customization | a GRPO-trained LangGraph-CLI agent | `/module-4` | M1–M3 concepts | 3–4 h | **GPU required** |
 | 5 | Deep Agents | a sandboxed deep agent | `/module-5` | M1–M2 concepts | 1–2 h | Docker (no GPU) |
-| 6 | Agent Safety | a NemoClaw-hardened OpenClaw agent | `/module-6` | M4–M5 concepts; extends M3 | 2–2.5 h | Docker + kernel ≥ 5.13 |
+| 6 | Agent Safety | a NemoClaw-hardened OpenClaw agent | `/module-6` | M4–M5 concepts; extends M3 | 2–2.5 h | Docker + Landlock enabled |
 | 7 | Harnesses & Skills | a pi-style harness + portable skills | `/module-7` | M1–M6 | 2–3 h | none main; opt. GPU (Ex4) |
 
 > **Hard prerequisite:** Module 3 *evaluates the M1 and M2 agents*, so those must be built

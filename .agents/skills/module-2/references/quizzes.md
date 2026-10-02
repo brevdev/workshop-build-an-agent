@@ -9,8 +9,8 @@ why each distractor is tempting, and how to go deeper.
 - **Why:** in agentic RAG, retrieval is a **tool the model chooses to call** — a greeting
   needs no outside context, so the agent answers directly. This is the exact difference from
   traditional RAG.
-- **Distractors:** *runs KB retrieval as it does for every query* → that's **traditional**
-  RAG's fixed path; *must embed the greeting and search first* → embeddings are computed to
+- **Distractors:** *runs KB retrieval as it does for every query* → that is the **simple fixed**
+  RAG pipeline illustrated here's fixed path; *must embed the greeting and search first* → embeddings are computed to
   *store* docs at ingestion, not to answer every turn.
 - **Principle:** "who decides whether to retrieve?" (the agentic-RAG thesis; `concepts.md`).
 - **Go deeper:** have them watch the agent skip the retriever tool on a greeting in the

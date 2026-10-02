@@ -27,7 +27,7 @@ Large Language Models (LLMs) have an impressive ability to generate text and rec
 
 ## Anatomy of an Agent
 
-There are **four key components** fundamental to all agents:
+We will use **four useful components** to understand this workshop’s agents:
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>MODEL</h4>The LLM that decides which tools to use and how to respond.</div>
@@ -98,7 +98,7 @@ Memory is what allows agents to maintain context across the conversation. There 
 - Often implemented with databases or vector stores
 - Enables personalization and learning
 
-In this module, we focus on short-term memory - the conversation log. In Module 2, you'll see how agents can access external knowledge bases, which is a form of long-term memory.
+In this module, we focus on short-term memory - the conversation log. In Module 2, you'll see how agents can access external knowledge bases, which provides persistent external knowledge; this is distinct from remembering a user across sessions.
 
 <!-- fold:break -->
 
@@ -131,7 +131,7 @@ This loop continues until the model decides it has enough information. The model
 
 </center>
 
-ReAct agents can adapt their approach based on intermediate results, retry failed actions, and decompose complex tasks into steps. This flexibility is what separates agents from fixed workflows.
+ReAct agents can adapt their approach based on intermediate results, retry failed actions, and decompose complex tasks into steps. The model chooses actions at runtime; developer-defined workflows can also include branches and loops.
 
 Here is that loop running on the simple agent you will build next:
 
@@ -212,6 +212,6 @@ Check out the
 <button onclick="openOrCreateFileInJupyterLab('code/1-build-an-agent/intro_to_agents.ipynb');"><i class="fa-solid fa-flask"></i> Introduction to Agents</button>
 notebook where you'll build your first agent from scratch!
 
-Once you've completed the notebook, continue to [Report Generation Agent](report_generation_agent.md) to see a production-ready implementation using LangChain.
+Once you've completed the notebook, continue to [Report Generation Agent](report_generation_agent.md) to see a framework-managed implementation using LangChain.
 
 

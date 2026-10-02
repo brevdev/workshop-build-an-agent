@@ -63,7 +63,7 @@ Always start by asking what they've tried / reading the error or token output wi
 
 ### 2a · `harness_overhead` — what every call costs
 - **Goal:** the tax = system prompt **plus** the registered tool schemas, in tokens.
-- **L1:** "Two parts, both billed every turn: the prompt text and the JSON of the tool
+- **L1:** "Two parts, both included in the starting context: the prompt text and the JSON of the tool
   schemas. You have `count_tokens(...)`. `convert_to_openai_tool(t)` turns a tool into its
   schema — and it also passes an *already*-converted dict schema straight through, so you
   can call it on every item uniformly (the maximal set is loaded from JSON as dicts)."
@@ -80,7 +80,7 @@ Always start by asking what they've tried / reading the error or token output wi
 - **L1:** "Inside the loop over each `SKILL.md`: read it, pull `name`/`description` (there's a
   `parse_frontmatter` helper), stash the *full text* somewhere the `load_skill` tool can reach,
   and add a single index line. What does the index line look like?"
-- **L2:** "`text = skill_file.read_text()`; `meta = parse_frontmatter(text)`;
+- **L2:** "`text = read_skill_text(skill_file, skills_dir)`; `meta = parse_frontmatter(text)`;
   `bodies[meta['name']] = text`; `index_lines.append(f\"- {meta['name']}: {meta['description']}\")`."
 - **Common mistakes:** putting the **full body** in the index (that *is* eager loading — the
   bug the exercise exposes); not saving to `bodies` (then `load_skill` has nothing to return).
@@ -98,23 +98,24 @@ Always start by asking what they've tried / reading the error or token output wi
 > Have them connect the numbers to the landscape page's bars — *their* harness, measured.
 
 ---
-## Exercise 3 — Author a Portable Skill (`skills/dataset_profiler/SKILL.md`) — *authoring, no code blank*
-**Coach the shape; do not write it.** The learner writes a `dataset_profiler` skill that
+## Exercise 3 — Author a Portable Skill (`skills/dataset-profiler/SKILL.md`) — *authoring, no code blank*
+**Coach the shape; do not write it.** The learner writes a `dataset-profiler` skill that
 teaches an agent to summarize an unfamiliar CSV, following the format of the repo-root
-`skills/code_review/SKILL.md`.
+`skills/code-review/SKILL.md`.
 - **L1:** "Two parts: frontmatter (`name` + a `description`) and the body. The `description` is
   the *trigger* — the lazy loader matches it against the task. Should it describe the *task
   vocabulary* ('profile/summarize/explore an unfamiliar CSV or DataFrame') or the implementation?"
 - **L2:** "Body = a numbered procedure the agent follows (e.g. shape → dtypes → nulls →
   numeric distributions → cardinality → a few surprising facts) plus an output format. Save it
-  to `code/7-agent-harnesses/skills/dataset_profiler/SKILL.md`."
+  to `code/7-agent-harnesses/skills/dataset-profiler/SKILL.md`."
 - **Prove portability (guide, don't run):** load it via their Exercise-2 lazy loader and ask
   the agent to profile `test_data/sensor_readings.csv`; then `cp -r` the folder into
-  `~/.hermes/skills/` and ask Hermes the same — *one file, two harnesses, zero changes.*
+  `~/.hermes/skills/` from the project root and ask Hermes the same. The file is unchanged;
+  its runtime still needs the required libraries. Supply the workshop Python path when needed.
 - **Common mistakes:** a `description` that names the implementation (won't trigger); no
   numbered procedure (the agent has nothing to follow); wrong save path.
 - **Do NOT** open `skills/.examples/` (the completed version) for them; point to
-  `skills/code_review/SKILL.md` as the *format* model and let them write their own.
+  `skills/code-review/SKILL.md` as the *format* model and let them write their own.
 
 ---
 ## Exercise 4 — Verified NVIDIA Skill, Real GPU (`run_gpu_task` is provided) — *ops, no code blank*
@@ -127,9 +128,8 @@ Guide the install → **verify** → run → watch loop; let them run it.
    GPU; the skill supplies the how. Watch the agent load it, reach for cuDF, and light the GPU
    up; the closing 🧾 receipt says whether the skill was consulted (if not, rerun — loading is
    the model's call).
-- **If util stays at 0 / no GPU:** check the data crossed the 100K-row gate; confirm cuDF
-  imported GPU-side; on a no-GPU box the exercise prints a skip message and the answers
-  notebook shows expected output (it's a clean fallback, not a failure). See `troubleshooting.md`.
+- **If util stays at 0 / no GPU:** confirm cuDF imports and inspect actual tool calls and
+  outputs. Ask for pandas when GPU execution is unavailable; don't infer speed from utilization. See `troubleshooting.md`.
 - **Teaching hook:** the cloud model only wrote a few hundred tokens of code; **your GPU** did
   the compute. The skill is what made it reach for cuDF correctly.
 
@@ -142,7 +142,7 @@ Guide the install → **verify** → run → watch loop; let them run it.
   your lazy loader on the next run? (Module 6 lesson.)"
 - **L2:** "`resp = model.invoke(SKILL_AUTHOR_PROMPT.format(transcript=transcript))`; strip any
   ``` fences from `resp.content`; `meta = parse_frontmatter(content)` to **validate**; then
-  `path = skills_dir / meta['name'] / 'SKILL.md'`, `mkdir(parents=True, exist_ok=True)`,
+  `path = skill_target(skills_dir, meta['name'])`, `path.parent.mkdir(parents=True, exist_ok=True)`,
   `write_text(content)`, and `return path`."
 - **Common mistakes:** saving without `parse_frontmatter` validation (a malformed skill breaks
   the loader next run — exactly the self-evolution failure M6 warned about); not stripping code

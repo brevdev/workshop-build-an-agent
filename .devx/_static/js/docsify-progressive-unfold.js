@@ -7,10 +7,17 @@
         let navContainer = null;
         let prevBtn = null;
         let nextBtn = null;
+        let initializeTimer;
+
+        // Keep each module's progress separate, including inside Jupyter's proxy.
+        const moduleId = (document.documentElement.className.match(/dx-mod(\d+)/) || [])[1]
+            || location.pathname;
+        const cookiePrefix = `docsify-unfold-${encodeURIComponent(moduleId)}-`;
+        window.dxUnfoldCookiePrefix = cookiePrefix;
 
         // Cookie helpers
         function getCookieKey() {
-            return `docsify-unfold-${encodeURIComponent(vm.route.path)}`;
+            return `${cookiePrefix}${encodeURIComponent(vm.route.path)}`;
         }
 
         function saveProgress() {
@@ -100,7 +107,7 @@
             return sections.length;
         }
 
-        function showSection(sectionIndex) {
+        function showSection(sectionIndex, scroll = true) {
             if (sectionIndex < 0 || sectionIndex >= sections.length) {
                 console.log('Invalid section index:', sectionIndex, 'max:', sections.length - 1);
                 return;
@@ -128,13 +135,34 @@
             saveProgress();
 
             // Scroll to the start of the current section
-            if (sections[sectionIndex] && sections[sectionIndex][0]) {
+            if (scroll && sections[sectionIndex] && sections[sectionIndex][0]) {
                 sections[sectionIndex][0].scrollIntoView({
-                    behavior: 'smooth',
+                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
                     block: 'start'
                 });
             }
         }
+
+        function revealAnchor() {
+            const id = new URLSearchParams(location.hash.split('?')[1] || '').get('id');
+            const target = id && document.getElementById(id);
+            if (!target) return;
+            const index = sections.findIndex(section => section.some(el => el === target || el.contains(target)));
+            if (index > currentSection) showSection(index, false);
+            requestAnimationFrame(() => target.scrollIntoView({ behavior: 'instant', block: 'start' }));
+        }
+
+        window.addEventListener('hashchange', () => requestAnimationFrame(revealAnchor));
+        document.addEventListener('keydown', (e) => {
+            if (e.target.closest('input, textarea, select, button, a, summary, pre, [contenteditable]')) return;
+            if (e.key === 'ArrowLeft' && currentSection > 0) {
+                e.preventDefault();
+                showSection(currentSection - 1);
+            } else if (e.key === 'ArrowRight' && currentSection < sections.length - 1) {
+                e.preventDefault();
+                showSection(currentSection + 1);
+            }
+        });
 
         function createNavigation(contentEl) {
             // Remove existing navigation if it exists
@@ -309,20 +337,8 @@
                 // Show initial section(s) - start with first section if no saved progress
                 const initialSection = savedProgress > 0 ? Math.min(savedProgress, sectionCount - 1) : 0;
                 console.log('Progressive Unfold: Starting with section', initialSection);
-                showSection(initialSection);
-
-                // Add keyboard navigation
-                document.addEventListener('keydown', (e) => {
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-                    if (e.key === 'ArrowLeft' && currentSection > 0) {
-                        e.preventDefault();
-                        showSection(currentSection - 1);
-                    } else if (e.key === 'ArrowRight' && currentSection < sections.length - 1) {
-                        e.preventDefault();
-                        showSection(currentSection + 1);
-                    }
-                });
+                showSection(initialSection, false);
+                revealAnchor();
             } else {
                 console.log('Progressive Unfold: Only one section found, no navigation needed');
             }
@@ -331,11 +347,12 @@
         // Hook into Docsify lifecycle
         hook.doneEach(() => {
             // Longer delay to ensure zoom plugin is fully initialized
-            setTimeout(initialize, 1);
+            initializeTimer = setTimeout(initialize, 1);
         });
 
         // Cleanup on route change
         hook.beforeEach(() => {
+            clearTimeout(initializeTimer);
             if (navContainer) {
                 navContainer.remove();
                 navContainer = null;

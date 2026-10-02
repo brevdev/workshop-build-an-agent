@@ -11,11 +11,10 @@ flowchart LR
 
     subgraph sdg[SDG Pipeline]
         direction LR
-        schema[Define Output<br />Schema<br />#40;Pydantic#41;] --> sample[Sample<br />Valid<br />Outputs] --> generate[Generate<br />Natural<br />Language] --> combine[Combine<br />Training<br />Pairs]
+        schema[Schema + Seed Values] --> sample[Generate User Request] --> generate[Generate CLI JSON] --> combine[Review + Split Pairs]
     end
-
-    schema -.- schema_label[Outputs first<br />always valid]
-    generate -.- generate_label[Inputs second<br />varied phrasing]
+    schema -.- schema_label[Shape checked]
+    generate -.- generate_label[Check request/label agreement]
 
     classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
     classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

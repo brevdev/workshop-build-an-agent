@@ -8,8 +8,8 @@ Congratulations on completing Module 1! You've taken your first steps into the w
   <p class="dx-island-title">WHAT YOU'VE LEARNED</p>
   <p>In this module, you explored the foundations of AI agents:</p>
   <ul>
-    <li><b>The Four Components</b> - every agent needs a model (the brain), tools (the hands), memory (the context), and routing (the control flow).</li>
-    <li><b>The Agentic Loop</b> - agents work by repeatedly deciding whether to use a tool or respond, giving them flexibility that workflows lack.</li>
+    <li><b>The Four Components</b> - our examples combine a model (the brain), tools (the hands), memory (the context), and routing (the control flow).</li>
+    <li><b>The Agentic Loop</b> - agents work by repeatedly deciding whether to use a tool or respond, letting the model choose actions within an application’s control flow.</li>
     <li><b>The ReAct Pattern</b> - the most common agent architecture alternates between reasoning and acting.</li>
     <li><b>System Prompts</b> - the personality of your agent, defining its role, constraints, and behavior.</li>
     <li><b>From Scratch to Framework</b> - you built an agent manually, then saw how LangChain abstracts away the routing complexity.</li>

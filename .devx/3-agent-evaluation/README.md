@@ -1,6 +1,6 @@
-<div class="dx-hero" data-eyebrow="MODULE 03 / AGENT EVALUATION" data-title="Agent Evaluation Workshop" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Super (LLM-judge)|GPU::Hosted API endpoint"></div>
+<div class="dx-hero" data-eyebrow="MODULE 03 / AGENT EVALUATION" data-title="Agent Evaluation Workshop" data-meta="DURATION::2-3 hrs|MODEL::Nemotron (judge)|GPU::Hosted API endpoint"></div>
 
-The Agent Evaluation Workshop teaches you how to measure and improve the quality of your AI agents using systematic evaluation techniques. You'll learn to evaluate both the **Report Generation Agent** and **IT Help Desk Agent** you built in previous modules using industry-standard metrics, LLM-as-a-judge approaches, and NVIDIA's evaluation tooling. Unlike manual testing, systematic evaluation provides quantitative insights into agent performance, helping you identify weaknesses and track improvements over time.
+The Agent Evaluation Workshop teaches you how to measure and improve the quality of your AI agents using systematic evaluation techniques. You'll learn to evaluate both the **Report Generation Agent** and **IT Help Desk Agent** you built in previous modules using widely used metrics, LLM-as-a-judge approaches, and NVIDIA's evaluation tooling. Unlike manual testing, systematic evaluation provides quantitative insights into agent performance, helping you identify weaknesses and track improvements over time.
 
 This workshop will help you get started measuring and improving AI agents. Here's what you're in for:
 
@@ -26,7 +26,7 @@ By the end of this workshop, you'll know how to:
 
 This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
 
-<button onclick="launch('Claude Code', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Assistants');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
+<button onclick="launch('Claude Code', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
 
 Ask for this module by name — `/module-3` in Claude Code, `$module-3` in Codex — or just describe what you're stuck on and the right skill loads on its own.
 

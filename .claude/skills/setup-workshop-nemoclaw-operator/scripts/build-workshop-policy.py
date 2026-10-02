@@ -6,7 +6,7 @@ Usage:  build-workshop-policy.py <live.yaml> <apply.yaml>
 
 Reads the captured live policy (metadata header already stripped), adds the
 workshop blocks from references/policy-blocks.md, and writes the apply file.
-Idempotent: blocks already present are left untouched. Self-verifies that the
+Idempotent: existing blocks stay intact; the MCP block gains Python access. Self-verifies that the
 result equals the input plus exactly the intended additions and nothing else;
 exits non-zero on any structural surprise. Human-readable rationale for every
 block: references/policy-blocks.md.
@@ -85,7 +85,7 @@ WORKSHOP_BLOCKS: dict = {
         "endpoints": [_ep("mcp.tavily.com", [
             _allow("GET", "/**"), _allow("POST", "/**"), _allow("DELETE", "/**")
         ])],
-        "binaries": [{"path": "/usr/local/bin/node"}],
+        "binaries": copy.deepcopy(PY_BINARIES),
     },
     "tiktoken_encodings": {
         "name": "tiktoken-encodings",
@@ -105,6 +105,10 @@ def compose(live: dict) -> dict:
     np = doc["network_policies"]
     for key, block in WORKSHOP_BLOCKS.items():
         np.setdefault(key, copy.deepcopy(block))
+    # M2 now uses Python Streamable HTTP instead of a Node subprocess.
+    for binary in PY_BINARIES:
+        if binary not in np["mcp_tavily"].setdefault("binaries", []):
+            np["mcp_tavily"]["binaries"].append(copy.deepcopy(binary))
     for ep in np.get("nvidia", {}).get("endpoints", []):
         if RANKING_RULE not in ep["rules"]:
             ep["rules"].append(copy.deepcopy(RANKING_RULE))
@@ -131,6 +135,13 @@ def verify(live: dict, doc: dict) -> list[str]:
                     ep["rules"].append(copy.deepcopy(RANKING_RULE))
             if dnp.get(k) != expect:
                 errs.append("nvidia block differs beyond the /v1/ranking rules")
+        elif k == "mcp_tavily":
+            expect = copy.deepcopy(lnp[k])
+            for binary in PY_BINARIES:
+                if binary not in expect.setdefault("binaries", []):
+                    expect["binaries"].append(copy.deepcopy(binary))
+            if dnp.get(k) != expect:
+                errs.append("mcp_tavily differs beyond the Python client binaries")
         elif dnp.get(k) != lnp[k]:
             errs.append(f"pre-existing block modified: {k}")
     fse = copy.deepcopy(live["filesystem_policy"])

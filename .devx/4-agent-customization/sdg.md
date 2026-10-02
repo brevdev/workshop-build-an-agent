@@ -28,12 +28,12 @@ For a new domain like the LangGraph CLI, we don't have the real logs from the ag
 SDG breaks this cycle:
 
 1. **Define the space** — Your Pydantic schema describes the shape of a valid output
-2. **Sample the seeds systematically** — Samplers draw a command and its flags from distributions *you* control, so every corner of the space gets visited
+2. **Sample the seeds systematically** — Samplers draw a command and its flags from distributions *you* control, then inspect whether the generated sample covers the cases you need
 3. **Generate natural language** — An LLM turns each seed into a realistic user phrasing
 4. **Generate the structured output** — A second, *schema-constrained* LLM call reads that phrasing and emits the JSON tool call
 5. **Result**: Real training data without real users
 
-**Why this works**: The model doesn't need *authentic* user phrasing—it needs to learn the *mapping* from intent to command. Synthetic variations are sufficient to learn that mapping, and you can always fine-tune later with real data once you have it.
+**Why this works**: The model doesn't need *authentic* user phrasing—it needs to learn the *mapping* from intent to command. Synthetic variations can help learn that mapping, and you can always fine-tune later with real data once you have it.
 
 <!-- fold:break -->
 
@@ -46,7 +46,7 @@ SDG breaks this cycle:
 
 **The key difference**: Data Designer never asks the model "invent 200 examples." It walks a space *you* defined — a seed row per example — and constrains every generated output to your schema. Naive prompting controls neither the coverage nor the shape.
 
-Be precise about what that buys you, though: the schema guarantees the output's **shape** (right fields, right types, always parses), not its **labels** — no schema can tell you whether `port: 7842` is the port the sentence asked for. That's why the QA step matters.
+Be precise about what that buys you, though: the schema checks the output's **shape** (fields and types), not its **labels** — no schema can tell you whether `port: 7842` is the port the sentence asked for. That's why the QA step matters.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-sdg-1">See an example</button>
@@ -70,7 +70,7 @@ call    = llm(request, output_format=CLIToolCall)                   # constraine
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
   <p class="dx-quiz-q">Every row Data Designer produced parses cleanly and matches your <code>CLIToolCall</code> schema. What does that tell you about the dataset?</p>
-  <button class="dx-quiz-opt" data-right data-fb="Right. Constrained decoding guarantees the SHAPE - fields, types, parseability. The values are still an LLM's reading of the generated request, so the labels themselves need spot-checking.">That the output *shape* is correct — the labels themselves still need review</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. Schema validation checks SHAPE - fields, types, parseability. The values are still an LLM's reading of the generated request, so the labels themselves need spot-checking.">That the output *shape* is correct — the labels themselves still need review</button>
   <button class="dx-quiz-opt" data-fb="That's the trap. A schema constrains structure, not meaning. `port: 3000` is schema-valid whether or not the request said 3000.">That every label is correct — schema validation is the check</button>
   <button class="dx-quiz-opt" data-fb="Samplers do drive coverage of the command/flag space, which is the real advantage over naive prompting - but that's a separate property from schema validity.">Nothing useful — schema validity is unrelated to data quality</button>
   <button class="dx-quiz-opt" data-fb="Balance comes from how you configure the samplers, and is worth checking separately (see the Balance checklist below). Schema validity says nothing about it.">That the command types are evenly balanced</button>
@@ -79,6 +79,8 @@ call    = llm(request, output_format=CLIToolCall)                   # constraine
 <!-- fold:break -->
 
 **What makes Training Data "Good Enough"?** Training data quality matters more than quantity. Here's what to aim for:
+
+The notebook starts with 25 rows to check the pipeline and saves them under `data/langgraph_cli/generated`. Training defaults to the supplied reviewed dataset; grow and review your generated data before selecting it.
 
 **Minimum viable dataset:**
 - At least 10-20 examples per command type
@@ -91,7 +93,7 @@ call    = llm(request, output_format=CLIToolCall)                   # constraine
 - [ ] Edge cases are represented (empty paths, special characters, max values)
 - [ ] Negative examples if needed (invalid commands → error response)
 
-**Diminishing returns**: Beyond 500-1000 examples, adding more data helps less. Focus on diversity over quantity.
+Treat these counts as a starting point. Use held-out results to decide whether more varied data helps.
 
 <!-- fold:break -->
 
@@ -103,7 +105,7 @@ call    = llm(request, output_format=CLIToolCall)                   # constraine
 2. **Configure samplers** — Distributions for each seed field (which commands? which templates? which ports?)
 3. **Generate natural language** — An LLM turns each seed row into a realistic user request
 4. **Generate the structured output** — A schema-constrained LLM call converts that request into JSON
-5. **Combine into examples** — Input/output pairs ready for training
+5. **Check and combine** — Reject missing seed values or invented flags, then review the remaining labels
 
 ![SDG Pipeline](img/sdg_pipeline_dark.svg)
 
@@ -179,7 +181,7 @@ for ex in data:
 print("All outputs valid!")
 ```
 
-Expect that to pass on every row — constrained decoding guarantees it. The check that finds real problems is the one the schema can't do: whether the values match the request.
+Check this even when using structured generation: failed requests, truncation, or exports can leave unusable rows. The check that finds real problems is the one the schema can't do: whether the values match the request.
 
 ```python
 # Do closed-set fields only contain legal values?
@@ -197,7 +199,7 @@ print(f"{len(bad)} row(s) with an unknown template")
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">PREFER A HEAD START?</p>
   <p>We recommend generating your own dataset for the hands-on experience. But if you'd rather move ahead quickly, a starter set is provided - it also makes a good reference when you build your own:</p>
-  <p>📁 Sample Training Data (225 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button></p>
+  <p>📁 Sample Training Data (213 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button></p>
 </div>
 
 <!-- fold:break -->
@@ -210,14 +212,14 @@ Open the <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customizati
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'class CLIToolCall');"><i class="fas fa-code"></i> CLIToolCall</button> — Define the Pydantic model for CLI commands.
 
-This schema is what constrains the generated outputs — every synthetic example is guaranteed to *conform* to it (right fields, right types, always parseable). Define `CLIToolCall` as a `BaseModel` with `command` (str), `template` (optional str), `path` (optional str), and `port` (optional int) fields. Optional fields should default to `None`.
+The schema checks output fields and types; it does not prove that a label matches the request. Define `CLIToolCall` as a `BaseModel` with `command` (str), `template` (optional str), `path` (optional str), and `port` (optional int) fields. Optional fields should default to `None`.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
 class CLIToolCall(BaseModel):
-    command: str = Field(None, description="CLI command: new, dev, up, build, or dockerfile")
+    command: str = Field(..., description="CLI command: new, dev, up, build, or dockerfile")
     template: Optional[str] = Field(None, description="Template name for 'new' command")
     path: Optional[str] = Field(None, description="Project path for 'new' command")
     port: Optional[int] = Field(None, description="Port for 'dev' or 'up' command")
@@ -248,11 +250,13 @@ params=CategorySamplerParams(values=[
 
 <!-- fold:break -->
 
+Start with the notebook's 25-row batch and one worker. Inspect the results before increasing the count; if the provider returns 429, wait and retry or use the shipped dataset.
+
 ### Exercise: Train/Val Split
 
 <button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'train_test_split');"><i class="fas fa-code"></i> train_test_split</button> — Split the dataset for training and validation.
 
-The validation set is held out during GRPO training and used to detect overfitting — if training reward climbs but validation reward plateaus, the model is memorizing rather than generalizing. Use `train_test_split` to split `dataset_df` with `test_size` set to `0.1` (10% for validation) and `random_state` seed set to `42` (or some other number).
+The validation set is held out during GRPO training and used to detect overfitting — if training reward climbs without held-out improvement, investigate overfitting, label errors, and reward shortcuts. Use `train_test_split` to split `dataset_df` with `test_size` set to `0.1` (10% for validation) and `random_state` seed set to `42` (or some other number).
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -266,14 +270,15 @@ train_df, val_df = train_test_split(dataset_df, test_size=0.1, random_state=42)
 
 ## Inspecting Your Data
 
-Before moving to training, spot-check a few examples from your generated data in <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button>:
+After the save cell succeeds, spot-check your generated data in <button onclick="openExistingFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/generated/train.jsonl');"><i class="fa-brands fa-python"></i> generated/train.jsonl</button>:
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">SPOT-CHECK BEFORE YOU TRAIN</p>
   <ul>
     <li><b>Do the inputs sound natural?</b> They should read like a real user, not robotic templates.</li>
     <li><b>Do the outputs parse correctly?</b> Every output should be valid JSON matching the <code>CLIToolCall</code> schema.</li>
-    <li><b>Is there variety?</b> Scan for repetitive phrasing - if many examples start the same way, the model may latch onto those patterns instead of intent.</li>
+    <li><b>Do labels match the requests?</b> Check command, paths, ports and flags; the provided filter catches some mistakes, but meaning still needs review.</li>
+    <li><b>Is there variety?</b> Check command coverage as well as phrasing before increasing the batch size.</li>
   </ul>
 </div>
 
@@ -285,8 +290,11 @@ Double check that you have successfully generated synthetic data for the LangGra
 
 ```
 data/langgraph_cli/
-├── train.jsonl    # 225 examples
-└── val.jsonl      # 25 examples
+├── train.jsonl       # reviewed shipped set: 213 examples
+├── val.jsonl         # reviewed shipped set: 25 examples
+└── generated/        # your reviewed SDG output; counts vary
+    ├── train.jsonl
+    └── val.jsonl
 ```
 
 With this data, we are now ready to begin the customization. Check out [GRPO Training](grpo_training.md) to learn more and get started!

@@ -1,5 +1,5 @@
 ---
-name: technical_writing
+name: technical-writing
 description: Guidelines for writing clear, professional technical documentation
 ---
 

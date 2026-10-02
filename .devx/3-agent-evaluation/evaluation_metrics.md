@@ -8,7 +8,7 @@ Now that we understand why evaluation is important, let's dive into the specific
 
 **LLM-as-a-judge**: One of the most powerful techniques for evaluating AI agents is using another LLM to judge the quality of outputs, allowing us to evaluate subjective qualities like helpfulness, coherence, and relevance at scale. 
 
-Traditional deterministic metrics like string or keyword matching don't work well for evaluating natural language outputs. Human evaluation is a lot more accurate and captures subjectivity well, but is expensive and slow. 
+Traditional deterministic metrics like string or keyword matching don't work well for evaluating natural language outputs. Human review can capture nuance, but requires clear rubrics and agreement checks and is expensive to scale.
 
 LLM-as-a-judge provides a neat middle ground. 
 
@@ -39,23 +39,17 @@ RAGAS provides a comprehensive framework for evaluating RAG systems. Each metric
 </div>
 
 <div class="dx-island dx-reveal">
-  <p class="dx-island-title">READING THE SCORES - RAGAS METRICS RUN 0 TO 1</p>
-  <div class="dx-tax">
-    <div class="dx-tax-row" style="--dx-w:30"><span class="dx-tax-name">Poor</span><div class="dx-tax-track"><div class="dx-tax-fill">&lt; 0.50</div></div><span class="dx-tax-note">urgent - not production-ready</span></div>
-    <div class="dx-tax-row" style="--dx-w:55"><span class="dx-tax-name">Fair</span><div class="dx-tax-track"><div class="dx-tax-fill">0.50 - 0.69</div></div><span class="dx-tax-note">needs improvement</span></div>
-    <div class="dx-tax-row" style="--dx-w:80"><span class="dx-tax-name">Good</span><div class="dx-tax-track"><div class="dx-tax-fill">0.70 - 0.89</div></div><span class="dx-tax-note">acceptable for many uses</span></div>
-    <div class="dx-tax-row" style="--dx-w:97"><span class="dx-tax-name">Excellent</span><div class="dx-tax-track"><div class="dx-tax-fill">0.90 - 1.00</div></div><span class="dx-tax-note">production-ready</span></div>
-  </div>
-  <p>These are the general bands, and exactly how the two <b>retrieval</b> metrics (context precision &amp; recall) are read. The two <b>generation</b> metrics — <b>faithfulness</b> and <b>answer relevancy</b> — hold to a slightly stricter bar (Fair 0.60-0.74, Good 0.75-0.89), because a wrong grounded-fact matters more than a slightly noisy retrieval. Each metric's section below shows its exact bands.</p>
+  <p class="dx-island-title">READ SCORES WITH THEIR DEFINITIONS AND COVERAGE</p>
+  <p>Context precision, recall, and faithfulness range from 0–1; cosine-based answer relevancy can be negative. The notebook’s custom 1–5 rubrics are divided by 5, so their valid range is 0.2–1.0. A failed measurement is missing, not zero. There are no universal “production-ready” cutoffs: validate task-specific thresholds against reviewed examples, and report sample counts and failure rates.</p>
 </div>
 
 <!-- fold:break -->
 
 ### Context Precision
 
-**Definition**: Whether the retrieved chunks are relevant or irrelevant to the question (signal-to-noise ratio). Crucially, it accounts for **ranking**. It's not enough to retrieve the right document; it also needs to be at the top of the list. 
+**Definition**: Rank-sensitive average precision: are useful retrieved chunks ranked before irrelevant chunks? It is not the fraction of retrieved documents that are relevant.
 
-**Why it matters**: High context precision means your retrieval system isn't wasting the LLM's context window with irrelevant information, improving both generation quality and cost-efficiency. It also reduces the risk of the model being distracted by off-topic content.
+**Why it matters**: It rewards placing relevant chunks early. However, irrelevant chunks after the last relevant chunk do not lower this metric. For relevance labels `[1, 0, 0]`, average precision is still 1.0; inspect context size and relevance separately. See the [RAGAS definition and examples](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_precision/).
 
 Crucially, LLMs can suffer from the "Lost in the Middle" phenomenon where relevant information buried in the middle of a context window may be ignored. This is why **ranking** matters: the model should see the right data first. 
 
@@ -108,14 +102,7 @@ Note that this context precision value is not a perfect 1.0 score. Why? Because 
 <div id="aside-em-3" popover class="dx-aside-panel">
 <button class="dx-aside-x" popovertarget="aside-em-3" popovertargetaction="hide" aria-label="Close">×</button>
 
-**Score interpretation**:
-
-| Score Range | Interpretation | What It Means | Action Needed |
-|-------------|----------------|---------------|---------------|
-| **0.90 - 1.00** | Excellent ✅ | Nearly all retrieved documents are relevant | Production-ready for most use cases |
-| **0.70 - 0.89** | Good 👍 | Most documents relevant, minor noise | Acceptable for many applications |
-| **0.50 - 0.69** | Fair ⚠️ | Significant noise in retrieval results | Needs improvement before production |
-| **Below 0.50** | Poor ❌ | Retrieval returning mostly irrelevant docs | Urgent attention required |
+**Score interpretation**: Higher values mean relevant retrieved chunks tend to precede irrelevant ones. A score of 1.0 does not imply that every retrieved chunk is relevant or that every needed fact was retrieved.
 
 **Optimization Strategies**
 - Fine-tune your retrieval parameters (similarity threshold, top-k)
@@ -148,9 +135,9 @@ Better retrieval: [Password reset guide, Password reset FAQ, Account security, L
 
 ### Context Recall
 
-**Definition**: Whether all the necessary information to answer the question was retrieved. It evaluates completeness rather than precision.
+**Definition**: How much of a reviewed reference answer is supported by the retrieved contexts. It measures coverage of that reference.
 
-**Why it matters**: This is your system's "Upper Bound" of knowledge. Low context recall means your agent is missing important information, leading to incomplete or incorrect answers. Even with perfect generation, missing context will result in gaps in the response.
+**Why it matters**: Missing evidence limits an answer grounded in those sources. Check whether low recall reflects missing retrieval, an unsuitable reference, or an incorrect judge decision.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-em-5">How is this calculated?</button>
@@ -171,14 +158,7 @@ Context Recall = (Number of claims attributable to contexts) / (Total number of 
 <div id="aside-em-6" popover class="dx-aside-panel">
 <button class="dx-aside-x" popovertarget="aside-em-6" popovertargetaction="hide" aria-label="Close">×</button>
 
-**Score interpretation**:
-
-| Score Range | Interpretation | What It Means | Action Needed |
-|-------------|----------------|---------------|---------------|
-| **0.90 - 1.00** | Excellent ✅ | All critical information was retrieved | Upper bound is optimal |
-| **0.70 - 0.89** | Good 👍 | Most information retrieved, minor gaps | Acceptable, monitor for specific gaps |
-| **0.50 - 0.69** | Fair ⚠️ | Significant information gaps | Increase retrieval coverage |
-| **Below 0.50** | Poor ❌ | Major gaps, answers will be incomplete | Critical - expand retrieval or knowledge base |
+**Score interpretation**: Higher values mean more claims in the reference answer are supported by retrieved contexts. Inspect unsupported reference claims: a flawed reference can lower recall even when retrieval is appropriate.
 
 **Optimization Strategies**:
 - Increase the number of retrieved documents (top-k parameter)
@@ -209,11 +189,11 @@ For high recall, retrieved contexts must cover all three ground truth steps.
 
 ### Faithfulness
 
-**Definition**: Whether the generated answer is factually consistent with the retrieved context, eg. whether every claim can be inferred from somewhere in the retrieved context. It's essentially a measure of hallucination - lower faithfulness means more hallucinated content.
+**Definition**: Whether claims in the generated answer are supported by the retrieved context. Unsupported claims may be false or may come from outside knowledge; this metric does not distinguish those cases.
 
-**Why it matters**: Faithfulness is critical for production RAG systems since safety is paramount. It prevents hallucination and ensures users can trust the agent's responses. Low faithfulness means the model is "making things up" rather than grounding answers in retrieved knowledge.
+**Why it matters**: It helps identify unsupported claims. A high score does not establish that the source itself is correct, or that the answer is complete or safe.
 
-A faithful answer might be "I don't know" (if the context is empty). An unfaithful answer invents facts. At the end of the day, **an honest "I don't know" is preferable over a confident lie.**
+Abstaining can be appropriate when evidence is insufficient. A ratio-based score may be undefined when an answer has no factual claims; do not automatically count that as a perfect answer.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-em-8">How is this calculated?</button>
@@ -237,14 +217,7 @@ Faithfulness = (Number of claims supported by context) / (Total number of claims
 <div id="aside-em-9" popover class="dx-aside-panel">
 <button class="dx-aside-x" popovertarget="aside-em-9" popovertargetaction="hide" aria-label="Close">×</button>
 
-**Score interpretation**:
-
-| Score Range | Interpretation | What It Means | Action Needed |
-|-------------|----------------|---------------|---------------|
-| **0.90 - 1.00** | Excellent ✅ | Answer fully grounded in context | Production-ready, trustworthy |
-| **0.75 - 0.89** | Good 👍 | Mostly grounded, minor extrapolations | Acceptable, monitor for hallucinations |
-| **0.60 - 0.74** | Fair ⚠️ | Significant unsupported claims | Strengthen grounding in prompts |
-| **Below 0.60** | Poor ❌ | Frequent hallucination, unreliable | Urgent - agent is making things up |
+**Score interpretation**: Higher values mean a larger fraction of the answer’s claims were judged supported by context. This does not establish that the context is true, that the answer is complete, or that the system is safe.
 
 **Optimization Strategies**:
 - Strengthen system prompts to emphasize grounding in context
@@ -279,7 +252,7 @@ Unfaithful answer: "Contact your manager to reset passwords immediately." (Faith
 
 **Definition**: How well the generated answer addresses the original question. It evaluates whether the response is on-topic and directly answers what was originally asked, and penalizes answers that are true and possibly even well-grounded, but off-topic.
 
-**Why it matters**: An agent might generate a factually correct, faithful response that still doesn't answer what the user asked. High relevancy ensures users get actionable answers to their specific questions, improving user satisfaction and reducing follow-up queries.
+**Why it matters**: A grounded answer can still miss the user's question. Relevancy helps detect that mismatch; actionability and usefulness need their own checks.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-em-11">How is this calculated?</button>
@@ -292,6 +265,8 @@ RAGAS uses an LLM to generate potential questions that the answer would be appro
 Answer Relevancy = mean(cosine_similarity(original_question, generated_question_i))
 ```
 
+Cosine similarity ranges from −1 to 1, although these scores usually fall between 0 and 1 ([RAGAS definition](https://docs.ragas.io/en/v0.2.15/concepts/metrics/available_metrics/answer_relevance/)).
+
 where `i` indicates the index of a generated question derived from the generated response.
 
 </div>
@@ -302,14 +277,7 @@ where `i` indicates the index of a generated question derived from the generated
 <div id="aside-em-12" popover class="dx-aside-panel">
 <button class="dx-aside-x" popovertarget="aside-em-12" popovertargetaction="hide" aria-label="Close">×</button>
 
-**Score interpretation**:
-
-| Score Range | Interpretation | What It Means | Action Needed |
-|-------------|----------------|---------------|---------------|
-| **0.90 - 1.00** | Excellent ✅ | Answer directly addresses the question | High user satisfaction expected |
-| **0.75 - 0.89** | Good 👍 | Mostly relevant with minor tangents | Acceptable, minor prompt tuning |
-| **0.60 - 0.74** | Fair ⚠️ | Partially addresses question | Improve question understanding |
-| **Below 0.60** | Poor ❌ | Off-topic or too generic | Critical - users won't get answers they need |
+**Score interpretation**: Higher values indicate closer alignment between the original question and questions generated from the answer. This is a proxy for relevance, not proof of correctness or user satisfaction.
 
 **Optimization Strategies**:
 - Add examples of relevant vs. irrelevant answers in system prompt
@@ -352,7 +320,7 @@ Low relevancy: "Passwords are important for security. Our company requires passw
   <button class="dx-quiz-opt" data-right data-fb="Exactly. Faithfulness only checks that claims are grounded; it says nothing about whether the answer is on-topic. A grounded-but-off-topic answer scores high on faithfulness and low on relevancy.">Answer Relevancy - it is faithful to the context but never answers the question asked</button>
   <button class="dx-quiz-opt" data-fb="No - every claim is accurately quoted from the docs, so faithfulness is high. Faithfulness measures grounding, not relevance to the question.">Faithfulness - the answer contains hallucinations</button>
   <button class="dx-quiz-opt" data-fb="Context Precision grades the retrieved documents, not the generated answer. The docs may be perfectly relevant; the problem is how the agent used them.">Context Precision - the retrieval was poor</button>
-  <button class="dx-quiz-opt" data-fb="This is the core misconception. An answer can be fully faithful (no hallucinations) yet completely miss what the user asked - which is exactly what Answer Relevancy catches.">None - a faithful answer is always a good answer</button>
+  <button class="dx-quiz-opt" data-fb="This is the core misconception. An answer can be fully grounded in its context yet completely miss what the user asked - which is exactly what Answer Relevancy catches.">None - a faithful answer is always a good answer</button>
 </div>
 
 <!-- fold:break -->
@@ -405,4 +373,3 @@ Over the next sections, you'll learn how to:
 - Use NVIDIA Nemotron models as evaluation judges
 - Design effective evaluation prompts
 - Implement custom evaluation criteria
-

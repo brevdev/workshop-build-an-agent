@@ -8,10 +8,10 @@ graph LR
     subgraph "Module 5: Container Level"
         B1["Docker Namespace<br/>Isolated filesystem"]
         B2["Resource Limits<br/>512MB RAM, 1 CPU"]
-        B3["No Host Mounts<br/>Credential isolation"]
+        B3["No Host Mounts<br/>Separate workspace"]
     end
 
-    subgraph "Module 6: Kernel Level"
+    subgraph "Module 6: Kernel and Gateway Policy"
         C1["Landlock LSM<br/>Per-path file access"]
         C2["seccomp BPF<br/>Syscall filtering"]
         C3["Network Proxy<br/>Per-endpoint control"]
@@ -19,9 +19,9 @@ graph LR
     end
 
     A1 --> A2 --> A3
-    A3 -->|"Gap: Agent can bypass<br/>app-level controls"| B1
+    A3 -->|"Approved commands still need<br/>process boundaries"| B1
     B1 --> B2 --> B3
-    B3 -->|"Gap: No per-file or<br/>per-endpoint granularity"| C1
+    B3 -->|"Add agent-specific<br/>path and endpoint policies"| C1
     C1 --> C2 --> C3 --> C4
 
     style A1 fill:#ff9800,color:#000

@@ -64,11 +64,24 @@ Identify *which* blank from the traceback line and **point them to it — don't 
   still runs; only the dashboard is empty. Not an error to fix unless they want tracing.
 
 ## Local NIM migration (`migrate.md`)
-- **`docker login nvcr.io` fails** → the NGC/NVIDIA key is wrong; username must be the
-  literal `$oauthtoken`, password is `$NVIDIA_API_KEY` via `--password-stdin`.
+- **Missing key / registry login fails** → save the key in Workshop Secrets Manager,
+  then run `python code/2-agentic-rag/nim_setup.py --check` from `/project`. The helper
+  loads `secrets.env`; a new terminal does not inherit notebook environment changes.
+  It passes the key through stdin/environment, not command arguments. If the saved
+  key is present but registry access is denied, check its NGC permissions.
+- **Driver preflight fails** → the pinned NIM 2.0.13 image uses CUDA 13 and the helper
+  requires R580+. A host administrator must assess a supported driver/profile or
+  platform-specific compatibility setup. Do not silently bypass this check or change
+  host drivers from the workshop. The hosted path remains available.
 - **Container slow / seems stuck** → first run downloads the model into the `nim-cache`
   volume; wait for `Application startup complete`. Needs a GPU (`--gpus 1`) and the host
   docker socket (provided by the workshop's `/var/host-run/` mount).
+- **Plain chat works, but agent returns an automatic-tool-choice HTTP 400** → use the
+  pinned launch in `nim_setup.py`, including `--enable-auto-tool-choice`,
+  `--tool-call-parser qwen3_coder`, and `--reasoning-parser nemotron_v3`.
+  Run `python code/2-agentic-rag/nim_smoke_test.py`: it verifies a real tool call,
+  sends back a newly generated result with its matching ID, and checks the final answer.
+  A chat-only HTTP 200 is insufficient. Visible `<think>`/tool markup also fails this check.
 - **Agent can't reach the NIM** → use `base_url="http://nemotron:8000/v1"` (the
   container name resolves only on the shared `--network workbench`); `localhost` won't
   work from the agent container. Include `/v1`; set `model="nvidia/nemotron-3-nano"`.

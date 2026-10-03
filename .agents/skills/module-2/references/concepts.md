@@ -86,8 +86,10 @@ runs (cost, latency, quality). Requires `LANGSMITH_API_KEY`; traces land in the
 - **API Catalog** (build.nvidia.com): free, instant, huge model selection — great for
   starts/experiments. **Local NIM:** deployment control, with hardware-limited performance. This exercise leaves embeddings, reranking, and web search hosted.
 - Migrate the LLM to a local **NIM container** (`nvcr.io/nim/nvidia/nemotron-3-nano`,
-  the smaller Nemotron 3 Nano 30B-a3b that fits one GPU): NGC `docker login`, create a
-  `nim-cache` volume, `docker run … --network workbench -p 8000:8000`, then repoint the
+  the smaller Nemotron 3 Nano 30B-a3b, on a supported GPU/profile): `nim_setup.py`
+  checks the driver and saved key, authenticates to NGC, creates `nim-cache`, and runs
+  a pinned image on `workbench` with model-specific tool/reasoning parsers. Verify a
+  complete tool round trip with `nim_smoke_test.py`, then repoint the
   agent: `ChatNVIDIA(base_url="http://nemotron:8000/v1", model="nvidia/nemotron-3-nano", …)`.
 - Embeddings + rerank can also be moved local with a second GPU (same pattern,
   per-model `base_url`).

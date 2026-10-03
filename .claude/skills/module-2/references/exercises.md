@@ -123,9 +123,17 @@ This connects to `mcp_server.py` instead of Tavily's hosted server.
 
 The exercises here are operational (run a container), not `...` blanks. Guide the
 steps; let the learner run them:
-1. NGC login: `echo $NVIDIA_API_KEY | docker login nvcr.io --username '$oauthtoken' --password-stdin`
-2. `docker volume create nim-cache`
-3. `docker run … --network workbench --gpus 1 -p 8000:8000 nvcr.io/nim/nvidia/nemotron-3-nano:latest` (wait for "Application startup complete")
+1. From `/project`, run `python code/2-agentic-rag/nim_setup.py --check`. Check the
+   supported GPU/profile and Docker-host disk capacity; the pinned CUDA 13 image needs R580+.
+2. Inspect `python code/2-agentic-rag/nim_setup.py --print-command`, then launch with
+   `python code/2-agentic-rag/nim_setup.py`. The helper loads saved credentials,
+   authenticates to NGC, creates `nim-cache`, and starts the digest-pinned Nano image.
+   Its automatic-tool-choice, `qwen3_coder` tool parser and `nemotron_v3` reasoning parser
+   are required for this model's agent calls.
+3. Follow `docker logs -f nemotron` until ready, then run
+   `python code/2-agentic-rag/nim_smoke_test.py`. Require the actual tool request,
+   matching result ID, and final answer from the generated tool result; plain chat alone
+   does not pass. These operational helpers do not complete the learner's agent-code blank.
 4. **Code change:** repoint `llm` to the local NIM.
    - **L1:** "Keep `ChatNVIDIA`, but add a `base_url` for your local container and switch the model to the Nano you launched."
    - **L2:** "`base_url='http://nemotron:8000/v1'`, `model='nvidia/nemotron-3-nano'` (the page also sets `top_p=0.95`, `max_tokens=8192`)."

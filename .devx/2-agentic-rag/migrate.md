@@ -22,7 +22,11 @@ Our agent has been running on **Nemotron 3 Super (120B)** through NVIDIA's hoste
 
 For our model, you can find the relevant details on the [deployment page](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b/deploy), including Docker commands and environment setup.
 
-Whenever you want to deploy a new model, check its *Deploy* tab for reference instructions. We'll be closely following these directions, with slight modifications, to run our LLM locally.
+This workshop pins **NIM 2.0.13 / vLLM 0.28.0** by its multi-architecture image digest in `code/2-agentic-rag/nim_setup.py`. The model and its output parsers must match: ordinary chat can work even when an agent's tool calls fail.
+
+The pinned image uses CUDA 13. The launch helper checks for **R580 or newer** before downloading anything; see [NVIDIA's driver compatibility table](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cuda-driver). An older driver needs a host administrator to assess a supported upgrade or [platform-specific compatibility setup](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html). The helper does not change the host driver. You can keep using the hosted agent if the local requirements are not met.
+
+Check **free GPU memory and disk space on the Docker host**, including the model cache. For this image, the A100 BF16 profile downloads about 59 GiB of model files and the unpacked image occupies about 30 GiB; allow additional space during download. Other GPU/profile combinations differ. Stop training or other GPU services before starting this exercise.
 
 <!-- fold:break -->
 
@@ -30,151 +34,68 @@ Whenever you want to deploy a new model, check its *Deploy* tab for reference in
 
 <img src="_static/robots/startup.png" alt="It's alive!" style="float:right;max-width:300px;margin:25px;" />
 
-Start by opening a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> tab in Jupyter. We'll use this dedicated terminal to launch the NIM container.
-
-In a typical development workflow, both your agent and NIM containers would run in the background, allowing you to multitask and iterate quickly. For this exercise, it's perfectly fine to run the NIM in the foreground so you can easily monitor its output and ensure everything starts up correctly.
-
-<!-- fold:break -->
-
-### Login to NGC
-
-Login to the NVIDIA GPU Cloud (NGC) container registry.
+Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> tab in Jupyter and run commands from the project root:
 
 ```bash
-echo $NVIDIA_API_KEY | \
-  docker login nvcr.io \
-  --username '$oauthtoken' \
-  --password-stdin
+cd /project
+python code/2-agentic-rag/nim_setup.py --check
 ```
+
+This checks Docker, the shared `workbench` network, the driver, the container name, and the presence of your saved NVIDIA key. **Save the key in Workshop Secrets Manager first.** Saving a key in a notebook does not export it into a new terminal; this helper loads `secrets.env` directly without printing the key or putting it in command arguments.
+
 <!-- fold:break -->
 
-### Create your NIM Cache
-
-Create a location for NIM containers to save their downloaded model files.
+### Inspect the launch configuration
 
 ```bash
-docker volume create nim-cache
+python code/2-agentic-rag/nim_setup.py --print-command
 ```
+
+The command creates a container named `nemotron` on the `workbench` network and mounts the `nim-cache` model volume. It uses a 16,384-token context and up to four concurrent sequences, with 80% of GPU memory allocated to Nano. This leaves some headroom for the optional retrieval models; check their requirements separately.
+
+These model-specific settings are essential for our agent:
+
+```text
+--enable-auto-tool-choice
+--tool-call-parser qwen3_coder
+--reasoning-parser nemotron_v3
+```
+
+The tool parser converts Nano's generated tool markup into structured calls the agent can execute. The reasoning parser separates reasoning from visible answer content. These are the [built-in parsers NVIDIA specifies for Nemotron 3](https://docs.nvidia.com/nemo/labs-voice-agent/build-voice-agents/model-serving/v-llm-plugins/). Changing only `ChatNVIDIA`'s URL cannot configure the server's parsers.
 
 <!-- fold:break -->
 
-### 🔥 Let's go!
-
-Light the fires with this Docker run command! This command will pull the NIM container image and model data files before hosting the model behind a local OpenAI compliant API. Start this command and go on to the next step.
+### Start the container
 
 ```bash
-docker run -it --rm \
-    --name nemotron \
-    --network workbench \
-    --gpus 1 \
-    --shm-size=16GB \
-    -e NGC_API_KEY=$NVIDIA_API_KEY \
-    -v nim-cache:/opt/nim/.cache \
-    -u $(id -u) \
-    -p 8000:8000 \
-    nvcr.io/nim/nvidia/nemotron-3-nano:latest
+python code/2-agentic-rag/nim_setup.py
+docker logs -f nemotron
 ```
+
+The helper authenticates to NGC using the saved key, creates the model-cache volume, and starts the pinned container in the background. Docker may download the image before the helper returns. In the container log, watch for profile selection, model download, model loading, and then `Application startup complete`. A cold start can take several minutes.
+
+Press **Ctrl+C** to stop following the logs; the background container keeps running. If startup exits, inspect `docker logs nemotron` before retrying. The helper will not overwrite an existing container.
 
 <!-- fold:break -->
 
-As the NIM container is starting, the log allows you to observe that it is:
+## Test an Actual Tool Round Trip
 
-1. Finding the most optimized profile for your hardware
-2. Downloading the model files
-3. Loading the model, and finally
-4. Starting the model
-
-*Expect everything to take a few minutes to stabilize.*
-
-You'll know the NIM is ready for inference when it says `Application startup complete`, runs a built-in smoke test, then starts logging metrics.
-
-<div class="dx-aside">
-<button class="dx-aside-btn" popovertarget="aside-migrate-1">📜 If you're curious, it looks like this.</button>
-<div id="aside-migrate-1" popover class="dx-aside-panel">
-<button class="dx-aside-x" popovertarget="aside-migrate-1" popovertargetaction="hide" aria-label="Close">×</button>
-
-```
-INFO 2025-09-10 16:31:52.7 on.py:48] Waiting for application startup.
-INFO 2025-09-10 16:31:52.239 on.py:62] Application startup complete.
-INFO 2025-09-10 16:31:52.240 server.py:214] Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO 2025-09-10 16:31:55.944 api_server.py:516] An example cURL request:
-curl -X 'POST' \
-  'http://0.0.0.0:8000/v1/chat/completions' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "model": "nvidia/nemotron-3-nano",
-    "messages": [
-      {
-        "role":"user",
-        "content":"Hello! How are you?"
-      },
-      {
-        "role":"assistant",
-        "content":"Hi! I am quite well, how can I help you today?"
-      },
-      {
-        "role":"user",
-        "content":"Can you write me a song?"
-      }
-    ],
-    "top_p": 1,
-    "n": 1,
-    "max_tokens": 15,
-    "stream": true,
-    "frequency_penalty": 1.0,
-    "stop": ["hello"]
-  }'
-
-INFO 2025-09-10 16:31:55.944 api_server.py:524] Responses API examples:
-curl -X 'POST' \
-  'http://0.0.0.0:8000/v1/responses' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "model": "nvidia/nemotron-3-nano",
-    "input": "Hello, how are you?",
-    "max_output_tokens": 128,
-    "stream": false
-  }'
-
-
-curl -X 'GET' \
-  'http://0.0.0.0:8000/v1/responses/resp_123456' \
-  -H 'accept: application/json'
-
-
-curl -X 'POST' \
-  'http://0.0.0.0:8000/v1/responses/resp_123456/cancel' \
-  -H 'accept: application/json'
-
-INFO 2025-09-10 16:32:05.957 metrics.py:386] Avg prompt throughput: 0.2 tokens/s, Avg generation throughput: 1.1 tokens/s, Running: 0 reqs, Swapped: 0 reqs, Pending: 0 reqs, GPU KV cache usage: 0.0%, CPU KV cache usage: 0.0%.
-```
-
-</div>
-</div>
-
-<!-- fold:break -->
-
-## Test the NIM
-
-Before moving on, let's verify that the NIM is running correctly by sending it a test request.
-
-Open a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> tab, and run the following test command:
+A successful chat request alone does not prove that this service can run an agent. From the project root, run:
 
 ```bash
-curl -X 'POST' \
-  'http://nemotron:8000/v1/chat/completions' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-      "model": "nvidia/nemotron-3-nano",
-      "messages": [{"role":"user", "content":"Which number is larger, 9.11 or 9.8?"}],
-      "max_tokens": 64
-  }'
+python code/2-agentic-rag/nim_smoke_test.py
 ```
 
-You should see the model start to answer the question, then get cut off after 64 tokens.
+The test first checks readiness, then asks Nano to call a small verification tool using **automatic** tool choice. The tool generates a fresh code only after the model requests it. The script sends that result back with the matching tool-call ID and verifies that Nano's final answer reproduces the code.
+
+You should see:
+
+```text
+PASS: readiness, automatic tool call, matching tool-call ID, and final answer from the tool result.
+Verification code: workshop-...
+```
+
+This tests the same model → tool request → tool result → final answer cycle you built in Module 1. A plain answer, an HTTP error, a truncated response, an incorrect tool result, or visible unparsed reasoning markup fails the check. If the service is still loading, wait for readiness and retry. An `auto tool choice` error means the server was launched without the required parser flags; inspect its launch configuration before continuing.
 
 <!-- fold:break -->
 
@@ -208,9 +129,9 @@ llm = ChatNVIDIA(
 
 > **👷‍♂️ Heads Up:** For these steps, your `langgraph` server should still be running. If you stopped the server, make sure to [start it back up](running.md). If it is still running, no need to restart! It will see your changes.
 
-Go back to our <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-rocket"></i> Simple Agents Client</button> and try prompting the agent again. If everything was successful, you should notice no change!
+Go back to our <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-rocket"></i> Simple Agents Client</button> and ask **“How do I connect to VPN?”** Confirm that the trace includes `company_llc_it_knowledge_base`, a returned tool result, and a final answer. Check its citations against those returned chunks. Nano is a different model, so wording and answer quality can differ from the hosted model.
 
-Although... if you look at the log messages for the NIM, you should start seeing messages like this:
+The NIM log should also show successful requests for the model turns:
 
 ```
 INFO 2025-09-10 19:08:21.184 httptools_impl.py:481] 172.19.0.3:35474 - "POST /v1/chat/completions HTTP/1.1" 200
@@ -232,3 +153,17 @@ Recall that our agent also uses two additional models:
 Local retrieval also requires supported embedding and reranking deployments. Check each model's deployment availability, GPU profiles, and free memory before running it; configure its endpoint separately with `base_url`.
 
 Running all three models locally will give you full control over your agent's stack and may improve performance. Give it a try!
+
+
+<!-- fold:break -->
+
+## Release the GPU When Finished
+
+For the container you created in this exercise:
+
+```bash
+docker stop nemotron
+docker rm nemotron
+```
+
+Stopping it releases GPU memory. The `nim-cache` volume retains downloaded model files for a later run. If you also deployed local embedding/reranking containers, stop those when finished. Revert your agent's `llm` configuration to the hosted model before continuing without the local service.

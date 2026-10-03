@@ -53,8 +53,10 @@ interrupt_on)` returns a compiled **LangGraph** graph with a **middleware stack*
 - **Skills in this demo:** selected flat markdown presets are inserted into the system prompt. This is eager loading; the library's directory-based `skills=` mechanism is separate.
 - **HITL:** `interrupt_on=INTERRUPT_TOOLS` = `{write_file, edit_file, execute}` — those
   tools pause for human approval or rejection in the client.
-- **Workspace:** `/tmp/deepagent_workspace` locally (seeded with fake demo secrets),
-  exposed as virtual `/` to local file tools; `/workspace` in Docker. File tools require absolute paths within that root.
+- **Workspace:** `/tmp/deepagent_workspace` locally (seeded with fake demo secrets).
+  File-only mode exposes it as virtual `/`. With local shell execution enabled,
+  both file and shell tools use real absolute host paths; Docker uses `/workspace`
+  for both. The prompt selects the root for the active backend.
 
 ## Backends (the execution boundary)
 The **backend** decides where file ops and shell commands run — and is the sandboxing

@@ -44,11 +44,12 @@ learner's escape hatch is the teaching page's `🆘 Need some help?` block. Per 
   sandbox branch above is provided.)
 - **L1:** "Two backends here: one runs shell on the host workspace, one is file-only. Which
   matches `'execute'`? What params does the page specify for the shell one?"
-- **L2:** "`LocalShellBackend(root_dir=workspace, timeout=60.0, max_output_bytes=50000, inherit_env=False, virtual_mode=True)` if `'execute' in skill_ids`, else `FilesystemBackend(root_dir=workspace, virtual_mode=True)`."
+- **L2:** "`LocalShellBackend(root_dir=workspace, timeout=60.0, max_output_bytes=50000, inherit_env=False, virtual_mode=False)` if `'execute' in skill_ids`, else `FilesystemBackend(root_dir=workspace, virtual_mode=True)`."
 - **Common mistakes:** swapping the two; omitting params; reaching for `DockerSandboxBackend`
   here (that's the sandbox branch, already handled above).
 - **Teaching hook:** this is the security lever — `LocalShellBackend` runs on the host;
-  `DockerSandboxBackend` isolates. Connect to the sandboxing lesson.
+  its file and shell tools share real absolute paths. File-only mode uses a virtual
+  `/`; Docker uses `/workspace` and isolates execution. Connect to the sandboxing lesson.
 - **Target:** the two backend constructions above.
 
 ### E5 · `create_agent()` — assemble with `create_deep_agent`

@@ -117,7 +117,7 @@ Your enabled capabilities:
 CRITICAL RULES:
 1. Answer simple questions directly. For independent subtasks, use task and check its result.
 2. File tools require ABSOLUTE paths. Your workspace is: {workspace}
-   Always use paths like: {workspace}/hello.py
+   For example, a file named hello.py goes under that root. Quote paths in shell commands.
 3. Use web search for current information only when that tool is enabled.
 4. Be concise and technically accurate.
 5. You are running on NVIDIA infrastructure.{rag_rule}
@@ -140,8 +140,10 @@ The **backend** determines where file operations and shell commands execute. Dee
 
 Fill in ``_build_backend()`` to return the right backend:
 
-* If "execute" is in ``skill_ids`` → ``LocalShellBackend`` (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to False, virtual_mode=True)
+* If "execute" is in ``skill_ids`` → ``LocalShellBackend`` (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to False, virtual_mode=False)
 * Otherwise → ``FilesystemBackend`` (with root_dir as workspace, virtual_mode=True)
+
+With local shell execution enabled, file tools and shell commands use the same real absolute paths, such as `/tmp/deepagent_workspace/hello.py`. The shell starts in that workspace. File-only mode exposes the workspace through a virtual `/`, while Docker uses `/workspace` for both files and commands. The supplied prompt chooses the matching root. Local shell execution still has the host user's access; use Docker when you need isolation.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -153,7 +155,7 @@ if "execute" in skill_ids:
         root_dir=workspace,
         timeout=60.0,
         max_output_bytes=50000,
-        inherit_env=False, virtual_mode=True,
+        inherit_env=False, virtual_mode=False,
     )
     print("[Agent] Shell execution enabled via LocalShellBackend")
 else:

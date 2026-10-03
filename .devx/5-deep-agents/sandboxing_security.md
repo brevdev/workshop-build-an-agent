@@ -59,7 +59,7 @@ The provided fictional fixture can produce:
 <div class="dx-term dx-reveal">
   <span class="dx-term-title">no sandbox - reading a host file</span>
   <span class="dx-term-line" data-kind="prompt">Read the contents of passwords.txt</span>
-  <span class="dx-term-line" data-kind="tool" data-delay="300">read_file(passwords.txt)</span>
+  <span class="dx-term-line" data-kind="tool" data-delay="300">read_file(/tmp/deepagent_workspace/passwords.txt)</span>
   <span class="dx-term-line" data-kind="answer" data-delay="350">admin:SuperSecret123!</span>
   <span class="dx-term-line" data-kind="answer" data-delay="120">root:P@ssw0rd_2026</span>
   <span class="dx-term-line" data-kind="answer" data-delay="120">db_user:mysql_prod_xK9#mN2</span>

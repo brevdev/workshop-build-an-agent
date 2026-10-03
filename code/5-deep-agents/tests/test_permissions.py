@@ -2,6 +2,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shlex
 import sys
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -56,6 +57,27 @@ def test_file_only_boundaries_and_disabled_backend(tmp_path):
     disabled=restrict_backend(FilesystemBackend(root_dir=root,virtual_mode=True),[])
     with pytest.raises(PermissionError):disabled.write('/unselected.txt','bad')
     assert not (root/'unselected.txt').exists()
+
+
+def test_local_file_and_shell_tools_share_the_prompt_workspace(tmp_path, monkeypatch):
+    mod = factory()
+    workspace = tmp_path / 'workspace with spaces'
+    workspace.mkdir()
+    monkeypatch.setattr(mod, 'WORKSPACE_DIR', str(workspace))
+    backend, sandbox = mod._build_backend(['fileio', 'execute'], {})
+    prompt = mod._build_system_prompt(['fileio', 'execute'], 'nemotron', False)
+    assert sandbox is None and f'Your workspace is: {workspace}' in prompt
+    script = workspace / 'hello.py'
+    assert backend.write(str(script), 'print("Hello World")\n').error is None
+    assert 'Hello World' in backend.read(str(script))
+    result = backend.execute(f'python3 {shlex.quote(str(script))}')
+    assert result.exit_code == 0 and 'Hello World' in result.output.splitlines()
+    # File-only mode keeps its virtual paths and existing boundary protections.
+    files, _ = mod._build_backend(['fileio'], {})
+    assert 'Hello World' in files.read('/hello.py')
+    assert 'Your workspace is: /\n' in mod._build_system_prompt(['fileio'], 'nemotron', False)
+    assert 'Your workspace is: /workspace\n' in mod._build_system_prompt(
+        ['fileio', 'execute'], 'nemotron', False, sandbox_enabled=True)
 
 
 def test_model_view_and_guessed_tool_calls_are_restricted():

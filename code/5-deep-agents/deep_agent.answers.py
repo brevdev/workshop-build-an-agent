@@ -52,7 +52,9 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 # ── Configuration ─────────────────────────────────────────────────────────────
 
 # Workspace directories
-WORKSPACE_DIR = os.environ.get("DEEPAGENT_WORKSPACE", "/tmp/deepagent_workspace")            # Local (has sensitive files for demo)
+WORKSPACE_DIR = os.path.abspath(os.path.expanduser(
+    os.environ.get("DEEPAGENT_WORKSPACE", "/tmp/deepagent_workspace")
+))  # Local workspace (contains fake sensitive files for the demo)
 SANDBOX_WORKSPACE_DIR = "/workspace"                  # Path INSIDE Docker container
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
 
@@ -172,7 +174,12 @@ def _load_skill_content(skill_ids: list[str]) -> str:
 def _build_system_prompt(skill_ids: list[str], model_id: str, hitl_enabled: bool, sandbox_enabled: bool = False) -> str:
     """Create a system prompt that includes the selected capabilities and skills."""
     model_name = MODEL_DISPLAY_NAMES.get(model_id, "AI Model")
-    workspace = SANDBOX_WORKSPACE_DIR if sandbox_enabled else "/"
+    if sandbox_enabled:
+        workspace = SANDBOX_WORKSPACE_DIR
+    elif "execute" in skill_ids:
+        workspace = WORKSPACE_DIR
+    else:
+        workspace = "/"
 
     enabled = []
     if "websearch" in skill_ids:
@@ -216,7 +223,7 @@ Your enabled capabilities:
 CRITICAL RULES:
 1. Answer simple questions directly. For independent subtasks, use task and check its result.
 2. File tools require ABSOLUTE paths. Your workspace is: {workspace}
-   For example, a file named hello.py goes under that root.
+   For example, a file named hello.py goes under that root. Quote paths in shell commands.
 3. Use web search for current information only when that tool is enabled. Include the current date for news, check publication dates, and cite only claims supported by retrieved text. If freshness or details are unverified, say so.
 4. Be concise and technically accurate.
 5. You are running on NVIDIA infrastructure.{rag_rule}
@@ -228,7 +235,7 @@ CRITICAL RULES:
 # TODO: Exercise 4
 # Fill in _build_backend() to return the right backend:
 #   - If "execute" is in skill_ids → 
-#         LocalShellBackend (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to False, virtual_mode=True)
+#         LocalShellBackend (with root_dir as workspace, 60.0 timeout, 50000 max_output_bytes, inherit_env set to False, virtual_mode=False)
 #   - Otherwise → 
 #         FilesystemBackend (with root_dir as workspace, virtual_mode=True)
 
@@ -251,7 +258,8 @@ def _build_backend(skill_ids: list[str], sandbox_map: dict[str, bool]):
             raise RuntimeError("Docker sandbox could not start. No agent was created; check Docker and retry.") from exc
         return backend, backend
 
-    # No sandbox — local execution
+    # No sandbox — local execution. Shell and file tools share real host paths.
+    # File-only mode keeps its virtual root; enabling shell is not isolation.
     workspace = WORKSPACE_DIR
     print(f"[Agent] Sandbox mode OFF — using local workspace: {workspace}")
 
@@ -261,7 +269,7 @@ def _build_backend(skill_ids: list[str], sandbox_map: dict[str, bool]):
             timeout=60.0,
             max_output_bytes=50000,
             inherit_env=False,
-            virtual_mode=True,
+            virtual_mode=False,
         )
         print("[Agent] Shell execution enabled via LocalShellBackend")
     else:

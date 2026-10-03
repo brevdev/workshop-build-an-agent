@@ -47,7 +47,7 @@ Docker must be available; the backend creates a `python:3.11-slim` container per
 
 | | Local mode | Sandbox Mode |
 |---|---|---|
-| File tools | Virtual paths under `/tmp/deepagent_workspace` | Paths under `/workspace` in the container |
+| File tools | File-only: virtual `/`; with Shell Execution: real paths under `/tmp/deepagent_workspace` (or `DEEPAGENT_WORKSPACE`) | Paths under `/workspace` in the container |
 | Shell tools | Backend user; the working directory is not a jail | Nonroot container process |
 | Container limits | Not applicable | 512 MiB memory, 1 CPU, 64 processes, 60-second commands |
 | Host mounts / container network | Host permissions apply | No host mounts or network |

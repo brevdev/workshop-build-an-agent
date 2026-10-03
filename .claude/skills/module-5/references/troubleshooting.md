@@ -41,7 +41,11 @@ The Client adapter imports the completed `code/5-deep-agents/deep_agent.py`; whi
 - Selecting Web Search requires `TAVILY_API_KEY`; a missing key stops creation with a clear error. Web Search and RAG execute in the application, outside the file/shell Docker sandbox.
 
 ## Workspace & file paths
-- File tools use virtual `/` for the local workspace and `/workspace` for Docker. Traversal, outside paths, and escaping symlinks are rejected. Local shell execution, when selected, still runs as the host user.
+- File-only mode uses virtual `/` and rejects traversal, outside paths and escaping
+  symlinks. With local shell execution enabled, file and shell tools both use the
+  actual workspace path (normally `/tmp/deepagent_workspace`); the shell runs as
+  the host user. Docker uses `/workspace` for both. If a file can be read but a
+  shell command cannot find it, check that the backend and prompt use the same root.
 
 ## The fake demo files (not an incident)
 `/tmp/deepagent_workspace/{passwords.txt, ssn_records.txt}` are **seeded by `postBuild` on

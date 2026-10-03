@@ -2,7 +2,7 @@
 Monkey-patches for the Nemotron-H remote modeling code, applied to the loaded
 model class at runtime.
 
-Two distinct bugs are fixed:
+Compatibility fixes for the pinned remote model:
 
 1. Forward pass doesn't respect UNSLOTH_RETURN_HIDDEN_STATES. Unsloth's efficient
    GRPO implementation expects the model to return hidden states in the `logits`
@@ -17,6 +17,10 @@ Two distinct bugs are fixed:
    reconstruct `cache_position` from `past_key_values` when it's missing —
    exactly what transformers 5.x's native NemotronH implementation does via
    its GenerationMixin parent.
+
+3. The remote model declares tied weights with the transformers 4.x list
+   format. The transformers 5.x saver expects a target-to-source mapping.
+   The export helper updates this metadata on the loaded model only.
 
 Usage:
     from nemotron_unsloth_patch import patch_nemotron_for_unsloth_grpo
@@ -36,6 +40,16 @@ def patch_nemotron_for_inference(model):
     name = causal_lm.__class__.__name__
     if "NemotronH" in name and hasattr(causal_lm, "prepare_inputs_for_generation"):
         _patch_prepare_inputs_for_generation(causal_lm, name)
+
+
+def patch_nemotron_for_export(model):
+    """Translate the pinned model's legacy tying declaration for the 5.x saver.
+
+    This changes metadata, not tensor values or cache files. The saver still
+    checks actual tensor storage before removing any shared weights.
+    """
+    if "NemotronH" in type(model).__name__ and getattr(model, "_tied_weights_keys", None) == ["lm_head.weight"]:
+        model._tied_weights_keys = {"lm_head.weight": "backbone.embeddings.weight"}
 
 
 def patch_nemotron_for_unsloth_grpo(model):
@@ -248,8 +262,8 @@ def verify_patch(model, tokenizer):
 def save_remote_model_code(model, output_dir):
     """Bundle the trusted remote Python files needed by a fresh local loader.
 
-    Unsloth's merged-weight export does not copy these files. The code comes
-    from the exact model revision already loaded for training.
+    Keep the export self-contained even when a saver omits remote-code files.
+    The code comes from the exact model revision already loaded for training.
     """
     import inspect
     import shutil

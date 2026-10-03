@@ -350,6 +350,10 @@ After constructing the trainer, run the training cell once. It first scores the 
 
 After the save cell, the customized model should appear in: `outputs/grpo_langgraph_cli/merged_model/`.
 
+The save cell first preserves the trained LoRA adapter in `outputs/grpo_langgraph_cli/final_adapter/`. It then merges the adapter into the live BF16 model with PEFT and writes fresh model shards, the tokenizer, and the required model code. It does not modify the downloaded base-model cache. A failed file save leaves an earlier completed export intact; free disk space and rerun the save cell while the kernel still holds the merged model. Allow room for the base-model cache and a full exported model (plus the previous export if replacing one).
+
+After merging, `model` is an inference model without separate trainable LoRA adapters. To train again, restart from the model-loading and LoRA cells. Continue to the next notebook to verify that a fresh process can load the exported model.
+
 <!-- fold:break -->
 
 ## Troubleshooting

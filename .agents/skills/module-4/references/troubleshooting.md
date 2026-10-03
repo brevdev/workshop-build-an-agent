@@ -61,8 +61,12 @@ ordered correctly (after load, before PEFT).
 
 ## Running the customized agent (`03_run_agent.ipynb`)
 - Loads from `outputs/grpo_langgraph_cli/merged_model/` — **`FileNotFoundError`/empty** →
-  training didn't finish/save. They can re-run training or (if provided) use a supplied
-  checkpoint.
+  check whether the training notebook's save cell completed. The cell preserves the
+  adapter in `outputs/grpo_langgraph_cli/final_adapter/`, merges with PEFT, and writes
+  fresh weights without changing Hub cache permissions. A failed file save can be
+  retried while the kernel still holds the merged model; check free disk first.
+  After merging, rerun the loading/LoRA cells before training again. Do not suggest
+  changing permissions recursively in the shared Hugging Face cache.
 - **Trained model emits odd/free-form text instead of JSON CLI calls** → the runtime
   system prompt must **match the training JSON format** (the R2 exercise). Mismatch = the
   model isn't prompted the way it was trained.

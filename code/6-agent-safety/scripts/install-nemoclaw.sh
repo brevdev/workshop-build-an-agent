@@ -3,7 +3,7 @@
 #
 # Why this script exists (vs. the upstream one-liner):
 #
-#   1. On Workbench's older glibc, NemoClaw v0.0.49's compatibility gateway
+#   1. On Workbench's older glibc, NemoClaw v0.0.55's compatibility gateway
 #      uses Docker host networking, but its CLI
 #      dials 127.0.0.1:8080 — which inside this container is the container's
 #      own loopback. A socat tunnel bridges 127.0.0.1:8080 -> the Docker
@@ -31,16 +31,22 @@ LOG=/tmp/nemoclaw-install.log
 TUNNEL_LOG=/tmp/nemoclaw-tunnel.log
 touch "$LOG" "$TUNNEL_LOG" || exit 1
 chmod 600 "$LOG" "$TUNNEL_LOG" || exit 1
-NEMOCLAW_TAG="${NEMOCLAW_INSTALL_TAG:-v0.0.49}"
+NEMOCLAW_TAG="${NEMOCLAW_INSTALL_TAG:-v0.0.55}"
 SANDBOX_NAME="${NEMOCLAW_SANDBOX_NAME:-my-assistant}"
 GATEWAY_NAME="${NEMOCLAW_OPENSHELL_GATEWAY_COMPAT_CONTAINER_NAME:-nemoclaw-openshell-gateway}"
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
-# Pair the pinned CLI with the base built at its release commit. Upstream's
-# mutable :latest now contains an incompatible OpenClaw bundle.
-if [[ "${NEMOCLAW_INSTALL_REF:-$NEMOCLAW_TAG}" == "v0.0.49" && -z "${NEMOCLAW_SANDBOX_BASE_IMAGE_REF:-}" ]]; then
-    export NEMOCLAW_SANDBOX_BASE_IMAGE_REF="ghcr.io/nvidia/nemoclaw/sandbox-base@sha256:3d36a38a03e4729f97d19db5226d767fb4583dd0ea52bc083458f7601164e1c8"
+# v0.0.55 pairs OpenShell 0.0.44 with OpenClaw 2026.5.22 and includes the
+# upstream embedded-mode write-hook fix (NVIDIA/NemoClaw#4519). The newer
+# OpenClaw includes the runtime-dependency EXDEV fix. Pin the multiarch base
+# published for release commit 95d483fe, rather than mutable :latest.
+if [[ "${NEMOCLAW_INSTALL_REF:-$NEMOCLAW_TAG}" == "v0.0.55" && -z "${NEMOCLAW_SANDBOX_BASE_IMAGE_REF:-}" ]]; then
+    export NEMOCLAW_SANDBOX_BASE_IMAGE_REF="ghcr.io/nvidia/nemoclaw/sandbox-base@sha256:10433a8cd2f2b809dd0fdf983514679e04c0f8aa1ff5bbff675029046033b108"
 fi
+
+# This module uses hosted inference; it does not need a GPU in the sandbox.
+# An explicit override remains available for learners using a local GPU route.
+export NEMOCLAW_SANDBOX_GPU="${NEMOCLAW_SANDBOX_GPU:-0}"
 
 log() { echo "$@" | tee -a "$LOG"; }
 
@@ -80,14 +86,37 @@ gateway_bind_is_private() {
     printf '%s\n' "$gateway_env" | grep -Fx "OPENSHELL_BIND_ADDRESS=$DOCKER_HOST_IP" >/dev/null
 }
 
+runtime_matches_pin() {
+    # A Ready sandbox can still contain the broken runtime from an older lab.
+    # Explicit alternative releases remain the caller's responsibility.
+    [[ "${NEMOCLAW_INSTALL_REF:-$NEMOCLAW_TAG}" != "v0.0.55" ]] && return 0
+    local version_out
+    version_out="$(timeout 20 nemoclaw --version 2>/dev/null)" || return 1
+    [[ "$version_out" == "nemoclaw v0.0.55" ]] || return 1
+    version_out="$(timeout 20 openshell --version 2>/dev/null)" || return 1
+    [[ "$version_out" == "openshell 0.0.44" ]] || return 1
+    version_out="$(timeout 30 nemoclaw "$SANDBOX_NAME" exec -- openclaw --version 2>/dev/null)" || return 1
+    printf '%s\n' "$version_out" | grep -Eq '^OpenClaw 2026\.5\.22([[:space:]]|$)'
+}
+
 # Fast path: NemoClaw already installed — just ensure the tunnel and exit
 if command -v nemoclaw >/dev/null 2>&1; then
     ensure_tunnel
-    if sandbox_ready && gateway_bind_is_private; then
-        log "✓ NemoClaw sandbox '$SANDBOX_NAME' is Ready."
-        exit 0
+    if sandbox_ready; then
+        if [[ "${NEMOCLAW_FRESH:-0}" != "1" ]] && gateway_bind_is_private && runtime_matches_pin; then
+            log "✓ NemoClaw sandbox '$SANDBOX_NAME' is Ready."
+            exit 0
+        fi
+        # Upstream's pre-upgrade backup starts a registered sandbox's gateway
+        # before its onboarding preflight, which conflicts with our tunnel.
+        # Do not destroy the learner's workspace or reuse an old runtime.
+        log "Sandbox '$SANDBOX_NAME' needs a runtime or gateway refresh; its workspace has been preserved."
+        log "Save any needed files, then explicitly reset this disposable lab:"
+        log "  nemoclaw '$SANDBOX_NAME' destroy --cleanup-gateway"
+        log "  NEMOCLAW_FRESH=1 bash '$SCRIPT_DIR/install-nemoclaw.sh'"
+        exit 1
     fi
-    log "NemoClaw sandbox '$SANDBOX_NAME' is not Ready or its gateway bind needs repair; will re-onboard."
+    log "NemoClaw sandbox '$SANDBOX_NAME' is not Ready; will re-onboard."
     stop_tunnel
 fi
 
@@ -143,10 +172,13 @@ trap 'kill "$WATCHER_PID" 2>/dev/null || true; if [[ -n "$DOCKER_ADAPTER_DIR" ]]
 log "Running NemoClaw installer (tag: ${NEMOCLAW_TAG})..."
 log ""
 
+# Clone/build files become root-owned Docker layers and must be readable by
+# the sandbox user. Keep the helper's logs/state private; relax only the child
+# installer, whose own credential writers set explicit private permissions.
 if curl -fsSL https://www.nvidia.com/nemoclaw.sh \
-       | NEMOCLAW_INSTALL_TAG="${NEMOCLAW_TAG}" NEMOCLAW_NO_EXPRESS=1 bash 2>&1 | tee -a "$LOG"; then
-    if ! sandbox_ready || ! gateway_bind_is_private; then
-        log "Installer finished, but sandbox readiness or the private gateway bind check failed. Run the health check before continuing."
+       | (umask 022; NEMOCLAW_INSTALL_TAG="${NEMOCLAW_TAG}" NEMOCLAW_NO_EXPRESS=1 bash) 2>&1 | tee -a "$LOG"; then
+    if ! sandbox_ready || ! gateway_bind_is_private || ! runtime_matches_pin; then
+        log "Installer finished, but sandbox readiness, the private gateway bind check, or the pinned runtime version check failed. Run the health check before continuing."
         exit 1
     fi
     # A native gateway needs no compatibility tunnel or waiting watcher.

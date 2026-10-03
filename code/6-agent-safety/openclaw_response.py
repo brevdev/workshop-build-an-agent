@@ -1,4 +1,4 @@
-"""Normalize gateway replies from the workshop's pinned OpenClaw 2026.5.20.
+"""Normalize replies from the pinned host (2026.5.20) and sandbox (2026.5.22) OpenClaw.
 
 The gateway CLI returns ``result.payloads`` in output order. Payloads can carry
 ``text``, ``mediaUrl(s)`` and ``isError``; a zero exit status alone is not success.

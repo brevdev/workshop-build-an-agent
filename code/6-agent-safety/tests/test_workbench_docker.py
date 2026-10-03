@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import shutil
 import sys
+import tomllib
 
 import pytest
 
@@ -26,8 +27,17 @@ def test_gateway_and_supervisor_use_daemon_visible_files(tmp_path):
     shared = tmp_path / 'shared'
     state = shared / 'state'
     state.mkdir(parents=True)
+    config = state / 'openshell-gateway.toml'
+    original_config = ('[openshell]\nversion = 1\n'
+                       '[openshell.gateway]\ncompute_drivers = ["docker"]\n'
+                       '[openshell.drivers.docker]\n'
+                       'network_name = "openshell-docker"\n'
+                       'supervisor_bin = ' + json.dumps(str(sandbox)) + '\n')
+    config.write_text(original_config)
     socket = tmp_path / 'docker.sock'
     socket.touch()
+    ca_bundle = tmp_path / 'public-ca.pem'
+    ca_bundle.write_text('public certificate fixture\n')
     mounts = [
         {'Source': '/daemon/volume', 'Destination': str(shared)},
         {'Source': '/run/docker.sock', 'Destination': str(socket)},
@@ -37,22 +47,32 @@ def test_gateway_and_supervisor_use_daemon_visible_files(tmp_path):
            'OPENSHELL_BIND_ADDRESS': '0.0.0.0',
            'NEMOCLAW_OPENSHELL_GATEWAY_STATE_DIR': str(state),
            'OPENSHELL_DOCKER_SUPERVISOR_BIN': str(sandbox),
+           'OPENSHELL_GATEWAY_CONFIG': str(config),
            'OPENSHELL_DB_URL': 'sqlite:' + str(state / 'openshell.db')}
     args = ['run', '--name', 'nemoclaw-openshell-gateway',
             '--volume', f'{gateway}:/opt/nemoclaw/openshell-gateway:ro',
             '--volume', f'{state}:{state}:rw',
             '--volume', f'{installed}:{installed}:ro',
             '--volume', f'{socket}:/var/run/docker.sock:rw']
-    result, child_env = adapter.adapt_gateway(args, env, mounts)
+    result, child_env = adapter.adapt_gateway(args, env, mounts, ca_bundle=ca_bundle)
     assert '/daemon/volume/bin/openshell-gateway:/opt/nemoclaw/openshell-gateway:ro' in result
     assert '/daemon/volume/state:/daemon/volume/state:rw' in result
     assert '/daemon/volume/bin:/daemon/volume/bin:ro' in result
     assert '/run/docker.sock:/var/run/docker.sock:rw' in result
+    assert '/daemon/volume/bin/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro' in result
     assert child_env['OPENSHELL_DOCKER_SUPERVISOR_BIN'] == '/daemon/volume/bin/openshell-sandbox'
     assert child_env['OPENSHELL_DB_URL'] == 'sqlite:/daemon/volume/state/openshell.db'
     assert child_env['OPENSHELL_BIND_ADDRESS'] == '172.18.0.1'
+    assert child_env['OPENSHELL_GATEWAY_CONFIG'] == '/daemon/volume/state/workbench-openshell-gateway.toml'
+    translated = state / 'workbench-openshell-gateway.toml'
+    driver = tomllib.loads(translated.read_text())['openshell']['drivers']['docker']
+    assert driver['supervisor_bin'] == '/daemon/volume/bin/openshell-sandbox'
+    assert driver['network_name'] == 'openshell-docker'
+    assert translated.stat().st_mode & 0o777 == 0o600
+    assert config.read_text() == original_config  # upstream drift checks use this
     assert (shared / 'bin/openshell-gateway').read_bytes() == b'gateway-binary'
     assert (shared / 'bin/openshell-sandbox').read_bytes() == b'supervisor-binary'
+    assert (shared / 'bin/ca-certificates.crt').read_bytes() == ca_bundle.read_bytes()
     assert args[4].startswith(str(gateway))  # caller arguments remain intact
 
 

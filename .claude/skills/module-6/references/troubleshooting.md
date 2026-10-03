@@ -24,11 +24,29 @@ code.** Steps:
    the Docker-bridge gateway). Recovery from a failed install can remove and recreate the
    gateway; inspect its output and preserve any existing work first.
    Logs: `/tmp/nemoclaw-tunnel.log`.
-4. **Full reset:** recreates gateway state. Use it only after confirming which workshop
-   resources it will remove; do not suggest it as a harmless connectivity check.
-- The tunnel/gateway plumbing is a workaround for **NemoClaw v0.0.49** specifically (its
+4. **Full reset or version upgrade:** preserve needed workspace files first, restore
+   connectivity if necessary, then use `nemoclaw my-assistant destroy --cleanup-gateway`
+   (asks for confirmation) followed by `NEMOCLAW_FRESH=1 bash code/6-agent-safety/scripts/install-nemoclaw.sh`.
+   Replace the sandbox name if customized. This deletes the sandbox workspace and its
+   registration. Removing only the gateway or setting `NEMOCLAW_FRESH=1` leaves a registered
+   sandbox whose upstream pre-upgrade backup can start the tunnel before the port check.
+   Do not suggest this as a harmless connectivity check.
+- The tunnel/gateway plumbing targets **NemoClaw v0.0.55 / OpenShell 0.0.44** (its
   preflight wants :8080 free in the container but its readiness wants to *reach* the gateway).
+- The matching sandbox contains **OpenClaw 2026.5.22**. Older builds can fail with `EXDEV`
+  during plugin loading or an `includes` TypeError in `before_tool_call`. A healthy pinned
+  install takes the safe rerun path. A Ready sandbox with an older runtime is preserved
+  and rejected: use the explicit full reset above to replace its image.
+- After control-plane readiness, use `python code/6-agent-safety/scripts/check-nemoclaw-agent.py`
+  to verify actual inference, a temporary file write, and an independent read. It makes
+  three model calls and deletes its test file; it does not establish safety. The first
+  greeting can retry twice, waiting 30 seconds each time for upstream CLI pairing.
+  If pairing remains pending, the result stays **NOT READY**: wait for the watcher and
+  rerun the check. Embedded fallback is not a gateway success. A hook crash is not a kernel denial.
 - The provided helper binds its compatibility gateway to Docker bridge addresses. This pinned control plane disables TLS and operator authentication; keep the host and bridge-connected containers trusted. Sandbox policy does not secure the operator port.
+- The helper mounts Workbench's system CA bundle read-only in the compatibility gateway,
+  so `openshell inference set` can verify HTTPS endpoints normally. Do not treat
+  `--no-verify` as proof that a newly selected model works.
 - **Key reassurance for the learner:** even with the live stack down, the **Python safety-eval
   exercises run against the mock agent + `test_data/` fixtures** — the concept/code learning
   (classify, red-team scoring, judge, suite) is fully doable. The live two of the three agents
@@ -39,6 +57,8 @@ code.** Steps:
 - NemoClaw needs **Docker** (the Workbench mounts the host socket via `/var/run/`→`/var/host-run/`;
   see the `setup-workshop` skill). `install-nemoclaw.sh` builds the sandbox image, configures
   networking, and launches OpenClaw. Image size and build time vary by release.
+- Hosted inference defaults to `NEMOCLAW_SANDBOX_GPU=0`; this module does not require
+  Docker GPU passthrough. Explicit GPU configurations can override that setting.
 - **Provider/model changes:** behavior depends on the installed OpenShell and NemoClaw
   versions. Docker mode alone does not prohibit provider changes. Check the active gateway
   route and any sandbox pin; `nemoclaw connect` may restore the pin to shared gateway state.

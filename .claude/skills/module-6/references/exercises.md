@@ -36,7 +36,7 @@ and compare tool results with operator-side logs.
   the pin does not provide concurrent route isolation. The optional classifier below only
   returns a proposed route—it does not connect to the live gateway.
 
-> CLI behavior varies by version. The workshop pins NemoClaw v0.0.49; confirm the
+> CLI behavior varies by version. The workshop pins NemoClaw v0.0.55; confirm the
 > installed OpenShell version. Docker mode alone does not rule out provider changes.
 > Never switch a shared gateway per prompt to implement privacy routing.
 

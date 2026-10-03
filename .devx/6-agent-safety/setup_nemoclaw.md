@@ -51,10 +51,10 @@ The script will then build the sandbox image, configure networking, and launch O
 The Workbench project container talks to the host's Docker daemon via a mounted socket. The script handles three setup details:
 
 1. **Deferred socat tunnel** — Forwards the container's `127.0.0.1:8080` to the gateway bound to the Docker bridge after the preflight port check.
-2. **Shared runtime paths** — Keeps gateway binaries and state in Workbench's shared volume and maps their paths for the host Docker daemon. The sandbox base is pinned to a compatible immutable image.
+2. **Shared runtime paths** — Keeps gateway binaries, driver configuration and state in Workbench's shared volume and maps their paths for the host Docker daemon. A read-only system certificate bundle lets the gateway verify HTTPS inference endpoints. The sandbox base is pinned to a compatible immutable image.
 3. **Stale-container cleanup** — If a previous install attempt failed, the script removes the leftover gateway container before retrying.
 
-These workarounds target NemoClaw v0.0.49. On a healthy install, the script only ensures the tunnel is up; on failure, it can remove the named gateway and rerun onboarding. Use it only for your disposable workshop setup. See `code/6-agent-safety/scripts/install-nemoclaw.sh` for the implementation.
+The workshop pins NemoClaw **v0.0.55**, OpenShell **0.0.44**, and OpenClaw **2026.5.22**, with the matching immutable sandbox base. This includes upstream fixes for plugin dependency moves (`EXDEV`) and the file-write hook. The hosted-inference sandbox defaults to CPU mode; it does not need GPU passthrough. On a healthy install, rerunning the script checks the versions and restores the tunnel. A Ready sandbox with an older runtime is preserved, and the helper asks you to reset it explicitly; rerunning alone does not upgrade its image. Recovery from an incomplete install can remove the named gateway and rerun onboarding. Use it only for your disposable workshop setup. See `code/6-agent-safety/scripts/install-nemoclaw.sh` for the implementation.
 
 This pinned gateway disables operator authentication and TLS. The helper avoids a public-interface listener, but other host users and bridge-connected containers may still reach port 8080. Keep this workshop on a trusted host; sandbox policy does not protect the operator control plane.
 
@@ -85,13 +85,14 @@ The install script writes detailed logs to two files:
     bash code/6-agent-safety/scripts/install-nemoclaw.sh
     ```
 
-2. **Full reset.** If something went very wrong (e.g., conflicting state from earlier attempts), remove the gateway container and any tunnel, then re-run:
+2. **Full reset or version upgrade.** Save any workspace files you need first: destroying the sandbox deletes them. With the tunnel and gateway reachable, use the official destroy command to remove the sandbox **and its registration**, then reinstall. Replace `my-assistant` if you chose another name. The destroy command asks for confirmation.
 
     ```bash
-    docker rm -f nemoclaw-openshell-gateway
-    pkill -f "socat TCP-LISTEN:8080"
-    bash code/6-agent-safety/scripts/install-nemoclaw.sh
+    nemoclaw my-assistant destroy --cleanup-gateway
+    NEMOCLAW_FRESH=1 bash code/6-agent-safety/scripts/install-nemoclaw.sh
     ```
+
+    Removing only the gateway or setting `NEMOCLAW_FRESH=1` is insufficient: upstream backs up registered sandboxes before onboarding, which can restart the tunnel before the port check. If the destroy command cannot connect, run the health check and restore the tunnel first.
 
 </details>
 
@@ -149,6 +150,7 @@ If something didn't work, don't worry -- here are the most common issues and the
 | Port 18789 already in use | Another process holds the default gateway port | Inspect it with `lsof -i :18789`; stop it only if it belongs to this lab. |
 | Inference requests time out | Endpoint unreachable or blocked by network policy | Verify provider with `nemoclaw my-assistant status`; check policy rules in `openshell term` |
 | Node.js version too old | NemoClaw requires Node.js 22.16+ | Check with `node --version`; upgrade with `nvm install 22 && nvm use 22` |
+| `EXDEV` during plugin startup, or a `before_tool_call` error mentioning `includes` | An older sandbox runtime is still installed | Save needed workspace files, then follow **Full reset or version upgrade** above, including the official sandbox destroy command. Verify the pinned versions and run the agent check below. |
 
 </details>
 
@@ -167,6 +169,14 @@ nemoclaw my-assistant status
 ```
 
 You should see **Phase: Ready**, along with the active inference provider and endpoint.
+
+`Ready` describes the sandbox control plane. Check the agent and its file tools separately:
+
+```bash
+python code/6-agent-safety/scripts/check-nemoclaw-agent.py
+```
+
+This normally makes three model calls and removes its uniquely named temporary workspace file afterward. It checks a greeting, verifies that the agent really wrote a file, changes that file independently, and asks the agent to read the new contents. Expect three `PASS` lines. On the first run, it may retry the greeting twice, waiting 30 seconds each time for the upstream gateway's CLI pairing. If pairing is still pending, it reports **NOT READY**; wait for the pairing watcher and rerun the check. An embedded fallback does not count as a gateway success. A tool-hook exception is a runtime failure, not evidence that filesystem policy denied access. This check verifies functionality; the next lesson tests enforcement.
 
 <!-- fold:break -->
 

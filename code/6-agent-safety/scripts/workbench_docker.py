@@ -10,9 +10,29 @@ import json
 import os
 from pathlib import Path
 import shutil
+import ssl
 import subprocess
 import sys
 import tempfile
+import tomllib
+
+
+def stage_gateway_config(source, destination, supervisor):
+    """Keep v0.0.55's driver config, translating its daemon-side binary path."""
+    text = Path(source).read_text()
+    config = tomllib.loads(text)
+    original = config['openshell']['drivers']['docker']['supervisor_bin']
+    old = 'supervisor_bin = ' + json.dumps(original)
+    if text.count(old) != 1:
+        raise ValueError('Unexpected compatibility gateway supervisor config')
+    text = text.replace(old, 'supervisor_bin = ' + json.dumps(supervisor))
+    descriptor, temporary = tempfile.mkstemp(dir=destination.parent, prefix='.config-')
+    try:
+        with os.fdopen(descriptor, 'w') as output:
+            output.write(text)
+        os.replace(temporary, destination)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def stage_binary(source, destination):
@@ -36,7 +56,7 @@ def host_path(path, mounts):
     raise ValueError('Gateway runtime path is outside the shared Docker mounts')
 
 
-def adapt_gateway(args, env, mounts):
+def adapt_gateway(args, env, mounts, *, ca_bundle=None):
     """Stage runtime binaries and translate this gateway's three bind mounts."""
     args = list(args)
     env = dict(env)
@@ -66,8 +86,24 @@ def adapt_gateway(args, env, mounts):
         args[index + 1] = ':'.join([source, target, *mode])
     if not gateway_found:
         raise ValueError('Unexpected compatibility gateway mount layout')
+    # The upstream ubuntu:24.04 compatibility image has no CA store. OpenShell
+    # 0.0.44 verifies inference routes over HTTPS, so give it the Workbench
+    # trust store without disabling certificate or endpoint verification.
+    # Some Workbench Python builds point OpenSSL at /etc/ssl/cert.pem, while
+    # Ubuntu installs the system bundle under /etc/ssl/certs instead.
+    certificate_source = (ca_bundle or ssl.get_default_verify_paths().cafile
+                          or '/etc/ssl/certs/ca-certificates.crt')
+    stage_binary(certificate_source, binaries / 'ca-certificates.crt')
+    args[1:1] = ['--volume', binary_host + '/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro']
     env['OPENSHELL_DOCKER_SUPERVISOR_BIN'] = binary_host + '/openshell-sandbox'
     env['OPENSHELL_DB_URL'] = 'sqlite:' + state_host + '/openshell.db'
+    # OpenShell 0.0.44 also reads driver settings from TOML. Preserve the
+    # upstream file for its own drift checks and stage a host-visible copy.
+    if env.get('OPENSHELL_GATEWAY_CONFIG'):
+        config = state / 'workbench-openshell-gateway.toml'
+        stage_gateway_config(env['OPENSHELL_GATEWAY_CONFIG'], config,
+                             env['OPENSHELL_DOCKER_SUPERVISOR_BIN'])
+        env['OPENSHELL_GATEWAY_CONFIG'] = host_path(config, mounts)
     # The pinned compatibility gateway disables TLS/auth. Its operator listener
     # must stay on the bridge used by the Workbench tunnel, not every host NIC.
     address = ipaddress.ip_address(env['WORKSHOP_DOCKER_HOST_IP'])
@@ -102,5 +138,5 @@ if __name__ == '__main__':
         main()
     except (KeyError, ValueError, OSError, subprocess.SubprocessError) as error:
         print('Workbench gateway mount setup failed (' + type(error).__name__ +
-              '). Check the shared-volume mount and Docker access.', file=sys.stderr)
+              '): ' + str(error) + '. Check the shared-volume mount and Docker access.', file=sys.stderr)
         sys.exit(1)

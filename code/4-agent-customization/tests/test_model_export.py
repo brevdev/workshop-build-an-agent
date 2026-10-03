@@ -102,3 +102,67 @@ def test_export_refuses_unrelated_directory_and_symlink(tmp_path):
         with pytest.raises(ValueError):
             save_merged_model(None, None, path)
     assert (unrelated / "notes.txt").read_text() == "keep"
+
+
+class SmallExport:
+    config = None
+
+    def save_pretrained(self, path, **kwargs):
+        path.mkdir(exist_ok=True)
+        (path / "config.json").write_text("{}")
+        (path / "model.safetensors").write_bytes(b"new complete model")
+
+
+@pytest.mark.parametrize("phase", ["after-old-move", "before-publish", "after-publish"])
+def test_publication_interrupt_never_deletes_previous_export(tmp_path, monkeypatch, phase):
+    import model_export
+
+    destination = tmp_path / "model"
+    destination.mkdir()
+    (destination / "config.json").write_text("{}")
+    (destination / "model.safetensors").write_bytes(b"previous complete model")
+    replace = model_export.os.replace
+
+    def interrupt(source, target):
+        if phase == "before-publish" and Path(source).name == "model":
+            # The staging directory, not the existing destination or backup.
+            if Path(source).parent != tmp_path:
+                raise KeyboardInterrupt("notebook interrupted")
+        replace(source, target)
+        if phase == "after-old-move" and Path(target).name == "previous":
+            raise KeyboardInterrupt("notebook interrupted")
+        if phase == "after-publish" and Path(source).name == "model" and Path(source).parent != tmp_path:
+            raise KeyboardInterrupt("notebook interrupted")
+
+    monkeypatch.setattr(model_export.os, "replace", interrupt)
+    with pytest.raises(KeyboardInterrupt):
+        save_merged_model(SmallExport(), SmallExport(), destination)
+    if phase == "after-publish":
+        assert (destination / "model.safetensors").read_bytes() == b"new complete model"
+        backups = list(tmp_path.glob(".model-*/previous/model.safetensors"))
+        assert len(backups) == 1 and backups[0].read_bytes() == b"previous complete model"
+    else:
+        assert (destination / "model.safetensors").read_bytes() == b"previous complete model"
+        assert list(tmp_path.iterdir()) == [destination]
+
+
+def test_failed_rollback_retains_previous_export_and_reports_its_path(tmp_path, monkeypatch):
+    import model_export
+
+    destination = tmp_path / "model"
+    destination.mkdir()
+    (destination / "config.json").write_text("{}")
+    (destination / "model.safetensors").write_bytes(b"previous complete model")
+    replace = model_export.os.replace
+
+    def fail_publication_and_restore(source, target):
+        if Path(target) == destination:
+            raise OSError("rename unavailable")
+        replace(source, target)
+
+    monkeypatch.setattr(model_export.os, "replace", fail_publication_and_restore)
+    with pytest.raises(OSError, match="rename unavailable") as failure:
+        save_merged_model(SmallExport(), SmallExport(), destination)
+    backups = list(tmp_path.glob(".model-*/previous/model.safetensors"))
+    assert len(backups) == 1 and backups[0].read_bytes() == b"previous complete model"
+    assert str(backups[0].parent) in "\n".join(failure.value.__notes__)

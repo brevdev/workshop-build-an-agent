@@ -65,6 +65,8 @@ ordered correctly (after load, before PEFT).
   adapter in `outputs/grpo_langgraph_cli/final_adapter/`, merges with PEFT, and writes
   fresh weights without changing Hub cache permissions. A failed file save can be
   retried while the kernel still holds the merged model; check free disk first.
+  If an interrupted publication cannot restore its previous export, the exception
+  gives the retained backup path. Preserve that backup until the model is recovered.
   After merging, rerun the loading/LoRA cells before training again. Do not suggest
   changing permissions recursively in the shared Hugging Face cache.
 - **Trained model emits odd/free-form text instead of JSON CLI calls** → the runtime

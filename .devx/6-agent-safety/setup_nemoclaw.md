@@ -224,9 +224,18 @@ From inside the sandbox (`nemoclaw my-assistant connect`), test the default-deny
 curl https://example.com
 ```
 
-If no active rule permits `example.com`, expect a proxy denial (often 403). Inspect the actual policy; presets and provider rules can add access. Now try an endpoint that the policy explicitly allows (your configured inference endpoint). The connection should succeed.
+If no active rule permits `example.com`, expect a proxy denial (often 403). Inspect the actual policy; presets and provider rules can add access.
 
-Confirm the denial in `openshell logs my-assistant`. A timeout or upstream server error alone does not prove a policy denial.
+Next, compare the sandbox's inference route with the provider's real address:
+
+```bash
+curl -sS -o /dev/null -w "inference.local: %{http_code}\n" https://inference.local/v1/models
+curl -sS -o /dev/null -w "direct: %{http_code}\n" https://integrate.api.nvidia.com/v1/models
+```
+
+The first returns `200`, even though the sandbox holds no API key: OpenShell routes the request and adds the credentials outside the agent. The second is denied (`CONNECT tunnel failed, response 403`) because the agent cannot reach the provider directly. That denial is intended. Don't add a network rule for it or approve its pending rule in `openshell term`, because direct access would let the agent bypass `inference.local`.
+
+From the host shell (type `exit` first), confirm both in `openshell logs my-assistant`: the denial for `example.com`, and `ALLOWED inference.local:443` followed by a `routing proxy inference request` line for the real endpoint. A timeout or upstream server error alone does not prove a policy denial.
 
 <!-- fold:break -->
 

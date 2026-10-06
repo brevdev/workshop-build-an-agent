@@ -16,7 +16,7 @@ code.** Steps:
    using the *same* readiness signal the workshop code uses, and prints the one recovery command.
    It explicitly flags a **corrupt/partial `nemoclaw` install** (`Cannot find module '.../dist/lib/agent/runtime'`),
    the most common failure — repaired by re-running the installer below. The `.devx` pages
-   (`using_nemoclaw.md`, `evaluating_safety.md`, `setup_nemoclaw.md`) now surface this same script.
+   `setup_nemoclaw.md` and `using_nemoclaw.md` surface this same script.
 2. **Deeper detection (NemoClaw Client):** `python3 code/6-agent-safety/scripts/diagnose-nemoclaw.py`
    — reports what the Streamlit client's detection logic sees (why "Live NemoClaw Agent" isn't the default).
 3. **Repair the installation:** `bash code/6-agent-safety/scripts/install-nemoclaw.sh`
@@ -31,6 +31,17 @@ code.** Steps:
    registration. Removing only the gateway or setting `NEMOCLAW_FRESH=1` leaves a registered
    sandbox whose upstream pre-upgrade backup can start the tunnel before the port check.
    Do not suggest this as a harmless connectivity check.
+5. **Onboarding failed before a sandbox existed** (the installer exited during the prompts):
+   rerun `install-nemoclaw.sh` — it resumes the interrupted onboarding (the script exports
+   `NEMOCLAW_SANDBOX_NAME` so upstream can resume, and `NEMOCLAW_RESOURCE_PROFILE=default`
+   so v0.0.55's resource-profile prompt, which rejects Enter, never appears). If the same
+   error repeats, `NEMOCLAW_FRESH=1 bash code/6-agent-safety/scripts/install-nemoclaw.sh`
+   starts onboarding over. The script prints both commands when it fails.
+6. **Remove everything / free disk:** `bash code/6-agent-safety/scripts/uninstall-nemoclaw.sh`
+   destroys the sandbox, runs the official `nemoclaw uninstall`, and removes what the
+   Workbench adaptations leave (compatibility gateway container, `openshell*` networks,
+   NemoClaw images, `/nvwb-shared-volume/nemoclaw`, the socat tunnel). It asks first; the
+   sandbox workspace is lost. `--all-images` also removes the public base images.
 - The tunnel/gateway plumbing targets **NemoClaw v0.0.55 / OpenShell 0.0.44** (its
   preflight wants :8080 free in the container but its readiness wants to *reach* the gateway).
 - The matching sandbox contains **OpenClaw 2026.5.22**. Older builds can fail with `EXDEV`
@@ -49,9 +60,11 @@ code.** Steps:
   `--no-verify` as proof that a newly selected model works.
 - **Key reassurance for the learner:** even with the live stack down, the **Python safety-eval
   exercises run against the mock agent + `test_data/` fixtures** — the concept/code learning
-  (classify, red-team scoring, judge, suite) is fully doable. The live two of the three agents
-  auto-skip (`_check_openclaw_cli()`/`_check_gateway_via_cli()`/`_check_nemoclaw_cli()`/
-  `_check_sandbox_running()` gate them).
+  (classify, red-team scoring, judge, suite) is fully doable: `python agent_safety.py` uses
+  the mock by default. In the **NemoClaw Client**, the two live modes need their detection
+  checks to pass (`_check_openclaw_cli()` + `_check_gateway_via_cli()` for Live OpenClaw;
+  `_check_nemoclaw_cli()` + `_check_sandbox_running()` for Live NemoClaw); otherwise it shows
+  the reason and falls back toward the Mock Agent.
 
 ## Docker & sandbox image
 - NemoClaw needs **Docker** (the Workbench mounts the host socket via `/var/run/`→`/var/host-run/`;

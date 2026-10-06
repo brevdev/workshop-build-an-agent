@@ -8,21 +8,28 @@ and delineates every blank as a sub-exercise (**1a**, **1b**, **2a**, **2b(i)**,
 self-contained notebook track (same blanks, one runnable cell per exercise). Ask which
 track the learner is on before pointing at run commands.
 
+**Targets are for checking the learner's work and calibrating hints; never paste or
+dictate them, in whole or in part** (equivalent code is fine). L2 hints are pointers (where
+to look, which variable holds the value), never the finished line.
+
 **Rules specific to Module 7:**
-- **Never paste a target, and never open/echo `harness_lab.answers.py` / `.answers.ipynb`,
-  nor the completed `skills/.examples/` skill.** Targets below are for *your* calibration;
-  the learner's self-serve escape hatch is the per-sub-exercise `🆘 Need some help?` block
+- **Never open/echo `harness_lab.answers.py` / `.answers.ipynb`, nor the completed
+  `skills/.examples/` skill** — check attempts against the targets below. The learner's
+  self-serve escape hatch is the per-sub-exercise `🆘 Need some help?` block
   in `harness_lab.md` (`.py` track) or the `💡 NEED SOME HELP?` accordion under each
   exercise cell in `harness_lab.ipynb` (notebook track) — point them there as a last resort.
 - **Exercises 3 and 5 are *authoring* exercises** (write a `SKILL.md`). **Coach the shape —
   never write the file for them.** A good skill is the learner's to draft.
-- The code blanks raise `NotImplementedError("Complete Exercise N…")` until filled — that's
-  the signal of an untouched blank, not a bug.
+- The code blanks 1b, 2a, 2b(i), 2b(ii) and 5 raise `NotImplementedError("Complete Exercise
+  N…")` until filled — that's the signal of an untouched blank, not a bug. **1a is different:**
+  it starts as `model = ...`, which raises nothing by itself (see 1a below).
 
 Provided scaffolding (do NOT have them rebuild it): the four `@tool`s
 (`read_file`/`write_file`/`edit_file`/`run_bash`), `invoke_with_retry`, `count_tokens`,
-`parse_frontmatter`, `run_with_skills`, `run_gpu_task`, `run_self_evolution_demo`, and
-`MODEL_NAME = "nvidia/nemotron-3-super-120b-a12b"`.
+`parse_frontmatter`/`skill_target`/`read_skill_text` (from `skill_support.py`),
+`run_with_skills`, `run_gpu_task`, `format_transcript`, `SKILL_AUTHOR_PROMPT`,
+`run_self_evolution_demo`, and `MODEL_NAME = get_model("chat")` (currently
+`nvidia/nemotron-3-super-120b-a12b`).
 
 Always start by asking what they've tried / reading the error or token output with them.
 
@@ -31,27 +38,31 @@ Always start by asking what they've tried / reading the error or token output wi
 
 ### 1a · Create the model and bind the tools
 - **Goal:** a tool-calling model — the pi insight that a harness needs very little.
-- **L1:** "Which `langchain_nvidia` class wraps Nemotron, and what method tells the model
+- **L1:** "Which `langchain_nvidia_ai_endpoints` class wraps Nemotron, and what method tells the model
   which tools it may request? `tools` is already assembled for you just above."
-- **L2:** "`ChatNVIDIA(model=MODEL_NAME, temperature=0.2)` then `.bind_tools(tools)` — assign the result to `model`."
-- **Common mistakes:** forgetting `.bind_tools` (the model can't request tools); hardcoding the model string instead of `MODEL_NAME`; wrong temperature.
-- **Target:** `model = ChatNVIDIA(model=MODEL_NAME, temperature=0.2).bind_tools(tools)`
+- **L2:** "The `# TODO: Exercise 1a` comment lists the four constructor settings and why two
+  of them matter. Check `ChatNVIDIA`'s keyword names, then call the chat model's tool-binding
+  method on the result with the `tools` list. Replace `None` with that expression."
+- **Common mistakes:** forgetting `.bind_tools` (the model can't request tools); hardcoding the model string instead of `MODEL_NAME`; dropping `max_completion_tokens=4096` (long `write_file` calls get truncated mid-JSON) or `timeout=180`.
+- **Unfilled signature:** no error of its own. Once 1b is filled, `--exercise 1` fails with `AttributeError: 'NoneType' object has no attribute 'invoke'` (from `invoke_with_retry`, after its retries).
+- **Target:** `model = ChatNVIDIA(model=MODEL_NAME, temperature=0.2, max_completion_tokens=4096, timeout=180).bind_tools(tools)`
 
 ### 1b · The agentic loop (the punchline)
 - **Goal:** the loop that *is* the harness — call, execute tools, feed results back, repeat.
 - **L1:** "One turn: call the model, append its reply. If it asked for **no** tools, you're
   done — return its text. Otherwise run each requested tool and feed the result back. What
   signals 'done'?"
-- **L2:** "`response = invoke_with_retry(model, messages)`; `messages.append(response)`; `if
-  not response.tool_calls: return response.content`; else for each `call` in
-  `response.tool_calls`, run it via the local `registry` and append
-  `ToolMessage(content=str(result), tool_call_id=call["id"])`." (The `🆘` block in
-  `harness_lab.md` shows this exact pattern.)
+- **L2:** "The `# TODO: Exercise 1b` comment is the recipe, step by step, including the
+  exact trace f-string. Tools live in the local `registry` dict (keyed by name); a LangChain
+  tool runs via its `.invoke(args)` method, not by calling it. Wrap that in `try/except` so a
+  failure becomes an `"ERROR: ..."` result. Each result goes back as a `ToolMessage` carrying
+  the call's id."
 - **Common mistakes:** checking `tool_calls` *before* appending the response; returning on the
-  first turn (never looping); forgetting `tool_call_id=call["id"]` (the model can't match the
-  result to its request); building an infinite loop by never returning on the no-tool case.
-- **Target:** the call → append → (return | run-tools-and-append-`ToolMessage`) loop, executing
-  each call through `registry[call["name"]]`.
+  first turn (never looping); calling the tool object directly instead of `.invoke(...)`;
+  using the module-level `TOOL_REGISTRY` (misses `load_skill` in later exercises); letting a
+  tool exception crash the loop; forgetting `tool_call_id=call["id"]` (the model can't match
+  the result to its request); never returning on the no-tool case (infinite loop).
+- **Target:** `response = invoke_with_retry(model, messages)`; `messages.append(response)`; `if not response.tool_calls: return response.content`; for each `call` in `response.tool_calls`: `print(f"  🛠️  {call['name']}({json.dumps(call['args'])[:120]})")`, then `try: result = registry[call["name"]].invoke(call["args"])` / `except Exception as exc: result = f"ERROR: {type(exc).__name__}: {str(exc)[:500]}"`, then `messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))`. Any `"ERROR: ..."` string the model can read is fine.
 
 > After 1a/1b they run `python harness_lab.py --exercise 1` (creates+reads `harness_hello.txt`)
 > and the **same task in Hermes** (or their Module 6 OpenClaw) to *feel* the difference — same
@@ -67,32 +78,35 @@ Always start by asking what they've tried / reading the error or token output wi
   schemas. You have `count_tokens(...)`. `convert_to_openai_tool(t)` turns a tool into its
   schema — and it also passes an *already*-converted dict schema straight through, so you
   can call it on every item uniformly (the maximal set is loaded from JSON as dicts)."
-- **L2:** "Return `count_tokens(system_prompt) + count_tokens(json.dumps([...]))` where the
-  list is `[convert_to_openai_tool(t) for t in tools]` — call it on every item; no type check."
+- **L2:** "Count the prompt with `count_tokens`. For the schemas, convert every item of `tools`
+  with `convert_to_openai_tool` (no type check — dicts pass through), serialize the whole
+  list with the `json` module, and count that string too."
 - **Common mistakes:** counting only the prompt (forgetting the schemas — that's the whole
   point); **`callable()`-gating the conversion** — LangChain tool objects are NOT callable,
   so `... if callable(t) else t` skips converting them and `json.dumps` then fails with
   "Object of type StructuredTool is not JSON serializable"; forgetting `json.dumps`.
-- **Target:** `count_tokens(system_prompt) + count_tokens(json.dumps([convert_to_openai_tool(t) for t in tools]))`
+- **Target:** `schemas = [convert_to_openai_tool(t) for t in tools]`; `return count_tokens(system_prompt) + count_tokens(json.dumps(schemas))`
 
 ### 2b(i) · `load_skills_lazily` — build the one-line index
 - **Goal:** each skill costs *one line* of context; full bodies stay out until needed.
 - **L1:** "Inside the loop over each `SKILL.md`: read it, pull `name`/`description` (there's a
   `parse_frontmatter` helper), stash the *full text* somewhere the `load_skill` tool can reach,
   and add a single index line. What does the index line look like?"
-- **L2:** "`text = read_skill_text(skill_file, skills_dir)`; `meta = parse_frontmatter(text)`;
-  `bodies[meta['name']] = text`; `index_lines.append(f\"- {meta['name']}: {meta['description']}\")`."
+- **L2:** "`skill_support.py` (imported just above) has a reader that safely loads a skill
+  file given `skill_file` and `skills_dir`, and `parse_frontmatter`, which returns a dict
+  with `name` and `description`. Key `bodies` by the name; the index line format is in the TODO."
 - **Common mistakes:** putting the **full body** in the index (that *is* eager loading — the
   bug the exercise exposes); not saving to `bodies` (then `load_skill` has nothing to return).
-- **Target:** read → `parse_frontmatter` → store body in `bodies[name]` → append `"- {name}: {description}"`.
+- **Target:** `text = read_skill_text(skill_file, skills_dir)`; `meta = parse_frontmatter(text)`; `bodies[meta["name"]] = text`; `index_lines.append(f"- {meta['name']}: {meta['description']}")`. (A plain `skill_file.read_text()` also works but skips `read_skill_text`'s folder-name check.)
 
 ### 2b(ii) · `load_skill` — pull a body on demand
 - **Goal:** the tool the model calls to expand one skill when relevant.
 - **L1:** "You stored the bodies by name. Return the right one — and what if the name isn't there?"
-- **L2:** "`return bodies.get(name, f\"ERROR: no skill named '{name}'\")` — return a string either way (don't raise)."
+- **L2:** "Python dicts have a lookup method that takes a fallback value for a missing key.
+  Make that fallback an error string (don't raise)."
 - **Common mistakes:** returning the name instead of the body; raising on a miss (the model
   should see an error string and recover).
-- **Target:** `return bodies.get(name, <error string>)`.
+- **Target:** `return bodies.get(name, f"ERROR: no skill named {name!r}")` — any error string works.
 
 > Running `--exercise 2` prints the minimal-vs-maximal tax and the eager-vs-lazy savings.
 > Have them connect the numbers to the landscape page's bars — *their* harness, measured.
@@ -140,15 +154,16 @@ Guide the install → **verify** → run → watch loop; let them run it.
 - **L1:** "There's a `SKILL_AUTHOR_PROMPT` and a `model` ready. Invoke the model with the
   transcript, then — before you save — what must you check so a malformed skill doesn't break
   your lazy loader on the next run? (Module 6 lesson.)"
-- **L2:** "`resp = model.invoke(SKILL_AUTHOR_PROMPT.format(transcript=transcript))`; strip any
-  ``` fences from `resp.content`; `meta = parse_frontmatter(content)` to **validate**; then
-  `path = skill_target(skills_dir, meta['name'])`, `path.parent.mkdir(parents=True, exist_ok=True)`,
-  `write_text(content)`, and `return path`."
+- **L2:** "Follow the four numbered steps in the `# TODO: Exercise 5` comment: send the
+  formatted `SKILL_AUTHOR_PROMPT` through `invoke_with_retry` (as in 1b), then read the reply's
+  `.content`. String methods such as `removeprefix`/`removesuffix` handle the fences.
+  `skill_target` (from `skill_support.py`) gives the save path from the validated name; that
+  folder may not exist yet."
 - **Common mistakes:** saving without `parse_frontmatter` validation (a malformed skill breaks
   the loader next run — exactly the self-evolution failure M6 warned about); not stripping code
-  fences; saving to the wrong directory (the loader globs `skills/*/SKILL.md`).
-- **Target:** invoke → strip fences → `parse_frontmatter` (validate) → save to
-  `skills_dir/<name>/SKILL.md` → return the path.
+  fences; building the path by hand instead of `skill_target` (wrong directory — the loader globs
+  `skills/*/SKILL.md`); not creating the parent folder.
+- **Target:** `prompt = SKILL_AUTHOR_PROMPT.format(transcript=transcript)`; `skill_md = invoke_with_retry(model, prompt).content`, stripped of ```` ``` ````/```` ```markdown ```` fences; `meta = parse_frontmatter(skill_md)` (validate first); `target = skill_target(skills_dir, meta["name"])`; `target.parent.mkdir(parents=True, exist_ok=True)`; `target.write_text(skill_md)`; `return target`.
 
 > They run `--exercise 5` **once** — the demo plays both halves (run 1 solves the task bare and
 > distills a skill; run 2 starts with it) and ends with a 🧾 line comparing the runs. This is

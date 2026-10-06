@@ -52,7 +52,7 @@ gap (knows bash, not the LangGraph CLI) is **measurable**, and it's real-world.
   not just slot values), validity (all outputs parse + pass schema). Aim ~100–300
   examples as a starting point, then measure held-out performance. Generated rows go
   under `data/langgraph_cli/generated/`; training defaults to the reviewed shipped
-  `train.jsonl` / `val.jsonl` (213 / 25). Select reviewed generated data with `DATA_DIR`.
+  `train.jsonl` / `val.jsonl` (155 / 50). Select reviewed generated data with `DATA_DIR`.
 
 ## Verifiable rewards + NeMo Gym (`grpo_training.md`)
 - **RLVR (RL with Verifiable Rewards):** for structured outputs, score with **code, not

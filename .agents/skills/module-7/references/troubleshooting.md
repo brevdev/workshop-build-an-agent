@@ -6,10 +6,13 @@ light on infrastructure — most issues are an unfilled blank, a missing key, or
 Hermes/verified-skill/GPU setup. Runtime fixes below are fair to give directly.
 
 ## Unfilled exercise blanks (the #1 cause)
-Each blank raises `NotImplementedError("Complete Exercise N…")` until filled — the message
-names the exact exercise. `python harness_lab.py --exercise N` will surface it. That's the
+Blank 1a is `model = ...`; every other code blank raises `NotImplementedError("Complete Exercise N…")` until filled —
+the message names the exact exercise. `python harness_lab.py --exercise N` will surface it, and
+`python code/workshop_support/blanks.py 7` lists them without running anything. That's the
 signal of an untouched blank (guide via `exercises.md`), **not** a bug to fix for them.
-- `--exercise 1` raises in `build_bare_agent` → 1a/1b unfilled.
+- `--exercise 1` raises `NotImplementedError("Complete Exercise 1b")` → the loop is unfilled.
+- `--exercise 1` fails with `AttributeError: 'ellipsis' object has no attribute 'invoke'`
+  (after `invoke_with_retry`'s retries) → 1a is still `model = ...`. `blanks.py` lists it.
 - `--exercise 2` raises in `harness_overhead` (2a) or `load_skills_lazily` (2b) → that blank.
 - `--exercise 5` raises in `self_evolve_skill` → Ex 5 unfilled.
 

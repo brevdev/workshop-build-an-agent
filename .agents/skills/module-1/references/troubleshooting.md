@@ -58,7 +58,8 @@ a fresh clone.
 - **Repeated identical searches / very many searches** → repeated-query /
   cost-runaway; look at the trace together.
 - **Didn't search at all** → the model judged its own knowledge sufficient; discuss
-  the system prompt's "you MUST use tavily_search" rule and when that fires.
+  the system prompt's "you MUST use search_tavily before writing" rule (for up-to-date
+  or verifiable facts) and when that fires.
 
 These map directly onto Module 1's "things that can go wrong" and "what to watch
 for," and preview Module 3 (evaluation). Use them to teach, not just to fix.

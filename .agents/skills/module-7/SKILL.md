@@ -131,7 +131,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **`references/quizzes.md`** — deeper "Check Your Understanding" feedback (the four in-page quizzes).
 
 ## Environment & hardware
-Exercises 1, 2, 3, and 5 use hosted Nemotron and local CPU tools. Exercise 4 can use cuDF on a compatible NVIDIA GPU; without one the code announces a CPU fallback. A GPU and a skill do not guarantee that this workload will run faster—measure it.
+Exercises 1, 2, 3, and 5 use hosted Nemotron and local CPU tools. Exercise 4 can use cuDF on a compatible NVIDIA GPU; without one (or without cuDF) `run_gpu_task` prints a warning and the agent should use pandas. A GPU and a skill do not guarantee that this workload will run faster—measure it.
 The core lab needs `NVIDIA_API_KEY` and network access. Hermes needs a separate installation and endpoint configuration. The optional Claude Code/Codex track needs its own model access. The verified-skill installer needs `git` and `model-signing`; the workshop image includes them.
 
 ## Handling diagram / NVIDIA-tech / quiz / hardware questions

@@ -36,7 +36,8 @@ Each module adds a capability *and* a matching discipline. Detailed version in `
 | 7 | Harnesses & Skills | a pi-style harness + portable skills | `/module-7` | M1–M6 | 2–3 h | none main; opt. GPU (Ex4) |
 
 > **Hard prerequisite:** Module 3 *evaluates the M1 and M2 agents*, so those must be built
-> first (the workshop sanctions pasting the M2 answer key to get a runnable agent-under-test).
+> first (the M3 lesson lets the *learner* copy the M2 answer key to get a runnable
+> agent-under-test; as tutor you still never open or paste it).
 > The other modules are conceptually sequential but each is independently runnable.
 
 ## How to route a request
@@ -60,7 +61,8 @@ Map the learner's intent to the right skill, then hand off (or invoke it):
 
 ## Tutoring stance (applies here too)
 You are a learning assistant, not an answer key. Explain, route, and orient; **never complete
-a learner's exercises or paste solutions/answer keys**; give graduated hints; don't spoil a
+a learner's exercises, and never open or paste solutions/answer keys** (check attempts against
+the Targets in each module's `references/exercises.md`); give graduated hints; don't spoil a
 module the learner hasn't reached. Full policy + rationale in `references/tutor-policy.md`.
 
 ## Environment

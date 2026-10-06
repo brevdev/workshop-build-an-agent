@@ -24,9 +24,10 @@ These mechanisms support longer tasks but add cost and failure modes. Earlier mo
   **auto-summarization** compresses old messages. The agent "knows where to find
   information" instead of holding it all in context. Here MemorySaver is process-local; Docker workspace files disappear when the sandbox is deleted.
 - **Pillar 4 — Agent Skills.** Detailed (thousands-of-tokens) markdown **operating
-  procedures** injected into the prompt — decision thresholds, tool-usage patterns, error
-  recovery, output formats. (Module 4's Superpowers were a taste.) Skills add *expertise*,
-  not new tools.
+  procedures** — decision thresholds, tool-usage patterns, error recovery, output formats.
+  (Module 4's Superpowers were a taste.) Skills add *expertise*, not new tools. How they
+  reach the model varies: this module's build appends selected presets to the system prompt
+  (eager); deepagents' `skills=` option discloses them progressively (see below).
 
 ## Shallow vs deep (when to use which)
 | | Shallow | Deep |
@@ -48,9 +49,11 @@ interrupt_on)` returns a compiled **LangGraph** graph with a **middleware stack*
 "batteries included." Built-in capabilities: **planning** (`write_todos`), **filesystem**
 (`ls/glob/grep/read_file/write_file/edit_file`), **shell** (`execute`), **sub-agents**
 (`task`), **context management** (auto-summarization). Extend with **MCP tools**
-(`MultiServerMCPClient`) and **skills** (`.md` files via the `skills=` arg). In this module:
+(`MultiServerMCPClient`) and **skills** (the `skills=` arg takes directories of `SKILL.md`
+folders; its `SkillsMiddleware` puts only each skill's name and description in the prompt and
+the agent reads the full file on demand — progressive disclosure). In this module:
 - **Models:** `nemotron` and `nemotron_fast` resolve the shared `chat` and `fast_chat` roles. `/api/models` exposes the actual model names; there are no mislabeled fallbacks.
-- **Skills in this demo:** selected flat markdown presets are inserted into the system prompt. This is eager loading; the library's directory-based `skills=` mechanism is separate.
+- **Skills in this demo:** `create_agent()` passes no `skills=` argument. `_load_skill_content()` reads the selected flat presets (`superpowers.md`, `cudf.md`, `code_review.md`, `cuopt.md` in `demo/backend/skills/`) and `_build_system_prompt()` appends their full text to the system prompt. This is eager loading, separate from the library's `skills=` mechanism.
 - **HITL:** `interrupt_on=INTERRUPT_TOOLS` = `{write_file, edit_file, execute}` — those
   tools pause for human approval or rejection in the client.
 - **Workspace:** `/tmp/deepagent_workspace` locally (seeded with fake demo secrets).

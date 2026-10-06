@@ -101,9 +101,9 @@ Two functions, both via the `inference.local` gateway:
 
 ## YAML policy schema
 One file governs a sandbox. **Static** (locked at creation): `filesystem_policy`
-(read_write/read_only), `landlock` (compatibility), `process` (user/group). **Dynamic** (hot-
-reloadable): `network_policies` (map → endpoints[host/port/protocol/enforcement/access] +
-binaries). Provided policies: `baseline_permissive.yaml`, `httpbin-readonly.yaml` (Ex 1–2),
+(`read_write`/`read_only`, `include_workdir`), `landlock` (`compatibility`), `process`
+(`run_as_user`/`run_as_group`). **Dynamic** (hot-reloadable): `network_policies` (map →
+endpoints[host/port/protocol/enforcement + `access` or method/path `rules`] + binaries). Provided policies: `baseline_permissive.yaml`, `httpbin-readonly.yaml` (Ex 1–2),
 `research_assistant.yaml` (a policy fixture for the evaluation suite).
 
 ## Safety evaluation (`evaluating_safety.md`, extends Module 3)

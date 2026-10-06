@@ -158,7 +158,7 @@ def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
     # max_completion_tokens=4096 (the 1024 default truncates long write_file
     # calls mid-JSON), and timeout=180 (a 120B model can exceed the 60s
     # default on long generations), then .bind_tools(tools)
-    model = None
+    model = ...
 
     def run(task: str, max_turns: int = 20) -> str:
         messages = [SystemMessage(content=system_prompt), HumanMessage(content=task)]

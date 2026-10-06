@@ -31,7 +31,7 @@ ordered correctly (after load, before PEFT).
 - `reward_fn` POSTs to `/verify`; **connection refused / timeout** → server not running,
   wrong port, or wrong `verify_endpoint`. Sanity-check: `curl localhost:8001/...`.
 - Reward is in **[-1, 1]** (flag-accuracy: `(correct − wrong − extra)/total`, exact = 1.0).
-- Test the reward path manually before a full run: `reward_fn([[{"content": json.dumps(train_dataset[0]["answer"])}]], answer=[train_dataset[0]["answer"]], prompts=[train_dataset[0]["prompt"]])` should return1.0. Infrastructure failures now stop the run.
+- Test the reward path manually before a full run: `reward_fn([[{"content": json.dumps(train_dataset[0]["answer"])}]], answer=[train_dataset[0]["answer"]], prompts=[train_dataset[0]["prompt"]])` should return `[1.0]`. Infrastructure failures now stop the run.
 
 ## Training behavior (interpretation — guide, don't conclude)
 - **Rewards not improving / stuck near 0:** reward-fn bug, LR too low (try 2–5×), data not
@@ -47,7 +47,7 @@ ordered correctly (after load, before PEFT).
 ## SDG / NeMo Data Designer
 - Uses hosted `nvidia/nemotron-3.5-lightning-30b-a3b` via **NeMo Data Designer** (`data-designer`).
   If SDG errors or is slow/unreachable, the learner can **use the provided dataset**
-  (`data/langgraph_cli/train.jsonl` = 213, `val.jsonl` = 25) and move to GRPO.
+  (`data/langgraph_cli/train.jsonl` = 155, `val.jsonl` = 50) and move to GRPO.
 - Bad/invalid synthetic outputs will confuse training (the reward scores them as
   failures) — spot-check coverage/balance/diversity/validity before training.
 
@@ -76,11 +76,19 @@ ordered correctly (after load, before PEFT).
 
 ## Keys
 `secrets.env` (repo root) needs **`NVIDIA_API_KEY`** — for SDG (hosted Data Designer model)
-and to pull the base model from NGC/HF. The GRPO training itself runs **locally on the GPU**.
+and for the hosted planner in `bash_agent.ipynb`, `03_run_agent.ipynb` and `main_hf`. The base
+model downloads from Hugging Face without a key. The GRPO training itself runs **locally on the GPU**.
+
+## Running the customized agent outside the notebook
+`cd code/4-agent-customization && python3.12 -m bash_agent.main_hf` starts the same combined
+agent as `03_run_agent.ipynb` (hosted planner + the fine-tuned model as `langgraph_cli`). Add
+`--cli-only` to run the fine-tuned model alone (one request → one LangGraph command), and
+`--model-path` to load a different export. Free the GPU from the training kernel first.
 
 ## "Just run/train it for me" (policy reminder, not a bug)
 Decline and explain: training is a substantial GPU run and is the learner's to run; the
-reward server and SDG are theirs to start too. Offer the provided dataset/checkpoint
-shortcuts and the A100/H100-vs-GB10 guidance instead.
+reward server and SDG are theirs to start too. Offer the provided reviewed dataset (it
+skips SDG; no trained checkpoint or adapter ships, so it cannot skip training) and the
+A100/H100-vs-GB10 guidance instead.
 
 For hosted rate limits (HTTP 429), wait before retrying. The notebook starts with 25 rows and one worker; use the shipped cleaned dataset when quota is limited.

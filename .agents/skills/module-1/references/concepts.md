@@ -72,8 +72,8 @@ A special message defining the agent's identity and behavior: who it is, how to
 behave, when to use tools. The *same* model with a different system prompt behaves
 very differently. In the report agent, the `ReportWriter` system prompt
 (`docgen_agent.py`) sets the role, a quality bar ("never invent sources"), tool-use
-rules ("you MUST use tavily_search for facts to verify"), and the output format. To
-change behavior (tone, strictness, format), change the **prompt**, not the code.
+rules ("you MUST use search_tavily before writing" for facts to verify), and the output
+format. To change behavior (tone, strictness, format), change the **prompt**, not the code.
 
 ## Failure modes (and why they matter)
 - **Hallucination** — making things up, especially when tools return nothing.
@@ -87,7 +87,7 @@ missing citations, and unexpected tool use.
 
 ## The Module 1 build, concretely (`report_generation_agent.md`)
 The Report Generation Agent maps the four components onto real code:
-- **Model:** `ChatOpenAI(base_url="https://integrate.api.nvidia.com/v1", model_name="nvidia/nemotron-3-super-120b-a12b", ...)` in `docgen_agent.py`.
+- **Model:** `ChatOpenAI(base_url=MODEL_URL, model_name=MODEL_NAME, ...)` in `docgen_agent.py` — `MODEL_URL` is `https://integrate.api.nvidia.com/v1`; `MODEL_NAME = get_model("chat")` (currently `nvidia/nemotron-3-super-120b-a12b`, from `code/workshop_support/models.json`).
 - **Tools:** `search_tavily` in `tools.py` — async Tavily web search; the `@tool` decorator auto-generates the schema.
 - **Memory/State:** managed by LangChain as conversation history (`state["messages"]`).
 - **Routing:** `create_agent(model, tools, system_prompt)` builds a ReAct agent — no manual loop.

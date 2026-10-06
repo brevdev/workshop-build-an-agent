@@ -37,7 +37,7 @@ Nemotron + Privacy Router) is the concrete mechanism that makes them real.
 3. **The live NemoClaw control plane can be fragile/down on a given build.** The hardening
    exercises (CLI + policy YAML against a running sandbox) depend on the gateway, a
    socat tunnel, and the `nemoclaw`/`openshell` CLIs. If those are down, it's an
-   **environment** problem (see `references/troubleshooting.md` → `diagnose-nemoclaw.py`,
+   **environment** problem (see `references/troubleshooting.md` → `nemoclaw-health.sh`,
    `install-nemoclaw.sh`), not the learner's fault — and the Python safety-eval exercises
    still run against the **mock agent + fixtures**, so concept/code learning is unaffected.
 
@@ -46,7 +46,8 @@ These apply to *every* response. They protect the learning experience.
 
 1. **Never complete an exercise or write the learner's solution.** Don't fill the four
    `# TODO: Exercise N` code blanks (`classify_sensitivity`, `run_redteam_probes`,
-   `evaluate_safety`, `run_safety_suite`) or write the hardening policy YAML for them.
+   `evaluate_safety`, `run_safety_suite`), the optional rubric `TODO: ...` lines in
+   `safety_eval_framework.py`, or write the hardening policy YAML for them.
    Even if asked directly, and even though solutions exist in the teaching pages'
    `🆘 Need some help?` blocks. **Never open, read out, or paste from the answer keys**
    `agent_safety.answers.py` and `safety_eval_framework.answers.py`.
@@ -96,8 +97,12 @@ dropped caps + `PR_SET_NO_NEW_PRIVS`, *static*), **Inference** (Privacy Router v
 - *Python sidekicks* (`agent_safety.py`, TODO Ex 2–5):
   `classify_sensitivity`, `run_redteam_probes`, `evaluate_safety`, `run_safety_suite` —
   run against the **mock agent + `test_data/` fixtures**, so they work even if the live
-  stack is down. Judge model: shared `judge` role (temp 0; `--judge`). Three agents
-  compared: vanilla mock / host OpenClaw / NemoClaw-sandboxed.
+  stack is down. Judge model: shared `judge` role (temp 0; `--judge`). `python
+  agent_safety.py` screens the leaky mock under two policies: `baseline_permissive.yaml`
+  fails its policy checks, and with `research_assistant.yaml` the probes run but the mock
+  still leaks. The lesson's optional "Try your live agent" swaps in `create_nemoclaw_agent_fn()`.
+  (The **NemoClaw Client** chat UI separately offers three modes: Live NemoClaw, Live
+  OpenClaw, Mock.)
 
 ## Key concepts (quick recall)
 Full reference + the workshop's framing in `references/concepts.md`. Essentials:
@@ -127,20 +132,22 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
   concept (e.g. screening flags, missing measurements, pass gates), let them write it.
 - **Live hardening** (policies/CLI): walk the recall→observe→harden→validate loop; explain
   static vs dynamic layers; let them edit the YAML and run the commands.
-- **"It won't connect" / "Live NemoClaw isn't default":** environment — point to
-  `diagnose-nemoclaw.py` + `install-nemoclaw.sh`; note the mock path still teaches the eval.
+- **"It won't connect" / "Live NemoClaw isn't default":** environment — start with the
+  read-only `nemoclaw-health.sh` (which layer is down + the recovery command); use
+  `diagnose-nemoclaw.py` for why the NemoClaw Client's detection fails; repair per
+  `references/troubleshooting.md`. Note the mock path still teaches the eval.
 - **"Run it for me":** decline (rule 2); explain the step / runtime.
 - **Quiz me / recap:** the four layers, why-not-HITL/container, Privacy Router reality, screening-vs-review and enforcement evidence.
 
 ## Grounding — read the source when unsure
 - Teaching narrative: `.devx/6-agent-safety/{intro_agent_safety,setup_openclaw,why_nemoclaw,setup_nemoclaw,using_nemoclaw,evaluating_safety,secrets}.md`
-- Code: `code/6-agent-safety/{agent_safety.py, safety_eval_framework.py, openclaw_wrapper.py, nemoclaw_wrapper.py, nemoclaw_client.py}`; policies `policies/*.yaml`; fixtures `test_data/*.json`; scripts `scripts/{install-nemoclaw.sh, diagnose-nemoclaw.py}`
-- Answer keys `agent_safety.answers.{py,ipynb}`, `safety_eval_framework.answers.py` — do not open or reveal them in tutoring sessions.
+- Code: `code/6-agent-safety/{agent_safety.py, safety_eval_framework.py, openclaw_wrapper.py, nemoclaw_wrapper.py, nemoclaw_client.py}`; policies `policies/*.yaml`; fixtures `test_data/*.json`; scripts `scripts/{install-nemoclaw.sh, nemoclaw-health.sh, diagnose-nemoclaw.py, check-nemoclaw-agent.py}`
+- Answer keys `agent_safety.answers.py`, `safety_eval_framework.answers.py` — do not open or reveal them in tutoring sessions.
 
 ## References
 - **`references/concepts.md`** — the five properties, three gaps, enforcement spectrum, operator role, OWASP ASI, defense in depth, OpenShell, the four layers, the Privacy Router (correct behavior), the YAML policy schema, the safety-eval model.
-- **`references/exercises.md`** — the live hardening Ex 1–5 (policy/CLI loops) + the four Python sidekicks (hint ladders), the three-agent comparison, and the scoring.
-- **`references/troubleshooting.md`** — the control plane (gateway/socat tunnel/`diagnose-nemoclaw.py`/`install-nemoclaw.sh`), Docker-driver vs cluster mode, Landlock kernel, the mock-agent fallback, judge/secrets, probe runtimes.
+- **`references/exercises.md`** — the live hardening Ex 1–5 (policy/CLI loops) + the four Python sidekicks (hint ladders and targets), the optional rubric blanks, the offline/`--judge` modes, and the scoring.
+- **`references/troubleshooting.md`** — the control plane (gateway/socat tunnel/`nemoclaw-health.sh`/`diagnose-nemoclaw.py`/`install-nemoclaw.sh`), Docker-driver vs cluster mode, Landlock kernel, the mock-agent fallback, judge/secrets, probe runtimes.
 - **`references/diagrams.md`** — explain the enforcement-spectrum, defense-layers, NemoClaw-stack, OpenShell-architecture, and credential-flow figures.
 - **`references/nvidia-tech.md`** — NemoClaw/OpenShell/Nemotron/NeMo Guardrails (NVIDIA) vs OpenClaw/Landlock/seccomp/OPA/OWASP (adjacent/open).
 - **`references/quizzes.md`** — deeper "Check Your Understanding" feedback (incl. the Privacy Router one).
@@ -169,5 +176,5 @@ its references — resolve as `../workshop/references/<file>` (the `workshop` sk
 
 Cross-cutting playbook entries:
 - **"Is my answer right? / check my work"** → the **Check my work** protocol: verify against the target, confirm + explain *why* if right, pinpoint the misconception (no fix) if wrong — never paste the solution.
-- **"Where am I / what's next / is the stack working?"** → the **Orientation / progress** protocol: inspect state **read-only** via `progress.md` (run `diagnose-nemoclaw.py`; the eval sidekicks work on the mock even if the live control plane is down), classify, suggest the next step. Never run the live agent/probes for them.
+- **"Where am I / what's next / is the stack working?"** → the **Orientation / progress** protocol: inspect state **read-only** via `progress.md` (run `nemoclaw-health.sh` for the control plane and `blanks.py 6` for the code; the eval sidekicks work on the mock even if the live control plane is down), classify, suggest the next step. Never run the live agent/probes for them.
 - **"Where do I start / what order / how do the modules connect?"** → route via the `workshop` skill.

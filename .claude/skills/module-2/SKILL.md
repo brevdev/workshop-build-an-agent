@@ -45,8 +45,8 @@ These apply to *every* response. They protect the learning experience.
    the agent hot-reload.
 5. **Separate "exercise" from "environment".** Filling in exercise code = guide only.
    Setup/runtime problems (missing keys, `langgraph dev` won't start, MCP can't reach
-   `npx`, the NIM container) are NOT learning exercises — give concrete, direct steps
-   (see `references/troubleshooting.md`).
+   Tavily's hosted endpoint, the NIM container) are NOT learning exercises — give
+   concrete, direct steps (see `references/troubleshooting.md`).
 6. **Ground everything in the real module; never fabricate.** Base answers on the
    actual content and code (cite the file/section). Don't invent APIs, parameters, or
    model names. If unsure, read the source (paths below) or say so — never bluff.
@@ -110,9 +110,12 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
   "cited [KB:source_id] vs source URLs?") connect to agentic RAG + the system prompt's tool guidance;
   suggest LangSmith traces.
 - **Troubleshooting:** triage env/runtime vs exercise vs behavior
-  (`references/troubleshooting.md`); for env/runtime give direct fixes; an unfilled
-  blank usually shows as `'ellipsis' object has no attribute ...` in the `langgraph
-  dev` log.
+  (`references/troubleshooting.md`); for env/runtime give direct fixes. Unfilled blanks
+  show up differently: most PART 1 blanks fail at import (`'ellipsis' object has no
+  attribute ...` in the `langgraph dev` log), but the MCP blanks never raise — the
+  `web_search` tool returns "Search failed (TypeError). Check the Tavily key and Workshop
+  Health." to the agent while `MCP_CONFIG` is `...` (see the unfilled-blank list in
+  troubleshooting).
 - **Check understanding / "quiz me":** ask about agentic-vs-traditional RAG, MCP vs
   Skills, or why reranking helps.
 - **Navigation / recap:** use the flow table; the module ends "operations-ready" and
@@ -126,19 +129,20 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 ## References
 - **`references/concepts.md`** — RAG, agentic RAG, embeddings/reranking, MCP, Skills, NIM, observability — in the workshop's framing, with source pointers.
 - **`references/exercises.md`** — every blank by section, the concept it teaches, a graduated hint ladder, the three `AGENT` rebuilds, common mistakes, and targets (never paste).
-- **`references/troubleshooting.md`** — `langgraph dev`, unfilled-blank signatures, MCP (npx/local), models/keys (incl. retriever EOL), FAISS, the client, LangSmith, local NIM/docker.
+- **`references/troubleshooting.md`** — `langgraph dev`, unfilled-blank signatures, MCP (remote Streamable HTTP / optional local SSE), models/keys (incl. retriever EOL), FAISS, the client, LangSmith, local NIM/docker.
 - **`references/diagrams.md`** — explain the LLM→RAG→agentic-RAG progression diagrams and the retrieval-chain figures.
 - **`references/nvidia-tech.md`** — NeMo Retriever (embed/rerank), ChatNVIDIA, NIM; what's NVIDIA vs third-party (MCP, FAISS, LangChain).
 - **`references/quizzes.md`** — deeper "Check Your Understanding" feedback.
 
 ## Environment & hardware
 **No GPU required for the main path.** The LLM + NeMo Retriever embedding/reranking run on
-**hosted** NIM; FAISS is CPU; the default web search uses Tavily's **remote** MCP server via
-`npx` (Node, already in the DevX-Lab container). **No GPU, no Docker** for the core
-build/run. **Optional, skippable:** (a) the local MCP server (`uvicorn mcp_server:app`, CPU
+**hosted** NIM; FAISS is CPU; the default web search connects directly to Tavily's hosted
+MCP server (`streamable_http` to `https://mcp.tavily.com/mcp/`, key sent as an
+`Authorization: Bearer` header — no Node/`npx`, no local process). **No GPU, no Docker**
+for the core build/run. **Optional, skippable:** (a) the local MCP server (`uvicorn mcp_server:app`, CPU
 only); (b) **"Migrate to Local NIM"** runs `nemotron-3-nano` in a **Docker NIM container —
 that step needs a compatible GPU, sufficient memory, a supported model profile, and Docker** (stay on hosted models if unavailable; nothing else in
-the module breaks). **Needs:** `NVIDIA_API_KEY` + `TAVILY_API_KEY`; Node/`npx` for remote MCP.
+the module breaks). **Needs:** `NVIDIA_API_KEY` + `TAVILY_API_KEY` and outbound HTTPS (no Node).
 
 ## Handling diagram / NVIDIA-tech / quiz / hardware questions
 - **"What is this diagram showing?"** → `references/diagrams.md` (the progression + retrieval chain).

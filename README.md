@@ -27,6 +27,8 @@ The entire workshop can take anywhere from 14 to 21 hours to complete, depending
 
 Open **Workshop Utilities → Workshop Health** in the JupyterLab launcher to check your environment, keys, model endpoints, and local services. Use **Secrets Manager** in the same section to save or update keys.
 
+To start a module over, close its notebooks and run `python code/workshop_support/reset.py <module number>` in a terminal. It copies your exercise files to `~/workshop-backups/`, restores them from git, and stops the module's servers. It shows what it will do and asks first.
+
 ## 🤖 Learn with an AI tutor (optional)
 
 This repo ships a set of **Agent Skills** that turn a coding agent into a hands-on workshop tutor. It explains each module's concepts in the workshop's own framing, gives **graduated hints — without ever completing your exercises or revealing answer keys** — interprets agent behavior, and troubleshoots the environment. It's an optional companion to the notebooks; you stay in the driver's seat.

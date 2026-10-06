@@ -45,7 +45,7 @@ Teaching narrative for module N is in `.devx/<N>-<slug>/`; code in `code/<N>-<sl
 - **Build:** a minimal pi-style harness (4 tools + a loop) around Nemotron, a context-tax meter, a hand-authored portable Agent Skill, a GPU-accelerated NVIDIA Verified Skill (cuDF), and a self-evolving harness.
 - **Concepts:** harness vs LLM (engine/car), the five harness responsibilities, the context tax + lazy skill loading, the seven-harness landscape, the open Agent Skills spec, NVIDIA Verified Skills, GPU skills.
 - **Code:** `harness_lab.py` / `.ipynb` (5 exercises — `build_bare_agent`, `harness_overhead`, `load_skills_lazily`, `self_evolve_skill`, + author a `SKILL.md`) (+ `.answers.*`); `scripts/install_nvidia_skill.sh`.
-- **Prereq:** M1–M6 concepts — the **capstone**; it names the harness layer used in every prior module.  **Time:** 2–3 h.  **Hardware:** none for the main path (hosted Nemotron + `tiktoken`, CPU); **Exercise 4's cuDF path needs an NVIDIA GPU** (cuDF) — clean fallback + skip message without one.
+- **Prereq:** M1–M6 concepts — the **capstone**; it names the harness layer used in every prior module.  **Time:** 2–3 h.  **Hardware:** none for the main path (hosted Nemotron + `tiktoken`, CPU); **Exercise 4's cuDF path needs an NVIDIA GPU** (cuDF) — without one, `run_gpu_task` prints a warning and the agent should use pandas.
 
 ## Routing shorthand
 RAG → M2 · evaluation/metrics → M3 · training/GRPO/GPU → M4 · deep agents/planning/sandbox → M5 ·

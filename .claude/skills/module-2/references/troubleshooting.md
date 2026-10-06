@@ -9,19 +9,37 @@ Most Module 2 errors surface in the **`langgraph dev` terminal log** — read it
 learner; the traceback's last frame usually points at the exact `rag_agent.py` line.
 
 ## Unfilled exercise blanks (the #1 cause)
-A blank left as `...` (Python `Ellipsis`) fails when used:
-- `AttributeError: 'ellipsis' object has no attribute 'split_documents'` → `splitter` (A1) unfilled.
-- `'ellipsis' object is not callable` / `TypeError` around embeddings, reranker, llm, or `call_tool` → that blank (A2/A3/A4/B2) unfilled.
-- `langgraph dev` fails to import the graph / "graph not found" → an unfilled blank or
-  syntax error in `rag_agent.py`, or `AGENT` still `...`.
-Identify *which* blank from the traceback line and **point them to it — don't fill it.**
+`python code/workshop_support/blanks.py 2` lists every blank still left in `rag_agent.py`.
+A blank left as `...` (Python `Ellipsis`) fails where it is first used. PART 1 blanks fail
+when `langgraph dev` imports the file, in file order:
+- `AttributeError: 'ellipsis' object has no attribute 'split_documents'` → `splitter` (A1).
+- `AttributeError: 'ellipsis' object has no attribute 'embed_documents'` → `embeddings` (A2);
+  raised by `FAISS.from_documents` after the `retry` helper's three attempts (a few seconds).
+- `ValidationError ... ContextualCompressionRetriever` / `base_compressor` / `input_value=Ellipsis`
+  → `reranker` (A3).
+- `AttributeError: 'ellipsis' object has no attribute 'bind_tools'` → `llm` (A4), raised by
+  `create_react_agent`.
+- `ValueError: Variable 'AGENT' in module '…rag_agent.py' is not a Graph or Graph factory
+  function` → `AGENT` still `...` (A5/B3/C3).
+
+Tool blanks do **not** raise; the agent receives a tool result instead:
+- `MCP_CONFIG = ...` (B1) → `web_search` returns **"Search failed (TypeError). Check the
+  Tavily key and Workshop Health."** Its `try/except` catches everything, so there is no
+  traceback in the log; check the blank before the key.
+- `result = ...` (B2) with a working connection → the same message with `(AttributeError)`.
+  Connection or credential failures produce the same message format too, so read the
+  exception name and rule out the blanks first.
+- `get_skill` / `list_available_skills` still `return ...` (C1/C2) → the tool result is the
+  text `Ellipsis`.
+Identify *which* blank from the traceback line or tool result and **point them to it — don't fill it.**
 
 ## Running the agent (`langgraph dev`)
 - Start **from the module dir**: `cd code/2-agentic-rag && langgraph dev`. The graph
   `rag_agent` and env files come from `langgraph.json`.
 - It **hot-reloads** on save — after editing `rag_agent.py`, just re-test; no restart
   needed (a hard crash needs a restart).
-- Reads keys from `../../secrets.env` + `../../variables.env` (per `langgraph.json`).
+- Reads keys from `../../secrets.env` (the `env` entry in `langgraph.json`; `rag_agent.py`
+  also calls `load_secrets()`).
 - If the command isn't found, the LangGraph CLI comes from `langgraph-cli[inmem]` in
   `requirements.txt`; confirm the right environment/kernel.
 
@@ -55,8 +73,9 @@ Identify *which* blank from the traceback line and **point them to it — don't 
 - `get_skill` returning "Skill 'X' not found" → wrong skill name or `SKILLS_DIR` path.
   Available skills live in the **top-level `skills/`** dir: `code-review`,
   `technical-writing` (each is a folder with a `SKILL.md`).
-- "what skills do you have?" returning nothing → `list_available_skills` (C2) still
-  `...`, or `AGENT` not yet rebuilt to include the skills tools (C3).
+- "what skills do you have?" returning no skill names → `list_available_skills` (C2) still
+  `...` (its tool result is the text `Ellipsis`), or `AGENT` not yet rebuilt to include the
+  skills tools (C3).
 
 ## LangSmith observability (optional)
 - Tracing/monitoring only work if `LANGSMITH_API_KEY` is set; traces land in the
@@ -69,12 +88,24 @@ Identify *which* blank from the traceback line and **point them to it — don't 
   loads `secrets.env`; a new terminal does not inherit notebook environment changes.
   It passes the key through stdin/environment, not command arguments. If the saved
   key is present but registry access is denied, check its NGC permissions.
-- **Driver preflight fails** → the pinned NIM 2.0.13 image uses CUDA 13 and the helper
-  requires R580+. A host administrator must assess a supported driver/profile or
-  platform-specific compatibility setup. Do not silently bypass this check or change
-  host drivers from the workshop. The hosted path remains available.
+- **Driver preflight fails** → the pinned NIM 2.0.13 image uses CUDA 13. On data-center
+  GPUs (A100, H100, L40S, …) with an older driver (R535+), the helper adds the image's CUDA
+  forward-compatibility libraries automatically (tested on an A100 with R565). Other GPUs
+  need an R580+ driver; do not change host drivers from the workshop. The hosted path
+  remains available.
+- **"Not enough disk space" / "needs at least 63 GB of GPU memory"** → the default BF16
+  profile on an A100 needs about 64 GB of downloads plus the 32 GB image. Rerun with
+  `--profile nvfp4` (about 19 GB, 21 GB of GPU memory; emulated and not NIM-validated before
+  Blackwell, but the smoke test checks tool calling), or free disk (e.g. the Module 4
+  merged model in `code/4-agent-customization/outputs/`).
+- **"Only N GB of GPU memory is free"** → the NIM reserves 80% of the GPU. Shut down
+  other notebook kernels (Kernel > Shut Down Kernel), especially Module 4 training.
+- **Container already exists** → `python code/2-agentic-rag/nim_setup.py --stop` removes it
+  (keeps the image and model cache); `--teardown` removes everything for a clean retry.
 - **Container slow / seems stuck** → first run downloads the model into the `nim-cache`
-  volume; wait for `Application startup complete`. Needs a GPU (`--gpus 1`) and the host
+  volume; wait for `Application startup complete` (about 3 minutes once downloaded). If the
+  log ends with `driver too old` or CUDA error 804, the forward-compatibility path does not
+  support this GPU: the host needs an R580+ driver. Needs a GPU (`--gpus 1`) and the host
   docker socket (provided by the workshop's `/var/host-run/` mount).
 - **Plain chat works, but agent returns an automatic-tool-choice HTTP 400** → use the
   pinned launch in `nim_setup.py`, including `--enable-auto-tool-choice`,

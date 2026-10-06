@@ -4,10 +4,11 @@ Use this to help learners through the exercises **without completing them**. For
 each blank: the learning goal, a graduated hint ladder (give the smallest hint that
 unblocks; escalate only on continued struggle), common mistakes, and the target.
 
-**The "target" is what the learner should arrive at — it is already in the
-notebook's own `💡 NEED SOME HELP?` block. Never paste it. Guide them to write it,
-or as a last resort point them to that block.** The targets are listed here only so
-you can calibrate hints and recognize a correct attempt.
+**Targets are for checking the learner's work and calibrating hints; never paste or
+dictate them, in whole or in part.** Each matches the notebook's own `💡 NEED SOME
+HELP?` block, which you never open — as a last resort, point the learner to it.
+Equivalent code is fine. L2 hints are pointers (where to look, which variable holds the
+value), never the finished line.
 
 Always start by asking what they've tried, and read the error/output *with* them.
 
@@ -29,36 +30,43 @@ A from-scratch build whose sections map one-to-one onto the four components. Con
 ### A2 · Part 2 / Tools — write the `add` tool (cell 11)
 - **Goal:** see that a "tool" is just a Python function.
 - **L1:** "What should `add(a, b)` give back?"
-- **L2:** "One line — return the sum."
+- **L2:** "A function hands its result to the caller with `return`, not `print`. Which
+  operator combines the two parameters?"
 - **Common mistakes:** `print`ing instead of `return`ing; adding type checks it doesn't need.
 - **Target:** `def add(a, b): return a + b`
 - The tool **schema** (cell 14) is provided — point out it mirrors the function (name, description, typed params). That schema is "the menu" the model reads.
 
 ### A3 · Part 4 / Routing — call the model (cell 18)
-- **Goal:** invoke `call_llm` with the four pieces, then append the reply to memory.
+- **Goal:** invoke `call_llm` with the four pieces (appending the reply to memory is provided).
 - **L1:** "The markdown lists four arguments and what each maps to — which variable is your short-term memory? Your tool menu?"
-- **L2:** "`model_client`→`client`, `model_name`→`MODEL_NAME`, `message_history`→`memory`, `tool_list`→`tools`. Don't forget `memory.append(llm_response)`."
-- **Common mistakes:** passing `messages` (it's named `memory` here); forgetting the append.
+- **L2:** "Each value already exists: the client from Part 1, the model constant from the
+  config cell, the list started in Part 3, and the schema list from 'Describe the tools'.
+  Scroll back and match each to the argument's description. The append is provided."
+- **Common mistakes:** passing `messages` (it's named `memory` here); passing `MODEL_URL` or `API_KEY` instead of the client object.
 - **Target:** `call_llm(model_client=client, model_name=MODEL_NAME, message_history=memory, tool_list=tools)`
 
 ### A4 · Part 4 / Routing — parse the tool request (cell 21)
 - **Goal:** extract name/args/id for each requested tool; `arguments` is a JSON **string**. With no tool calls the provided loop does nothing.
 - **L1:** "Print `llm_response` — the tool call is a nested dict. Where's the function name? The arguments? The id?"
-- **L2:** "`tool_call['function']['name']`, `json.loads(tool_call['function']['arguments'])`, `tool_call['id']`. The tip in the cell says why `json.loads` is needed."
+- **L2:** "Look at how `call_llm` (setup cell) builds each entry of `tool_calls`: an `id`
+  key plus a nested `function` dict. Index into that structure; the Part 4 markdown says why
+  the arguments need `json.loads`."
 - **Common mistakes:** forgetting `json.loads` (args arrive as a string); indexing the wrong nesting level.
 - **Target:** `tool_name = tool_call["function"]["name"]`; `tool_args = json.loads(tool_call["function"]["arguments"])`; `tool_id = tool_call["id"]`
 
 ### A5 · Part 4 / Routing — execute the tool (cell 24) — *the punchline*
 - **Goal:** realize **your code** runs the tool, not the model.
 - **L1:** "You have `tool_args` as a dict of keyword arguments. How do you pass a dict as kwargs into `add`?"
-- **L2:** "Unpack it: `add(**tool_args)`."
+- **L2:** "Look up 'Unpacking Argument Lists' in the Python tutorial: one operator spreads a
+  dict into keyword arguments at the call site."
 - **Common mistakes:** `add(tool_args)` (passes the whole dict as one positional arg).
 - **Target:** `tool_out = add(**tool_args)`
 
 ### A6 · Part 4 / Routing — append the tool result (cell 27)
 - **Goal:** feed the result back as a `tool` message so the model can use it next turn.
 - **L1:** "You extracted three values earlier — which belongs in `tool_call_id`? In `name`? And what type must `content` be?"
-- **L2:** "`tool_call_id`→`result["id"]`, `name`→`result["name"]`, `content`→`str(result["output"])`."
+- **L2:** "Look at the `tool_results.append(...)` line in the previous cell: the keys it
+  stores in each `result` are what this message needs. Match them by meaning."
 - **Common mistakes:** not stringifying `content`; mixing up `id` vs `name`.
 - **Target:** `{"role":"tool","tool_call_id":result["id"],"name":result["name"],"content":str(result["output"])}`
 
@@ -79,15 +87,17 @@ The learner writes the client that drives the prebuilt `agent` (imported from
 ### B1 · Define the query and initial state (cell 6)
 - **Goal:** initialize the agent's state with a user message — same message shape as Notebook A.
 - **L1:** "What shape is a message? You used it from scratch — role + content. What's the agent's *starting* state?"
-- **L2:** "`state = {'messages': [{'role': 'user', 'content': user_query}]}`, with `user_query` a string describing the report you want."
-- **Common mistakes:** key `message` vs `messages`; passing a bare string instead of a message dict; forgetting the list.
+- **L2:** "Reuse the message dict shape from `intro_to_agents.ipynb` Part 3 (`memory`'s first
+  entry), but put your `user_query` variable where the text goes. `user_query` itself is any
+  string describing the report you want."
+- **Common mistakes:** the outer `{"messages": [...]}` is provided, so the blank is one message dict — writing `{ user_query }` (a set, not a dict); quoting `"user_query"` instead of using the variable; a role other than `user`.
 - **Target (in the cell's `💡` block):** `user_query = "…"` ; `state = {"messages": [{"role": "user", "content": user_query}]}`
 
 ### B2 · Invoke the agent (cell 9)
-- **Goal:** run the agent asynchronously and grab the final message.
-- **L1:** "The agent is async — how do you call an async method in a notebook? And where in the returned state does the final reply live?"
-- **L2:** "`state = await agent.ainvoke(state)`, then `response = state['messages'][-1]`."
-- **Common mistakes:** forgetting `await`; using `.invoke` instead of `.ainvoke`; indexing `[0]` instead of `[-1]`.
+- **Goal:** run the agent on the state you built; `await agent.ainvoke(...)` and `response = state["messages"][-1]` are provided — only the argument is blank.
+- **L1:** "What does the agent start from? What did you build in the previous cell?"
+- **L2:** "Pass the whole dict from the previous cell, not just the query text. It already holds your user message under `messages`."
+- **Common mistakes:** passing `user_query` (a bare string) instead of the state dict; re-wrapping it as `{"messages": state}`.
 - **Target (in the cell's `💡` block):** `state = await agent.ainvoke(state)` ; `response = state["messages"][-1]`
 
 > **Extra credit (from the teaching page):** print the whole `state["messages"]` to
@@ -99,7 +109,7 @@ The learner writes the client that drives the prebuilt `agent` (imported from
 ## Escalation protocol
 1. Ask what they've tried / read the error together.
 2. **L1** — conceptual nudge.
-3. **L2** — specific pointer (name the function / shape / variable).
+3. **L2** — specific pointer (name the function / shape / variable to look at — not the finished line).
 4. **Last resort** — "there's a `💡 NEED SOME HELP?` block right below that cell; open it and compare with your attempt." Never paste it yourself.
 
 Between levels, invite them to try and report back. Always acknowledge the attempt

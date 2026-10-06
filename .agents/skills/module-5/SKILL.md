@@ -85,7 +85,11 @@ Flow (teaching narrative in `.devx/5-deep-agents/`, code in `code/5-deep-agents/
 **The four pillars:** **Planning** (explicit `write_todos` plan docs), **Delegation**
 (orchestrator spawns sub-agents via `task`, isolated context), **Memory** (filesystem as
 external memory + checkpointer + auto-summarization), **Skills** (detailed `.md` operating
-procedures injected into the prompt).
+procedures). In this module's build, `_build_system_prompt` appends the full text of each
+selected preset (`demo/backend/skills/*.md`) to the system prompt — eager loading;
+`create_deep_agent` gets no `skills=` argument. deepagents' own `skills=[paths]` option
+(shown in `deep_agents.md`, not used here) is progressive disclosure: only each SKILL.md's
+name and description enter the prompt, and the agent reads the file when needed.
 
 **The build:** `deep_agent.py` is a factory mirroring `demo/backend/agent.py`. It uses
 `create_deep_agent(model, tools, system_prompt, backend, checkpointer, interrupt_on, middleware)`.

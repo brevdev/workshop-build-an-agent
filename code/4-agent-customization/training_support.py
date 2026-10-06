@@ -113,6 +113,17 @@ def training_token_budget(tokenizer, train_dataset, val_dataset, max_seq_length,
     return max_prompt_length, max_seq_length - max_prompt_length
 
 
+def _valid_call(parsed):
+    """True when the reply contained a JSON object that fits the CLI schema."""
+    if not isinstance(parsed, dict):
+        return False
+    try:
+        CLIToolCall.model_validate(parsed)
+    except ValueError:  # pydantic's ValidationError is a ValueError
+        return False
+    return True
+
+
 def evaluate_cli_model(model, tokenizer, dataset, verify_endpoint, max_new_tokens=256):
     """Greedy, held-out evaluation; never executes a generated shell command.
 
@@ -136,7 +147,8 @@ def evaluate_cli_model(model, tokenizer, dataset, verify_endpoint, max_new_token
                     **inputs, max_new_tokens=max_new_tokens, do_sample=False,
                     pad_token_id=tokenizer.pad_token_id,
                 )
-            response = tokenizer.decode(output[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
+            new_tokens = output[0][inputs.input_ids.shape[1]:]
+            response = tokenizer.decode(new_tokens, skip_special_tokens=True)
             result = requests.post(verify_endpoint, json={
                 "task_id": f"held-out-{index}",
                 "task_input": {"input": example["user_input"], "output": example["answer"]},
@@ -144,12 +156,28 @@ def evaluate_cli_model(model, tokenizer, dataset, verify_endpoint, max_new_token
             }, timeout=30)
             result.raise_for_status()
             score = result.json()
+            # Separate formatting failures from wrong answers: a cut-off reply says
+            # nothing about whether the model knows the CLI.
+            if score["exact_match"]:
+                outcome = "exact"
+            elif len(new_tokens) >= max_new_tokens:
+                outcome = "cut_off"
+            elif not _valid_call(score.get("parsed_output")):
+                outcome = "invalid_output"
+            elif not score.get("command_correct"):
+                outcome = "wrong_command"
+            else:
+                outcome = "wrong_flags"
             rows.append({"input": example["user_input"], "response": response,
-                         "reward": score["reward"], "exact_match": score["exact_match"]})
+                         "reward": score["reward"], "exact_match": score["exact_match"],
+                         "outcome": outcome})
     finally:
         model.train(was_training)
     if not rows:
         raise ValueError("The held-out dataset is empty.")
+    outcomes = {name: sum(row["outcome"] == name for row in rows)
+                for name in ("exact", "wrong_flags", "wrong_command", "invalid_output", "cut_off")}
     return {"count": len(rows), "max_new_tokens": max_new_tokens, "do_sample": False,
             "exact_match_rate": sum(row["exact_match"] for row in rows) / len(rows),
-            "mean_reward": sum(row["reward"] for row in rows) / len(rows), "rows": rows}
+            "mean_reward": sum(row["reward"] for row in rows) / len(rows),
+            "outcomes": outcomes, "rows": rows}

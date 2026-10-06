@@ -414,11 +414,13 @@ class OpenAILLM:
             kwargs["tools"] = tools
 
         completion = self.client.chat.completions.create(**kwargs)
+        content = completion.choices[0].message.content or ""
+        # The customized model answers with JSON text rather than native tool calls.
+        return content, completion.choices[0].message.tool_calls or self._parse_tool_calls(content)
 
-        return (
-            completion.choices[0].message.content or "",
-            completion.choices[0].message.tool_calls or [],
-        )
+    # The same parsing as local inference: the served model is the same model.
+    _parse_tool_calls = HuggingFaceLLM._parse_tool_calls
+    _json_to_bash_command = HuggingFaceLLM._json_to_bash_command
 
 
 def get_llm(config: Config):
@@ -429,13 +431,9 @@ def get_llm(config: Config):
         config: The application configuration
         
     Returns:
-        Either LLM (API), HuggingFaceLLM (local), or OpenAILLM (vLLM server)
+        HuggingFaceLLM (local inference) or OpenAILLM (the same model behind a server)
     """
     if config.use_api:
-        # Check if using NVIDIA NIM or local vLLM server
-        if "nvidia" in config.llm_base_url.lower() or "integrate.api" in config.llm_base_url:
-            return LLM(config)
-        else:
-            return OpenAILLM(config)
-    else:
-        return HuggingFaceLLM(config)
+        # The customized model served by vLLM or similar at config.api_base_url.
+        return OpenAILLM(config)
+    return HuggingFaceLLM(config)

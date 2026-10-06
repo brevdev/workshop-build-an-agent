@@ -124,7 +124,7 @@ class CompleteTrainingExercises(ast.NodeTransformer):
     """Supply only the choices explicitly requested in the two exercise prompts."""
 
     choices = {
-        "GRPOConfig": {"num_generations": "4", "learning_rate": "1e-5", "max_steps": "50"},
+        "GRPOConfig": {"num_generations": "4", "learning_rate": "5e-5", "max_steps": "50"},
         "GRPOTrainer": {"model": "model", "processing_class": "tokenizer",
                         "reward_funcs": "[reward_fn]", "args": "training_args",
                         "train_dataset": "train_dataset"},
@@ -168,11 +168,18 @@ def test_notebook_trains_once_after_configuration_and_compares_same_holdout(
     def config(**kwargs):
         events.append("configure")
         assert kwargs["max_prompt_length"] == 216
-        assert kwargs["max_completion_length"] == 808
-        assert (kwargs["num_generations"], kwargs["learning_rate"], kwargs["max_steps"]) == (4, 1e-5, 50)
+        # Training and evaluation share one short budget for JSON answers.
+        assert kwargs["max_completion_length"] == 128
+        assert (kwargs["num_generations"], kwargs["learning_rate"], kwargs["max_steps"]) == (4, 5e-5, 50)
+        # TRL counts completions: 4 per micro-batch x 4 accumulation steps = 4 prompts x 4 generations.
+        assert kwargs["per_device_train_batch_size"] * kwargs["gradient_accumulation_steps"] == 4 * kwargs["num_generations"]
         return SimpleNamespace(**kwargs)
 
     class Trainer:
+        state = SimpleNamespace(log_history=[
+            {"step": step, "reward": 0.5, "reward_std": 0.2, "frac_reward_zero_std": 0.5,
+             "completions/mean_length": 20.0} for step in range(1, 13)] + [{"train_runtime": 1.0}])
+
         def __init__(self, **kwargs):
             events.append("construct")
             assert kwargs == {"model": model, "processing_class": tokenizer,
@@ -189,14 +196,15 @@ def test_notebook_trains_once_after_configuration_and_compares_same_holdout(
     def evaluate(actual_model, actual_tokenizer, dataset, endpoint, max_new_tokens):
         assert actual_model is model and actual_tokenizer is tokenizer
         assert dataset is val and endpoint == "http://verifier.test/verify"
-        assert max_new_tokens == 256
+        assert max_new_tokens == 128
         if model.adapters_disabled:
             assert not model.trained
             events.append("baseline")
         else:
             assert model.trained
             events.append("trained")
-        return {"exact_match_rate": 0.0, "count": len(dataset), "max_new_tokens": max_new_tokens}
+        return {"exact_match_rate": 0.0, "count": len(dataset), "max_new_tokens": max_new_tokens,
+                "outcomes": {"exact": 0}, "rows": [{"exact_match": False}]}
 
     monkeypatch.setattr(training_support, "evaluate_cli_model", evaluate)
     monkeypatch.setattr(nemotron_unsloth_patch, "verify_patch", lambda *args: events.append("verify"))
@@ -220,4 +228,6 @@ def test_notebook_trains_once_after_configuration_and_compares_same_holdout(
     comparison = json.loads((tmp_path / "outputs/grpo_langgraph_cli/held_out_comparison.json").read_text())
     assert comparison["base_revision"] == "pinned-revision"
     assert comparison["baseline"] == comparison["trained"]  # Zero improvement remains a valid result.
+    assert (comparison["improved"], comparison["regressed"]) == (0, 0)
+    assert list(ns["curve"].index) == ["steps 1-10", "steps 11-12"]
     assert train == rows(100) and val == rows(200)

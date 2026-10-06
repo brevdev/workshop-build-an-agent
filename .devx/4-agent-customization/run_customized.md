@@ -11,10 +11,10 @@ The saved model is a candidate **specialized agent**. Use its held-out results t
 
 <!-- fold:break -->
 
-But how do we actually *use* the trained model? The training notebook saved a merged model checkpoint. Now we need to:
-1. **Load the trained model** instead of the generic base model
-2. **Use the right prompt format** — the model was trained with a specific JSON system prompt, and we need to match that at inference time
-3. **Wire up the same HITL execution** — review commands before running them
+But how do we actually *use* the trained model? The training notebook saved a merged model checkpoint. The trained model does one job well: it turns a LangGraph CLI request into the exact command. On its own it cannot list files or read a README. So instead of replacing the general bash agent, we give the agent the trained model **as a tool**:
+1. **Load the trained model** locally
+2. **Use the right prompt format** — the model was trained with a specific JSON system prompt, and the tool must use exactly that prompt
+3. **Wire both tools into the agent** — the hosted model keeps planning and running bash commands, calls your model for LangGraph requests, and every command still waits for your approval
 
 <!-- fold:break -->
 
@@ -24,7 +24,7 @@ During GRPO training, the model learned to map natural language requests to stru
 
 ![Inference Pipeline](img/inference_pipeline_dark.svg)
 
-The key difference from the base agent in `bash_agent.ipynb`: instead of calling a remote NIM model via API, we're running the trained model **locally** with HuggingFace Transformers. The `HuggingFaceLLM` class handles model loading, tokenization, and parsing the structured JSON output.
+The key difference from the base agent in `bash_agent.ipynb`: alongside the hosted model, the trained model runs **locally** with HuggingFace Transformers, behind a `langgraph_cli` tool. The `HuggingFaceLLM` class handles model loading, tokenization, and parsing the structured JSON output into a command. A small specialist model behind a tool adds depth without losing the general agent's breadth.
 
 <!-- fold:break -->
 
@@ -52,7 +52,7 @@ llm = HuggingFaceLLM(config)
 
 ### Exercise: System Prompt
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = Messages');"><i class="fas fa-code"></i> Messages</button> — Initialize with the JSON system prompt. Each request produces one CLI translation; after approval, the program shows the command result and returns control to you.
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = ');"><i class="fas fa-code"></i> Messages</button> — Inside the `langgraph_cli` tool, start the conversation with the JSON system prompt. Each call sends one request to the trained model and returns one command; the tool never runs it.
 
 Implement `messages` by creating a `Messages` instance with `config.json_system_prompt`.
 
@@ -70,20 +70,19 @@ messages = Messages(config.json_system_prompt)
 
 <!-- fold:break -->
 
-### Exercise: Execute with Human-in-the-Loop
+### Exercise: Give the Agent Both Tools
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'tool_result = bash.exec_bash_command');"><i class="fas fa-code"></i> exec_bash_command</button> — Execute the command after user confirmation.
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'tools=');"><i class="fas fa-code"></i> tools</button> — Give the agent confirmed bash execution and your specialist.
 
-Whether or not held-out accuracy improves, the HITL pattern from `bash_agent.md` still applies. Training does not guarantee safe commands. The `confirm_execution()` function prompts the user before any command runs.
+Whether or not held-out accuracy improves, the HITL pattern from `bash_agent.md` still applies. Training does not guarantee safe commands, so the specialist's commands run through the same confirmation step as every other command: `ExecOnConfirm` asks you before anything runs.
 
-Implement the execution block: if the user confirms the command, execute it with `bash.exec_bash_command(command)` and store the result in `tool_result`.
+Implement `tools` as a list of `ExecOnConfirm(bash).exec_bash_command` and your `langgraph_cli` tool.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
 
 ```python
-if confirm_execution(command):
-    tool_result = bash.exec_bash_command(command)
+tools=[ExecOnConfirm(bash).exec_bash_command, langgraph_cli],
 ```
 </details>
 
@@ -91,7 +90,7 @@ if confirm_execution(command):
 
 ## Run the Agent Interactively
 
-After completing the exercises, start your new agent in the <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>:
+After completing the exercises, run Step 7 in the notebook, or start the same agent in a <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button>. Shut down the training notebook's kernel first to free GPU memory.
 
 Make sure you're in the `code/4-agent-customization` directory:
 
@@ -105,19 +104,21 @@ And start your customized bash agent:
 python3.12 -m bash_agent.main_hf
 ```
 
+Add `--cli-only` to talk to the trained model alone: each request becomes one LangGraph command, with no general bash.
+
 <!-- fold:break -->
 
 ### Test the Customized Agent
 
-Try requests such as *“Create a react-agent project in ./myapp”*, *“Start the dev server on8080”*, and *“Build an image tagged v2”*. Check the proposed JSON and command before approving. Training can introduce regressions in generic Bash behavior too.
+Start with a general request such as *“List the files in this directory”*: the hosted model answers it with bash. Then try LangGraph requests such as *“Create a react-agent project in ./myapp”*, *“Start the dev server on port 8080”*, and *“Build an image tagged myapp:v2”*: the agent calls `langgraph_cli` and shows you the trained model's command before running it. Check each command before approving.
 
 <!-- fold:break -->
 
 ## Measuring the Improvement
 
-Open `outputs/grpo_langgraph_cli/held_out_comparison.json`, written by the training notebook. It compares the **same local9B model before and after training** on untouched validation rows, using the same JSON prompt, greedy decoding, token budget and verifier. Compare exact-match rate and inspect the saved failures; an improvement is a result to measure, not a promise.
+Open `outputs/grpo_langgraph_cli/held_out_comparison.json`, written by the training notebook. It compares the **same local 9B model before and after training** on untouched validation rows, using the same JSON prompt, greedy decoding, token budget and verifier. Compare exact-match rate and inspect the saved failures; an improvement is a result to measure, not a promise.
 
-The hosted starter agent uses a different model and tool setup, so its chat demonstrations are not a fair training baseline. This carries Module3's evaluation approach into customization. The verifier checks labels, not whether running a command is safe.
+The hosted starter agent uses a different model and tool setup, so its chat demonstrations are not a fair training baseline. This carries Module 3's evaluation approach into customization. The verifier checks labels, not whether running a command is safe.
 
 <!-- fold:break -->
 

@@ -9,7 +9,13 @@ config:
 
 flowchart LR
 
-    input[User Input<br />#40;natural<br />language#41;] --> model[Trained<br />Model<br />#40;HuggingFace#41;] --> json[JSON Tool<br />Call Output<br />#40;structured#41;] --> hitl[HITL<br />Confirm &<br />Execute]
+    input[User Request<br />#40;natural<br />language#41;] --> planner[Hosted<br />Planner<br />#40;bash agent#41;]
+    planner -- general request: a bash command --> hitl[HITL<br />Confirm &<br />Execute]
+    planner -- LangGraph request --> tool
+    subgraph tool [langgraph_cli tool]
+        model[Trained<br />Model<br />#40;HuggingFace#41;] --> json[JSON → CLI<br />command]
+    end
+    tool --> hitl
 
     classDef node fill:#fff,stroke:#444,stroke-width:2px,color:#222;
     classDef cluster fill:#eaf6e0,stroke:#76b900,stroke-width:3px,color:#111,rounded corners,shadow;

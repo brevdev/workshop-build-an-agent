@@ -1,15 +1,16 @@
 #!/usr/bin/env python3.12
 """
-Bash Computer Use Agent - HuggingFace Implementation
+Bash Computer Use Agent - with your fine-tuned LangGraph CLI model
 
-This is the entry point for running the customized bash agent with local
-HuggingFace model inference. Uses the trained model checkpoint from
-GRPO training (02_grpo_training.ipynb).
+Entry point for the customized agent. The hosted model plans and runs bash
+commands as the base agent does, and calls your locally fine-tuned model (the
+GRPO checkpoint from 02_grpo_training.ipynb) as a tool for LangGraph CLI requests.
 
 Usage:
     python -m bash_agent.main_hf
     python -m bash_agent.main_hf --model-path /path/to/model
-    python -m bash_agent.main_hf --use-api  # Use OpenAI-compatible API instead
+    python -m bash_agent.main_hf --use-api   # fine-tuned model behind an OpenAI-compatible server
+    python -m bash_agent.main_hf --cli-only  # the fine-tuned model alone: one request, one CLI command
 """
 
 import argparse
@@ -22,6 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from .config import Config
 from .bash import Bash
+from .combined import build_combined_agent, run_agent_loop
 from .helpers import Messages, get_llm
 
 
@@ -32,7 +34,21 @@ def confirm_execution(cmd: str) -> bool:
 
 
 def main(config: Config):
-    """Main agent loop for the customized model."""
+    """Run the hosted bash agent with the fine-tuned CLI model as its `langgraph_cli` tool."""
+    bash = Bash(config)
+    agent = build_combined_agent(config, get_llm(config), bash)
+    print("\n" + "=" * 60)
+    print("Bash Computer Use Agent + fine-tuned LangGraph CLI model")
+    print("=" * 60)
+    print(f"Planner: {config.llm_model_name} (hosted)")
+    print(f"LangGraph CLI model: {config.api_base_url if config.use_api else config.model_path}")
+    print(f"Working directory: {bash.cwd}")
+    print("=" * 60)
+    run_agent_loop(agent, bash)
+
+
+def main_cli_only(config: Config):
+    """The fine-tuned model alone: translate each request into one LangGraph CLI command."""
     # Enable LangGraph CLI commands (the agent has been trained on these)
     config.enable_langgraph_cli()
     
@@ -178,6 +194,11 @@ def parse_args():
         help="Sampling temperature (default: 0.1)"
     )
     parser.add_argument(
+        "--cli-only",
+        action="store_true",
+        help="Run only the fine-tuned model: each request becomes one LangGraph CLI command"
+    )
+    parser.add_argument(
         "--device",
         type=str,
         default="cuda",
@@ -207,4 +228,7 @@ if __name__ == "__main__":
         config.device = args.device
 
     # Run the agent
-    main(config)
+    if args.cli_only:
+        main_cli_only(config)
+    else:
+        main(config)

@@ -120,24 +120,95 @@ def test_generated_labels_require_seed_literals_and_requested_flags():
     assert rows==[{'input':good['input'],'output':good['output']}]
 
 
-def test_customized_loop_translates_once_per_request(tmp_path, monkeypatch):
+LANGGRAPH_COMMAND = 'langgraph new ./demo --template react-agent-python'
+
+
+class Translator:
+    """Stands in for the fine-tuned model: one request in, one CLI command out."""
+    def __init__(self, command=LANGGRAPH_COMMAND):
+        self.command, self.requests = command, []
+
+    def query(self, messages):
+        history = messages.to_list()
+        self.requests.append(history)
+        return '{}', [{'id': 'one', 'function': {'name': 'exec_bash_command',
+                                                 'arguments': json.dumps({'cmd': self.command})}}]
+
+
+class ScriptedPlanner:
+    """A chat model that replays fixed tool calls, then answers."""
+    def __new__(cls, steps):
+        from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
+
+        class Planner(GenericFakeChatModel):
+            def bind_tools(self, tools, **kwargs):
+                return self
+        return Planner(messages=iter(steps))
+
+
+def run_notebook_agent(tmp_path, monkeypatch, planner_steps, answers):
     import builtins
     from bash_agent.config import Config
     from bash_agent.bash import Bash
     from bash_agent.helpers import Messages
-    class Translator:
-        calls = 0
-        def query(self, messages):
-            self.calls += 1
-            assert len(messages.to_list()) == 2
-            return '{}', [{'id':'one','function':{'name':'exec_bash_command','arguments':'{"cmd":"echo translated"}'}}]
+    config = Config(root_dir=str(tmp_path), llm_api_key='test-only')
     translator = Translator()
-    config = Config(root_dir=str(tmp_path))
-    context = {'config':config,'bash':Bash(config),'Messages':Messages,'llm':translator,'json':json}
-    cells=json.loads((LAB/'answer_key/03_run_agent.answers.ipynb').read_text())['cells']
-    source=next(''.join(cell['source']) for cell in cells if 'def run_agent_loop' in ''.join(cell['source']))
+    context = {'config': config, 'bash': Bash(config), 'Messages': Messages, 'llm': translator, 'json': json}
+    cells = json.loads((LAB/'answer_key/03_run_agent.answers.ipynb').read_text())['cells']
+    source = next(''.join(c['source']) for c in cells if 'def langgraph_cli' in ''.join(c['source']))
+    import langchain_openai
+    monkeypatch.setattr(langchain_openai, 'ChatOpenAI', lambda **kwargs: ScriptedPlanner(planner_steps))
     exec(source, context)
-    answers=iter(['one request','y','quit'])
-    monkeypatch.setattr(builtins,'input',lambda _:next(answers))
-    context['run_agent_loop']()
-    assert translator.calls == 1
+    replies = iter(answers)
+    monkeypatch.setattr(builtins, 'input', lambda _: next(replies))
+    result = context['agent'].invoke({'messages': [{'role': 'user', 'content': 'make a project'}]},
+                                     config={'configurable': {'thread_id': 't'}})
+    return translator, result
+
+
+def test_fine_tuned_model_is_queried_with_its_training_prompt(tmp_path, monkeypatch):
+    from langchain_core.messages import AIMessage
+    from bash_agent.prompts import JSON_SYSTEM_PROMPT
+    steps = [AIMessage(content='', tool_calls=[{'name': 'langgraph_cli', 'args': {'request': 'make a project'}, 'id': 'a'}]),
+             AIMessage(content='', tool_calls=[{'name': 'exec_bash_command', 'args': {'cmd': 'echo translated'}, 'id': 'b'}]),
+             AIMessage(content='Done.')]
+    translator, result = run_notebook_agent(tmp_path, monkeypatch, steps, answers=['y'])
+    assert len(translator.requests) == 1
+    system, user = translator.requests[0]
+    assert system == {'role': 'system', 'content': JSON_SYSTEM_PROMPT}
+    assert user == {'role': 'user', 'content': 'make a project'}
+    tool_results = [m for m in result['messages'] if m.type == 'tool']
+    assert tool_results[0].content == LANGGRAPH_COMMAND      # the specialist returns, never runs
+    assert 'translated' in tool_results[1].content            # the confirmed command ran
+    assert result['messages'][-1].content == 'Done.'
+
+
+def test_declined_specialist_command_does_not_run(tmp_path, monkeypatch):
+    from langchain_core.messages import AIMessage
+    steps = [AIMessage(content='', tool_calls=[{'name': 'exec_bash_command', 'args': {'cmd': 'touch never'}, 'id': 'b'}]),
+             AIMessage(content='Skipped.')]
+    _, result = run_notebook_agent(tmp_path, monkeypatch, steps, answers=['n'])
+    assert 'declined' in [m for m in result['messages'] if m.type == 'tool'][0].content
+    assert not (tmp_path / 'never').exists()
+
+
+def test_main_hf_agent_has_bash_and_specialist_tools(tmp_path, monkeypatch):
+    import bash_agent.combined as combined
+    from bash_agent.config import Config
+    from bash_agent.bash import Bash
+    seen = {}
+    monkeypatch.setattr(combined, 'create_react_agent', lambda **kwargs: seen.update(kwargs) or 'agent')
+    config = Config(root_dir=str(tmp_path), llm_api_key='test-only')
+    assert combined.build_combined_agent(config, Translator(), Bash(config)) == 'agent'
+    assert [t.name if hasattr(t, 'name') else t.__name__ for t in seen['tools']] == ['exec_bash_command', 'langgraph_cli']
+    assert 'langgraph' in config.allowed_commands
+    assert 'langgraph_cli' in seen['prompt']
+    tool = seen['tools'][1]
+    assert tool.invoke({'request': 'build it'}) == LANGGRAPH_COMMAND
+
+
+def test_specialist_tool_refuses_non_langgraph_commands(tmp_path):
+    import bash_agent.combined as combined
+    from bash_agent.config import Config
+    tool = combined.make_langgraph_cli_tool(Translator('cat /project/secrets.env'), Config(root_dir=str(tmp_path)))
+    assert 'did not produce a valid LangGraph CLI command' in tool.invoke({'request': 'show secrets'})

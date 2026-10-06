@@ -100,14 +100,16 @@ Outputs that score above the group average get reinforced; below-average outputs
 <div id="aside-grpo_training-3" popover class="dx-aside-panel">
 <button class="dx-aside-x" popovertarget="aside-grpo_training-3" popovertargetaction="hide" aria-label="Close">×</button>
 
-**Key metrics to monitor during training:**
+**Key metrics to monitor during training** (the names TRL logs; the notebook plots them after training):
 
-| Metric | Healthy Range | Warning Signs |
-|--------|---------------|---------------|
-| **Mean Reward** | Increasing over steps | Flat or decreasing after warmup |
-| **Reward Std** | Decreasing over time | Remains high (model still uncertain) |
-| **Loss** | Decreasing, then stabilizing | Oscillating wildly or exploding |
-| **Gradient Norm** | Stable, typically < 10 | Exploding (> 100) or vanishing (< 0.001) |
+| Metric | Healthy | Warning signs |
+|--------|---------|---------------|
+| **Mean reward** (`reward`) | Trends upward over steps; it is noisy because each step sees different prompts | Flat or falling after warmup |
+| **Groups with no signal** (`frac_reward_zero_std`) | Below 1 early on; it climbs toward 1 as the model gets every sample right and the reward nears its maximum | Near 1 while the reward is still low: every sample scores the same (all wrong), so nothing is learnable |
+| **Reward spread** (`reward_std`) | Above zero while the model is still learning | Zero from the start: the task is too easy or too hard for sampling to find better answers |
+| **Completion length** (`completions/mean_length`, `completions/clipped_ratio`) | Short JSON answers that end on their own | A clipped ratio above zero: answers hit the token limit and were cut off |
+| **Gradient norm** (`grad_norm`) | Stable, typically < 10 | Exploding (> 100) |
+| **Loss** (`loss`) | Close to zero. It is not a progress signal here | With TRL's default `beta=0` and one update per batch, the GRPO loss stays near zero whether or not the model improves. Judge progress by the reward curves and the held-out comparison |
 
 **Red flags and what they mean:**
 
@@ -292,9 +294,11 @@ resp = requests.post(verify_endpoint, json=verify_request, timeout=30)
 
 Implement some key training configuration parameters.
 
-These three settings control the core training dynamics: `num_generations` is how many candidate outputs GRPO generates per prompt (more = richer comparison signal), `learning_rate` controls the step size for weight updates, and `max_steps` caps the total training iterations. Implement `training_args` with `num_generations=4`, `learning_rate=1e-5`, and `max_steps=50`.
+These three settings control the core training dynamics: `num_generations` is how many candidate outputs GRPO generates per prompt (more = richer comparison signal), `learning_rate` controls the step size for weight updates, and `max_steps` caps the total training iterations. Implement `training_args` with `num_generations=4`, `learning_rate=5e-5`, and `max_steps=50`.
 
-Run the token-budget cell first. It measures the formatted prompts in both data splits and reserves at least 256 tokens for each generated answer within `MAX_SEQ_LENGTH`. If a request is too long, review it before proceeding; the check does not silently truncate prompts or remove held-out examples.
+Two related settings are already filled in. TRL counts `per_device_train_batch_size` in **completions**, not prompts: with `gradient_accumulation_steps=4`, each step scores 16 completions, that is 4 prompts × 4 generations, and 50 steps cover the training data a little more than once. LoRA trains a small set of added weights, so it uses a larger learning rate than full fine-tuning. We use 5e-5: in our runs, 1e-5 barely changed the model in 50 steps, and 1e-4 sometimes over-learned one convention, sending every "server" request to `up`, even dev-server requests. On an A100 the run takes about 15 to 25 minutes.
+
+Run the token-budget cell first. It checks that the formatted prompts in both data splits fit within `MAX_SEQ_LENGTH` next to a 128-token answer budget. The system prompt's `/no_think` turns off Nemotron Nano's reasoning trace, so the JSON answers stay well under that. If a request is too long, review it before proceeding; the check does not silently truncate prompts or remove held-out examples.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -304,7 +308,7 @@ training_args = GRPOConfig(
     ... # Keep other args as-is
     num_generations=4,
     ...
-    learning_rate=1e-5,
+    learning_rate=5e-5,
     ...
     max_steps=50,
     ...

@@ -199,7 +199,7 @@ print(f"{len(bad)} row(s) with an unknown template")
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">PREFER A HEAD START?</p>
   <p>We recommend generating your own dataset for the hands-on experience. But if you'd rather move ahead quickly, a starter set is provided - it also makes a good reference when you build your own:</p>
-  <p>📁 Sample Training Data (213 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button></p>
+  <p>📁 Sample Training Data (155 examples): <button onclick="openOrCreateFileInJupyterLab('code/4-agent-customization/data/langgraph_cli/train.jsonl');"><i class="fa-brands fa-python"></i> train.jsonl</button></p>
 </div>
 
 <!-- fold:break -->
@@ -290,8 +290,8 @@ Double check that you have successfully generated synthetic data for the LangGra
 
 ```
 data/langgraph_cli/
-├── train.jsonl       # reviewed shipped set: 213 examples
-├── val.jsonl         # reviewed shipped set: 25 examples
+├── train.jsonl       # reviewed shipped set: 155 examples
+├── val.jsonl         # reviewed shipped set: 50 examples (10 per command)
 └── generated/        # your reviewed SDG output; counts vary
     ├── train.jsonl
     └── val.jsonl

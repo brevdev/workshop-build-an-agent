@@ -60,7 +60,11 @@ like `rm`, `mv`, `rmdir`, `sudo`, etc. If the user asks you to do so, politely r
 # Config.json_system_prompt replays it at inference. Change it after training and
 # you must retrain. The example's template must be a real LangGraph CLI template
 # (they all end in `-python`) or it teaches a value the reward function penalizes.
-JSON_SYSTEM_PROMPT = """You are an expert CLI assistant for the LangGraph Platform CLI.
+# `/no_think` turns off Nemotron Nano's reasoning trace: the chat template removes
+# it from the prompt and opens the reply with an empty <think></think>. The model
+# answers with the JSON directly, so a short completion budget never truncates it.
+JSON_SYSTEM_PROMPT = """/no_think
+You are an expert CLI assistant for the LangGraph Platform CLI.
 
 Translate user requests into structured JSON tool calls.
 

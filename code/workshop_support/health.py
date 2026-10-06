@@ -1,16 +1,20 @@
 """Read-only workshop checks, served behind the JupyterLab proxy."""
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
+import contextlib
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import metadata
+import importlib.util
+import io
 import json
 import math
 import os
 from pathlib import Path
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import threading
@@ -35,6 +39,24 @@ MODULES = [
     ("Agent Safety", "6. Agent Safety", ["chat", "fast_chat", "judge"], False),
     ("Agent Harnesses", "7. Agent Harnesses", ["chat"], False),
 ]
+
+
+# Hosts the exercises, downloads and installers reach, and what each is for.
+NETWORK_HOSTS = {
+    "integrate.api.nvidia.com": "hosted models",
+    "ai.api.nvidia.com": "hosted retrieval models",
+    "api.tavily.com": "web search",
+    "mcp.tavily.com": "remote MCP",
+    "huggingface.co": "Module 4 model download",
+    "nvcr.io": "Module 2 local NIM",
+    "github.com": "Module 6 and 7 installers",
+    "registry.npmjs.org": "OpenClaw and NemoClaw installers",
+    "openclaw.ai": "OpenClaw installer",
+    "www.nvidia.com": "NemoClaw installer",
+}
+# Module 4 GRPO training: model download plus merged export, and its GPU peak.
+TRAINING_DISK_GB = 35
+TRAINING_GPU_GB = 45  # the training notebook peaks around 43 GB on an A100
 
 
 def row(label, status, detail, **extra):
@@ -106,12 +128,30 @@ def environment_checks():
     except (OSError, KeyError, ValueError):
         checks.append(row("Memory", "unknown", "Memory information is unavailable."))
     try:
-        gpu = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.free", "--format=csv,noheader"],
+        gpu = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.free,memory.total,driver_version",
+                              "--format=csv,noheader,nounits"],
                              capture_output=True, text=True, timeout=4, check=True)
-        detail = gpu.stdout.strip().replace(", [N/A]", " · free GPU memory is not reported separately")
-        checks.append(row("GPU", "info", detail or "No GPU reported."))
-    except (OSError, subprocess.SubprocessError):
+        name, free, total, driver = [part.strip() for part in gpu.stdout.splitlines()[0].split(",")]
+        try:
+            free_gb, total_gb = int(free) / 1024, int(total) / 1024
+            detail = f"{name} · {free_gb:.0f} of {total_gb:.0f} GB free · driver {driver}."
+            if total_gb < TRAINING_GPU_GB:
+                detail += f" Module 4 training needs about {TRAINING_GPU_GB} GB of GPU memory."
+            elif free_gb < TRAINING_GPU_GB:
+                detail += (f" Module 4 training needs about {TRAINING_GPU_GB} GB free; shut down other "
+                           "notebook kernels or model containers first.")
+        except ValueError:
+            detail = f"{name} · free GPU memory is not reported separately · driver {driver}."
+        checks.append(row("GPU", "info", detail))
+    except (OSError, subprocess.SubprocessError, ValueError, IndexError):
         checks.append(row("GPU", "idle", "No accessible GPU. Local training and the optional GPU lab need one."))
+    try:
+        free_disk = shutil.disk_usage("/").free / 1e9
+        checks.append(row("Disk", "pass" if free_disk >= TRAINING_DISK_GB else "fail",
+                          f"{free_disk:.0f} GB free. Module 4 training needs about {TRAINING_DISK_GB} GB; "
+                          "the optional local NIM in Module 2 needs 56–101 GB, depending on its profile."))
+    except OSError:
+        checks.append(row("Disk", "unknown", "Free disk space is unavailable."))
     try:
         subprocess.run(["docker", "info", "--format", "{{.ServerVersion}}"],
                        capture_output=True, timeout=4, check=True)
@@ -122,7 +162,54 @@ def environment_checks():
         checks.append(row(command, "pass" if shutil.which(command) else "idle",
                           "Installed. Module 6 walks through setup." if shutil.which(command)
                           else "Install during Module 6 setup."))
+    checks.append(network_check())
+    checks.append(local_nim())
     return checks
+
+
+def network_check():
+    """Resolve every host the workshop needs; DNS failures look like exercise bugs otherwise."""
+    executor = ThreadPoolExecutor(max_workers=len(NETWORK_HOSTS))
+    futures = {executor.submit(socket.getaddrinfo, host, 443): host for host in NETWORK_HOSTS}
+    done, _ = wait(futures, timeout=4)
+    executor.shutdown(wait=False, cancel_futures=True)
+    failed = [host for future, host in futures.items() if future not in done or future.exception()]
+    if not failed:
+        return row("Network", "pass", f"All {len(NETWORK_HOSTS)} workshop hosts resolve.")
+    names = "; ".join(f"{host} ({NETWORK_HOSTS[host]})" for host in failed)
+    return row("Network", "fail", f"Could not resolve {names}. DNS lookups can fail intermittently; "
+                                  "refresh to check again before installs or downloads.")
+
+
+def local_nim():
+    """Report whether Module 2's optional local NIM can run here, without starting anything."""
+    label = "Local NIM (optional)"
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "workshop_nim_setup", PROJECT_ROOT / "code/2-agentic-rag/nim_setup.py")
+        nim_setup = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(nim_setup)
+        state = subprocess.run(["docker", "ps", "-a", "--filter", f"name=^/{nim_setup.CONTAINER}$",
+                                "--format", "{{.Status}}"], capture_output=True, text=True, timeout=5)
+        if state.stdout.strip():
+            running = state.stdout.startswith("Up")
+            return row(label, "pass" if running else "info",
+                       f"Container {nim_setup.CONTAINER!r}: {state.stdout.strip()}.", modules=[2])
+        reason = ""
+        for profile in ("auto", "nvfp4"):
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    nim_setup.preflight(profile)
+            except RuntimeError as exc:
+                reason = str(exc)
+                continue
+            how = "" if profile == "auto" else " with `--profile nvfp4` (smaller download)"
+            return row(label, "pass", f"This host can run the Module 2 local NIM{how}.", modules=[2])
+        return row(label, "idle", f"Not available here: {reason} The hosted model works for every exercise.",
+                   modules=[2])
+    except Exception:
+        return row(label, "unknown", "Could not check. Run `python code/2-agentic-rag/nim_setup.py --check`.",
+                   modules=[2])
 
 
 def sandbox_service():
@@ -267,7 +354,7 @@ class HealthState:
             else:
                 status, detail = "pass", "Shared checks passed. Follow the lesson’s local setup steps."
             if number == 4:
-                detail += " Training also needs free GPU memory."
+                detail += f" Training also needs about {TRAINING_GPU_GB} GB of free GPU memory and {TRAINING_DISK_GB} GB of disk."
             module_rows.append(row(label, status, detail, number=number, tile=tile))
         return {"environment": environment, "keys": key_rows, "endpoints": endpoints,
                 "search": search, "services": services, "modules": module_rows, "checked_at": checked}

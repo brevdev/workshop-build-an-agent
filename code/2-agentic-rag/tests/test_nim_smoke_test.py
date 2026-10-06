@@ -92,8 +92,19 @@ class SmokeTestTests(unittest.TestCase):
 
     def test_invented_final_answer_fails(self):
         session = Session(final=choice({"content": "workshop-made-up"}))
-        with self.assertRaisesRegex(RuntimeError, "did not reproduce the tool result"):
+        with self.assertRaisesRegex(RuntimeError, "did not include the tool result"):
             smoke_test("http://nim/v1", session)
+
+    def test_code_inside_a_sentence_passes(self):
+        class Wrapped(Session):
+            def post(self, url, **kwargs):
+                response = super().post(url, **kwargs)
+                if len(self.requests) == 2:
+                    code = response.body["choices"][0]["message"]["content"]
+                    return choice({"role": "assistant", "content": f"The current workshop verification code is: **{code}**"})
+                return response
+        code = smoke_test("http://nim/v1", Wrapped())
+        self.assertTrue(code.startswith("workshop-"))
 
     def test_visible_reasoning_markup_fails(self):
         session = Session(final=choice({"content": "<think>private reasoning</think>"}))

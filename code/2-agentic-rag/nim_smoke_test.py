@@ -72,8 +72,10 @@ def smoke_test(base_url: str, session: requests.Session) -> str:
     ])
     final = completion(session, base_url, messages, "none")
     check_visible_content(final)
-    if final.get("tool_calls") or (final.get("content") or "").strip() != code:
-        raise RuntimeError("The final answer did not reproduce the tool result exactly; the round trip did not pass.")
+    # The code is random and generated after the call, so containing it proves
+    # the answer used the tool result. Models often wrap it in a short sentence.
+    if final.get("tool_calls") or code not in (final.get("content") or ""):
+        raise RuntimeError("The final answer did not include the tool result; the round trip did not pass.")
     return code
 
 

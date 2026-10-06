@@ -63,6 +63,7 @@ def check_agent(sandbox, timeout=180):
         # The pinned upstream auto-pair watcher polls every 30 seconds after
         # startup; its list/approval CLI calls add latency. Allow two bounded
         # retries of only the harmless greeting, never a file operation.
+        # `nemoclaw exec` can also hang intermittently; a repeated greeting is harmless.
         for attempt in range(3):
             try:
                 greeting = ask_agent(sandbox, 'Reply briefly with hello. Do not use tools.', timeout)
@@ -72,6 +73,10 @@ def check_agent(sandbox, timeout=180):
                     raise
                 print('Waiting 30 seconds for the gateway CLI pairing to complete.', flush=True)
                 time.sleep(30)
+            except subprocess.TimeoutExpired:
+                if attempt == 2:
+                    raise
+                print(f'No reply within {timeout} seconds; retrying the greeting.', flush=True)
         if not greeting.strip():
             raise CheckFailed('The agent returned no greeting.')
         print('PASS: hosted agent returned a valid response.', flush=True)
@@ -88,8 +93,10 @@ def check_agent(sandbox, timeout=180):
 
         response = ask_agent(sandbox, f'Use your read tool to read {path} and reply with its current '
                              'contents. It has changed since your previous turn. Do not use exec or a shell.', timeout)
-        if read_marker not in response:
-            raise CheckFailed('The agent did not return the current file contents.')
+        # OpenClaw can split one reply into several text payloads; ignore the joins.
+        if read_marker not in re.sub(r'\s+', '', response):
+            excerpt = ' '.join(response.split())[:300]
+            raise CheckFailed(f'The agent did not return the current file contents. It replied: {excerpt!r}')
         print('PASS: agent read the independently changed file.', flush=True)
     finally:
         original_error = sys.exc_info()[1]

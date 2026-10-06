@@ -36,25 +36,26 @@ curl -fsSL https://openclaw.ai/install.sh | OPENCLAW_VERSION=2026.5.20 bash
 
 ### Step 2: Complete the Setup Wizard
 
-The install script automatically starts the setup wizard. Walk through the prompts as follows:
+The install script automatically starts the setup wizard. Use the arrow keys and Enter to choose; in long lists you can also type to search. Walk through the prompts as follows:
 
-1. **Security warning** — Read the notice and confirm: **Yes**
+1. **Security warning** — Read the notice. **No** is preselected: press the left arrow to select **Yes**, then Enter.
 2. **Setup mode** — Select **QuickStart** (uses default gateway settings: port 18789, loopback bind, token auth)
-3. **Model/auth provider** — Select **Custom Provider**, then enter:
+3. **Model/auth provider** — Select **More…**, then type `Custom` and select **Custom Provider**. Then enter:
    - **API Base URL**: `https://integrate.api.nvidia.com/v1`
+   - **How do you want to provide this API key?**: **Paste API key now**
    - **API Key**: Paste your NVIDIA API key (the same one from the Secrets Manager)
    - **Endpoint compatibility**: **OpenAI-compatible**
-   - **Model ID**: `nvidia/nemotron-3-super-120b-a12b`
+   - **Model ID**: `nvidia/nemotron-3-super-120b-a12b`. The wizard verifies the endpoint; if it reports `fetch failed`, choose **Change model** and enter the same ID again to retry.
    - **Endpoint ID**: Accept the default (`custom-integrate-api-nvidia-com`)
    - **Model alias**: Leave blank
-   - **Image Input**: Leave as **No**
-4. **Channel** — Select **Skip for now** (we'll use the CLI and NemoClaw Client for this module)
-5. **Web search** — Select **Skip for now**
-6. **Skills** — Select **No** (not needed for this module)
-7. **Hooks** — Select **Skip for now**
-8. Select **Hatch in Terminal** to test the connection. Exit when you receive a successful response.
+   - **Image input**: Leave as **No**
+4. **Channel** — Type `Skip` and select **Skip for now** (we'll use the CLI and NemoClaw Client for this module)
+5. **Web search** — Type `Skip` and select **Skip for now**. Do not just press Enter: the preselected option is Ollama Web Search.
+6. **Configure skills now?** — Select **No** (right arrow, then Enter; not needed for this module)
+7. **Enable hooks?** — This list allows several choices: press **Space** to tick **Skip for now**, then Enter
+8. **How do you want to hatch your agent?** — Select **Hatch later**. You will start the gateway and send your first message in Steps 5 and 6. (If you choose Hatch in Terminal instead, leave the chat with Ctrl+C twice quickly; after `Onboarding complete` the wizard may not return to the prompt, so press Ctrl+C again. Your configuration is already saved.)
 
-The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates the agent workspace at `~/.openclaw/workspace/`.
+The installer ends with `Onboarding complete`. The wizard writes your configuration to `~/.openclaw/openclaw.json` and creates the agent workspace at `~/.openclaw/workspace/`.
 
 > If you need to re-run the setup later, use `openclaw onboard`.
 
@@ -123,6 +124,8 @@ The fictional `WORKSHOP_CANARY` value supports the later credential probe. Tool 
 ```bash
 openclaw gateway status
 ```
+
+If the gateway stops with `another gateway instance is already listening on ws://127.0.0.1:18789`, something else holds the port. Usually it is a gateway you already started in another terminal; reuse that one. If you installed NemoClaw before this step, its sandbox dashboard forward uses port 18789: set up OpenClaw first, as this module does, or start this gateway on another port with `openclaw gateway run --port 18791` and check it with `openclaw gateway status --url ws://127.0.0.1:18791`.
 
 > Check for any configuration issues with ``openclaw doctor``. OpenClaw also provides a built-in UI with ``openclaw dashboard``, but we will use the NemoClaw Client app built for this workshop.
 

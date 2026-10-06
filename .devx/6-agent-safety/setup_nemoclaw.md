@@ -24,22 +24,21 @@ The script handles workshop-environment quirks for you and then runs the officia
 
 ### What you'll be asked
 
-Walk through each prompt as follows:
+Walk through each prompt as follows. Your NVIDIA key is read from your saved workshop secrets, and the script names the sandbox `my-assistant`, so neither is asked for.
 
 1. **License notice** — Type `yes` to accept.
-2. **Inference provider** — Select **NVIDIA Endpoints** (option 1).
-3. **Model** — Select **Nemotron 3 Super 120B** by name. Confirm the model ID matches the workshop preflight; menu positions can change.
-4. **Sandbox name** — Press Enter to accept the default (`my-assistant`).
-5. **Confirm configuration** — Type `Y` to apply.
-6. **Brave Web Search** — Type `N` to skip (not needed for this module).
-7. **Messaging channels** — Press Enter to skip (not needed for this module).
+2. **Inference provider** — Press Enter to accept **NVIDIA Endpoints** (option 1).
+3. **Model** — Press Enter to accept **Nemotron 3 Super 120B** (`nvidia/nemotron-3-super-120b-a12b`). Check the ID on screen; menu positions can change.
+4. **Apply this configuration?** — Press Enter (Yes).
+5. **Brave Web Search** — Press Enter (No; not needed for this module).
+6. **Messaging channels** — Press Enter to skip (not needed for this module).
 
-When prompted for policy options:
+The script then builds the sandbox image (about 3–8 minutes) and launches OpenClaw inside the sandbox. When prompted for policy options:
 
-1. Leave **Policy tier** as "Balanced".
-2. Leave **Presets** as the default options.
+1. **Policy tier** — Press Enter to keep "Balanced".
+2. **Presets** — Press Enter to keep the defaults.
 
-The script will then build the sandbox image, configure networking, and launch OpenClaw inside the sandbox. Image size and first-run build time depend on the installed release.
+The install ends with `✓ NemoClaw installed and onboarded.` You can close the terminal afterwards; the tunnel keeps running. If the install stops early, rerun the same command: it resumes where it left off.
 
 <!-- fold:break -->
 
@@ -93,6 +92,18 @@ The install script writes detailed logs to two files:
     ```
 
     Removing only the gateway or setting `NEMOCLAW_FRESH=1` is insufficient: upstream backs up registered sandboxes before onboarding, which can restart the tunnel before the port check. If the destroy command cannot connect, run the health check and restore the tunnel first.
+
+3. **Onboarding stopped before the sandbox was created.** Rerunning the script resumes the interrupted onboarding. If the same error repeats, start the onboarding over:
+
+    ```bash
+    NEMOCLAW_FRESH=1 bash code/6-agent-safety/scripts/install-nemoclaw.sh
+    ```
+
+4. **Remove everything.** To delete the sandbox, the NemoClaw and OpenShell CLIs, the gateway, and their Docker images and state (for example, to start over or to free disk space), run the uninstall script. It asks for confirmation first.
+
+    ```bash
+    bash code/6-agent-safety/scripts/uninstall-nemoclaw.sh
+    ```
 
 </details>
 

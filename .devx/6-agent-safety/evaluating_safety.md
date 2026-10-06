@@ -182,6 +182,16 @@ Module 6 adds policy enforcement and behavior checks. Keep testing both as your 
 
 <!-- fold:break -->
 
+## When You Are Done With Module 6
+
+Module 7 does not need the NemoClaw sandbox. Stop the OpenClaw gateway you started on the host (press **Ctrl+C** in its terminal). To also remove the sandbox, the NemoClaw and OpenShell CLIs, and their Docker images and state, run the uninstall script. Save any sandbox workspace files you want to keep first; the script asks for confirmation.
+
+```bash
+bash code/6-agent-safety/scripts/uninstall-nemoclaw.sh
+```
+
+<!-- fold:break -->
+
 ## What to Explore Next
 
 Agent safety is the discipline — NemoClaw is one implementation. The tools and references below let you go deeper:

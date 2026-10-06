@@ -118,3 +118,47 @@ def test_read_requires_the_independent_file_content(monkeypatch, reads_current_c
     assert state['cleaned']
     assert state['content']
     assert all(state['content'] not in prompt for prompt in state['prompts'])
+
+
+def test_greeting_retries_an_exec_timeout(monkeypatch):
+    calls = {'greet': 0}
+
+    def ask(sandbox, prompt, timeout):
+        if 'hello' in prompt:
+            calls['greet'] += 1
+            if calls['greet'] == 1:
+                raise check.subprocess.TimeoutExpired(['nemoclaw'], timeout)
+            return 'Hello.'
+        if 'read tool' in prompt:
+            return state['content']
+        return 'Done.'
+
+    state = {'content': ''}
+
+    def run(sandbox, args, timeout):
+        if 'unlink' not in args[2]:
+            state['content'] = args[-1]
+        return ''
+
+    monkeypatch.setattr(check, 'ask_agent', ask)
+    monkeypatch.setattr(check, 'run_cli', run)
+    check.check_agent('my-assistant', 5)
+    assert calls['greet'] == 2
+
+
+def test_read_accepts_a_reply_split_across_payloads(monkeypatch):
+    state = {'content': ''}
+
+    def ask(sandbox, prompt, timeout):
+        if 'read tool' in prompt:  # OpenClaw joins separate text payloads with blank lines
+            return state['content'][:12] + '\n\n' + state['content'][12:]
+        return 'Done.'
+
+    def run(sandbox, args, timeout):
+        if 'unlink' not in args[2]:
+            state['content'] = args[-1]
+        return ''
+
+    monkeypatch.setattr(check, 'ask_agent', ask)
+    monkeypatch.setattr(check, 'run_cli', run)
+    check.check_agent('my-assistant', 5)

@@ -33,6 +33,14 @@ touch "$LOG" "$TUNNEL_LOG" || exit 1
 chmod 600 "$LOG" "$TUNNEL_LOG" || exit 1
 NEMOCLAW_TAG="${NEMOCLAW_INSTALL_TAG:-v0.0.55}"
 SANDBOX_NAME="${NEMOCLAW_SANDBOX_NAME:-my-assistant}"
+# The installer output below is piped through `tee`, so upstream onboarding
+# cannot prompt on a resumed run and needs the name from the environment.
+# Without it, an interrupted onboarding fails the same way on every rerun.
+export NEMOCLAW_SANDBOX_NAME="$SANDBOX_NAME"
+# v0.0.55 rejects Enter at its resource-profile prompt even though it shows a
+# default, which ends onboarding before a sandbox exists. "default" selects
+# OpenShell's defaults, the same as that menu's "No profile" option.
+export NEMOCLAW_RESOURCE_PROFILE="${NEMOCLAW_RESOURCE_PROFILE:-default}"
 GATEWAY_NAME="${NEMOCLAW_OPENSHELL_GATEWAY_COMPAT_CONTAINER_NAME:-nemoclaw-openshell-gateway}"
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
@@ -62,7 +70,9 @@ log "Docker host IP: $DOCKER_HOST_IP"
 
 ensure_tunnel() {
     pgrep -f "socat TCP-LISTEN:8080" >/dev/null 2>&1 && return 0
-    nohup socat TCP-LISTEN:8080,bind=127.0.0.1,fork,reuseaddr "TCP:${DOCKER_HOST_IP}:8080" \
+    # Its own session, so closing this terminal does not stop the tunnel. socat
+    # handles SIGHUP itself, so nohup alone is not enough.
+    setsid socat TCP-LISTEN:8080,bind=127.0.0.1,fork,reuseaddr "TCP:${DOCKER_HOST_IP}:8080" \
         > "$TUNNEL_LOG" 2>&1 &
     disown
     sleep 0.5
@@ -162,7 +172,8 @@ log "Starting deferred-tunnel watcher (will fire socat once the gateway appears)
         sleep 0.5
     done
     echo "[watcher $(date +%T)] gateway container up; starting socat" >> "$TUNNEL_LOG"
-    exec socat TCP-LISTEN:8080,bind=127.0.0.1,fork,reuseaddr "TCP:${DOCKER_HOST_IP}:8080" \
+    # setsid: the tunnel must outlive this terminal, like the fast path's tunnel.
+    exec setsid socat TCP-LISTEN:8080,bind=127.0.0.1,fork,reuseaddr "TCP:${DOCKER_HOST_IP}:8080" \
         >> "$TUNNEL_LOG" 2>&1
 ) &
 WATCHER_PID=$!
@@ -196,5 +207,11 @@ if curl -fsSL https://www.nvidia.com/nemoclaw.sh \
 else
     rc=$?
     log "Installer exited with code ${rc}. See $LOG and $TUNNEL_LOG for details."
+    log "Next steps:"
+    log "  Retry (resumes the interrupted onboarding):"
+    log "    bash '$SCRIPT_DIR/install-nemoclaw.sh'"
+    log "  Start onboarding over if retrying repeats the same error:"
+    log "    NEMOCLAW_FRESH=1 bash '$SCRIPT_DIR/install-nemoclaw.sh'"
+    log "  Find the failing layer: bash '$SCRIPT_DIR/nemoclaw-health.sh'"
     exit "$rc"
 fi

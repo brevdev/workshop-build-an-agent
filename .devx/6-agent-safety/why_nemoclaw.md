@@ -366,7 +366,7 @@ OpenShell applies multiple overlapping process restrictions - click each to lear
 <details class="dx-def">
 <summary>Non-root execution</summary>
 
-The sandbox process runs as a dedicated `sandbox` user and group, never as root. The policy YAML explicitly declares `user: sandbox` and `group: sandbox`, and OpenShell rejects policies that specify root.
+The sandbox process runs as a dedicated `sandbox` user and group, never as root. The policy YAML explicitly declares `run_as_user: sandbox` and `run_as_group: sandbox`, and OpenShell rejects policies that specify root.
 
 </details>
 <details class="dx-def">
@@ -487,10 +487,10 @@ Now that you understand what the layers do and why they matter, let's look at ho
 
 ## YAML Policy Deep-Dive
 
-Every OpenShell sandbox is governed by a single policy YAML file. The NemoClaw blueprint ships a default at `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`. Here is the full structure with annotations.
+Every OpenShell sandbox is governed by a single policy YAML file. The NemoClaw blueprint ships a default at `nemoclaw-blueprint/policies/openclaw-sandbox.yaml`. Here is its structure, abridged from the version this workshop pins (v0.0.55), with annotations.
 
 <div class="dx-aside">
-<button class="dx-aside-btn" popovertarget="aside-wn-5">Click to view full file</button>
+<button class="dx-aside-btn" popovertarget="aside-wn-5">Click to view the annotated policy</button>
 <div id="aside-wn-5" popover class="dx-aside-panel">
 <button class="dx-aside-x" popovertarget="aside-wn-5" popovertargetaction="hide" aria-label="Close">×</button>
 
@@ -501,10 +501,7 @@ version: 1
 # --- STATIC: locked at sandbox creation, cannot change while running ---
 
 filesystem_policy:
-  read_write:
-    - /sandbox
-    - /tmp
-    - /dev/null
+  include_workdir: true          # The sandbox working directory (/sandbox) is writable
   read_only:
     - /usr
     - /lib
@@ -513,57 +510,54 @@ filesystem_policy:
     - /app
     - /etc
     - /var/log
+  read_write:
+    - /tmp
+    - /dev/null
+    - /sandbox/.openclaw         # Agent configuration
+    - /sandbox/.nemoclaw         # Plugin state
+    - /home/linuxbrew            # Homebrew prefix for `brew install`
 
 landlock:
-  enforce: true          # Enable Landlock LSM enforcement
+  compatibility: best_effort     # Enforce when the kernel supports Landlock; skip silently otherwise
 
 process:
-  user: sandbox          # Non-root user identity
-  group: sandbox         # Non-root group identity
+  run_as_user: sandbox           # Non-root user identity
+  run_as_group: sandbox          # Non-root group identity
 
 # --- DYNAMIC: hot-reloadable with `openshell policy set` ---
 
 network_policies:
   nvidia:
-    name: nvidia-inference
+    name: nvidia
     endpoints:
       - host: integrate.api.nvidia.com
         port: 443
         protocol: rest
         enforcement: enforce
-        access: read-write
-      - host: inference-api.nvidia.com
-        port: 443
-        protocol: rest
-        enforcement: enforce
-        access: read-write
+        rules:                   # Layer 7: only these methods and paths
+          - allow: { method: POST, path: "/v1/chat/completions" }
+          - allow: { method: GET, path: "/v1/models" }
     binaries:
-      - { path: /usr/local/bin/claude }
       - { path: /usr/local/bin/openclaw }
 
-  github:
-    name: github-access
+  managed_inference:             # The inference.local privacy router
+    name: managed_inference
     endpoints:
-      - host: github.com
-        port: 443
-        protocol: https
-        enforcement: enforce
-        access: read-write
-    binaries:
-      - { path: /usr/bin/gh }
-      - { path: /usr/bin/git }
-
-  github_rest_api:
-    name: github-rest-api
-    endpoints:
-      - host: api.github.com
+      - host: inference.local
         port: 443
         protocol: rest
         enforcement: enforce
-        access: read-write
+        rules:
+          - allow: { method: GET, path: "/**" }
+          - allow: { method: POST, path: "/**" }
     binaries:
-      - { path: /usr/bin/gh }
+      - { path: /usr/local/bin/openclaw }
+      - { path: /usr/bin/python3 }
+
+  # ... further entries (clawhub.ai, openclaw.ai, docs.openclaw.ai, ...) follow the same shape
 ```
+
+The `best_effort` setting is a deliberate trade-off: on a kernel without Landlock, the sandbox still starts, but without filesystem enforcement. OpenShell also offers `hard_requirement`, which refuses to start instead.
 
 </div>
 </div>

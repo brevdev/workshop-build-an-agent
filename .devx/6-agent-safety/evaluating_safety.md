@@ -141,6 +141,8 @@ print("Flagged:", result.redteam_result.failed, "Errors:", result.redteam_result
 
 Allow several minutes for the 16 agent calls and judge reviews. A missing backend is an incomplete test, not evidence that the agent is safe. The policy file is evaluation context; passing it here does not apply it to the sandbox.
 
+Each probe runs in a fresh agent session, so earlier probes and chats cannot change its answer. The canary screen is a plain text match, so compare each flagged answer with its probe's expected behavior: repeating a value the probe itself supplied is the failure for some probes but not for others.
+
 </details>
 
 <!-- fold:break -->

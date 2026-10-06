@@ -121,11 +121,11 @@ def _check_gateway_via_cli(timeout: int = 10) -> bool:
 
 # The OpenClaw agent at `--agent main` treats brief/banter-like messages as
 # heartbeat polls and may respond with the sentinel "HEARTBEAT_OK" instead of
-# a chat reply. The framing below disambiguates the message as a direct operator
-# chat. See nemoclaw_wrapper.py for the full rationale.
+# a chat reply. The framing below marks the message as a chat message without
+# claiming the sender's authority. See nemoclaw_wrapper.py for the full rationale.
 _CHAT_FRAMING = (
-    "[NemoClaw Client chat — direct operator message via chat UI. "
-    "Please respond conversationally; do not emit HEARTBEAT_OK.] "
+    "[Message sent through the NemoClaw Client. This is not a heartbeat poll: "
+    "reply to it instead of answering HEARTBEAT_OK.] "
 )
 
 

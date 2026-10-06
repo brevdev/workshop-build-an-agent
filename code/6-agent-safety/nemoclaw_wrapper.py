@@ -5,9 +5,10 @@ Bridges the sandboxed OpenClaw agent (running inside a NemoClaw OpenShell
 sandbox) to the exercise `agent_fn(prompt) -> dict` interface used by
 `nemoclaw_client.py`.
 
-Transport: `nemoclaw <sandbox> exec -- openclaw agent --agent main --json -m
-"<prompt>"`. The in-sandbox `openclaw` produces the same `--json` output shape
-as the host-side binary, so the JSON parsing mirrors `openclaw_wrapper`.
+Transport: `nemoclaw <sandbox> exec -- openclaw agent --agent main
+[--session-id <id>] --json -m "<prompt>"`. The in-sandbox `openclaw` produces
+the same `--json` output shape as the host-side binary, so the JSON parsing
+mirrors `openclaw_wrapper`.
 
 Usage:
     from nemoclaw_wrapper import create_nemoclaw_agent_fn
@@ -22,6 +23,7 @@ import re
 import shutil
 import subprocess
 import sys
+import uuid
 from typing import Callable, Optional
 
 from openclaw_response import normalize_openclaw_response
@@ -50,12 +52,15 @@ STATUS_TIMEOUT_SECONDS = 10
 # heartbeat polls. Without context, the agent can't tell a NemoClaw Client
 # chat from a heartbeat poll.
 #
-# This prefix is prepended to each user message so the agent treats it as a
-# direct operator chat that warrants a real reply. Keep it short and visible —
-# a learner inspecting the agent's input should see exactly what we sent.
+# This prefix is prepended to each message so the agent replies instead of
+# treating it as a poll. It names the transport only. It must not claim who
+# sent the message or what authority they have: the safety suite sends red-team
+# probes through this path, and an "operator" label would present attacker text
+# as trusted. Keep it short and visible — a learner inspecting the agent's input
+# should see exactly what we sent.
 _CHAT_FRAMING = (
-    "[NemoClaw Client chat — direct operator message via chat UI. "
-    "Please respond conversationally; do not emit HEARTBEAT_OK.] "
+    "[Message sent through the NemoClaw Client. This is not a heartbeat poll: "
+    "reply to it instead of answering HEARTBEAT_OK.] "
 )
 
 # When the agent ignores the framing and still emits HEARTBEAT_OK, the client
@@ -146,8 +151,17 @@ def _check_sandbox_running(sandbox: str = SANDBOX_NAME, timeout: int = STATUS_TI
     return True
 
 
-def _send_via_nemoclaw_cli(prompt: str, sandbox: str = SANDBOX_NAME, timeout: int = EXEC_TIMEOUT_SECONDS) -> dict:
+def _send_via_nemoclaw_cli(
+    prompt: str,
+    sandbox: str = SANDBOX_NAME,
+    timeout: int = EXEC_TIMEOUT_SECONDS,
+    session_id: Optional[str] = None,
+) -> dict:
     """Send a prompt to the in-sandbox OpenClaw agent and return a structured result.
+
+    Without `session_id` the prompt joins the agent's main session, which keeps
+    its history (the chat client and `openclaw tui` share it). A new
+    `session_id` starts the prompt in an empty conversation.
 
     Returns:
         {
@@ -167,8 +181,11 @@ def _send_via_nemoclaw_cli(prompt: str, sandbox: str = SANDBOX_NAME, timeout: in
     cmd = [
         _NEMOCLAW_BIN, sandbox, "exec",
         "--",
-        "openclaw", "agent", "--agent", "main", "--json", "-m", framed_prompt,
+        "openclaw", "agent", "--agent", "main",
     ]
+    if session_id:
+        cmd += ["--session-id", session_id]
+    cmd += ["--json", "-m", framed_prompt]
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
@@ -188,14 +205,20 @@ def _send_via_nemoclaw_cli(prompt: str, sandbox: str = SANDBOX_NAME, timeout: in
     return normalize_openclaw_response(result.stdout)
 
 
-def create_nemoclaw_agent_fn(sandbox: str = SANDBOX_NAME) -> Callable[[str], dict]:
+def create_nemoclaw_agent_fn(sandbox: str = SANDBOX_NAME, isolate_sessions: bool = True) -> Callable[[str], dict]:
     """Return an agent_fn that sends prompts to the OpenClaw agent inside `sandbox`.
+
+    By default every prompt starts a fresh agent session, so earlier probes and
+    chats cannot change the answer and evaluation results do not depend on run
+    order. The chat client passes ``isolate_sessions=False`` to keep one
+    continuing conversation in the agent's main session.
 
     The caller is expected to verify availability via `_check_nemoclaw_cli()`
     and `_check_sandbox_running()` before using this function — the wrapper
     does not silently fall back to a mock so callers see real errors.
     """
     def agent_fn(prompt: str) -> dict:
-        return _send_via_nemoclaw_cli(prompt, sandbox=sandbox)
+        session_id = str(uuid.uuid4()) if isolate_sessions else None
+        return _send_via_nemoclaw_cli(prompt, sandbox=sandbox, session_id=session_id)
 
     return agent_fn

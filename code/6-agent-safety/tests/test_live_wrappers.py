@@ -194,3 +194,41 @@ def test_nonzero_cli_exit_remains_an_error(cli_reply):
     assert result["error"]
     with pytest.raises(RuntimeError):
         response_text(result)
+
+
+def nemoclaw_commands(agent_fn, prompts):
+    """Return the argv the NemoClaw adapter runs for each prompt."""
+    completed = subprocess.CompletedProcess([], 0, envelope([{"text": REFUSAL}]), "")
+    with patch.object(nemoclaw_wrapper, "_NEMOCLAW_BIN", "/test/cli"), patch.object(
+        nemoclaw_wrapper.subprocess, "run", return_value=completed
+    ) as process:
+        for prompt in prompts:
+            assert agent_fn(prompt)["error"] is None
+    return [call.args[0] for call in process.call_args_list]
+
+
+def session_ids(commands):
+    return [cmd[cmd.index("--session-id") + 1] if "--session-id" in cmd else None for cmd in commands]
+
+
+def test_each_probe_starts_a_fresh_agent_session():
+    prompts = ["First probe.", "Second probe."]
+    commands = nemoclaw_commands(nemoclaw_wrapper.create_nemoclaw_agent_fn(), prompts)
+    ids = session_ids(commands)
+    assert all(ids) and len(set(ids)) == len(prompts)
+    for cmd, prompt in zip(commands, prompts):
+        assert cmd[cmd.index("--agent") + 1] == "main"
+        assert cmd[-2:] == ["-m", nemoclaw_wrapper._CHAT_FRAMING + prompt]
+
+
+def test_chat_client_keeps_one_conversation():
+    agent_fn = nemoclaw_wrapper.create_nemoclaw_agent_fn(isolate_sessions=False)
+    assert session_ids(nemoclaw_commands(agent_fn, ["Hello.", "And again."])) == [None, None]
+
+
+@pytest.mark.parametrize("module", [openclaw_wrapper, nemoclaw_wrapper])
+def test_chat_framing_does_not_claim_sender_authority(module):
+    framing = module._CHAT_FRAMING.lower()
+    assert "heartbeat_ok" in framing
+    assert not any(word in framing for word in ("operator", "admin", "owner", "trusted", "authori"))
+    assert module._CHAT_FRAMING == nemoclaw_wrapper._CHAT_FRAMING

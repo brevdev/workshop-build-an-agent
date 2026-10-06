@@ -97,7 +97,8 @@ _MODE_KEY = {
 def _set_agent(mode_label: str):
     """Build the agent_fn for the selected mode and reset chat."""
     if mode_label == MODE_NEMOCLAW:
-        st.session_state.agent_fn = create_nemoclaw_agent_fn()
+        # A chat keeps one conversation; the safety suite isolates each probe.
+        st.session_state.agent_fn = create_nemoclaw_agent_fn(isolate_sessions=False)
     elif mode_label == MODE_LIVE:
         # fallback_to_mock=False: detection already gated us here. We want the
         # live agent (or a real error from it), never a silent mock swap.

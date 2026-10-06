@@ -1,5 +1,5 @@
 data-designer~=0.3.7
-deepagents==0.3.11  # keep in sync with demo/backend/requirements.txt (Module 5)
+deepagents==0.3.11
 docker
 duckdb~=1.4.4
 dotenv~=0.9.9

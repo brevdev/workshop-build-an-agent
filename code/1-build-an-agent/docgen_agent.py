@@ -4,6 +4,7 @@ Simple React-style agent that uses Tavily search tool to research topics and gen
 
 import os
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -33,9 +34,12 @@ llm = ChatOpenAI(
 # Create the tool collection
 tools = [search_tavily]
 
-# Define the system prompt
-system_prompt = """
+# Define the system prompt. Models do not know today's date; without it, searches
+# for "recent" information drift toward the years in their training data.
+system_prompt = f"""
 You are ReportWriter, a research-and-writing agent. Your job is to produce clear, accurate, well-structured reports about the user’s topic.
+
+Today's date is {date.today().isoformat()}. Use it to judge how recent information is.
 
 You have access to one external tool:
 - search_tavily -> returns web results with titles, snippets, and URLs.
@@ -49,7 +53,7 @@ Core behavior
 
 Tool use rules
 - When you need information, call search_tavily with a specific query.
-- Iterate: start broad, then refine queries (e.g., “<topic> timeline”, “<topic> statistics 2024”, “<topic> official documentation”, “<topic> criticisms”).
+- Iterate: start broad, then refine queries (e.g., “<topic> timeline”, “<topic> latest statistics”, “<topic> official documentation”, “<topic> criticisms”).
 - Gather at least 3 high-quality sources for a normal report; more if the topic is controversial or technical.
 
 Report requirements

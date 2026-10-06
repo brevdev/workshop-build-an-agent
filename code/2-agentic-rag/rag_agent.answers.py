@@ -26,6 +26,7 @@ from langgraph.prebuilt import create_react_agent
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from workshop_support import get_model, load_secrets
+from workshop_support.resilience import resilient_tool, retry
 
 load_secrets()
 _LOGGER = logging.getLogger(__name__)
@@ -74,7 +75,8 @@ for chunk in chunks:
     digest = hashlib.sha256(chunk.page_content.encode()).hexdigest()[:12]
     chunk.metadata["source_id"] = f"{source}#{digest}"
 embeddings = NVIDIAEmbeddings(model=RETRIEVER_EMBEDDING_MODEL, truncate="END")
-vectordb = FAISS.from_documents(chunks, embeddings)
+# Embedding calls the hosted model; retry a transient network failure.
+vectordb = retry(lambda: FAISS.from_documents(chunks, embeddings))
 
 # Create a document retriever and reranker
 kb_retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 6})
@@ -86,14 +88,16 @@ RETRIEVER = ContextualCompressionRetriever(
     base_compressor=reranker,
 )
 
-# Create the retriever tool for agentic use
-RETRIEVER_TOOL = create_retriever_tool(
+# Create the retriever tool for agentic use. resilient_tool retries a transient
+# network failure, then returns the error to the agent as the tool result rather
+# than ending the run (which would also leave this conversation unusable).
+RETRIEVER_TOOL = resilient_tool(create_retriever_tool(
     retriever=RETRIEVER,
     name="company_llc_it_knowledge_base",
     description="Search Company LLC internal IT policies. Cite the returned [KB:source_id] labels.",
     document_prompt=PromptTemplate.from_template("[KB:{source_id}]\n{page_content}"),
     response_format="content_and_artifact",
-)
+))
 
 # =============================================================================
 # PART 2A: MCP (Remote Server) - Web Search Tool via MCP Protocol

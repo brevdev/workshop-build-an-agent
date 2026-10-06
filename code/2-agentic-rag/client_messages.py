@@ -37,7 +37,12 @@ def stream_error(data):
     kind = data.get("error", "RunError") if isinstance(data, dict) else "RunError"
     kind = re.sub(r"[^a-zA-Z0-9_.-]", "", str(kind))[:80] or "RunError"
     detail = data.get("message", "") if isinstance(data, dict) else ""
+    if "do not have a corresponding ToolMessage" in str(detail):
+        # A tool failed mid-run; this thread can never accept another message.
+        return ("This conversation has an unfinished tool call from a failed run and cannot continue. "
+                "Click New conversation in the sidebar, then ask again.")
     status = re.search(r"\b(401|403|404|410|429|500|502|503|504)\b", str(detail))
     if status:
         kind = f"HTTP {status.group(1)}"
-    return f"Agent run failed ({kind}). Check Workshop Health and the agent server logs, then retry."
+    return (f"Agent run failed ({kind}). Check Workshop Health and the agent server logs, then retry. "
+            "If the same error repeats, click New conversation in the sidebar.")

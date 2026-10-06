@@ -124,7 +124,7 @@ LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.p
 
 </center>
 
-We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '= create_retriever_tool');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` help the agent choose this tool. Its provided formatter displays `[KB:source_id]` labels and retains the same chunks as tool artifacts, so Module 3 can evaluate the evidence the agent actually saw.
+We expose this enhanced retrieval pipeline as a tool for the agent using LangChain’s <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'RETRIEVER_TOOL = ');"><i class="fas fa-code"></i> create_retriever_tool</button>. The `name` and `description` help the agent choose this tool. Its provided formatter displays `[KB:source_id]` labels and retains the same chunks as tool artifacts, so Module 3 can evaluate the evidence the agent actually saw. The provided `resilient_tool` wrapper retries a transient network failure, then hands a persistent one back to the agent as an error result, so a single hiccup cannot end the run or break the conversation.
 
 <!-- fold:break -->
 

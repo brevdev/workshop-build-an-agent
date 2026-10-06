@@ -135,7 +135,7 @@ MCP_CONFIG = {
 }
 ```
 
-This configuration connects to Tavily's hosted MCP server URL. No local server installation required — just provide your API key in the URL.
+This configuration connects to Tavily's hosted MCP server. No local server installation required — the key travels in the `Authorization` header, never in the URL, where it could end up in logs and browser history.
 
 </details>
 

@@ -10,6 +10,7 @@ from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 from starlette.requests import Request
+from starlette.responses import Response
 from tavily import TavilyClient
 import mcp.types as types
 
@@ -71,6 +72,9 @@ async def handle_sse(request: Request):
         await mcp_server.run(
             streams[0], streams[1], mcp_server.create_initialization_options()
         )
+    # The SSE transport already sent the response; Starlette still needs an
+    # endpoint return value, or it logs a TypeError after every session.
+    return Response()
 
 app = Starlette(
     routes=[

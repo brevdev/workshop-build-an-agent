@@ -12,6 +12,7 @@ from tavily import AsyncTavilyClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from workshop_support import load_secrets
+from workshop_support.resilience import resilient_tool
 
 load_secrets()
 _LOGGER = logging.getLogger(__name__)
@@ -130,3 +131,8 @@ async def search_tavily(
     )
     _LOGGER.debug("Search results: %s", formatted_search_docs)
     return formatted_search_docs
+
+
+# Retry a transient network failure, then report it to the agent as the tool
+# result instead of ending the run.
+search_tavily = resilient_tool(search_tavily)

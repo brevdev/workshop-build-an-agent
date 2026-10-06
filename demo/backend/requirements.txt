@@ -13,3 +13,5 @@ faiss-cpu
 python-dotenv
 # Sandbox support (Docker-based)
 docker
+# Tests: python -m pytest ../../code/5-deep-agents/tests
+pytest

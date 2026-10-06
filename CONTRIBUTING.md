@@ -47,6 +47,12 @@ Save this file, you'll use it in the next step.
 
 1. Select and configure your desired hardware profile. Click `Next ->`.
 
+    The workshop needs one GPU with 80 GB of memory (A100 or H100 80GB) for Module 4's training. For Module 2's optional local NIM, prefer an R580 or newer driver (data-center GPUs with older drivers use CUDA forward compatibility) and at least 250 GB of disk: the default BF16 profile does not fit next to the workshop image on a 124 GB disk, where learners must use `nim_setup.py --profile nvfp4`.
+
 1. Provide your new Workshop Launchable with a name.
 
 1. Click `Create Launchable` and you will be provided with a link to your Lauchable!
+
+## Release Checks
+
+Before publishing a change, run the checks in [tests/e2e/README.md](tests/e2e/README.md): `python -m pytest tests` for the static checks (no keys or GPU), then `python tests/e2e/run_e2e.py` to work through the modules with their solutions, plus the installer and local-NIM checks on a fresh machine.

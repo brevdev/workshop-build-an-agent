@@ -200,4 +200,22 @@ secrets.env
 
 # Workbench Project Layout
 workspace
+
+# Workshop outputs created while you work through the modules. The Module 4
+# training outputs alone are tens of gigabytes; never commit them.
+code/3-agent-evaluation/runs/
+data/evaluation/synthetic_*.json
+data/evaluation/rag_cases_requiring_correction.json
+code/4-agent-customization/data/langgraph_cli/generated/
+# Data Designer run folders (Modules 3 and 4)
+code/*/artifacts/
+code/4-agent-customization/outputs/
+code/4-agent-customization/unsloth_compiled_cache/
+# Projects the Module 4 agent creates in its working directory (e.g. `langgraph new`)
+code/4-agent-customization/bash_agent/*/
+# The policy file Module 6's exercises export and edit
+code/6-agent-safety/policies/lab-policy.yaml
+# Server logs from the release checks (tests/e2e)
+tests/e2e/.*.log
+tests/e2e/.stash/
 .claude/scheduled_tasks.lock

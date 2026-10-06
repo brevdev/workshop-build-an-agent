@@ -11,7 +11,7 @@ REPO="${REPO:-/sandbox/workshop-build-an-agent}"
 PORT="${PORT:-8888}"
 CA="/etc/openshell-tls/ca-bundle.pem"
 REPO_SLUG="${REPO_SLUG:-brevdev/workshop-build-an-agent}"
-BRANCH="${BRANCH:-edwli-dev}"
+BRANCH="${BRANCH:-main}"
 fail=0; warn=0
 
 pass() { printf '  PASS  %s\n' "$1"; }

@@ -44,7 +44,7 @@ skill instead): `docker ps` shows an `openshell-<sandbox>-…` container and the
 
 - User wants to run / access / go through the **Build an Agent workshop** from
   this sandbox. The repo lives (or will be cloned) at
-  `/sandbox/workshop-build-an-agent`, branch `edwli-dev` — stay on it.
+  `/sandbox/workshop-build-an-agent`, branch `main` (the repo default) — stay on it.
 - Do **NOT** use the generic `setup-workshop` skill here — it is a bare-metal
   installer (`nvwb` + Docker + CUDA + sudo) for a GPU host. It fails in the
   sandbox by design, not by bug.
@@ -330,7 +330,7 @@ only inbound path. Details live in the operator skill.
 - duckdb import segfaults in this sandbox — harmless, nothing in `code/`
   uses it. joblib "serial mode" warning — benign.
 - Trying `docker exec` to bypass seccomp → ALSO bypasses Landlock. FORBIDDEN.
-- Switching off branch `edwli-dev` (e.g. `nvwb switch-branch`) → don't.
+- Switching off branch `main` (e.g. `nvwb switch-branch`) → don't.
 - Simple Agents Client renders but needs a separate LangGraph backend (a
   module exercise) to chat; Deep Agents Client intentionally serves a "setup
   required" page until its backend + npm-built client exist. Neither is a

@@ -72,7 +72,7 @@ Only if the operator explicitly wants a key baked into an unattended image:
 > (GET `/brevdev/workshop-build-an-agent{,.git}/info/refs` + POST
 > `…/git-upload-pack` on github.com:443, binaries `/usr/bin/git` +
 > `/usr/lib/git-core/git-remote-http{,s}`), then ping me — I'll run
-> `git clone --branch edwli-dev https://github.com/brevdev/workshop-build-an-agent /sandbox/workshop-build-an-agent`.
+> `git clone --branch main https://github.com/brevdev/workshop-build-an-agent /sandbox/workshop-build-an-agent`.
 
 **Terminal tile wanted but PTY denied (probe 5 fails):**
 

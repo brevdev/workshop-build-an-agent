@@ -20,7 +20,7 @@ SHIM_SO="$SHIM_DIR/netlink-stub.so"
 LAUNCHER_DIR="$REPO/.launcher-config"
 RUNTIME_DIR="${JUPYTER_RUNTIME_DIR:-/tmp/jrt}"
 REPO_SLUG="${REPO_SLUG:-brevdev/workshop-build-an-agent}"
-BRANCH="${BRANCH:-edwli-dev}"
+BRANCH="${BRANCH:-main}"
 # CRITICAL: uv/TLS must use the OpenShell proxy CA bundle, NOT the system store.
 export SSL_CERT_FILE="${SSL_CERT_FILE:-/etc/openshell-tls/ca-bundle.pem}"
 export PIP_CERT="$SSL_CERT_FILE"

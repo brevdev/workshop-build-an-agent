@@ -59,7 +59,7 @@ async function openOrCreateFileInJupyterLab(path, factory = null, initialContent
         }
     }
 
-    await openFile(app, path, factory);
+    return await openFile(app, path, factory);
 }
 
 async function checkFileExists(contentsManager, path) {
@@ -144,6 +144,7 @@ async function openFile(app, path, factory = null) {
     try {
         const widget = await app.commands.execute(command, args);
         console.log(`Opened ${path} successfully`, widget);
+        return widget;
     } catch (error) {
         console.error(`Failed to open ${path}:`, error);
     }
@@ -182,60 +183,79 @@ async function goToLine(filename, lineno) {
 }
 
 
-async function goToLineAndSelect(filename, searchString, retry=true) {
+async function goToLineAndSelect(filename, searchString) {
     const app = window.parent.jupyterapp;
     if (!app) {
         console.error('JupyterLab app is not available on window.jupyterapp');
         return;
     }
-    await openOrCreateFileInJupyterLab(filename);
+    // Use the opened document, even if focus changes while it is loading.
+    const widget = await openOrCreateFileInJupyterLab(filename);
+    if (!widget) return;
+    await widget.context.ready;
+    await widget.revealed;
 
-    const widget = app.shell.currentWidget;
-    const editor = widget?.content?.editor;
-    const blocks = editor?.doc?.children;
-
-    if (!editor || !blocks || !Array.isArray(blocks)) {
-        if (retry) {
-            // retry with a delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return await goToLineAndSelect(filename, searchString, retry=false);
+    const content = widget.content;
+    const cells = content?.model?.cells;
+    if (cells) {
+        // Search cell models: off-screen cells may not have an editor yet.
+        // Prefer executable cells over copies of their code in Markdown hints.
+        let matchIndex = -1;
+        for (let index = 0; index < cells.length; index++) {
+            const model = cells.get(index);
+            if (!model.sharedModel.getSource().includes(searchString)) continue;
+            if (matchIndex === -1) matchIndex = index;
+            if (model.type === 'code') {
+                matchIndex = index;
+                break;
+            }
         }
-        console.error("No suitable editor or document found.");
+        if (matchIndex !== -1) {
+            content.mode = 'command';
+            content.deselectAll();
+            content.activeCellIndex = matchIndex;
+            const cell = content.widgets[matchIndex];
+            if (typeof content.scrollToItem === 'function') {
+                await content.scrollToItem(matchIndex, 'center');
+            } else {
+                // JupyterLab 3 notebooks do not virtualize their cells.
+                cell.node.scrollIntoView({ block: 'center' });
+            }
+            await cell.ready;
+            // Heading links should keep Markdown rendered for the learner.
+            if (cell.model.type === 'markdown' && cell.rendered) {
+                content.activate();
+            } else {
+                selectMatchingLine(cell.editor, searchString);
+            }
+            return;
+        }
+    } else if (content?.editor) {
+        if (selectMatchingLine(content.editor, searchString)) return;
+    } else {
+        console.error('No suitable editor or notebook found.');
         return;
     }
 
-    // Flatten all lines across all blocks, tracking line numbers
-    let totalLine = 0;
-
-    // Get current cursor position
-    const currentCursorPosition = editor.getCursorPosition();
-    const currentLine = currentCursorPosition ? currentCursorPosition.line : 0;
-
-    for (const block of blocks) {
-        const lines = block.text;
-        for (let i = 0; i < lines.length; i++) {
-            if (lines[i].includes(searchString)) {
-                const matchLine = totalLine;
-
-                // Only add padding if matchLine > currentLine
-                const linePadding = matchLine > currentLine ? Math.min(lines.length - i, 5) : 0;
-                const targetLine = matchLine + linePadding;
-                await app.commands.execute('fileeditor:go-to-line', { line: targetLine });
-
-                // Select and scroll to the matched line
-                const selection = {
-                    start: { line: matchLine, column: 0 },
-                    end: { line: matchLine, column: lines[i].length }
-                }
-                editor.setSelection(selection);
-
-                return;
-            }
-            totalLine++;
-        }
-    }
-
     console.warn(`"${searchString}" not found.`);
+}
+
+
+function selectMatchingLine(editor, searchString) {
+    // Public editor APIs work for both file editors and notebook cell editors.
+    for (let line = 0; line < editor.lineCount; line++) {
+        const text = editor.getLine(line);
+        if (!text.includes(searchString)) continue;
+        const selection = {
+            start: { line, column: 0 },
+            end: { line, column: text.length }
+        };
+        editor.setSelection(selection);
+        editor.focus();
+        editor.revealSelection(selection);
+        return true;
+    }
+    return false;
 }
 
 

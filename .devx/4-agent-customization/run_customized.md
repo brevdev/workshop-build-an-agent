@@ -34,7 +34,7 @@ Open the following notebook: <button onclick="openOrCreateFileInJupyterLab('code
 
 ### Exercise: Load Model
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'llm = HuggingFaceLLM');"><i class="fas fa-code"></i> HuggingFaceLLM</button> — Load the trained model for local inference.
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', '# TODO: Load the model with HuggingFaceLLM');"><i class="fas fa-code"></i> HuggingFaceLLM</button> — Load the trained model for local inference.
 
 The `HuggingFaceLLM` class wraps HuggingFace Transformers to provide the same interface as the NIM-based LLM from the base agent. It loads the trained checkpoint from `config.model_path` (which points to `outputs/grpo_langgraph_cli/merged_model`), handles tokenization, and parses structured JSON tool calls from the model's output.
 
@@ -52,7 +52,7 @@ llm = HuggingFaceLLM(config)
 
 ### Exercise: System Prompt
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', 'messages = ');"><i class="fas fa-code"></i> Messages</button> — Inside the `langgraph_cli` tool, start the conversation with the JSON system prompt. Each call sends one request to the trained model and returns one command; the tool never runs it.
+<button onclick="goToLineAndSelect('code/4-agent-customization/03_run_agent.ipynb', '    messages = ');"><i class="fas fa-code"></i> Messages</button> — Inside the `langgraph_cli` tool, start the conversation with the JSON system prompt. Each call sends one request to the trained model and returns one command; the tool never runs it.
 
 Implement `messages` by creating a `Messages` instance with `config.json_system_prompt`.
 

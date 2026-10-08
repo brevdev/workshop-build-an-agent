@@ -3,7 +3,7 @@
 NVIDIA vs third-party for the evaluation module.
 
 ## NVIDIA
-- **Nemotron judge** — the shared `judge` role selects the current model. The factory uses JSON mode, temperature 0, request pacing, and bounded retries. Temperature 0 reduces sampling variation; judge quality still needs human agreement checks. Agent and generator roles are configured separately, and each run records the actual models.
+- **Nemotron judge** — the shared `judge` role selects the current model. The factory uses JSON mode, temperature 0, request pacing, and bounded retries. Temperature 0 reduces sampling variation; judge quality still needs human agreement checks. By default the judge is the same model as the `chat` agent role (Nemotron 3 Super), so self-preference is possible; `WORKSHOP_JUDGE_MODEL` selects a different judge without code changes. The report notebook checks the judge's quotations and the report's numbers in code. Each run records the actual models.
 - **NeMo Data Designer** — NVIDIA's synthetic-data-generation tool, used in
   `generate_*_eval_dataset.ipynb` to build evaluation datasets (the `data-designer` package).
   Resource: build.nvidia.com.

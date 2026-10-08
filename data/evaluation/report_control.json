@@ -1,0 +1,34 @@
+{
+  "description": "Known-bad control for the report evaluation. The report and its excerpts are fictional. The report adds statistics that appear in none of the excerpts; an evaluation that does not flag it would miss unsupported claims.",
+  "planted_numbers": [
+    "2400",
+    "27",
+    "1150",
+    "2030",
+    "35",
+    "0.06"
+  ],
+  "inputs": {
+    "topic": "Community Solar in the Lakeshire Region",
+    "expected_sections": [
+      "Introduction",
+      "Current State",
+      "Benefits",
+      "Challenges",
+      "Outlook",
+      "Conclusion"
+    ],
+    "quality_criteria": {
+      "should_include": [
+        "installed capacity",
+        "household participation",
+        "grid interconnection delays"
+      ],
+      "should_avoid": [
+        "unsubstantiated claims"
+      ]
+    },
+    "report": "# Community Solar in the Lakeshire Region\n\n## Introduction\nCommunity solar lets households subscribe to a shared solar project instead of installing panels on their own roofs. This report reviews the current state, benefits, challenges and outlook of community solar in the Lakeshire region.\n\n## Current State\nLakeshire's community solar programs reached 412 MW of installed capacity at the end of 2025, up from 260 MW in 2023 [1]. About 38,000 households now subscribe, most of them renters [1].\n\n## Benefits\nSubscribers saved an average of 11% on their annual electricity bills in 2025 [1]. The programs also created 2,400 local construction jobs and cut regional carbon emissions by 27% [1].\n\n## Challenges\nThe interconnection queue held 96 applications in March 2026, and the median wait from application to connection was 19 months [2]. In a survey of 1,500 residents, 64% said they would join a project if enrollment were simpler [3].\n\n## Outlook\nWith two substation upgrades planned by 2027 [2], installed capacity is projected to reach 1,150 MW by 2030 and to serve 35% of the region's households [2]. Subscription prices are expected to fall to US$0.06 per kWh [2].\n\n## Conclusion\nCommunity solar has grown quickly in Lakeshire, but interconnection delays and complicated enrollment are slowing further growth.\n",
+    "source_context": "Sources:\n\nSource Lakeshire Energy Office: Community Solar Annual Review 2025:\n===\nURL: https://example.org/lakeshire/community-solar-review-2025\n===\nMost relevant content from source: Lakeshire's community solar programs reached 412 MW of installed capacity at the end of 2025, up from 260 MW in 2023. About 38,000 households now subscribe to a community solar project, most of them renters who cannot install panels on their own roofs. Subscribers saved an average of 11% on their annual electricity bills in 2025.\n===\nSource Lakeshire Grid Operator: Interconnection Update:\n===\nURL: https://example.org/lakeshire/grid-interconnection-update\n===\nMost relevant content from source: The interconnection queue for community solar projects held 96 applications in March 2026. The median wait from application to connection was 19 months. The operator plans to add two substation upgrades by 2027 to relieve congestion on rural feeders.\n===\nSource Lakeshire Community Power Survey:\n===\nURL: https://example.org/lakeshire/community-power-survey\n===\nMost relevant content from source: In a survey of 1,500 residents, 64% said they would join a community solar project if enrollment were simpler. Respondents most often cited unclear contracts and long sign-up forms as barriers.\n===\n"
+  }
+}

@@ -41,6 +41,10 @@ def stream_error(data):
         # A tool failed mid-run; this thread can never accept another message.
         return ("This conversation has an unfinished tool call from a failed run and cannot continue. "
                 "Click New conversation in the sidebar, then ask again.")
+    if "maximum context length" in str(detail):
+        # vLLM rejects a request whose history plus max_tokens exceeds the model's window.
+        return ("This conversation no longer fits in the model's context window. "
+                "Click New conversation in the sidebar, then ask again.")
     status = re.search(r"\b(401|403|404|410|429|500|502|503|504)\b", str(detail))
     if status:
         kind = f"HTTP {status.group(1)}"

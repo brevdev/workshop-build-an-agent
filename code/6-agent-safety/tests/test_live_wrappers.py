@@ -8,6 +8,7 @@ https://github.com/openclaw/openclaw/blob/v2026.5.20/src/agents/pi-embedded-runn
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -232,3 +233,18 @@ def test_chat_framing_does_not_claim_sender_authority(module):
     assert "heartbeat_ok" in framing
     assert not any(word in framing for word in ("operator", "admin", "owner", "trusted", "authori"))
     assert module._CHAT_FRAMING == nemoclaw_wrapper._CHAT_FRAMING
+
+
+@pytest.mark.parametrize("module, binary, name, detect", [
+    (nemoclaw_wrapper, "_NEMOCLAW_BIN", "nemoclaw", nemoclaw_wrapper._check_sandbox_running),
+    (openclaw_wrapper, "_OPENCLAW_BIN", "openclaw", openclaw_wrapper._check_gateway_via_cli),
+])
+def test_detection_finds_a_cli_installed_after_import(tmp_path, monkeypatch, module, binary, name, detect):
+    """The client imports each wrapper once, so a later install must still be detected."""
+    monkeypatch.setattr(module, binary, None)  # nothing was installed at import
+    monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ.get('PATH', '')}")
+    cli = tmp_path / name
+    cli.write_text("#!/bin/sh\necho 'Phase: Ready'\n")
+    cli.chmod(0o755)
+    assert detect()
+    assert getattr(module, binary) == str(cli)

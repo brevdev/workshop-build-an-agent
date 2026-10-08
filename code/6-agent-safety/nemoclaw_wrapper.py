@@ -94,8 +94,24 @@ def _find_nemoclaw_binary() -> Optional[str]:
 _NEMOCLAW_BIN = _find_nemoclaw_binary()
 
 
+def _refresh_nemoclaw_binary() -> Optional[str]:
+    """Search for the nemoclaw binary again and cache the result.
+
+    The client imports this module once, so a NemoClaw installed or moved after
+    the page opened is only found by searching again.
+    """
+    global _NEMOCLAW_BIN
+    _NEMOCLAW_BIN = _find_nemoclaw_binary()
+    return _NEMOCLAW_BIN
+
+
+def _nemoclaw_bin() -> Optional[str]:
+    """Return the cached binary, searching again while it has not been found."""
+    return _NEMOCLAW_BIN or _refresh_nemoclaw_binary()
+
+
 def _check_nemoclaw_cli() -> bool:
-    return _NEMOCLAW_BIN is not None
+    return _nemoclaw_bin() is not None
 
 
 def _check_sandbox_running(sandbox: str = SANDBOX_NAME, timeout: int = STATUS_TIMEOUT_SECONDS) -> bool:
@@ -111,13 +127,14 @@ def _check_sandbox_running(sandbox: str = SANDBOX_NAME, timeout: int = STATUS_TI
     global LAST_DETECT_ERROR
     LAST_DETECT_ERROR = None
 
-    if not _NEMOCLAW_BIN:
+    nemoclaw_bin = _nemoclaw_bin()
+    if not nemoclaw_bin:
         LAST_DETECT_ERROR = "nemoclaw binary not found on PATH or in standard locations"
         _log(LAST_DETECT_ERROR)
         return False
     try:
         result = subprocess.run(
-            [_NEMOCLAW_BIN, sandbox, "status"],
+            [nemoclaw_bin, sandbox, "status"],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -170,7 +187,8 @@ def _send_via_nemoclaw_cli(
           "error": str | None,   # error message if the call failed
         }
     """
-    if not _NEMOCLAW_BIN:
+    nemoclaw_bin = _nemoclaw_bin()
+    if not nemoclaw_bin:
         return {"text": "[NemoClaw CLI not found]", "meta": None, "error": "nemoclaw binary missing"}
 
     # `nemoclaw exec` rejects argv entries containing newlines/CRs (gRPC
@@ -179,7 +197,7 @@ def _send_via_nemoclaw_cli(
     sanitized_prompt = prompt.replace("\r", " ").replace("\n", " ")
     framed_prompt = _CHAT_FRAMING + sanitized_prompt
     cmd = [
-        _NEMOCLAW_BIN, sandbox, "exec",
+        nemoclaw_bin, sandbox, "exec",
         "--",
         "openclaw", "agent", "--agent", "main",
     ]

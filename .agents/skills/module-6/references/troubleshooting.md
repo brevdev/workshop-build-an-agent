@@ -65,6 +65,11 @@ code.** Steps:
   checks to pass (`_check_openclaw_cli()` + `_check_gateway_via_cli()` for Live OpenClaw;
   `_check_nemoclaw_cli()` + `_check_sandbox_running()` for Live NemoClaw); otherwise it shows
   the reason and falls back toward the Mock Agent.
+- **Client opened before the install** (often from the OpenClaw page) still offers only
+  OpenClaw or the Mock Agent once the sandbox is Ready: have the learner click
+  **🔄 Re-detect agents** in its sidebar. It searches for the `nemoclaw`/`openclaw` CLIs
+  again and reruns detection, so no restart is needed. If NemoClaw is still missing, the
+  **NemoClaw not detected — why?** expander gives the reason.
 
 ## Docker & sandbox image
 - NemoClaw needs **Docker** (the Workbench mounts the host socket via `/var/run/`→`/var/host-run/`;

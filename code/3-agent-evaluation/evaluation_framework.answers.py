@@ -33,6 +33,8 @@ class EvaluationResult(BaseModel):
     explanation: str
     metric_name: str
     status: Literal["ok", "error", "not_applicable"] = "ok"
+    # Claim/quote pairs the judge cited as evidence; verify them in code before trusting them.
+    claims: Optional[List[Any]] = None
 
     @model_validator(mode="after")
     def check_measurement(self):
@@ -78,7 +80,9 @@ def _parsed_result(parsed, metric):
     explanation = parsed.get("explanation")
     if not isinstance(explanation, str) or not explanation.strip():
         raise ValueError("A nonempty explanation is required")
-    return EvaluationResult(score=score, explanation=explanation, metric_name=metric)
+    claims = parsed.get("claims")
+    return EvaluationResult(score=score, explanation=explanation, metric_name=metric,
+                            claims=claims if isinstance(claims, list) else None)
 
 
 def parse_evaluation(content, metric_name):
@@ -235,7 +239,7 @@ Rate Evidence Support on a scale of 1-5 (JSON key: accuracy): Do the retrieved e
 - 2: Few claims supported
 - 1: No substantive claims supported or major contradictions
 Assess only the supplied evidence, not your memory. This is not external fact verification.
-Evaluate evidence support independently of source credibility, writing quality and the other criteria. Break factual assertions into atomic claims and locate exact supporting quotations in the excerpts. In the accuracy explanation, show claim-to-quotation pairs, and identify unsupported or contradicted claims. Support for part of a sentence does not support its other assertions. Preserve dates and qualifiers such as estimated or projected. A claim asserted in an excerpt is supported for this metric; whether that source is trustworthy is a separate, unmeasured question. Do not substitute an external-truth or source-credibility judgment for evidence support.
+Evaluate evidence support independently of source credibility, writing quality and the other criteria. Break factual assertions into atomic claims and locate exact supporting quotations in the excerpts. List up to 15 checkable claims in accuracy.claims: first every claim you find unsupported or contradicted, then statistics and dates. Give each claim's supporting quotation as one continuous span copied exactly from the excerpts, without ellipses, or "UNSUPPORTED" when no excerpt supports it; code checks every quotation. In the accuracy explanation, summarize the unsupported or contradicted claims. Support for part of a sentence does not support its other assertions. Preserve dates and qualifiers such as estimated or projected. A claim asserted in an excerpt is supported for this metric; whether that source is trustworthy is a separate, unmeasured question. Do not substitute an external-truth or source-credibility judgment for evidence support.
 If no excerpts were retrieved, return null for accuracy; this criterion is not applicable.
 
 Rate Writing Quality on a scale of 1-5: Is it clear, professional, and well-written?
@@ -250,7 +254,7 @@ Provide your evaluation as JSON:
   "structure": {{"explanation": "...", "score": <1-5>}},
   "content": {{"explanation": "...", "score": <1-5>}},
   "coverage": {{"explanation": "...", "score": <1-5>}},
-  "accuracy": {{"explanation": "...", "score": <1-5>}},
+  "accuracy": {{"claims": [{{"claim": "...", "quote": "..."}}], "explanation": "...", "score": <1-5>}},
   "writing": {{"explanation": "...", "score": <1-5>}}
 }}
 """)
@@ -284,7 +288,8 @@ def evaluate_report_quality(topic, report, expected_sections, quality_criteria=N
     """Score report form/content and support against actual retrieved excerpts.
 
     The historical ``accuracy`` key now explicitly means evidence support. Without
-    evidence it is not applicable; a judge's memory is not a source of truth.
+    evidence it is not applicable; a judge's memory is not a source of truth. Its result
+    carries the judge's claim/quote pairs so code can check them (``verify_claims``).
     """
     metrics = ("structure", "content", "coverage", "accuracy", "writing")
     if not report.strip():

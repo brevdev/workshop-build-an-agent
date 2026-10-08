@@ -271,6 +271,8 @@ The workshop includes a Streamlit-based NemoClaw Client that connects to your sa
 
 The client connects to your running gateway automatically. If the gateway is not reachable, it falls back to a mock agent for testing the UI.
 
+If the client was already open from the OpenClaw page, click **🔄 Re-detect agents** in its sidebar so it finds the sandbox you just created.
+
 **Note:** Just like from the OpenClaw setup page, you can also continue using the CLI for direct interaction:
 
 ```bash

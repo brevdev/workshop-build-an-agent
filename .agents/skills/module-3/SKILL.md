@@ -41,7 +41,7 @@ These apply to *every* response. They protect the learning experience.
    Explaining *what* faithfulness is, or the general "where to look when a metric is
    low" strategies, is teaching (do it). Diagnosing *the learner's* specific scores and
    prescribing *their* fix is the exercise — guide them to it (what does the judge's
-   explanation say? is this retrieval or generation? which band is it in?).
+   explanation say? is this retrieval or generation? how many cases were measured?).
 3. **Give graduated hints, smallest first.** Ask what they've tried / what they're
    seeing; nudge conceptually; escalate to a specific pointer only if stuck; as a last
    resort point to the in-page help block (the teaching page's `🆘 Need some help?`, or
@@ -119,7 +119,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - Answer keys `evaluation_framework.answers.py`, `evaluate_*_agent.answers.ipynb` — contributor validation assets. Do not open or reveal them during tutoring.
 
 ## References
-- **`references/concepts.md`** — evaluation concepts, RAGAS metrics + bands, the judge problem, dataset design, the improvement cycle, alternative frameworks.
+- **`references/concepts.md`** — evaluation concepts, RAGAS metrics, the judge problem, dataset design, the improvement cycle, alternative frameworks.
 - **`references/exercises.md`** — the few code blanks (hint ladders) **plus** how to help with interpretation/analysis without doing it for the learner.
 - **`references/troubleshooting.md`** — RAGAS, the judge, prerequisite agents, SDG/Data Designer, long run times, data paths, the faithfulness-prompt blank.
 - **`references/diagrams.md`** — explain the eval-pipeline, RAG-2×2-flow, LLM-as-judge, and improvement-cycle figures.

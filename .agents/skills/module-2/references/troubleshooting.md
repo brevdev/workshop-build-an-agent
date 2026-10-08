@@ -107,8 +107,14 @@ Identify *which* blank from the traceback line or tool result and **point them t
   log ends with `driver too old` or CUDA error 804, the forward-compatibility path does not
   support this GPU: the host needs an R580+ driver. Needs a GPU (`--gpus 1`) and the host
   docker socket (provided by the workshop's `/var/host-run/` mount).
-- **Plain chat works, but agent returns an automatic-tool-choice HTTP 400** → use the
-  pinned launch in `nim_setup.py`, including `--enable-auto-tool-choice`,
+- **Agent answered for several turns, then fails with an HTTP 400 about the maximum context
+  length** (the client says the conversation no longer fits in the context window) → the
+  thread's history plus `max_tokens` outgrew the NIM's 65,536-token window. Click **New
+  conversation** in the client sidebar; relaunching the NIM does not help. Nano reasons
+  before answering, so keep the lesson's `max_tokens=8192`: a larger value leaves less room
+  for history, and a smaller one can cut answers off.
+- **Plain chat works, but the agent's first request returns an automatic-tool-choice HTTP
+  400** → use the pinned launch in `nim_setup.py`, including `--enable-auto-tool-choice`,
   `--tool-call-parser qwen3_coder`, and `--reasoning-parser nemotron_v3`.
   Run `python code/2-agentic-rag/nim_smoke_test.py`: it verifies a real tool call,
   sends back a newly generated result with its matching ID, and checks the final answer.

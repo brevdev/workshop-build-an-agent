@@ -18,6 +18,12 @@ While other frameworks may provide different ways to deploy agents, the core ide
 
 To get started, start a new <button onclick="openNewTerminal();"><i class="fas fa-terminal"></i> terminal</button> here in Jupyter.
 
+Load your environment variables (re-run this any time you edit `variables.env`):
+
+```bash
+source /project/variables.env
+```
+
 Change to the `code/2-agentic-rag` directory:
 
 ```bash

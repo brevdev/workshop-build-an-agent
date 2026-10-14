@@ -60,6 +60,22 @@ Manage your API Keys from the [LangSmith Settings](https://smith.langchain.com/s
 
 </details>
 
+<details>
+<summary>⚠️ Outside the US?</summary>
+
+LangSmith has regional endpoints. Edit `variables.env` and set both `LANGSMITH_ENDPOINT` and `LANGCHAIN_ENDPOINT` to the endpoint for your region:
+
+- **GCP US (default):** `https://api.smith.langchain.com`
+- **GCP EU:**           `https://eu.api.smith.langchain.com`
+- **GCP APAC:**         `https://apac.api.smith.langchain.com`
+- **AWS US:**           `https://aws.api.smith.langchain.com`
+
+After editing, reload the file in your terminal before starting the agent:
+
+```bash
+source /project/variables.env
+```
+
 </details>
 
 ## Ready to Evaluate!

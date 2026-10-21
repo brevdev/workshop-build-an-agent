@@ -392,7 +392,7 @@ In a clean gateway-managed setup, upstream provider keys are absent from the san
 ```bash
 curl -sS --max-time 60 -X POST https://inference.local/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"nvidia/nemotron-3-super-120b-a12b","messages":[{"role":"user","content":"hello"}]}' \
+  -d '{"model":"nvidia/nemotron-3-ultra-550b-a55b","messages":[{"role":"user","content":"hello"}]}' \
   | head -20
 ```
 
@@ -463,7 +463,7 @@ From the host:
 openshell inference get
 ```
 
-Expected: one provider + one model (e.g. `nvidia-prod` / `nvidia/nemotron-3-super-120b-a12b`). Every sandbox on this gateway sees the same `inference.local` backend.
+Expected: one provider + one model (e.g. `nvidia-prod` / `nvidia/nemotron-3-ultra-550b-a55b`). Every sandbox on this gateway sees the same `inference.local` backend.
 
 </details>
 
@@ -494,7 +494,7 @@ Check that the completion's `model` field identifies the selected Lightning mode
 Swap back when you're done:
 
 ```bash
-openshell inference set --provider nvidia-prod --model nvidia/nemotron-3-super-120b-a12b
+openshell inference set --provider nvidia-prod --model nvidia/nemotron-3-ultra-550b-a55b
 ```
 
 The gateway route is shared in this lab. NemoClaw's connect-time pin can reset it when you enter a sandbox; that is a reconnect convenience, not concurrent per-sandbox privacy isolation. Use separate gateways or a verified sandbox-aware router before running agents with different privacy requirements together.

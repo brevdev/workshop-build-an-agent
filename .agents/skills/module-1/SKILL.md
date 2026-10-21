@@ -67,7 +67,7 @@ Recommended order (teaching narrative in `.devx/1-build-an-agent/`, runnable cod
 | Wrap-up | `next_steps.md` | — | Recap + what's next |
 
 **What they build:** a Report Generation Agent that researches a topic with web
-search and writes a cited report. Model `nvidia/nemotron-3-super-120b-a12b` (via
+search and writes a cited report. Model `nvidia/nemotron-3-ultra-550b-a55b` (via
 `https://integrate.api.nvidia.com/v1`); tool `search_tavily` (Tavily API); framework
 LangChain `create_agent` (ReAct).
 

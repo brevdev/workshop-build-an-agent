@@ -29,7 +29,7 @@ The backend uses the reference implementation while Module 5's exercises have bl
 
 ## Models, tools, and approvals
 
-The picker offers Nemotron Super and Nemotron Lightning, configured in [`models.json`](../code/workshop_support/models.json). Add tools with their **Add** button or drag them onto the agent.
+The picker offers Nemotron Ultra and Nemotron Lightning, configured in [`models.json`](../code/workshop_support/models.json). Add tools with their **Add** button or drag them onto the agent.
 
 | Selection | What it enables |
 |---|---|

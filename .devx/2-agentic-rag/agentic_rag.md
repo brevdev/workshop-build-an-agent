@@ -133,7 +133,7 @@ We expose this enhanced retrieval pipeline as a tool for the agent using LangCha
 With our vector database and retriever chain in place, we're ready to construct the agent graph. Think of this graph as a flowchart that maps out the possible steps the model can take to solve a task. A graph can express branches and loops for either a developer-defined workflow or a model-directed agent.
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell"><h4>MODEL</h4>NVIDIA Nemotron Ultra via ChatNVIDIA - the agent's reasoning and language.</div>
+  <div class="dx-cell"><h4>MODEL</h4>NVIDIA Nemotron 3.5 Super VL via ChatNVIDIA - the agent's reasoning and language.</div>
   <div class="dx-cell"><h4>RETRIEVER TOOL</h4>The reranking retrieval chain, exposed as a tool the agent can choose to call.</div>
   <div class="dx-cell"><h4>SYSTEM PROMPT</h4>Instructions that shape when and how the agent uses its tools.</div>
   <div class="dx-cell"><h4>GRAPH</h4>create_react_agent wires model + tools + prompt into a ReAct loop.</div>
@@ -145,7 +145,7 @@ With our vector database and retriever chain in place, we're ready to construct 
 
 <img src="_static/robots/gitfu.png" alt="Graphs!" style="float:right;max-width:300px;margin:25px;" />
 
-This agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron Ultra model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
+This agent uses an LLM for decision making and communicating. For this example, we will be using NVIDIA's Nemotron 3.5 Super VL model. These models represent a tuned balance of speed, cost, and accuracy. The LLM model name was defined in `LLM_MODEL`. Use this and the [ChatNVIDIA](https://python.langchain.com/docs/integrations/chat/nvidia_ai_endpoints/#instantiation) class to define <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', 'llm =');"><i class="fas fa-code"></i> llm</button>.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>

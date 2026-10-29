@@ -95,11 +95,82 @@ def test_content_blocks_and_error_event():
  assert 'secret' not in stream_error({'error':'Exception','message':'[429] Too Many Requests: https://private?key=secret'})
 
 
+def test_context_overflow_says_to_start_a_new_conversation():
+    # The error event a local NIM (vLLM) overflow produces through ChatNVIDIA.
+    detail = ("[400] {'message': \"This model's maximum context length is 32768 tokens. However, you requested "
+              "4096 output tokens and your prompt contains at least 28673 input tokens, for a total of at least "
+              "32769 tokens.\", 'type': 'BadRequestError', 'param': 'input_tokens', 'code': 400}")
+    message = stream_error({'error': 'Exception', 'message': detail})
+    assert "context window" in message and "New conversation" in message
+    assert "28673" not in message
+
+
 def test_quote_check_ignores_formatting_but_not_changed_facts():
     source = "### Procedure\n\n- **Wait 15 minutes** before contacting support."
     assert quote_is_present("Wait 15 minutes before contacting support.", source)
     assert not quote_is_present("Wait 5 minutes before contacting support.", source)
     assert not quote_is_present("UNSUPPORTED", source)
+
+
+def test_quote_check_accepts_flattened_lists_and_typographic_marks():
+    source = "Include these details:\n- Current asset tag\n- Reason for the refresh\n\nThe user’s AI-assisted triage"
+    assert quote_is_present("Include these details: - Current asset tag - Reason for the refresh", source)
+    assert quote_is_present("The user's AI‑assisted triage", source)
+    assert not quote_is_present("Include these details: - Previous asset tag", source)
+
+
+CONTROL = json.loads((CODE_DIR.parent / "data/evaluation/report_control.json").read_text())
+
+
+def test_numbers_missing_from_the_evidence_are_listed():
+    inputs = CONTROL["inputs"]
+    assert unsupported_numbers(inputs["report"], inputs["source_context"]) == CONTROL["planted_numbers"]
+    # Thousands separators, citation markers and single digits are not differences.
+    assert unsupported_numbers("Reached 3600 GW [12] in 2 steps 【3】", "reached 3,600 GW") == []
+    # Nor are a report's date stamp and its section or reference-list numbers.
+    assert unsupported_numbers("*Date: 2026‑10‑08*\n### 4.1 Threats\n11. Slack Blog", "") == []
+
+
+def test_claims_are_verified_against_the_evidence_not_the_judge():
+    evidence = CONTROL["inputs"]["source_context"]
+    checked = verify_claims([
+        {"claim": "Capacity reached 412 MW in 2025", "quote": "reached 412 MW of installed capacity at the end of 2025"},
+        {"claim": "Capacity will reach 1,150 MW", "quote": "reached 412 MW of installed capacity"},
+        {"claim": "The programs created 2,400 jobs", "quote": "The programs created 2,400 local construction jobs"},
+        {"claim": "Prices will fall", "quote": "UNSUPPORTED"},
+        "not a claim",
+    ], evidence)
+    assert checked["claims_checked"] == 5 and checked["claims_verified"] == 1
+    assert checked["evidence_verified"] == 0.2
+    assert verify_claims(None, evidence)["evidence_verified"] is None
+
+
+def test_known_bad_control_is_flagged_even_when_the_judge_is_fooled():
+    inputs = CONTROL["inputs"]
+    output = {m: {'score': 5, 'explanation': 'Fully supported.'} for m in ['structure', 'content', 'coverage', 'accuracy', 'writing']}
+    output["accuracy"]["claims"] = [{"claim": "The programs created 2,400 local construction jobs",
+                                     "quote": "created 2,400 local construction jobs"},
+                                    {"claim": "Capacity is projected to reach 1,150 MW by 2030",
+                                     "quote": "installed capacity is projected to reach 1,150 MW by 2030"}]
+    judge = RunnableLambda(lambda _: AIMessage(content=json.dumps(output)))
+    scores = evaluate_report_quality(**inputs, judge_llm=judge)
+    assert scores["accuracy"].score == 5 and scores["accuracy"].claims == output["accuracy"]["claims"]
+    row = dict(inputs)
+    store_scores(row, scores)
+    check_evidence(row, scores["accuracy"].claims)
+    assert row["evidence_verified"] == 0.0
+    assert "judge evidence score not backed by verified quotes" in row["evidence_flags"]
+    assert any(flag.startswith("6 numbers missing") for flag in row["evidence_flags"])
+
+
+def test_review_sample_shows_failures_disagreements_and_low_scores_first():
+    rows = [{"case_id": "ok", "judge_status": "ok", "aggregate_score": 1.0, "judge": 1.0, "check": 0.9},
+            {"case_id": "gap", "judge_status": "ok", "aggregate_score": 1.0, "judge": 1.0, "check": 0.1},
+            {"case_id": "low", "judge_status": "ok", "aggregate_score": 0.4, "judge": 0.4, "check": float("nan")},
+            {"case_id": "failed", "judge_status": "error", "aggregate_score": None}]
+    picked = review_sample(rows, compare=("judge", "check"))
+    assert [row["case_id"] for row in picked] == ["failed", "gap", "low"]
+    assert [row["case_id"] for row in review_sample(rows[:3], size=2)] == ["low", "ok"]
 
 
 def test_unreviewed_synthetic_references_are_not_silently_used(tmp_path):

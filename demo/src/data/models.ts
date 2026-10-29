@@ -15,7 +15,7 @@ export interface ModelDef {
 // Display settings only. The backend supplies supported IDs and model endpoints.
 export const models: ModelDef[] = [
   {
-    id: 'nemotron', name: 'Nemotron Ultra', provider: 'NVIDIA',
+    id: 'nemotron', name: 'Nemotron 3.5 Super VL', provider: 'NVIDIA',
     tagline: 'Reasoning for complex agent tasks', icon: '🟢',
     primaryColor: '#76B900', accentColor: '#8dc63f',
     glowColor: 'rgba(118,185,0,0.4)', subtleColor: 'rgba(118,185,0,0.1)',

@@ -74,7 +74,7 @@ The full demo has four phases. Click on each to learn more.
 <details class="dx-peek">
 <summary>1. Pick Your Model</summary>
 
-Click a model card to select it. The cards show the configured **Nemotron Ultra** and **Nemotron Lightning** models. Both support tool calling; availability and response quality can vary. The model's brand color will theme the entire UI.
+Click a model card to select it. The cards show the configured **Nemotron 3.5 Super VL** and **Nemotron Lightning** models. Both support tool calling; availability and response quality can vary. The model's brand color will theme the entire UI.
 
 </details>
 

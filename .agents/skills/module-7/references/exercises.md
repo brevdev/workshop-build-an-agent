@@ -29,7 +29,7 @@ Provided scaffolding (do NOT have them rebuild it): the four `@tool`s
 `parse_frontmatter`/`skill_target`/`read_skill_text` (from `skill_support.py`),
 `run_with_skills`, `run_gpu_task`, `format_transcript`, `SKILL_AUTHOR_PROMPT`,
 `run_self_evolution_demo`, and `MODEL_NAME = get_model("chat")` (currently
-`nvidia/nemotron-3-ultra-550b-a55b`).
+`nvidia/nemotron-3.5-super-vl-120b-a12b`).
 
 Always start by asking what they've tried / reading the error or token output with them.
 

@@ -18,7 +18,7 @@ In this exercise, we will run our LLM model locally and transition our code to o
 
 <img src="_static/robots/relocate.png" alt="Box 'em up and bring 'em home." style="float:right;max-width:300px;margin:25px;" />
 
-Our agent has been running on **Nemotron 3 Ultra (550B)** through NVIDIA's hosted API Catalog - powerful, and no local GPU required. To run locally, we'll switch to the smaller, more accessible [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b), whose deployment needs depend on the GPU, precision, and model profile. Check the *Deploy* tab’s supported hardware, container instructions, and memory requirements against the machine’s free memory before starting.
+Our agent has been running on **Nemotron 3.5 Super VL (120B)** through NVIDIA's hosted API Catalog - powerful, and no local GPU required. To run locally, we'll switch to the smaller, more accessible [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b), whose deployment needs depend on the GPU, precision, and model profile. Check the *Deploy* tab’s supported hardware, container instructions, and memory requirements against the machine’s free memory before starting.
 
 For our model, you can find the relevant details on the [deployment page](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b/deploy), including Docker commands and environment setup.
 
@@ -58,7 +58,7 @@ This checks Docker, the shared `workbench` network, the driver, free GPU memory,
 python code/2-agentic-rag/nim_setup.py --print-command
 ```
 
-The command creates a container named `nemotron` on the `workbench` network and mounts the `nim-cache` model volume. When this host needs them, the helper also adds the forward-compatibility library path and, for `--profile nvfp4`, the profile settings. It uses a 16,384-token context and up to four concurrent sequences, with 80% of GPU memory allocated to Nano. This leaves some headroom for the optional retrieval models; check their requirements separately.
+The command creates a container named `nemotron` on the `workbench` network and mounts the `nim-cache` model volume. When this host needs them, the helper also adds the forward-compatibility library path and, for `--profile nvfp4`, the profile settings. It uses a 65,536-token context window and up to four concurrent sequences, with 80% of GPU memory allocated to Nano. This leaves some headroom for the optional retrieval models; check their requirements separately.
 
 These model-specific settings are essential for our agent:
 
@@ -129,6 +129,8 @@ llm = ChatNVIDIA(
 ```
 
 </details>
+
+Every request must fit in the NIM's 65,536-token context window: the prompt (system prompt, conversation history and retrieved chunks) plus the `max_tokens` reserved for the answer. Nano reasons before it answers, so the hint reserves 8,192 tokens for its reasoning and reply; with less, some answers are cut off before they start. A very long conversation can still outgrow the window. The client then reports that the conversation no longer fits in the model's context window; click **New conversation** in its sidebar to start over with an empty history.
 
 <!-- fold:break -->
 

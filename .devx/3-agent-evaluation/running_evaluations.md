@@ -228,7 +228,7 @@ Run the evaluation at <button onclick="goToLineAndSelect('code/3-agent-evaluatio
 
 ### Judge Calibration Check
 
-Before fully trusting our LLM judge scores, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores as an initial agreement check. A few displayed examples do not establish calibration; compare independent ratings on a larger varied set.
+Before fully trusting our LLM judge scores, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores as an initial agreement check. The cell picks informative cases rather than the first few: failures, the cases where the judge's faithfulness and RAGAS faithfulness disagree most, and the lowest scores. A few displayed examples do not establish calibration; compare independent ratings on a larger varied set.
 
 This is a critical step! If the judge mechanism we use systematically disagrees with human intuition, our entire evaluation pipeline can become unreliable. 
 
@@ -325,13 +325,19 @@ For report evaluation, we'll use LLM-as-a-judge with specific criteria:
 
 Once you're ready, run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Evaluate report quality');"><i class="fas fa-code"></i> Evaluate Report Quality </button> to evaluate your report generation agent's performance.
 
+A judge can claim support that is not there, so the evidence score is also checked in code. The judge lists the claims it checked, each with a quotation from the excerpts. **Evidence verified** is the share of those claims whose quotation actually occurs in the excerpts and contains the claim's numbers. The code also lists numbers in the report that appear nowhere in the excerpts. A report is flagged for review when the judge's evidence score is low, when the judge gives 4–5 but few of its quotations verify, or when numbers are missing from the evidence. These checks confirm quotations, not that a quotation proves its claim.
+
 <!-- fold:break -->
 
 ### Judge Calibration Check
 
-Once again, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores as an initial agreement check. A few displayed examples do not establish calibration; compare independent ratings on a larger varied set.
+Once again, let's perform a quick calibration check. We'll review a small sample of responses side-by-side with the judge's scores as an initial agreement check. The cell shows failures first, then the largest gap between the judge's evidence score and the quotations verified in code, then the lowest scores. A few displayed examples do not establish calibration; compare independent ratings on a larger varied set.
 
 Run the cell under at <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Judge review');"><i class="fas fa-code"></i> Judge Calibration Check</button>. Take a moment to review these and consider: Do you agree with the judge's scores?
+
+### Test the Checks on a Known-Bad Report
+
+A check that never fails tells you nothing. Run <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Control: a known-bad report');"><i class="fas fa-code"></i> Control Report</button> to evaluate a provided fictional report that adds statistics found in none of its excerpts. Did the judge notice them? Which flags caught them?
 
 <!-- fold:break -->
 
@@ -353,7 +359,7 @@ Next, let's review any low-scoring responses. Run the cell <button onclick="goTo
 Consider:
 - Are there missing sections?
 - Do reports contain placeholder content, like "will be drafted"?
-- Are there overly vague or unsupported claims?
+- Are there overly vague or unsupported claims? Which reports have evidence flags?
 
 Finally, let's check the length of the generated reports. Run the cell <button onclick="goToLineAndSelect('code/3-agent-evaluation/evaluate_report_agent.ipynb', '## Report length and placeholders');"><i class="fas fa-code"></i> Report Length Analysis</button>.
 

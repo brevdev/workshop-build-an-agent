@@ -3,6 +3,7 @@
 import asyncio
 import hashlib
 import importlib.metadata
+import itertools
 import json
 import math
 import re
@@ -263,16 +264,118 @@ def record_config(directory, **changes):
     temporary.replace(path)
 
 
+_TYPOGRAPHY = str.maketrans({"\u2010": "-", "\u2011": "-", "\u2012": "-", "\u2013": "-", "\u2014": "-",
+                             "\u2212": "-", "\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"'})
+
+
 def quote_is_present(quote, source):
-    """Check wording while ignoring Markdown decoration and whitespace only.
+    """Check wording while ignoring Markdown decoration, typographic dashes/quotes and whitespace only.
 
     This locates a span; it does not establish that the span entails an answer.
     """
     def normalize(text):
-        text = re.sub(r"(?m)^\s*(?:#{1,6}\s+|[-*+]\s+)", "", text)
+        text = re.sub(r"(?m)^\s*(?:#{1,6}\s+|[-*+]\s+)", "", text.translate(_TYPOGRAPHY))
+        # A quoted bulleted list is often flattened onto one line: "details: - Current asset tag".
+        text = re.sub(r"\s[-*+]\s+", " ", text)
         return " ".join(text.replace("**", "").replace("__", "").replace("`", "").split())
     value = normalize(quote)
     return bool(value) and value != "UNSUPPORTED" and value in normalize(source)
+
+
+_CITATION_OR_URL = re.compile(r"[\[【](?:\d+(?:\s*[,\u2013-]\s*\d+)*|KB:[^\]】]*)[\]】]|https?://\S+")
+_NUMBER = re.compile(r"(?<![\w.,])(?<![A-Za-z]-)\d+(?:[.,]\d+)*(?!\w)")
+# Not claims: a report's own date stamp, and section or list numbers at the start of a line.
+_ISO_DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
+_SECTION_OR_LIST_NUMBER = re.compile(r"(?m)^\s*(?:#{1,6}\s*\d+(?:\.\d+)*\.?|\d+[.)])(?=\s)")
+
+
+def _numbers(text, min_digits=1):
+    """Numbers as values, so "3,600" matches "3600"; citation markers and URLs are skipped."""
+    values = []
+    for token in _NUMBER.findall(_CITATION_OR_URL.sub(" ", text.translate(_TYPOGRAPHY))):
+        value = token.replace(",", "")
+        if "." in value:
+            value = value.rstrip("0").rstrip(".")
+        if sum(ch.isdigit() for ch in value) >= min_digits and value not in values:
+            values.append(value)
+    return values
+
+
+def unsupported_numbers(text, evidence):
+    """List numbers in the text that never appear in the evidence: values to look up, not a verdict.
+
+    Single digits, ISO dates (a report's date stamp) and section or list numbers are ignored. A
+    number written differently in the evidence, such as 1.4 TW for 1,400 GW, is listed too.
+    """
+    found = set(_numbers(evidence))
+    text = _SECTION_OR_LIST_NUMBER.sub(" ", _ISO_DATE.sub(" ", text.translate(_TYPOGRAPHY)))
+    return [value for value in _numbers(text, min_digits=2) if value not in found]
+
+
+def verify_claims(claims, evidence):
+    """Check the judge's claim/quote pairs in code instead of trusting its evidence score.
+
+    A claim counts as verified when its quote occurs in the evidence and contains every number
+    in the claim. This confirms quotations; it does not prove that a quotation entails its claim.
+    """
+    if not isinstance(claims, list):
+        return {"claims_checked": 0, "claims_verified": 0, "evidence_verified": None, "unverified_claims": []}
+    unverified = []
+    for item in claims:
+        claim, quote = (item.get("claim"), item.get("quote")) if isinstance(item, dict) else (None, None)
+        if not (isinstance(claim, str) and isinstance(quote, str) and quote_is_present(quote, evidence)
+                and set(_numbers(claim)) <= set(_numbers(quote))):
+            unverified.append(item)
+    verified = len(claims) - len(unverified)
+    return {"claims_checked": len(claims), "claims_verified": verified,
+            "evidence_verified": verified / len(claims) if claims else None,
+            "unverified_claims": unverified}
+
+
+def evidence_flags(row, threshold=0.6):
+    """Reasons to read a report against its evidence yourself. No flag is not proof of support."""
+    flags = []
+    score, verified = row.get("accuracy_score"), row.get("evidence_verified")
+    if score is not None and score < threshold:
+        flags.append("low judge evidence score")
+    if score is not None and score >= 0.8 and (verified is None or verified < threshold):
+        flags.append("judge evidence score not backed by verified quotes")
+    numbers = row.get("unsupported_numbers") or []
+    if numbers:
+        flags.append(f"{len(numbers)} numbers missing from the evidence: "
+                     + ", ".join(numbers[:10]) + (", ..." if len(numbers) > 10 else ""))
+    return flags
+
+
+def check_evidence(row, claims):
+    """Record the code checks of a report's evidence next to its judge scores (after ``store_scores``)."""
+    row.update(verify_claims(claims, row["source_context"]))
+    row["unsupported_numbers"] = unsupported_numbers(row["report"], row["source_context"])
+    row["evidence_flags"] = evidence_flags(row)
+    return row
+
+
+def review_sample(rows, compare=None, size=3):
+    """Pick cases worth reading first: failures, the largest gaps between two measurements of
+    the same case (``compare`` names two 0–1 score keys), then the lowest scores.
+
+    A few cases are a smoke check; calibration needs independent ratings on a larger set.
+    """
+    def gap(row):
+        values = [row.get(key) for key in compare or ()]
+        if len(values) != 2 or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in values):
+            return None
+        return abs(values[0] - values[1])
+    failures = [row for row in rows if row.get("judge_status") != "ok"]
+    graded = [row for row in rows if row.get("judge_status") == "ok"]
+    largest_gaps = sorted((row for row in graded if gap(row) is not None), key=gap, reverse=True)
+    lowest = sorted(graded, key=lambda row: row["aggregate_score"])
+    picked = []
+    for group in itertools.zip_longest(failures, largest_gaps, lowest):
+        for row in group:
+            if row is not None and len(picked) < size and all(row is not seen for seen in picked):
+                picked.append(row)
+    return picked
 
 
 def select_dataset(data_dir, name):

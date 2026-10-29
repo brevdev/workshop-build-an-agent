@@ -230,7 +230,7 @@ class CLIToolCall(BaseModel):
 
 ### Exercise: Template Sampler
 
-<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', 'react-agent-python');"><i class="fas fa-code"></i> template sampler</button> — Configure the template values the sampler draws from.
+<button onclick="goToLineAndSelect('code/4-agent-customization/01_synthetic_data_generation.ipynb', '# TODO: Use actual LangGraph CLI template names');"><i class="fas fa-code"></i> template sampler</button> — Configure the template values the sampler draws from.
 
 Samplers control the distribution of the **seed** values each example is built from — they're what stops your dataset clustering around a couple of common cases. Add the following to the `values` list in `CategorySamplerParams`: `"react-agent-python"`, `"memory-agent-python"`, `"retrieval-agent-python"`, `"data-enrichment-agent-python"`, `"new-langgraph-project-python"`.
 

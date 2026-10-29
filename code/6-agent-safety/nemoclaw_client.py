@@ -20,7 +20,7 @@ import os
 # Ensure the module directory is on the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from openclaw_wrapper import create_openclaw_agent_fn, _create_mock_agent
+from openclaw_wrapper import create_openclaw_agent_fn, _create_mock_agent, _refresh_openclaw_binary
 import nemoclaw_wrapper
 from nemoclaw_wrapper import (
     HEARTBEAT_SENTINEL,
@@ -170,10 +170,13 @@ with st.sidebar:
         else:
             _set_agent(selected_mode)
 
-    # Re-detect: clears the cached detection result and re-runs the script.
-    # Useful when a learner starts the sandbox / gateway *after* opening this page —
-    # otherwise the cached "unavailable" result would persist until Streamlit restarts.
+    # Re-detect: searches for the CLIs again, clears the cached detection result and
+    # re-runs the script. Useful when a learner installs NemoClaw or starts the
+    # sandbox / gateway *after* opening this page — otherwise the cached "unavailable"
+    # result would persist until Streamlit restarts.
     if st.button("🔄 Re-detect agents", use_container_width=True, help="Re-check whether the NemoClaw sandbox and OpenClaw gateway are reachable."):
+        nemoclaw_wrapper._refresh_nemoclaw_binary()
+        _refresh_openclaw_binary()
         _detect_nemoclaw_available.clear()
         _detect_openclaw_available.clear()
         # Force the mode toggle to rebuild on next pass too.

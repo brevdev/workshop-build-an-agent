@@ -87,7 +87,7 @@ We generally rely on three approaches:
     <li>If alignment is poor, refine the evaluation prompt or add examples.</li>
   </ol>
   <p>Even a quick spot-check on 5 samples can reveal a judge that is too lenient, too harsh, or misreads your criteria. We'll practice this in the hands-on notebooks.</p>
-  <p><b>Check judge bias.</b> Agent and judge models are configured separately, but may use the same model. Even different models can share blind spots or prefer particular writing styles. Compare judgments with your own source-based ratings, especially when scores look unusually generous.</p>
+  <p><b>Check judge bias.</b> By default, this workshop's judge is the same Nemotron model as the agents it grades, so it may favor that model's own writing. Even different models can share blind spots or prefer particular writing styles, and a judge can claim support that its sources do not contain. The report evaluation therefore checks the judge's quotations in code. Compare judgments with your own source-based ratings, especially when scores look unusually generous.</p>
 </div>
 
 <!-- fold:break -->

@@ -60,7 +60,7 @@ def launch_command(compat_library_path: str | None = None, profile: str = "auto"
         "--network", "workbench", "--gpus", "1", "--shm-size=16GB",
         "-e", "NGC_API_KEY", *options, "-v", f"{CACHE}:/opt/nim/.cache",
         "-u", str(os.getuid()), "-p", "8000:8000", NIM_IMAGE,
-        "--max-model-len", "16384", "--gpu-memory-utilization", str(GPU_MEMORY_UTILIZATION),
+        "--max-model-len", "65536", "--gpu-memory-utilization", str(GPU_MEMORY_UTILIZATION),
         "--max-num-seqs", "4", "--enable-auto-tool-choice",
         "--tool-call-parser", "qwen3_coder", "--reasoning-parser", "nemotron_v3",
     ]

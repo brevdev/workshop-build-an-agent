@@ -4,7 +4,7 @@ NVIDIA vs third-party for the deep-agents module. Note: the deep-agent *framewor
 third-party; NVIDIA supplies the *models* and the explore-next blueprints.
 
 ## NVIDIA
-- **NVIDIA Nemotron** — `nvidia/nemotron-3-ultra-550b-a55b`, the default model
+- **NVIDIA Nemotron** — `nvidia/nemotron-3.5-super-vl-120b-a12b`, the default model
   (`MODEL_MAP["nemotron"]`) via **`ChatNVIDIA`** (temp 0.3). Deep agents need a strong
   **tool-calling** model. Resource: build.nvidia.com.
 - **NIM / API Catalog** — hosted inference for all the `MODEL_MAP` choices; `NVIDIA_API_KEY`.

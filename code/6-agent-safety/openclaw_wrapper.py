@@ -38,8 +38,24 @@ def _find_openclaw_binary() -> Optional[str]:
     return None
 
 
-# Resolve the binary once at import time
+# Resolve the binary at import time; _openclaw_bin() searches again while it is missing
 _OPENCLAW_BIN = _find_openclaw_binary()
+
+
+def _refresh_openclaw_binary() -> Optional[str]:
+    """Search for the openclaw binary again and cache the result.
+
+    The client imports this module once, so an OpenClaw installed or moved after
+    the page opened is only found by searching again.
+    """
+    global _OPENCLAW_BIN
+    _OPENCLAW_BIN = _find_openclaw_binary()
+    return _OPENCLAW_BIN
+
+
+def _openclaw_bin() -> Optional[str]:
+    """Return the cached binary, searching again while it has not been found."""
+    return _OPENCLAW_BIN or _refresh_openclaw_binary()
 
 
 def _read_gateway_token() -> Optional[str]:
@@ -62,7 +78,7 @@ _GATEWAY_TOKEN = _read_gateway_token()
 
 def _check_openclaw_cli() -> bool:
     """Check if the openclaw CLI is installed."""
-    return _OPENCLAW_BIN is not None
+    return _openclaw_bin() is not None
 
 
 def _build_env() -> dict:
@@ -82,11 +98,12 @@ def _build_env() -> dict:
 
 def _auto_approve_device() -> None:
     """Auto-approve the latest pending device pairing request."""
-    if not _OPENCLAW_BIN:
+    openclaw_bin = _openclaw_bin()
+    if not openclaw_bin:
         return
     try:
         subprocess.run(
-            [_OPENCLAW_BIN, "devices", "approve", "--latest"],
+            [openclaw_bin, "devices", "approve", "--latest"],
             capture_output=True,
             text=True,
             timeout=15,
@@ -98,10 +115,11 @@ def _auto_approve_device() -> None:
 
 def _check_gateway_via_cli(timeout: int = 10) -> bool:
     """Check if the OpenClaw gateway is running using `openclaw gateway status`."""
-    if not _OPENCLAW_BIN:
+    openclaw_bin = _openclaw_bin()
+    if not openclaw_bin:
         return False
     try:
-        cmd = [_OPENCLAW_BIN, "gateway", "status"]
+        cmd = [openclaw_bin, "gateway", "status"]
         if _GATEWAY_TOKEN:
             cmd += ["--token", _GATEWAY_TOKEN]
         result = subprocess.run(
@@ -142,7 +160,7 @@ def _send_via_cli(prompt: str, timeout: int = 600) -> dict:
     """
     framed_prompt = _CHAT_FRAMING + prompt
     cmd = [
-        _OPENCLAW_BIN, "agent", "--agent", "main",
+        _openclaw_bin(), "agent", "--agent", "main",
         "--json",
         "-m", framed_prompt,
     ]

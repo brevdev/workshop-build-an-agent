@@ -1,4 +1,4 @@
-<div class="dx-hero" data-eyebrow="MODULE 02 / AGENTIC RAG" data-title="Agentic RAG Workshop" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3 Ultra + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
+<div class="dx-hero" data-eyebrow="MODULE 02 / AGENTIC RAG" data-title="Agentic RAG Workshop" data-meta="DURATION::2-3 hrs|MODEL::Nemotron 3.5 Super VL + NeMo Retriever|GPU::Hosted API; local NIM optional"></div>
 
 Build an **IT Help Desk Agent** with NVIDIA models and LangGraph. A basic RAG pipeline retrieves before generation; this agent instead lets the model decide when and how to call retrieval tools. You'll add web search and reusable skills, then test the agent through the Simple Agents Client.
 

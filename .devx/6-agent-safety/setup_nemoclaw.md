@@ -28,7 +28,7 @@ Walk through each prompt as follows. Your NVIDIA key is read from your saved wor
 
 1. **License notice** — Type `yes` to accept.
 2. **Inference provider** — Press Enter to accept **NVIDIA Endpoints** (option 1).
-3. **Model** — Choose **Nemotron 3 Ultra 550B** (`nvidia/nemotron-3-ultra-550b-a55b`). Check the ID on screen; menu positions can change.
+3. **Model** — Select **Nemotron 3.5 Super VL** (`nvidia/nemotron-3.5-super-vl-120b-a12b`) from the list. If the list does not show it, choose **Other** and enter that model ID; the wizard validates it against the catalog. Check the ID on screen; menu positions can change.
 4. **Apply this configuration?** — Press Enter (Yes).
 5. **Brave Web Search** — Press Enter (No; not needed for this module).
 6. **Messaging channels** — Press Enter to skip (not needed for this module).
@@ -270,6 +270,8 @@ The workshop includes a Streamlit-based NemoClaw Client that connects to your sa
 <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button>
 
 The client connects to your running gateway automatically. If the gateway is not reachable, it falls back to a mock agent for testing the UI.
+
+If the client was already open from the OpenClaw page, click **🔄 Re-detect agents** in its sidebar so it finds the sandbox you just created.
 
 **Note:** Just like from the OpenClaw setup page, you can also continue using the CLI for direct interaction:
 

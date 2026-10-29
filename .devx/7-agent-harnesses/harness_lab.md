@@ -100,7 +100,7 @@ When prompted, enter the NVIDIA endpoint, model, and your key — or skip the wi
 ```yaml
 model:
   provider: custom
-  default: nvidia/nemotron-3-ultra-550b-a55b
+  default: nvidia/nemotron-3.5-super-vl-120b-a12b
   base_url: https://integrate.api.nvidia.com/v1
   api_key: ${NVIDIA_API_KEY}
 ```

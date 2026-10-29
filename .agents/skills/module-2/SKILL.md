@@ -71,7 +71,7 @@ Flow (teaching narrative in `.devx/2-agentic-rag/`, code in `code/2-agentic-rag/
 | Local NIM | `migrate.md` | run the LLM in a local NIM container; repoint `llm` | `rag_agent.py` (1 change) + docker |
 
 **What they build:** an IT Help Desk agent over a 12-doc knowledge base
-(`data/it-knowledge-base/`). Models: LLM `nvidia/nemotron-3-ultra-550b-a55b`
+(`data/it-knowledge-base/`). Models: LLM `nvidia/nemotron-3.5-super-vl-120b-a12b`
 (`ChatNVIDIA`), embeddings `nvidia/nemotron-3-embed-1b`, rerank
 `nvidia/llama-nemotron-rerank-vl-1b-v2`. Stack: FAISS + NeMo Retriever +
 `create_react_agent` (LangGraph), served by `langgraph dev`, chatted via the

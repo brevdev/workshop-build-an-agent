@@ -1,6 +1,6 @@
 {
   "chat": {
-    "id": "nvidia/nemotron-3-ultra-550b-a55b",
+    "id": "nvidia/nemotron-3.5-super-vl-120b-a12b",
     "label": "Agent model",
     "modules": [1, 2, 3, 5, 6, 7]
   },
@@ -10,7 +10,7 @@
     "modules": [4, 5, 6]
   },
   "judge": {
-    "id": "nvidia/nemotron-3-ultra-550b-a55b",
+    "id": "nvidia/nemotron-3.5-super-vl-120b-a12b",
     "label": "Evaluation judge",
     "modules": [3, 6]
   },

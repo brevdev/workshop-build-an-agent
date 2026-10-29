@@ -18,7 +18,7 @@ In this exercise, we will run our LLM model locally and transition our code to o
 
 <img src="_static/robots/relocate.png" alt="Box 'em up and bring 'em home." style="float:right;max-width:300px;margin:25px;" />
 
-Our agent has been running on **Nemotron 3 Ultra (550B)** through NVIDIA's hosted API Catalog - powerful, and no local GPU required. To run locally, we'll switch to the smaller, more accessible [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b), whose deployment needs depend on the GPU, precision, and model profile. Check the *Deploy* tab’s supported hardware, container instructions, and memory requirements against the machine’s free memory before starting.
+Our agent has been running on **Nemotron 3.5 Super VL (120B)** through NVIDIA's hosted API Catalog - powerful, and no local GPU required. To run locally, we'll switch to the smaller, more accessible [Nemotron 3 Nano](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b), whose deployment needs depend on the GPU, precision, and model profile. Check the *Deploy* tab’s supported hardware, container instructions, and memory requirements against the machine’s free memory before starting.
 
 For our model, you can find the relevant details on the [deployment page](https://build.nvidia.com/nvidia/nemotron-3-nano-30b-a3b/deploy), including Docker commands and environment setup.
 

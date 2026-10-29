@@ -13,7 +13,7 @@ projects, an open agent framework, and Linux-kernel primitives.
   github.com/NVIDIA/OpenShell.
 - **Privacy Router** — part of OpenShell's inference gateway: **credential injection +
   operator-chosen backend**, *not* content classification (see `concepts.md`).
-- **NVIDIA Nemotron** — `nvidia/nemotron-3-ultra-550b-a55b` for inference *and* the
+- **NVIDIA Nemotron** — `nvidia/nemotron-3.5-super-vl-120b-a12b` for inference *and* the
   LLM-as-judge in the safety eval (temp 0).
 - **NeMo Guardrails** — NVIDIA's input/output filtering library, cited as explore-next.
   github.com/NVIDIA/NeMo-Guardrails.

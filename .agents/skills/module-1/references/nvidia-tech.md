@@ -4,9 +4,12 @@ What each NVIDIA (and adjacent third-party) technology is, its role in *this* mo
 where to learn more. Be precise about what is NVIDIA vs not — learners conflate these.
 
 ## NVIDIA
-- **NVIDIA Nemotron 3 Ultra (550B)** — model id `nvidia/nemotron-3-ultra-550b-a55b`. The
-  reasoning LLM that powers the agent (the "Model" pillar). Chosen for strong tool-calling
-  and reasoning; hosted, so no local GPU is needed. Resource: https://build.nvidia.com.
+- **NVIDIA Nemotron 3.5 Super VL (120B)** — model id `nvidia/nemotron-3.5-super-vl-120b-a12b`
+  (120B total / 12B active parameters; "VL" = vision-language, though the workshop only uses
+  its text reasoning and tool calling). The reasoning LLM that powers the agent (the "Model"
+  pillar). Chosen for strong tool-calling and reasoning; hosted, so no local GPU is needed.
+  It succeeds Nemotron 3 Super (retired) and Nemotron 3 Ultra (heavily rate-limited).
+  Resource: https://build.nvidia.com.
 - **NVIDIA API Catalog / NIM** — hosted inference at `https://integrate.api.nvidia.com/v1`,
   an OpenAI-compatible endpoint. "NIM" = NVIDIA Inference Microservices, the serving layer
   behind the catalog. This is what lets Module 1 run GPU-free. Resources:

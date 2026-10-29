@@ -4,7 +4,7 @@ What each NVIDIA (and adjacent third-party) technology is, its role in *this* mo
 where to learn more. Be precise about what is NVIDIA vs not — learners conflate these.
 
 ## NVIDIA
-- **NVIDIA Nemotron 3 Super (120B)** — model id `nvidia/nemotron-3-super-120b-a12b`. The
+- **NVIDIA Nemotron 3 Ultra (550B)** — model id `nvidia/nemotron-3-ultra-550b-a55b`. The
   reasoning LLM that powers the agent (the "Model" pillar). Chosen for strong tool-calling
   and reasoning; hosted, so no local GPU is needed. Resource: https://build.nvidia.com.
 - **NVIDIA API Catalog / NIM** — hosted inference at `https://integrate.api.nvidia.com/v1`,

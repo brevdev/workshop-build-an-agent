@@ -37,7 +37,7 @@ a fresh clone.
   `asyncio.run()` inside Jupyter; use a bare `await` in the notebook instead.
 
 ## Model endpoint
-- Model `nvidia/nemotron-3-super-120b-a12b` at `https://integrate.api.nvidia.com/v1`.
+- Model `nvidia/nemotron-3-ultra-550b-a55b` at `https://integrate.api.nvidia.com/v1`.
 - **404 / model-not-found** → the catalog id may have changed; have them confirm the
   current id on https://build.nvidia.com and that their key has access. Don't guess a
   replacement model name.

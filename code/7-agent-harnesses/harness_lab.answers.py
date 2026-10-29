@@ -150,7 +150,7 @@ def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
     tools = CORE_TOOLS + list(extra_tools or [])
     registry = {t.name: t for t in tools}
     # Two defaults that bite: max_completion_tokens=1024 truncates long
-    # write_file calls mid-JSON, and timeout=60s is too tight for a 120B
+    # write_file calls mid-JSON, and timeout=60s is too tight for a large
     # model on long generations.
     model = ChatNVIDIA(
         model=MODEL_NAME, temperature=0.2, max_completion_tokens=4096, timeout=180

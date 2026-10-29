@@ -156,7 +156,7 @@ def build_bare_agent(extra_tools=None, system_prompt=MINIMAL_SYSTEM_PROMPT):
     # TODO: Exercise 1a — create the model and bind the tools to it.
     # Use ChatNVIDIA with MODEL_NAME, temperature=0.2,
     # max_completion_tokens=4096 (the 1024 default truncates long write_file
-    # calls mid-JSON), and timeout=180 (a 120B model can exceed the 60s
+    # calls mid-JSON), and timeout=180 (a large model can exceed the 60s
     # default on long generations), then .bind_tools(tools)
     model = ...
 

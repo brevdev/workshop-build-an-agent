@@ -27,7 +27,7 @@ plus retrieval-chain detail. Diagrams in `.devx/2-agentic-rag/img/`.
 - *Vector DB Search* = FAISS similarity over the ingested chunks.
 - *Reranking Model* = `NVIDIARerank` (`llama-nemotron-rerank-vl-1b-v2`): reorders candidates by
   estimated relevance (evaluate whether the new ordering helps).
-- *LLM* = `ChatNVIDIA` (Nemotron 3 Super).
+- *LLM* = `ChatNVIDIA` (Nemotron 3 Ultra).
 
 ## Common confusions
 - basic_rag "always retrieves" vs agentic_rag "retrieves when the model chooses" — that

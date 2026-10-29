@@ -36,7 +36,7 @@ Documents must be turned into searchable vectors before query time:
   decides when to call it.
 
 ## The agent (`agentic_rag.md`)
-- **Model:** `ChatNVIDIA(model="nvidia/nemotron-3-super-120b-a12b", temperature=0.6,
+- **Model:** `ChatNVIDIA(model="nvidia/nemotron-3-ultra-550b-a55b", temperature=0.6,
   max_tokens=4096)` — note this is `ChatNVIDIA` (NVIDIA endpoints), not Module 1's
   `ChatOpenAI`.
 - **Graph:** `create_react_agent(model, tools, prompt)` (LangGraph prebuilt) wires the

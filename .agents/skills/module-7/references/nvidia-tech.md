@@ -7,7 +7,7 @@ harness, but to make **every** harness better — engine (Nemotron), safety (Nem
 portable capability (Verified Skills).
 
 ## NVIDIA
-- **Nemotron** (`nvidia/nemotron-3-super-120b-a12b`) — the hosted model for the core lab and the configured optional Hermes track. Resource: https://build.nvidia.com.
+- **Nemotron** (`nvidia/nemotron-3-ultra-550b-a55b`) — the hosted model for the core lab and the configured optional Hermes track. Resource: https://build.nvidia.com.
 - **NIM / API Catalog** — hosted inference at `https://integrate.api.nvidia.com/v1`
   (OpenAI-compatible). Used by the core lab; optional coding agents need their own model access.
 - **ChatNVIDIA** (`langchain_nvidia_ai_endpoints`) — NVIDIA's official LangChain integration;

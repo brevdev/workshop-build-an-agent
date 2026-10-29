@@ -4,7 +4,7 @@ What each NVIDIA (and adjacent third-party) technology is and its role here. Be 
 about NVIDIA vs not.
 
 ## NVIDIA
-- **Nemotron 3 Super (120B)** — `nvidia/nemotron-3-super-120b-a12b`, via **`ChatNVIDIA`**
+- **Nemotron 3 Ultra (550B)** — `nvidia/nemotron-3-ultra-550b-a55b`, via **`ChatNVIDIA`**
   (temp 0.6, max_tokens 4096). The agent's reasoning LLM.
 - **NVIDIA NeMo Retriever** — NVIDIA's retrieval-model family. Two are used:
   - **Embeddings:** `nvidia/nemotron-3-embed-1b` (`NVIDIAEmbeddings`, `truncate="END"`).
@@ -31,5 +31,5 @@ about NVIDIA vs not.
 > Clarifications learners ask: *"Is MCP an NVIDIA thing?"* → no, it's Anthropic's open
 > standard (NVIDIA/NemoClaw use it too). *"Embedding vs rerank model?"* → embeddings
 > index/search by similarity; reranking reorders the top-k by relevance — both are NeMo
-> Retriever. *"Is this the same model as Module 1?"* → same LLM (Nemotron 3 Super), but M2
+> Retriever. *"Is this the same model as Module 1?"* → same LLM (Nemotron 3 Ultra), but M2
 > uses the native `ChatNVIDIA` client instead of M1's OpenAI-compatible `ChatOpenAI`.

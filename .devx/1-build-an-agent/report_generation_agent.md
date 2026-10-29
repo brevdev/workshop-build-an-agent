@@ -12,7 +12,7 @@ Remember, there are four primary components to an agent: the model, tools, memor
 In this exercise, we wire up all four - the same anatomy, now made concrete:
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell"><h4>MODEL</h4>NVIDIA Nemotron 3 Super (120B), accessed via NVIDIA's API.</div>
+  <div class="dx-cell"><h4>MODEL</h4>NVIDIA Nemotron 3 Ultra (550B), accessed via NVIDIA's API.</div>
   <div class="dx-cell"><h4>TOOLS</h4>A web search function using the Tavily Search Engine API.</div>
   <div class="dx-cell"><h4>MEMORY / STATE</h4>Managed automatically by LangChain as conversation history.</div>
   <div class="dx-cell"><h4>ROUTING</h4>Handled by LangChain's agent framework - no manual loop needed.</div>

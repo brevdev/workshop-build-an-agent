@@ -18,7 +18,7 @@ signal of an untouched blank (guide via `exercises.md`), **not** a bug to fix fo
 
 ## Keys, imports, dependencies
 - **`NVIDIA_API_KEY`** in repo-root `secrets.env` (gitignored) — the core lab and configured Hermes calls use
-  `nvidia/nemotron-3-super-120b-a12b` through `integrate.api.nvidia.com`. **401** → key
+  `nvidia/nemotron-3-ultra-550b-a55b` through `integrate.api.nvidia.com`. **401** → key
   missing/invalid (set it via the Secrets Manager / https://build.nvidia.com).
 - **`ModuleNotFoundError: tiktoken`** (Ex 2) or `langchain_nvidia_ai_endpoints` → install the
   workshop deps: `pip install -r requirements.txt` (run from the repo root). `tiktoken` uses
@@ -31,7 +31,7 @@ harness, not a specific one.
 - **Install:** `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`, then
   `hermes setup` → choose **Custom OpenAI-compatible endpoint**.
 - **Point it at Nemotron** (`~/.hermes/config.yaml`): `provider: custom`,
-  `default: nvidia/nemotron-3-super-120b-a12b`, `base_url: https://integrate.api.nvidia.com/v1`,
+  `default: nvidia/nemotron-3-ultra-550b-a55b`, `base_url: https://integrate.api.nvidia.com/v1`,
   `api_key: ${NVIDIA_API_KEY}`.
 - **"Hermes can't reach the model" / auth errors** → the `base_url` is missing `/v1`, the
   `api_key` env var isn't exported in that shell, or the model name is wrong. Same Nemotron

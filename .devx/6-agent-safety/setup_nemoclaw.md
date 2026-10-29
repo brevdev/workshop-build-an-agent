@@ -28,7 +28,7 @@ Walk through each prompt as follows. Your NVIDIA key is read from your saved wor
 
 1. **License notice** — Type `yes` to accept.
 2. **Inference provider** — Press Enter to accept **NVIDIA Endpoints** (option 1).
-3. **Model** — Press Enter to accept **Nemotron 3 Super 120B** (`nvidia/nemotron-3-super-120b-a12b`). Check the ID on screen; menu positions can change.
+3. **Model** — Choose **Nemotron 3 Ultra 550B** (`nvidia/nemotron-3-ultra-550b-a55b`). Check the ID on screen; menu positions can change.
 4. **Apply this configuration?** — Press Enter (Yes).
 5. **Brave Web Search** — Press Enter (No; not needed for this module).
 6. **Messaging channels** — Press Enter to skip (not needed for this module).

@@ -67,7 +67,7 @@ checkpointer = MemorySaver()
 
 # UI choices name the actual centrally configured model.
 MODEL_MAP = {"nemotron": get_model("chat"), "nemotron_fast": get_model("fast_chat")}
-MODEL_DISPLAY_NAMES = {"nemotron": "Nemotron Super", "nemotron_fast": "Nemotron Lightning"}
+MODEL_DISPLAY_NAMES = {"nemotron": "Nemotron Ultra", "nemotron_fast": "Nemotron Lightning"}
 
 # Tools that require human approval before executing
 INTERRUPT_TOOLS = {

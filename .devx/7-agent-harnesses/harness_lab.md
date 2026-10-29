@@ -28,7 +28,7 @@ Here's what a finished Exercise 1 run looks like:
 
 <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 1a');"><i class="fas fa-code"></i> TODO: Exercise 1a</button> — one statement: construct the model client and hand it the tool list (already assembled just above as `tools`).
 
-Use `ChatNVIDIA` with `MODEL_NAME`, `temperature=0.2`, `max_completion_tokens=4096` (the 1,024 default truncates long `write_file` calls mid-JSON), and `timeout=180` (a 120B model can exceed the 60s default on long generations) — then `.bind_tools(tools)` so the model knows which tools it may request.
+Use `ChatNVIDIA` with `MODEL_NAME`, `temperature=0.2`, `max_completion_tokens=4096` (the 1,024 default truncates long `write_file` calls mid-JSON), and `timeout=180` (a large model can exceed the 60s default on long generations) — then `.bind_tools(tools)` so the model knows which tools it may request.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -100,7 +100,7 @@ When prompted, enter the NVIDIA endpoint, model, and your key — or skip the wi
 ```yaml
 model:
   provider: custom
-  default: nvidia/nemotron-3-super-120b-a12b
+  default: nvidia/nemotron-3-ultra-550b-a55b
   base_url: https://integrate.api.nvidia.com/v1
   api_key: ${NVIDIA_API_KEY}
 ```

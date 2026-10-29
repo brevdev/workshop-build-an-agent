@@ -87,7 +87,7 @@ HELP?` accordion under every blank. Either way: a minimal **pi-style** harness
 (four tools — `read_file`/`write_file`/`edit_file`/`run_bash` — around Nemotron), a
 **context-tax meter** (`tiktoken`), a **lazy skill loader**, a hand-written **portable
 skill**, a **GPU run** through the verified `accelerated-computing-cudf` skill, and a
-**self-evolving** loop that writes its own skill. Model: `nvidia/nemotron-3-super-120b-a12b`
+**self-evolving** loop that writes its own skill. Model: `nvidia/nemotron-3-ultra-550b-a55b`
 (`ChatNVIDIA`, temp 0.2). The full harness they compare against is **Hermes** (NousResearch;
 OpenClaw from M6 also works).
 

@@ -33,7 +33,7 @@ Worked examples from the module's quizzes:
 - **Model** — the brain. Reads the conversation, decides whether to respond or call
   a tool, and generates output. Good agent models support **tool/function calling**,
   follow instructions reliably, and reason well. The workshop uses **NVIDIA Nemotron
-  3 Super (120B)** via NVIDIA's hosted API catalog (no local GPU needed for inference).
+  3 Ultra (550B)** via NVIDIA's hosted API catalog (no local GPU needed for inference).
 - **Tools** — functions that let the agent act (search, calculate, call APIs). The
   model **does not run tools**; it *requests* them and your code executes them. Each
   tool needs a **schema** (name, description, parameters); description quality
@@ -87,7 +87,7 @@ missing citations, and unexpected tool use.
 
 ## The Module 1 build, concretely (`report_generation_agent.md`)
 The Report Generation Agent maps the four components onto real code:
-- **Model:** `ChatOpenAI(base_url=MODEL_URL, model_name=MODEL_NAME, ...)` in `docgen_agent.py` — `MODEL_URL` is `https://integrate.api.nvidia.com/v1`; `MODEL_NAME = get_model("chat")` (currently `nvidia/nemotron-3-super-120b-a12b`, from `code/workshop_support/models.json`).
+- **Model:** `ChatOpenAI(base_url=MODEL_URL, model_name=MODEL_NAME, ...)` in `docgen_agent.py` — `MODEL_URL` is `https://integrate.api.nvidia.com/v1`; `MODEL_NAME = get_model("chat")` (currently `nvidia/nemotron-3-ultra-550b-a55b`, from `code/workshop_support/models.json`).
 - **Tools:** `search_tavily` in `tools.py` — async Tavily web search; the `@tool` decorator auto-generates the schema.
 - **Memory/State:** managed by LangChain as conversation history (`state["messages"]`).
 - **Routing:** `create_agent(model, tools, system_prompt)` builds a ReAct agent — no manual loop.

@@ -45,7 +45,7 @@ The install script automatically starts the setup wizard. Use the arrow keys and
    - **How do you want to provide this API key?**: **Paste API key now**
    - **API Key**: Paste your NVIDIA API key (the same one from the Secrets Manager)
    - **Endpoint compatibility**: **OpenAI-compatible**
-   - **Model ID**: `nvidia/nemotron-3-super-120b-a12b`. The wizard verifies the endpoint; if it reports `fetch failed`, choose **Change model** and enter the same ID again to retry.
+   - **Model ID**: `nvidia/nemotron-3-ultra-550b-a55b`. The wizard verifies the endpoint; if it reports `fetch failed`, choose **Change model** and enter the same ID again to retry.
    - **Endpoint ID**: Accept the default (`custom-integrate-api-nvidia-com`)
    - **Model alias**: Leave blank
    - **Image input**: Leave as **No**

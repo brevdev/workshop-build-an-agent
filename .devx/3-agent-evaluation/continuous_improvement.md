@@ -376,7 +376,6 @@ You've transformed from relying on intuition to having a rigorous, data-driven a
 While this module focused on RAGAS and custom LLM-as-a-judge pipelines, the evaluation ecosystem is rich with other tools worth exploring as you scale:
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide is-tall"><h4>NVIDIA NeMo Agent Toolkit</h4>Open-source, framework-agnostic library for connecting, evaluating, and profiling agents - built-in RAG evaluators, agent trajectory evaluation, and custom evaluator support. Works with LangChain, LlamaIndex, CrewAI, and more. <a href="https://github.com/NVIDIA/NeMo-Agent-Toolkit">github.com/NVIDIA/NeMo-Agent-Toolkit</a></div>
   <div class="dx-cell"><h4>NVIDIA NeMo Evaluator</h4>Enterprise microservice - 100+ benchmarks, LLM-as-a-judge scoring, RAG metrics, agent eval, built for CI/CD. <a href="https://docs.nvidia.com/nemo/microservices/latest/evaluate/index.html">docs.nvidia.com/nemo/microservices</a></div>
   <div class="dx-cell"><h4>LangSmith</h4>LangChain's platform for tracing, dataset management, and evaluation, tightly integrated with LangChain agents. <a href="https://smith.langchain.com/">smith.langchain.com</a></div>
   <div class="dx-cell"><h4>Arize Phoenix</h4>Open-source LLM observability - tracing, evaluation, and debugging of retrieval and generation quality. <a href="https://arize.com/phoenix/">arize.com/phoenix</a></div>

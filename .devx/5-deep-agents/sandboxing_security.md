@@ -393,13 +393,4 @@ You now have the complete toolkit — from building your first agent to deployin
 
 Each level of capability demands a corresponding level of security. Deep agents sit at the far end of this spectrum — the most capable and the most in need of containment.
 
-<!-- fold:break -->
-
-### What to Explore Next
-
-<div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide"><h4>EXPLORE NEXT</h4><p><span class="dx-chip is-green">START HERE</span> <a href="https://github.com/NVIDIA/NeMo-Agent-Toolkit">NVIDIA NeMo Agent Toolkit</a> - open-source, framework-agnostic library for connecting, evaluating, and profiling AI agents, with built-in RAG and trajectory evaluators.</p></div>
-  <div class="dx-cell is-wide"><h4>GO DEEPER</h4><p><a href="https://github.com/NVIDIA-AI-Blueprints/aiq">AI-Q Research Assistant Blueprint</a> - an open reference for enterprise deep agents that connect to your data, reason with SOTA models, and deliver trusted business insights.</p></div>
-</div>
-
 > **Congratulations!** You've completed Module 5: Deep Agents.

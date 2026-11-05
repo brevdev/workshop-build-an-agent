@@ -9,9 +9,8 @@ NVIDIA vs third-party for the evaluation module.
   Resource: build.nvidia.com.
 - **NeMo Retriever embeddings** — `nvidia/nemotron-3-embed-1b` (`EMBEDDING_MODEL` in
   the framework); RAGAS uses embeddings for Answer Relevancy.
-- **NeMo Agent Toolkit** and **NeMo Evaluator** — NVIDIA's production eval offerings,
-  mentioned in the wrap-up as where to go next. Toolkit: github.com/NVIDIA/NeMo-Agent-Toolkit;
-  Evaluator: developer.nvidia.com/nemo-evaluator.
+- **NeMo Evaluator** — NVIDIA's production evaluation offering, mentioned in the
+  wrap-up as where to go next. Resource: developer.nvidia.com/nemo-evaluator.
 - **NIM / NGC** — hosted inference + `NVIDIA_API_KEY`.
 
 ## Third-party (NOT NVIDIA)

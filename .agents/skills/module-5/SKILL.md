@@ -142,7 +142,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **`references/exercises.md`** — the five `deep_agent.py` blanks (hint ladders), the dry-run + Deep Agents Client run flow, the backend/HITL choices.
 - **`references/troubleshooting.md`** — demo backend `.venv`/uvicorn, Docker sandbox, model availability, HITL interrupts, workspace paths, deepagents imports, the fake demo files.
 - **`references/diagrams.md`** — explain the shallow vs middleware-pipeline, hierarchical-delegation, and the two sandbox-pattern figures.
-- **`references/nvidia-tech.md`** — Nemotron/NIM, AI-Q Blueprint, NeMo Agent Toolkit; deepagents/LangGraph/Docker are third-party.
+- **`references/nvidia-tech.md`** — Nemotron/NIM; deepagents/LangGraph/Docker are third-party.
 - **`references/quizzes.md`** — deeper "Check Your Understanding" feedback.
 
 ## Environment & hardware

@@ -44,7 +44,7 @@ The controls address different risks and can be combined:
 - **NeMo Data Designer** (SDG) — M3 (eval datasets), M4 (training data).
 - **NeMo Gym** (verifiable rewards) — M4.
 - **NemoClaw + OpenShell** (kernel enforcement + Privacy Router) — M6.
-- **NeMo Agent Toolkit / NeMo Evaluator / AI-Q Blueprint** — explore-next pointers in M3/M5/M6.
+- **NeMo Evaluator** — explore-next pointer in M3.
 - Per-module specifics + the NVIDIA-vs-third-party split: each module's `references/nvidia-tech.md`.
 
 ## Common cross-module questions

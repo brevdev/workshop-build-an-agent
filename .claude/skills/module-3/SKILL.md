@@ -123,7 +123,7 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
 - **`references/exercises.md`** — the few code blanks (hint ladders) **plus** how to help with interpretation/analysis without doing it for the learner.
 - **`references/troubleshooting.md`** — RAGAS, the judge, prerequisite agents, SDG/Data Designer, long run times, data paths, the faithfulness-prompt blank.
 - **`references/diagrams.md`** — explain the eval-pipeline, RAG-2×2-flow, LLM-as-judge, and improvement-cycle figures.
-- **`references/nvidia-tech.md`** — Nemotron judge, NeMo Data Designer, NeMo Evaluator; RAGAS/LangSmith are third-party.
+- **`references/nvidia-tech.md`** — Nemotron judge, NeMo Data Designer, NeMo Gym; RAGAS/LangSmith are third-party.
 - **`references/quizzes.md`** — deeper "Check Your Understanding" feedback.
 
 ## Environment & hardware

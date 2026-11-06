@@ -376,7 +376,7 @@ You've transformed from relying on intuition to having a rigorous, data-driven a
 While this module focused on RAGAS and custom LLM-as-a-judge pipelines, the evaluation ecosystem is rich with other tools worth exploring as you scale:
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell"><h4>NVIDIA NeMo Evaluator</h4>Enterprise microservice - 100+ benchmarks, LLM-as-a-judge scoring, RAG metrics, agent eval, built for CI/CD. <a href="https://docs.nvidia.com/nemo/microservices/latest/evaluate/index.html">docs.nvidia.com/nemo/microservices</a></div>
+  <div class="dx-cell"><h4>NVIDIA NeMo Gym</h4>Open-source library for evaluating agents in environments - repeated rollouts scored by verifiers (code checks or LLM judges), reported as pass rates and run-to-run variance. Verifiers double as RL rewards, as in Module 4. <a href="https://github.com/NVIDIA-NeMo/Gym">github.com/NVIDIA-NeMo/Gym</a></div>
   <div class="dx-cell"><h4>LangSmith</h4>LangChain's platform for tracing, dataset management, and evaluation, tightly integrated with LangChain agents. <a href="https://smith.langchain.com/">smith.langchain.com</a></div>
   <div class="dx-cell"><h4>Arize Phoenix</h4>Open-source LLM observability - tracing, evaluation, and debugging of retrieval and generation quality. <a href="https://arize.com/phoenix/">arize.com/phoenix</a></div>
   <div class="dx-cell"><h4>DeepEval</h4>Open-source eval framework with pre-built metrics (hallucination, relevancy, toxicity) and CI/CD integration. <a href="https://docs.confident-ai.com/">docs.confident-ai.com</a></div>

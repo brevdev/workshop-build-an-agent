@@ -37,7 +37,7 @@ where it's central; for depth, see that module's `concepts.md`.
 - **SFT** — Supervised Fine-Tuning: train on input→output examples to learn desired behavior.
 - **GRPO** — Group Relative Policy Optimization: generate several candidates, score each, reinforce the above-average ones (RL).
 - **RLVR** — Reinforcement Learning with Verifiable Rewards: rewards from *code* checks, not an LLM judge.
-- **NeMo Gym** — NVIDIA's reward/environment framework; here the `/verify` reward server.
+- **NeMo Gym** — NVIDIA's environment library for evaluating and training agents (a verifier scores each rollout); here the `/verify` reward server. M3 points to it for agent evaluation at scale.
 - **NeMo Data Designer** — NVIDIA's schema-first SDG tool.
 - **Reward hacking** — the model maximizes the reward via a shortcut without doing the task (e.g. empty `{}` scoring 1.0).
 - **LoRA / PEFT** — parameter-efficient fine-tuning (train small adapters, not all weights).

@@ -9,8 +9,11 @@ NVIDIA vs third-party for the evaluation module.
   Resource: build.nvidia.com.
 - **NeMo Retriever embeddings** — `nvidia/nemotron-3-embed-1b` (`EMBEDDING_MODEL` in
   the framework); RAGAS uses embeddings for Answer Relevancy.
-- **NeMo Evaluator** — NVIDIA's production evaluation offering, mentioned in the
-  wrap-up as where to go next. Resource: developer.nvidia.com/nemo-evaluator.
+- **NeMo Gym** — NVIDIA's open-source library for evaluating and training agents in
+  environments: a task dataset, an agent harness, and a verifier that scores each rollout
+  (code checks or LLM judges). Repeated runs report pass rates and run-to-run variance.
+  Mentioned in the wrap-up as where to go next for agent evaluation at scale. It scores task
+  completion; it does not compute the RAGAS metrics. Resource: github.com/NVIDIA-NeMo/Gym.
 - **NIM / NGC** — hosted inference + `NVIDIA_API_KEY`.
 
 ## Third-party (NOT NVIDIA)
@@ -26,3 +29,5 @@ NVIDIA vs third-party for the evaluation module.
 > framework; here it's pointed at NVIDIA models. *"Is the judge a special model?"* → no, it's
 > the configured Nemotron judge with a rubric prompt and JSON output mode. *"NeMo Data
 > Designer vs RAGAS?"* → Data Designer *generates* the test data; RAGAS *scores* the agent on it.
+> *"Isn't NeMo Gym the Module 4 training tool?"* → it's both: the environment and verifier
+> that score an evaluation run can also supply the RL reward, which is how M4 uses it.

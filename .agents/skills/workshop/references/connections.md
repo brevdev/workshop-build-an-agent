@@ -42,9 +42,8 @@ The controls address different risks and can be combined:
 - **NVIDIA API Catalog** — hosted model calls across the course; local NIM is optional in M2.
 - **NeMo Retriever** (embed + rerank) — M2 (RAG), M3 (RAGAS uses embeddings).
 - **NeMo Data Designer** (SDG) — M3 (eval datasets), M4 (training data).
-- **NeMo Gym** (verifiable rewards) — M4.
+- **NeMo Gym** (environments + verifiers) — M3 (explore-next: agent evaluation at scale), M4 (verifiable rewards).
 - **NemoClaw + OpenShell** (kernel enforcement + Privacy Router) — M6.
-- **NeMo Evaluator** — explore-next pointer in M3.
 - Per-module specifics + the NVIDIA-vs-third-party split: each module's `references/nvidia-tech.md`.
 
 ## Common cross-module questions

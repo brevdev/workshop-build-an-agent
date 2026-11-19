@@ -4,7 +4,7 @@
 
 Throughout this workshop you've built agents with LangGraph, run them with deepagents, and hardened an always-on OpenClaw assistant. Every one of those agents had two distinct layers: the **LLM** (stateless next-token prediction) and the **harness** (the execution loop, memory, and control flow around it). In this module, you'll dive deeper into that second layer and learn why the harness — not the model — is increasingly the primary design surface for agents. You'll take it apart: the decisions that go into it, the components that make it up, and why harness design is where agents succeed or break down.
 
-You'll examine harnesses across the design spectrum — from full orchestration frameworks like Claude Code and OpenClaw to the lightweight harness behind pi — and measure the **context tax** each design pays. **Agent Skills** provides an instruction format that compatible harnesses can share. You'll author your own skill, install an **NVIDIA Verified Skill** from [github.com/NVIDIA/skills](https://github.com/NVIDIA/skills), and put your GPU to work through a harness with the required local tools and libraries.
+You'll examine harnesses across the design spectrum — from full orchestration frameworks like Claude Code and OpenClaw to the lightweight harness behind pi — and measure the context tax each design pays. **Agent Skills** provides an instruction format that compatible harnesses can share. You'll author your own skill, install an NVIDIA Verified Skill from [github.com/NVIDIA/skills](https://github.com/NVIDIA/skills), and put your GPU to work through a harness with the required local tools and libraries.
 
 <div class="dx-bento">
   <div class="dx-cell is-wide is-tall dx-reveal" style="--i:1">
@@ -28,7 +28,7 @@ You'll examine harnesses across the design spectrum — from full orchestration 
 <div class="dx-island dx-tutor">
   <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
 
-This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+This workshop ships its own tutor as Agent Skills. It explains this module's concepts in the workshop's own framing, gives graduated hints without ever completing your exercises, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
 
 <button onclick="launch('Claude Code', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
 

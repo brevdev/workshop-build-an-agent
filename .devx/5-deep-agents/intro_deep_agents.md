@@ -2,7 +2,7 @@
 
 In Modules 1 through 4, we built increasingly capable agents — from a report generator to a RAG-powered help desk to a customized bash agent. Each used the same fundamental pattern: a **ReAct loop** where a single model reasons, calls a tool, observes the result, and repeats.
 
-These agents are powerful, but they're **shallow**. In this module, we'll explore what happens when we go *deep*.
+These agents are powerful, but they're shallow. In this module, we'll explore what happens when we go *deep*.
 
 <!-- fold:break -->
 
@@ -17,7 +17,7 @@ Here's a quick recap of what you've accomplished across the workshop:
   <div class="dx-cell"><h4>MODULE 4</h4><span class="dx-big">Custom CLI agent</span>Domain specialization via SDG + RLVR</div>
 </div>
 
-The earlier modules mostly use a **single agent loop**. They already include retrieval, checkpoint state, files or skills. Here, “deep” describes adding explicit planning, delegation and context management around that loop; it is a design pattern, not a strict boundary between kinds of agents.
+The earlier modules mostly use a single agent loop. They already include retrieval, checkpoint state, files or skills. Here, “deep” describes adding explicit planning, delegation and context management around that loop; it is a design pattern, not a strict boundary between kinds of agents.
 
 <!-- fold:break -->
 
@@ -90,12 +90,12 @@ A **deep agent** goes beyond the flat ReAct loop. It has built-in capabilities t
 
 | Capability | Shallow Agent | Deep Agent |
 |---|---|---|
-| **Planning** | Task-dependent prompts or plans | `write_todos` for task breakdown and tracking |
-| **File System** | Whatever tools are provided | Full suite: `read`, `write`, `edit`, `ls`, `glob`, `grep` |
-| **Shell Access** | Possible with custom implementation | Built-in `execute` with sandboxing |
-| **Sub-Agents** | Optional, explicitly wired | `task` tool to delegate work to specialized agents |
-| **Context Management** | Depends on the implementation | Auto-summarization when conversations get long |
-| **Skills** | Can use reusable instructions | Loadable markdown methodology files |
+| Planning | Task-dependent prompts or plans | `write_todos` for task breakdown and tracking |
+| File System | Whatever tools are provided | Full suite: `read`, `write`, `edit`, `ls`, `glob`, `grep` |
+| Shell Access | Possible with custom implementation | Built-in `execute` with sandboxing |
+| Sub-Agents | Optional, explicitly wired | `task` tool to delegate work to specialized agents |
+| Context Management | Depends on the implementation | Auto-summarization when conversations get long |
+| Skills | Can use reusable instructions | Loadable markdown methodology files |
 
 Deep agents aren't just agents with more tools — they're agents with an architecture designed for complex, autonomous work.
 
@@ -121,7 +121,7 @@ That's a deep agent. And that's what we'll build in this module.
 
 ## The Deep Agents Library
 
-We'll use [**langchain-ai/deepagents**](https://github.com/langchain-ai/deepagents) — an open-source agent harness built on LangChain and LangGraph. It's designed to be batteries-included, meaning the capabilities you need come built in:
+We'll use [langchain-ai/deepagents](https://github.com/langchain-ai/deepagents) — an open-source agent harness built on LangChain and LangGraph. It's designed to be batteries-included, meaning the capabilities you need come built in:
 
 ```python
 from deepagents import create_deep_agent

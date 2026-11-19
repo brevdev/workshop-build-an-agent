@@ -16,9 +16,8 @@ third-party; NVIDIA supplies the hosted *models*.
 - **Docker** — the sandbox isolation boundary (`DockerSandboxBackend`).
 - **Tavily** — optional web-search tool (`TavilySearchResults`, `TAVILY_API_KEY`).
 - **Framework vs model:** both shipped model choices are NVIDIA Nemotron models; LangChain/deepagents remain third-party libraries.
-- **Sandbox vendors** (named in the security spectrum): Daytona, Modal, Runloop, **E2B**
-  (Firecracker microVMs); **Bubblewrap/Seatbelt** (OS sandboxing used by Claude Code);
-  **gVisor**, **Firecracker** — all third-party isolation tech.
+- **Sandbox tech** (named in the security spectrum): **Deno**, **Bubblewrap/Seatbelt**,
+  **Docker**, **gVisor**, **Firecracker** — all third-party isolation tech.
 
 > Clarifications learners ask: *"Is deepagents an NVIDIA library?"* → no, it's LangChain's;
 > NVIDIA provides the hosted Nemotron models used here.

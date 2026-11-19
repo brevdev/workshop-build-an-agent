@@ -2,9 +2,9 @@
 
 What each NVIDIA (and adjacent third-party) technology is, its role in *this* module, and
 where to learn more. Module 7 is unusually full of **non-NVIDIA** names (seven harnesses) —
-learners conflate them, so be precise. The module's thesis: NVIDIA's bet is *not* to own the
-harness, but to make **every** harness better — engine (Nemotron), safety (NemoClaw), and
-portable capability (Verified Skills).
+learners conflate them, so be precise. The module's thesis: the harness layer
+changes fast, so it's best practice to build on pieces that work across harnesses — engine
+(Nemotron), safety (NemoClaw), and portable capability (Verified Skills).
 
 ## NVIDIA
 - **Nemotron** (`nvidia/nemotron-3.5-super-vl-120b-a12b`) — the hosted model for the core lab and the configured optional Hermes track. Resource: https://build.nvidia.com.

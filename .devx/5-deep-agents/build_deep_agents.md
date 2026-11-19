@@ -62,7 +62,7 @@ return ChatNVIDIA(
 
 ### Exercise: Build the Tool Pipeline
 
-Deep agents come with built-in tools (filesystem, planning, etc.), but we can add more. One easy and familiar addition we can make is **web search** via Tavily.
+Deep agents come with built-in tools (filesystem, planning, etc.), but we can add more. One easy and familiar addition we can make is web search via Tavily.
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 2');"><i class="fas fa-code"></i> # TODO: Exercise 2</button>
 

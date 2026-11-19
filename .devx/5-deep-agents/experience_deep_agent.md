@@ -4,7 +4,7 @@
 
 Before we start building, let's get the **Deep Agent Builder UI** running. This is the interactive demo you'll use to test your agent throughout this module — pick a model, drag-and-drop tools, click Build, and chat in real-time.
 
-The demo lives in the `demo/` folder and has two parts: a **React frontend** and a **FastAPI backend**.
+The demo lives in the `demo/` folder and has two parts: a React frontend and a FastAPI backend.
 
 > You haven't written any agent code yet — the backend runs a reference implementation until you complete the exercises on the next page.
 
@@ -74,7 +74,7 @@ The full demo has four phases. Click on each to learn more.
 <details class="dx-peek">
 <summary>1. Pick Your Model</summary>
 
-Click a model card to select it. The cards show the configured **Nemotron 3.5 Super VL** and **Nemotron Lightning** models. Both support tool calling; availability and response quality can vary. The model's brand color will theme the entire UI.
+Click a model card to select it. The cards show the configured Nemotron 3.5 Super VL and Nemotron Lightning models. Both support tool calling; availability and response quality can vary. The model's brand color will theme the entire UI.
 
 </details>
 
@@ -85,9 +85,9 @@ After picking a model, you'll see three panels:
 
 | Panel | What It Does |
 |---|---|
-| **Skill Palette** (left) | Available tools and skills — drag them onto the agent |
-| **Agent Builder** (center) | Drop zone — shows what's been added to your agent |
-| **Settings** (right) | Sandbox mode toggle and other configuration |
+| Skill Palette (left) | Available tools and skills — drag them onto the agent |
+| Agent Builder (center) | Drop zone — shows what's been added to your agent |
+| Settings (right) | Sandbox mode toggle and other configuration |
 
 **Drag tools** from the left palette onto the center area:
 - 🌐 **Web Search** — Real-time internet search via Tavily

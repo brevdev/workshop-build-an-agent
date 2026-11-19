@@ -88,7 +88,7 @@ We call this recurring overhead the **context tax**. The lab estimates about 400
   </div>
 </div>
 
-In the lab, you'll estimate this overhead and reduce the initial skill context with **lazy loading**.
+In the lab, you'll estimate this overhead and reduce the initial skill context with lazy loading.
 
 <!-- fold:break -->
 

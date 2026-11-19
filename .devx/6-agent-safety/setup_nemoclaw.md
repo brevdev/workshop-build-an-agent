@@ -53,7 +53,7 @@ The Workbench project container talks to the host's Docker daemon via a mounted 
 2. **Shared runtime paths** — Keeps gateway binaries, driver configuration and state in Workbench's shared volume and maps their paths for the host Docker daemon. A read-only system certificate bundle lets the gateway verify HTTPS inference endpoints. The sandbox base is pinned to a compatible immutable image.
 3. **Stale-container cleanup** — If a previous install attempt failed, the script removes the leftover gateway container before retrying.
 
-The workshop pins NemoClaw **v0.0.55**, OpenShell **0.0.44**, and OpenClaw **2026.5.22**, with the matching immutable sandbox base. This includes upstream fixes for plugin dependency moves (`EXDEV`) and the file-write hook. The hosted-inference sandbox defaults to CPU mode; it does not need GPU passthrough. On a healthy install, rerunning the script checks the versions and restores the tunnel. A Ready sandbox with an older runtime is preserved, and the helper asks you to reset it explicitly; rerunning alone does not upgrade its image. Recovery from an incomplete install can remove the named gateway and rerun onboarding. Use it only for your disposable workshop setup. See `code/6-agent-safety/scripts/install-nemoclaw.sh` for the implementation.
+The workshop pins NemoClaw v0.0.55, OpenShell 0.0.44, and OpenClaw 2026.5.22, with the matching immutable sandbox base. This includes upstream fixes for plugin dependency moves (`EXDEV`) and the file-write hook. The hosted-inference sandbox defaults to CPU mode; it does not need GPU passthrough. On a healthy install, rerunning the script checks the versions and restores the tunnel. A Ready sandbox with an older runtime is preserved, and the helper asks you to reset it explicitly; rerunning alone does not upgrade its image. Recovery from an incomplete install can remove the named gateway and rerun onboarding. Use it only for your disposable workshop setup. See `code/6-agent-safety/scripts/install-nemoclaw.sh` for the implementation.
 
 This pinned gateway disables operator authentication and TLS. The helper avoids a public-interface listener, but other host users and bridge-connected containers may still reach port 8080. Keep this workshop on a trusted host; sandbox policy does not protect the operator control plane.
 
@@ -84,7 +84,7 @@ The install script writes detailed logs to two files:
     bash code/6-agent-safety/scripts/install-nemoclaw.sh
     ```
 
-2. **Full reset or version upgrade.** Save any workspace files you need first: destroying the sandbox deletes them. With the tunnel and gateway reachable, use the official destroy command to remove the sandbox **and its registration**, then reinstall. Replace `my-assistant` if you chose another name. The destroy command asks for confirmation.
+2. **Full reset or version upgrade.** Save any workspace files you need first: destroying the sandbox deletes them. With the tunnel and gateway reachable, use the official destroy command to remove the sandbox and its registration, then reinstall. Replace `my-assistant` if you chose another name. The destroy command asks for confirmation.
 
     ```bash
     nemoclaw my-assistant destroy --cleanup-gateway
@@ -252,7 +252,7 @@ openshell sandbox upload my-assistant /tmp/deepagent_workspace/ssn_records.txt /
 
 Uploading a directory can nest its basename, so the commands above use explicit file destinations. Check both files exist before running probes.
 
-OpenClaw workspace files inside the sandbox are located at `/sandbox/.openclaw/workspace/`. These files persist across sandbox restarts but are **lost** if you run `nemoclaw my-assistant destroy`. The key workspace files are:
+OpenClaw workspace files inside the sandbox are located at `/sandbox/.openclaw/workspace/`. These files persist across sandbox restarts but are lost if you run `nemoclaw my-assistant destroy`. The key workspace files are:
 
 | File | Purpose |
 |------|---------|
@@ -286,4 +286,4 @@ openclaw tui
 
 Once the connection works, inspect the active policy and test its boundaries. A connected client alone does not verify filesystem restrictions, network rules or inference routing.
 
-> Head to [Working with NemoClaw](using_nemoclaw) to start the hands-on exercises.
+> Head to [Working in the Sandbox](using_nemoclaw) to start the hands-on exercises.

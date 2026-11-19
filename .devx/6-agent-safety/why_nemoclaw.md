@@ -1,10 +1,10 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 03 - PRINCIPLES" data-title="Why NemoClaw: Agent Security Principles and Layers" data-meta="READ::20 min|CONCEPTS::5+|FOCUS::4 security layers"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 03 - PRINCIPLES" data-title="Agent Security Principles and Layers" data-meta="READ::20 min|CONCEPTS::5+|FOCUS::4 security layers"></div>
 
 <img src="_static/robots/supervisor.png" alt="Agent Security Deep-Dive Robot" style="float:right;max-width:300px;margin:25px;" />
 
 Your OpenClaw agent is running. SOUL.md guides its behavior, but prompts do not enforce permissions. OpenClaw also supports tool policies, approvals, and sandboxing; our quickstart has not configured a sandbox. NemoClaw runs an OpenClaw agent inside an operator-managed boundary.
 
-Here, we'll start with **why** agent security is a distinct problem, map **what** threats exist, and then walk through **how** NemoClaw addresses each one -- layer by layer.
+Here, we'll start with why agent security is a distinct problem, map what threats exist, and then walk through how OpenShell addresses each one -- layer by layer.
 
 > NemoClaw is an open-source reference stack that simplifies running OpenClaw agents inside OpenShell containers with policy-based security and privacy guardrails. The `nemoclaw` CLI handles onboarding, lifecycle management, and sandbox configuration. OpenShell provides the sandbox runtime. NemoClaw does not modify the agent you built on the previous page: its installer starts a separate OpenClaw inside the sandbox, and your first agent keeps running outside it.
 
@@ -31,7 +31,7 @@ That table shows *what* changes. The rest of this page explains *why* these chan
 
 ## The Agent Threat Landscape
 
-OWASP's **Top 10 Risks for Agentic Applications** organizes common agent security threats.
+OWASP's Top 10 Risks for Agentic Applications organizes common agent security threats.
 
 These ten risks organize into three clusters. Click on each cluster to learn more about agentic AI risks and why they need addressing.
 
@@ -187,13 +187,13 @@ With the defense-in-depth principle and the OpenShell runtime established, here 
 
 ![NemoClaw Architecture](img/nemoclaw_architecture_dark.svg)
 
-The rest of this page walks through each of these four layers in detail, following a consistent pattern: the security principle at stake, the specific threat it addresses, and how NemoClaw implements it through OpenShell.
+The rest of this page walks through each of these four layers in detail, following a consistent pattern: the security principle at stake, the specific threat it addresses, and how OpenShell enforces it.
 
 <!-- fold:break -->
 
 ## NemoClaw's Security Layers
 
-NemoClaw applies defense in depth across four policy domains. The first three are enforced by OpenShell at the sandbox level. The fourth is managed by the OpenShell inference gateway and Privacy Router.
+OpenShell applies defense in depth across four policy domains. It enforces the first three at the sandbox level, and its inference gateway and Privacy Router manage the fourth.
 
 | Layer | What It Controls | When It Applies |
 |---|---|---|
@@ -218,7 +218,7 @@ This principle directly addresses ASI01 (Goal Hijack) and ASI02 (Tool Misuse). I
 
 Imagine a building where every door is locked by default. To open any door, you need a specific key -- a YAML policy entry -- for that exact door. No master key exists.
 
-NemoClaw runs with a **deny-by-default network policy**. Every outbound connection from the sandbox is intercepted by an HTTP CONNECT proxy inside the container. The proxy queries the policy engine with the destination host, port, and calling binary. If no policy block matches, the connection is blocked.
+The sandbox runs with a **deny-by-default network policy**. Every outbound connection from the sandbox is intercepted by an HTTP CONNECT proxy inside the container. The proxy queries the policy engine with the destination host, port, and calling binary. If no policy block matches, the connection is blocked.
 
 Here is an example network policy that grants `curl` read-only access to the GitHub API:
 
@@ -432,8 +432,8 @@ NemoClaw eliminates this by routing all inference through `inference.local` -- a
 
 1. The agent calls `https://inference.local/v1/chat/completions` using whatever client library it has
 2. The sandbox proxy intercepts the request and identifies it as managed inference
-3. OpenShell **strips** any credentials the sandbox-supplied request carries
-4. OpenShell **injects** the real API credentials from the host-side **Provider** record
+3. OpenShell strips any credentials the sandbox-supplied request carries
+4. OpenShell injects the real API credentials from the host-side Provider record
 5. The request is forwarded to the actual inference endpoint (NVIDIA, OpenAI, Anthropic, etc.)
 6. The response flows back to the agent
 
@@ -476,7 +476,7 @@ Runtime switching is done with:
 openshell inference set --provider my-local-ollama --model nemotron-nano
 ```
 
-This switches the backend for the whole gateway without restarting its sandboxes. For per-request choices, your application needs separately configured routes or gateways; don't change shared gateway state for each prompt. In Exercise 5 on the [Working with NemoClaw](using_nemoclaw) page, you'll build a classifier that **proposes a route** without changing live inference.
+This switches the backend for the whole gateway without restarting its sandboxes. For per-request choices, your application needs separately configured routes or gateways; don't change shared gateway state for each prompt. In Exercise 5 on the [Working in the Sandbox](using_nemoclaw) page, you'll build a classifier that proposes a route without changing live inference.
 
 </div>
 </div>
@@ -594,7 +594,7 @@ This opens a terminal UI showing every allow and deny decision as the agent oper
 
 You've covered the full arc: from understanding what makes agent security a distinct challenge, through the threat landscape and defense-in-depth principle, to the technical details of each enforcement layer and the YAML policy that ties them together.
 
-You now understand the four layers that NemoClaw places around its OpenClaw agent -- deny-by-default network policies, kernel-level filesystem sandboxing via Landlock, process hardening with seccomp and least privilege, and operator-controlled inference routing through the `inference.local` gateway. The next page walks you through installing and configuring the full NemoClaw stack so you can see these layers enforce policy in real time.
+You now understand the four layers that OpenShell enforces around the sandboxed OpenClaw agent -- deny-by-default network policies, kernel-level filesystem sandboxing via Landlock, process hardening with seccomp and least privilege, and operator-controlled inference routing through the `inference.local` gateway. The next page walks you through installing and configuring the full NemoClaw stack so you can see these layers enforce policy in real time.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>

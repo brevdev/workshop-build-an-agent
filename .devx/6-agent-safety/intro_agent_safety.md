@@ -6,7 +6,7 @@ In Modules 1 through 5, you built increasingly powerful agents — from a report
 
 Three names come up throughout this module, so here is which is which. **OpenClaw** is the autonomous agent. **OpenShell** is the sandbox runtime that contains it and enforces rules on its network access, files, processes, and model requests. **NVIDIA NemoClaw** is the reference stack that installs and connects the two, with a Nemotron model behind the agent. You'll work through each of those four layers of control hands-on.
 
-The question isn't whether your agent can do the work. It's whether your agent can do the work **safely when no one is watching**.
+The question isn't whether your agent can do the work. It's whether your agent can do the work safely when no one is watching.
 
 <!-- fold:break -->
 
@@ -185,40 +185,16 @@ The progression adds controls around the model, then tests what those controls a
 
 <!-- fold:break -->
 
-## Four Layers of Better Agent Security
+## What Has to Be Controlled
 
-A NemoClaw deployment comes with deny-by-default security controls across four layers, all enforced by OpenShell: **network**, **filesystem**, **process**, and **inference**. Each layer addresses a different dimension of agent behavior, and together they provide defense in depth that goes well beyond what application-level controls or container isolation alone can offer.
+Whatever enforces it, an autonomous agent needs four things controlled from outside the agent, where it cannot change them:
 
-<div class="dx-bento dx-reveal">
-  <div class="dx-cell"><h4>NETWORK</h4><span class="dx-big">Where it connects</span>Outbound connections blocked unless allowed - changeable while running.</div>
-  <div class="dx-cell"><h4>FILESYSTEM</h4><span class="dx-big">What it reads/writes</span>Kernel-enforced path rules - locked at sandbox creation.</div>
-  <div class="dx-cell"><h4>PROCESS</h4><span class="dx-big">What it executes</span>Restricted system calls, non-root user - locked at sandbox creation.</div>
-  <div class="dx-cell"><h4>INFERENCE</h4><span class="dx-big">Which models</span>Privacy Router - changeable while running.</div>
-</div>
+- **Network**: where the agent can connect. Destinations that are not on the list are denied.
+- **Filesystem**: what the agent can read and write. System paths are read-only, and writing is limited to a few designated directories.
+- **Process**: what the agent can execute. The agent runs as a non-root user, with a restricted set of allowed system calls, and can only start a limited number of processes at a time. This helps to reduce the impact of any compromise.
+- **Inference**: which model the agent talks to. The operator chooses the model backend, and its API key stays outside the sandbox.
 
-<!-- fold:break -->
-
-### Layer 1: Network
-
-Controls where the agent can connect. Unlisted destinations are denied. Rules can be limited to specific programs, and to specific kinds of request on an allowed host.
-
-<!-- fold:break -->
-
-### Layer 2: Filesystem
-
-Controls what the agent can read and write. System paths (`/usr`, `/lib`, `/etc`) are read-only, and writable access is limited to designated directories (`/sandbox`, `/tmp`). Read-only access prevents writes; it still permits reading any secrets in those paths.
-
-<!-- fold:break -->
-
-### Layer 3: Process
-
-Controls what the agent can execute. The agent runs as a non-root user, with a restricted set of allowed system calls, and can only start a limited number of processes at a time. This helps to reduce the impact of any compromise.
-
-<!-- fold:break -->
-
-### Layer 4: Inference
-
-Controls the inference backend and its credentials. The agent calls `inference.local`; the host supplies the configured provider's key without placing it in the sandbox.
+[Security Principles and Layers](why_nemoclaw) shows how OpenShell enforces each one.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
@@ -238,9 +214,9 @@ In the rest of this module, you'll build the NemoClaw stack layer by layer:
 | Page | What You'll Do | Exercise |
 |------|---------------|----------|
 | [Set Up Your OpenClaw Agent](setup_openclaw) | Get an autonomous agent running | Setup |
-| [Why NemoClaw: Principles and Layers](why_nemoclaw) | Understand agent security principles and NemoClaw's enforcement layers | Concepts |
+| [Security Principles and Layers](why_nemoclaw) | Understand agent security principles and OpenShell's enforcement layers | Concepts |
 | [Set Up NemoClaw](setup_nemoclaw) | Install and configure the NemoClaw stack | Setup |
-| [Working with NemoClaw](using_nemoclaw) | Write and apply OpenShell policies to harden the agent | Exercises 1-5 |
+| [Working in the Sandbox](using_nemoclaw) | Write and apply OpenShell policies to harden the agent | Exercises 1-5 |
 | [Evaluating Agent Safety](evaluating_safety) | Red-team probes + LLM-as-judge + continuous safety suite | Exercise 6 |
 
 > Let's set up your agent. Head to [Set Up Your OpenClaw Agent](setup_openclaw) to get started.

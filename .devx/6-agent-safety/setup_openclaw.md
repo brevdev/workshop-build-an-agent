@@ -2,7 +2,7 @@
 
 <img src="_static/robots/supervisor.png" alt="Setup Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Before you can harden an agent, you need an agent to harden. In this section, you'll set up **OpenClaw** — a popular, config-first autonomous agent framework — and get a personal assistant running that you'll spend the rest of the module hardening.
+Before you can see what a sandbox changes, you need an agent running without one. In this section, you'll set up **OpenClaw** — a popular, config-first autonomous agent framework — and get a personal assistant running on the host. It is your unprotected baseline: later, NemoClaw starts a second OpenClaw inside a sandbox, and you'll compare the two.
 
 <!-- fold:break -->
 
@@ -192,7 +192,7 @@ With the agent running, open the <button onclick="launch('NemoClaw Client');"><i
 
 ## Know Your Baseline — What Your Agent Can Actually Do
 
-Before you harden it, let's see what your agent can quietly do when you're not watching. Four quick probes — each takes under a minute. Run them in your running OpenClaw session (via `openclaw tui` or the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button>).
+Before you add a sandbox, let's see what your agent can quietly do when you're not watching. Four quick probes — each takes under a minute. Run them in your running OpenClaw session (via `openclaw tui` or the <button onclick="launch('NemoClaw Client');"><i class="fa-solid fa-rocket"></i> NemoClaw Client</button>).
 
 > Record what actually happens. A model may refuse, a tool may be unavailable, or a policy may deny access. Use only the fictional canaries below; a refusal alone does not prove an OS restriction.
 
@@ -257,8 +257,8 @@ Then open <button onclick="openOrCreateFileInJupyterLab('~/.openclaw/workspace/M
 
 ## What's Next
 
-Your agent works with the access granted by its tools, OS account, and configuration. SOUL.md guides behavior; it does not contain subprocesses. Next, we'll add a sandbox with operator-controlled permissions.
+Your agent works with the access granted by its tools, OS account, and configuration. SOUL.md guides behavior; it does not contain subprocesses. Next, you'll run a second agent inside a sandbox with operator-controlled permissions.
 
 In the following sections, you'll see exactly how the NemoClaw reference stack attempts to bridge these gaps with kernel-level enforcement, deny-by-default networking, credential isolation, and privacy routing.
 
-> Head to [Why NemoClaw: Principles and Layers](why_nemoclaw) to examine the security principles and technical layers that help make autonomous agents safer for production.
+> Head to [Security Principles and Layers](why_nemoclaw) to examine the security principles and technical layers that help make autonomous agents safer for production.

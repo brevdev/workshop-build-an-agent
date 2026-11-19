@@ -89,12 +89,10 @@ sandbox; keys stay out; instant updates; parallel; failures isolated). **This wo
 what data is reachable, does it execute code, what's the blast radius.
 
 ## Defense in depth & principles
-Six overlapping layers (assume any one fails): **HITL** → **permission allowlists** →
-**application sandboxing** → **container/VM isolation** → **network controls** (default-deny
-egress) → **audit logging**. Security principles: **trust the sandbox, not the model**
-(deepagents follows a "trust the LLM" model — enforce at the tool/sandbox level), **least
-privilege**, **credential isolation** (the Docker execution environment has no vendor keys), **audit tool use** (optional LangSmith tracing), **rate limiting** (recursion/timeout caps), **adversarial
-testing** (probe before deploy), **environment separation**.
+The page names **defense in depth** (a sandbox is one layer; any one layer can fail) and
+leaves the layers to Module 6. Three principles: **trust the sandbox, not the model**
+(the agent can do anything its tools allow — enforce at the tool/sandbox level), **least
+privilege**, **credential isolation** (the Docker execution environment has no vendor keys).
 
 ## Source map
 - Concepts → `intro_deep_agents.md`, `deep_agents.md`

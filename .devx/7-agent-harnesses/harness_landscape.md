@@ -49,7 +49,7 @@ Click through the tabs — each profile covers the philosophy, what it optimizes
 
 > **Philosophy:** Open community, config-first, always-on. The original — and the harness you already know from Module 6.
 
-Agents are configured with markdown (`SOUL.md`, `AGENTS.md`), run continuously on heartbeats, and self-evolve their own memory. Powers the **NVIDIA NemoClaw** reference stack <span class="dx-chip is-green">NemoClaw ✓</span>
+Agents are configured with markdown (`SOUL.md`, `AGENTS.md`), run continuously on heartbeats, and self-evolve their own memory. Powers the NVIDIA NemoClaw reference stack <span class="dx-chip is-green">NemoClaw ✓</span>
 
 **Choose it when:** you want an always-on autonomous agent, a plugin ecosystem, and any model (it runs Nemotron via NVIDIA endpoints, as you configured in Module 6).
 
@@ -97,7 +97,7 @@ You used this in Module 5: `create_deep_agent()` with planning, sub-agent delega
 
 > **Philosophy:** Less harness, more model. No context tax.
 
-Created by Mario Zechner, pi is the minimal pole of the landscape: a system prompt under **1,000 tokens**, exactly **four core tools** (Read, Write, Edit, Bash), and **lazy skills** — each installed capability costs one line of context per turn, with the full payload loading only when invoked.
+Created by Mario Zechner, pi is the minimal pole of the landscape: a system prompt under 1,000 tokens, exactly four core tools (Read, Write, Edit, Bash), and **lazy skills** — each installed capability costs one line of context per turn, with the full payload loading only when invoked.
 
 Its signature move is **self-extension**: ask for a capability, and the agent writes its own TypeScript extension live, no restart. It's the purest example of a self-evolving harness — and the inspiration for two of your lab exercises.
 
@@ -149,7 +149,7 @@ Work through the three questions below. Your path ends at a recommendation.
 <summary><b>🔄 Always-on assistant (heartbeats, evolving memory)</b></summary>
 
 > ### 🦞 → **OpenClaw** &nbsp;<span class="dx-chip is-green">recommended</span>
-> The community standard for always-on agents — and you already hardened one with NemoClaw in Module 6. Prefer stronger defaults and a curated skill hub? Pick **Hermes** instead.
+> The community standard for always-on agents — and you ran one inside a sandbox in Module 6. Prefer stronger defaults and a curated skill hub? Pick Hermes instead.
 
 </details>
 

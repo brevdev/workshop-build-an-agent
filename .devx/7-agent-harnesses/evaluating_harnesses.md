@@ -37,7 +37,7 @@ Choose skills for the libraries you use, verify their provenance, and check that
 
 <img src="_static/robots/finish.png" alt="Finish Robot" style="float:right;max-width:240px;margin:20px;" />
 
-This module's through-line is worth saying plainly. The harness layer is where the agent industry is innovating fastest, and NVIDIA's position is not to pick the winner — it's to **drive the technology forward together with the ecosystem**:
+The harness layer is where the agent industry is innovating fastest, so it's best practice not to tie your work to one harness. Build on pieces that work across them:
 
 - **NemoClaw** makes open harnesses safer (Module 6)
 - **Nemotron** supplies model inference through compatible endpoints (Modules 1–5)

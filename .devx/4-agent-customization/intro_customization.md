@@ -13,7 +13,7 @@ Typically, you have three overarching levers:
   </ul>
 </div>
 
-Options 1 and 2 were covered in Modules 1 and 2. When errors remain, compare those approaches with training using the same evaluation tasks.
+Options 1 and 2 were covered in Modules 1 and 2. If the agent still makes mistakes after those, training is the third option. Score all three on the same evaluation tasks to see whether training actually helps.
 
 <!-- fold:break -->
 
@@ -26,7 +26,7 @@ A pretrained model has already learned useful language and task patterns. Custom
 There are two main approaches to training:
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide"><h4>SFT - SUPERVISED FINE-TUNING</h4>Learn from supervised input/output examples. Works well with abundant, high-quality examples.</div>
+  <div class="dx-cell is-wide"><h4>SFT - SUPERVISED FINE-TUNING</h4>Train on example inputs paired with the correct outputs, so the model learns to produce answers like them. Works well with abundant, high-quality examples.</div>
   <div class="dx-cell is-wide"><h4>GRPO - RL-BASED</h4>Try multiple answers, learn which score highest. Useful when you can programmatically score correctness.</div>
 </div>
 

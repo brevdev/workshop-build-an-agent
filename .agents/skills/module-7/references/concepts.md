@@ -9,7 +9,7 @@ order-of-magnitude **bets the learner measures in the lab**, not a fixed scorebo
 The model proposes plans and tool calls from the supplied context. The harness executes
 calls, retains messages, and supplies persistent memory. Do not say the model cannot plan.
 - **Engine vs car:** the LLM is the engine; the harness is the chassis/transmission/fuel/
-  steering. An engine on a stand goes nowhere; a car without an engine is furniture.
+  steering. An engine on a stand can still do useful work but takes you nowhere; a car without an engine is furniture.
 - **Two independent choices:** *same model + different harness* → a very different agent
   (Nemotron in a bare loop vs. inside OpenClaw are night and day); *same harness + different
   model* → the interface can stay familiar while reasoning, tool use, latency, and results change.
@@ -72,7 +72,7 @@ Measure workload speed rather than treating a row-count rule as a universal thre
 | 2. Context tax + lazy loading | pi's lazy skills; deferred tool loading in maximal harnesses |
 | 3. Portable skill | the open Agent Skills spec powering every skill hub |
 | 4. Verified skill + GPU | NVIDIA Verified Skills (SkillSpector, skill cards, OpenSSF signing) |
-| 5. Self-evolving skill | pi self-extension; Hermes self-authored skills; OpenClaw memory evolution (+ NemoClaw write-policies) |
+| 5. Self-evolving skill | pi's self-extension; Hermes self-authored skills; OpenClaw memory evolution (+ NemoClaw write-policies) |
 
 ## Source map
 - Concepts → `intro_agent_harnesses.md` (harness/tax), `harness_landscape.md` (the seven), `agent_skills.md` (spec + verified), `gpu_skills.md` (local GPU)

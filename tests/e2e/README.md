@@ -53,7 +53,7 @@ ends the installer with exit code 0 and that `openclaw gateway status` reports
 **Local NIM (Module 2).** Needs a free GPU and disk:
 
 ```bash
-python code/2-agentic-rag/nim_setup.py --check          # add --profile nvfp4 on a 124 GB disk
+python code/2-agentic-rag/nim_setup.py --check          # add --profile nvfp4 when disk space is tight
 python code/2-agentic-rag/nim_setup.py [--profile nvfp4]
 docker logs -f nemotron                                 # wait for "Application startup complete"
 python code/2-agentic-rag/nim_smoke_test.py

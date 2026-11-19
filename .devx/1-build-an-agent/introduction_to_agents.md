@@ -52,7 +52,7 @@ In this workshop, we use **NVIDIA Nemotron 3.5 Super VL (120B)** - a powerful mo
 
 ### System Prompts
 
-Every agent has a **system prompt** - a special message that defines the agent's personality and behavior. It tells the model:
+Most agents have a **system prompt** - a special message that defines the agent's personality and behavior. It tells the model:
 
 - **Who it is**: "You are a research assistant..."
 - **How to behave**: "Always cite your sources..."
@@ -131,6 +131,8 @@ This loop continues until the model decides it has enough information. The model
 
 </center>
 
+In the diagram, *has tool calls?* is step 2 of the loop above: did the model's reply ask for a tool? If yes, your code runs it and returns the result to the model; if no, the reply is the final response.
+
 ReAct agents can adapt their approach based on intermediate results, retry failed actions, and decompose complex tasks into steps. The model chooses actions at runtime; developer-defined workflows can also include branches and loops.
 
 Here is that loop running on the simple agent you will build next:
@@ -154,9 +156,9 @@ Agents are powerful, but they're not always the right choice. Here's a quick dec
 | Use an Agent When... | Use a Simpler Approach When... |
 |---------------------|-------------------------------|
 | The task path varies based on input | The steps are always the same |
-| You need to combine multiple tools dynamically | A single API call or chain suffices |
-| Real-time or external information is required | Static data or model knowledge is enough |
-| The problem requires multi-step reasoning | Simple transformation or classification |
+| Which tools to use depends on the request | One model call or a fixed sequence of steps is enough |
+| The answer needs live or outside information | The model's own knowledge, plus what you put in the prompt, is enough |
+| The problem takes several steps, each building on the last | The task is one step, like summarizing or labeling text |
 | User queries are open-ended | Inputs are well-structured |
 
 **Examples of Good Agent Use Cases:**

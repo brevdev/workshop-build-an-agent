@@ -22,9 +22,9 @@ The simplest method for interacting with LLMs is directly prompting them and all
 
 ## LLM with RAG
 
-Retrieval augmented generation (RAG) is a useful technique that improves accuracy of LLMs by providing them with additional context at inference time. Typically, this data is recalled from a custom Vector Database.
+Retrieval augmented generation (RAG) improves an LLM's accuracy by giving it extra context when it answers. You saw the recipe in Module 1: take the question, search a knowledge base for relevant documents, and pass both to the model.
 
-Unstructured documents can be indexed and saved into the Vector Database. They are then searched by context similarity with the prompt.
+That knowledge base is usually a **vector database**. Ordinary documents such as manuals, wiki pages, and PDFs (often called *unstructured data*, because they have no fixed rows and columns) are split into pieces, and each piece is stored as a list of numbers that captures its meaning. A search returns the pieces whose meaning is closest to the question. You will build one on the next page.
 
 <center>
 
@@ -47,7 +47,7 @@ Unstructured documents can be indexed and saved into the Vector Database. They a
 
 ## ReAct Agent Architecture
 
-ReAct Agents are a simple agentic architecture that add tool calling support to traditional LLMs. We will use this to build our RAG Agent.
+You built a ReAct agent in Module 1: an LLM that can call tools in a loop. Here is that loop again as a refresher, since we will use it to build our RAG agent.
 
 The prompt is provided to the LLM. If the model requests any tool calls, those tools will be run, added to the chat history, and sent back to the model to be invoked again. When no tools are requested, the model's response is sent back.
 

@@ -19,7 +19,7 @@ skills** (more capability — Modules 1–2), and **training** (specialize the w
 **SFT vs GRPO** (two ways to train):
 | | SFT | GRPO |
 |---|---|---|
-| Signal | "copy this exact output" | "outputs like this score higher" |
+| Signal | "produce outputs like these examples" | "outputs like this score higher" |
 | Needs | gold input→output pairs | a reward signal (can be noisy) |
 | Exploration | none (imitation) | yes (tries variations) |
 | Best for | abundant gold data, one right format | **verifiable correctness, structured output** |

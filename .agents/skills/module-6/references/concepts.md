@@ -39,7 +39,8 @@ M6's thesis: *the operator's configuration is enforced even when the agent is co
 **OpenShell** (the sandbox runtime that *enforces*) + **Nemotron** (inference) + **Privacy
 Router** (inference gateway). `nemoclaw` CLI = host-side onboarding/lifecycle; `openshell`
 CLI = sandbox/policy/inference management. **NemoClaw enhances OpenClaw; it doesn't replace
-it**. OpenClaw has its own configurable tool controls; SOUL.md is guidance, not an OS
+it**; the workshop installer starts its own OpenClaw inside the sandbox, and the host agent from
+the setup page keeps running unsandboxed. OpenClaw has its own configurable tool controls; SOUL.md is guidance, not an OS
 boundary. NemoClaw adds the runtime policies studied here. A heartbeat needs a nonempty
 task; the pinned OpenClaw default is 30 minutes, and an effectively empty file is skipped.
 

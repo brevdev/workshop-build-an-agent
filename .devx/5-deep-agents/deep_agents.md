@@ -1,8 +1,8 @@
 <div class="dx-hero" data-eyebrow="MODULE 05 / 02 - FUNDAMENTALS" data-title="What Are Deep Agents?" data-meta="READ::25 min|CONCEPTS::5+|FOCUS::the four pillars"></div>
 
-**Deep agents** are AI agents equipped with planning tools, file system access, shell execution, and sub-agent spawning, operating through an autonomous reasoning loop to handle complex, multi-step tasks. They use the same LLM-in-a-loop foundation as the ReAct agents you built in earlier modules, but with a **middleware pipeline** around every interaction.
+**Deep agents** are AI agents equipped with planning tools, file system access, shell execution, and sub-agent spawning, operating through an autonomous reasoning loop to handle complex, multi-step tasks. They use the same LLM-in-a-loop foundation as the ReAct agents you built in earlier modules, but with a **middleware pipeline** around every interaction: a stack of add-on layers that each contribute one capability, such as planning or file access.
 
-**The result?** Agents with explicit support for longer tasks. Reliability still depends on the model, tools, context budget and evaluation.
+The result? Agents with explicit support for longer tasks. Reliability still depends on the model, tools, context budget and evaluation.
 
 In this section, we'll first explore the conceptual framework — the "four pillars" that make deep agents work — and then look at how the deepagents library implements them.
 
@@ -23,9 +23,9 @@ Deep agents enhance the ReAct loop with four architectural pillars. Each address
 
 <img src="_static/robots/datacenter.png" alt="Deep Agent Architecture" style="float:right;max-width:300px;margin:25px;" />
 
-Shallow agents plan **implicitly** — their "plan" exists only in the chain-of-thought reasoning within the context window. It's ephemeral, easily displaced by tool outputs, and invisible to the outside world.
+Shallow agents plan implicitly — their "plan" exists only in the chain-of-thought reasoning within the context window. It's ephemeral, easily displaced by tool outputs, and invisible to the outside world.
 
-Deep agents plan **explicitly**. They maintain plan documents — essentially markdown to-do lists — that they review and update between steps. Each task is tracked with a status: **pending**, **in_progress**, or **completed**. Before taking action, the agent consults its plan. After each step, it updates the plan with results and adjusts strategy if needed.
+Deep agents plan explicitly. They maintain plan documents — essentially markdown to-do lists — that they review and update between steps. Each task is tracked with a status: pending, in_progress, or completed. Before taking action, the agent consults its plan. After each step, it updates the plan with results and adjusts strategy if needed.
 
 <!-- fold:break -->
 
@@ -116,9 +116,9 @@ This is what enables deep agents to work on tasks that span hundreds of steps. T
 
 | | Shallow Agent | Deep Agent |
 |---|---|---|
-| **Where state lives** | Context plus any configured stores | Context plus configured files, stores and plans |
-| **When context fills** | Requires a context-management strategy | Summarizes and reads saved results; can still lose details |
-| **Cross-session memory** | Depends on storage and checkpoints | Also depends on storage; this demo checkpoint is in memory |
+| Where state lives | Context plus any configured stores | Context plus configured files, stores and plans |
+| When context fills | Requires a context-management strategy | Summarizes and reads saved results; can still lose details |
+| Cross-session memory | Depends on storage and checkpoints | Also depends on storage; this demo checkpoint is in memory |
 
 <!-- fold:break -->
 
@@ -131,7 +131,7 @@ The system prompts you've written so far — "You are a helpful assistant that..
 - **Error recovery strategies** — What to do when a tool call fails or returns unexpected results
 - **Output formats** — Exactly how to structure intermediate and final results
 
-If you worked through Module 4's **Superpowers** skills framework, you've already seen a taste of this. Deep agent skills take it further — they're detailed operating procedures that guide the agent's behavior across complex, multi-step workflows.
+If you worked through Module 4's Superpowers skills framework, you've already seen a taste of this. Deep agent skills take it further — they're detailed operating procedures that guide the agent's behavior across complex, multi-step workflows.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-deep_agents-3">Example: A deep research agent's skill excerpt</button>
@@ -151,19 +151,7 @@ Any agent can use detailed skills; this library combines them with planning, del
 
 ## Shallow vs. Deep Agents
 
-Here's a comprehensive comparison of the two architectures:
-
-| Dimension | Shallow Agent | Deep Agent |
-|-----------|--------------|------------|
-| **Planning** | Implicit (chain-of-thought) | Explicit (plan documents) |
-| **Delegation** | Single agent does everything | Orchestrator + specialized sub-agents |
-| **Memory** | Context and optional external stores | Explicit file/store workflow |
-| **System Prompt** | Task-dependent instructions | Task-dependent instructions and reusable skills |
-| **Task Horizon** | Depends on the task and limits | Often longer; no fixed step threshold |
-| **Error Recovery** | Can retry, revise or stop | Can retry, revise or delegate |
-| **Best For** | Focused, short tasks | Complex, multi-step workflows |
-
-The key insight: deep agents don't replace shallow agents. They **extend** them. Subagents can be focused loops or more structured agents of their own. The deep agent architecture adds the coordination layer that lets them work together on larger problems.
+The key insight: deep agents don't replace shallow agents. They extend them. Subagents can be focused loops or more structured agents of their own. The deep agent architecture adds the coordination layer that lets them work together on larger problems.
 
 <div class="dx-aside">
 <button class="dx-aside-btn" popovertarget="aside-deep_agents-4">Where do the agents you built fit?</button>
@@ -176,7 +164,7 @@ Looking back at the workshop:
 - **Module 2 RAG Agent** — A shallow agent with enhanced retrieval. Still single loop, but with richer context from external documents.
 - **Module 4 Customized Agent** — A shallow agent with trained expertise. Better at its domain, but still architecturally limited to single-loop execution.
 
-A deep agent could **orchestrate** all of these as sub-agents: use the RAG agent for document retrieval, the report agent for writing, and the customized agent for domain-specific analysis — all coordinated by a planner.
+A deep agent could orchestrate all of these as sub-agents: use the RAG agent for document retrieval, the report agent for writing, and the customized agent for domain-specific analysis — all coordinated by a planner.
 
 </div>
 </div>
@@ -207,7 +195,7 @@ Despite different implementations, the common architecture follows a consistent 
 <details class="dx-peek">
 <summary>2. Coding Assistants</summary>
 
-Software development is the most battle-tested use case for deep agents. Tools like **Claude Code** and **Cursor** all leverage deep agent patterns:
+Software development is the most battle-tested use case for deep agents. Tools like Claude Code and Cursor all leverage deep agent patterns:
 
 - **Planning tools** to decompose engineering tasks into subtasks
 - **File system access** to navigate and modify large codebases
@@ -220,21 +208,7 @@ These agents don't just autocomplete code — they reason about architecture, tr
 
 <!-- fold:break -->
 
-## Benefits and Tradeoffs
-
-Like any architectural decision, deep agents come with both benefits and costs. Click on each of the following to learn more: 
-
-<details class="dx-peek">
-<summary>1. Benefits of Deep Agent Architecture</summary>
-
-| Benefit | Description |
-|---------|-------------|
-| **Complex task handling** | Multi-step workflows spanning long time horizons that would overwhelm shallow agents |
-| **Scalable context** | File system access and sub-agent delegation prevent context overflow |
-| **Resilient planning** | Adapts strategy when steps fail instead of entering infinite loops |
-| **Safe execution** | Sandboxing enables autonomous code execution in production |
-
-</details>
+## Costs and When to Use
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">THE COSTS OF GOING DEEP</p>
@@ -244,20 +218,6 @@ Like any architectural decision, deep agents come with both benefits and costs. 
   <p><span class="dx-chip">COMPLEXITY</span> Harder to test, predict, and debug across multiple agents.</p>
   <p><span class="dx-chip">COORDINATION</span> Multi-agent writing can produce disjointed output without careful orchestration.</p>
 </div>
-
-<details class="dx-peek">
-<summary>2. So Why are Deep Agents Practical Now?</summary>
-
-Recent advances in LLM and agent capabilities have made these patterns practical for production use:
-
-- **Longer context windows** make it feasible for orchestrators to manage complex plans
-- **Better instruction following** means agents reliably execute detailed skill protocols
-- **Improved tool use** enables reliable file system access, code execution, and API calls
-- **Modularity** of MCP tools and agent skills makes for easier access to key agent components
-
-Deep agents are not universally better than shallow agents — they're better for a specific class of problems. Using a deep agent for a simple question-answering task is like using a distributed system for a single-user application: architecturally sound but massively over-engineered.
-
-</details>
 
 <!-- fold:break -->
 
@@ -273,40 +233,11 @@ Not every task needs a deep agent. Here's a decision framework:
 | Autonomous operation is acceptable | Real-time response is required |
 | The task benefits from planning and delegation | The path is straightforward |
 
-<div class="dx-aside">
-<button class="dx-aside-btn" popovertarget="aside-deep_agents-5">Show me some examples</button>
-<div id="aside-deep_agents-5" popover class="dx-aside-panel">
-<button class="dx-aside-x" popovertarget="aside-deep_agents-5" popovertargetaction="hide" aria-label="Close">×</button>
-
-| Task | Agent Type | Why |
-|------|-----------|-----|
-| "Summarize these articles" | Shallow | Single step, fits in context |
-| "Answer this question using our docs" | Shallow | RAG + generation, 3-5 steps |
-| "Research 10 competitors and write a market report" | Deep | Multi-source, requires planning and synthesis |
-| "Refactor this codebase to use a new API" | Deep | Multi-file, needs progress tracking |
-| "Generate a quarterly compliance report from 50 documents" | Deep | Long-running, delegation needed |
-
-</div>
-</div>
-
 > **A practical rule of thumb** - Ask yourself: "Could a single person complete this in one sitting without taking notes?" If yes, a shallow agent is probably fine. If the answer is "no — you'd need to break it into subtasks, keep a to-do list, and coordinate with specialists," that's a deep agent problem.
 
 <!-- fold:break -->
 
-## Putting It All Together
-
-To see how the four pillars work in concert, consider a deep research task: "Analyze the current state of AI regulation across the G7 countries."
-
-1. **Explicit Planning** — The agent creates a plan: research each country's regulations, then synthesize a comparison
-2. **Hierarchical Delegation** — The orchestrator spawns 7 researcher sub-agents, one per country
-3. **Persistent Memory** — Each researcher writes findings to files; the orchestrator reads them for synthesis
-4. **Agent Skills** — Detailed instructions load dynamically to tell each researcher how many sources to gather, what format to use, and how to handle conflicting information
-
-Combine the capabilities your task needs, then evaluate whether their benefit justifies the extra calls and complexity.
-
-Now let's see how the **deepagents library** implements these pillars.
-
-<!-- fold:break -->
+## How deepagents Implements the Pillars
 
 ### The `create_deep_agent()` Function
 
@@ -327,13 +258,13 @@ agent = create_deep_agent(
 )
 ```
 
-This returns a compiled **LangGraph** graph — the same framework we used in earlier modules, but with a much richer node structure.
+This returns a compiled LangGraph graph — the same framework we used in earlier modules, but with a much richer node structure.
 
 <!-- fold:break -->
 
 ### The Middleware Pipeline
 
-Under the hood, `create_deep_agent()` builds a LangGraph graph with a **middleware stack** that processes every interaction:
+Under the hood, `create_deep_agent()` builds a LangGraph graph with a middleware stack that processes every interaction:
 
 ![Middleware Pipeline](img/middleware_pipeline_dark.svg)
 
@@ -347,7 +278,7 @@ Every deep agent comes with these tools out of the box — provided by the middl
 
 #### Planning 
 
-The agent can create and manage a task list. When given a complex request, it breaks it into steps, tracks progress, and works through them systematically. This is **Pillar 1 (Explicit Planning)** in action.
+The agent can create and manage a task list. When given a complex request, it breaks it into steps, tracks progress, and works through them systematically. This is Pillar 1 (Explicit Planning) in action.
 
 ```
 User: "Research CUDA 13, write a benchmark script, and run it"
@@ -368,7 +299,7 @@ This gives the agent a structured approach to multi-step problems instead of imp
 
 <img src="_static/robots/operator.png" alt="File Operations" style="float:right;max-width:250px;margin:15px;" />
 
-Deep agents have full filesystem awareness — the tooling layer for **Pillar 3 (Persistent Memory)**. They can:
+Deep agents have full filesystem awareness — the tooling layer for Pillar 3 (Persistent Memory). They can:
 
 | Tool | What It Does |
 |---|---|
@@ -393,13 +324,13 @@ The `execute` tool runs shell commands. Combined with filesystem tools, this let
 - Check system status
 - Compile and build projects
 
-Shell access is what makes deep agents truly autonomous — but it's also what makes **sandboxing critical** (more on that in the security section).
+Shell access is what makes deep agents truly autonomous — but it's also what makes sandboxing critical (more on that in the security section).
 
 <!-- fold:break -->
 
 #### Sub-Agents
 
-Perhaps the most powerful capability: deep agents can **spawn sub-agents** to handle sub-tasks in isolated context windows. This is **Pillar 2 (Hierarchical Delegation)** in action.
+Perhaps the most powerful capability: deep agents can spawn sub-agents to handle sub-tasks in isolated context windows. This is Pillar 2 (Hierarchical Delegation) in action.
 
 <div class="dx-term dx-reveal">
   <span class="dx-term-title">deep-agent - hierarchical delegation</span>
@@ -421,7 +352,7 @@ Each sub-agent gets its own context, tools, and prompt. This enables:
 
 #### Context Management 
 
-Long conversations accumulate tokens quickly. Deep agents handle this with **automatic summarization** — when the conversation gets too long, the middleware transparently compresses earlier messages so the agent keeps working without hitting token limits. This supports **Pillar 3 (Persistent Memory)** by ensuring the agent doesn't lose track of its work.
+Long conversations accumulate tokens quickly. Deep agents handle this with **automatic summarization** — when the conversation gets too long, the middleware transparently compresses earlier messages so the agent keeps working without hitting token limits. This supports Pillar 3 (Persistent Memory) by ensuring the agent doesn't lose track of its work.
 
 <!-- fold:break -->
 
@@ -460,23 +391,9 @@ When writing code, follow this methodology:
 4. Debug systematically — read errors carefully
 ```
 
-Skills don't add new tools — they add **expertise**. You can create skills for any domain: code review, data analysis, GPU optimization, legal research, etc.
+Skills don't add new tools — they add expertise. You can create skills for any domain: code review, data analysis, GPU optimization, legal research, etc.
 
 <!-- fold:break -->
-
-## Architecture Summary
-
-Here's the key architectural difference:
-
-**Shallow Agent (ReAct):**
-
-![Shallow Agent Architecture](img/shallow_agent_pattern_dark.svg)
-
-**Deep Agent:**
-
-![Deep Agent Architecture](img/middleware_pipeline_dark.svg)
-
-The deep agent has a **pipeline** of middleware that wraps every model call and tool execution, adding intelligence at each step.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>

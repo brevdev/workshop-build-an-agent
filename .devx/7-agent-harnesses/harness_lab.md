@@ -2,7 +2,7 @@
 
 Five exercises. You'll build a minimal harness from scratch, measure the context tax, author a portable skill, put your GPU to work through a verified NVIDIA skill, and finish with an agent that writes its own skills.
 
-This page follows <button onclick="openOrCreateFileInJupyterLab('code/7-agent-harnesses/harness_lab.py');"><i class="fa-brands fa-python"></i> harness_lab.py</button>. Each exercise has one or more blanks marked `# TODO: Exercise …` in that file — the sub-exercise labels below (**1a**, **1b**, **2a**, **2b**…) match those markers exactly, and each blank gets its own instructions and its own `🆘` solution on this page. Fill the blanks, then look for the exercise's **Run it** line — all five exercises have one, in the same shape: a terminal button plus the exact command to copy.
+This page follows <button onclick="openOrCreateFileInJupyterLab('code/7-agent-harnesses/harness_lab.py');"><i class="fa-brands fa-python"></i> harness_lab.py</button>. Each exercise has one or more blanks marked `# TODO: Exercise …` in that file — the sub-exercise labels below (1a, 1b, 2a, 2b…) match those markers exactly, and each blank gets its own instructions and its own `🆘` solution on this page. Fill the blanks, then look for the exercise's **Run it** line — all five exercises have one, in the same shape: a terminal button plus the exact command to copy.
 
 > **Prefer notebooks?** The same lab, cell for cell, lives in <button onclick="openOrCreateFileInJupyterLab('code/7-agent-harnesses/harness_lab.ipynb');"><i class="fa-solid fa-flask"></i> harness_lab.ipynb</button> — identical `TODO` blanks, one runnable cell per exercise, and a collapsible **💡 NEED SOME HELP?** solution built in under each blank. If you go that route, work the notebook top to bottom and skip the **Run it** terminal commands on this page; everything else here — the concepts, the sub-exercise guidance, the Hermes detour — applies unchanged. (Full answer keys for either track: `harness_lab.answers.py` / `harness_lab.answers.ipynb`.)
 
@@ -10,7 +10,7 @@ This page follows <button onclick="openOrCreateFileInJupyterLab('code/7-agent-ha
 
 ## Exercise 1 — Build the Minimal Harness
 
-pi proves a complete harness needs surprisingly little: a short system prompt, four tools, and a loop. You'll build exactly that — Read, Write, Edit, Bash around Nemotron — by filling two blanks inside `build_bare_agent`.
+pi proves a complete harness needs surprisingly little: a short system prompt, four tools, and a loop. You won't install or run pi itself. You'll build your own harness in the same style — Read, Write, Edit, Bash around Nemotron — by filling two blanks inside `build_bare_agent`.
 
 Here's what a finished Exercise 1 run looks like:
 
@@ -45,7 +45,7 @@ Skip `.bind_tools(tools)` and the model never sees the tool schemas — it will 
 
 ### 1b — The agentic loop
 
-<button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 1b');"><i class="fas fa-code"></i> TODO: Exercise 1b</button> — the ~10 lines that *are* the harness. One turn: call the model with the message history and append its response; if the response contains **no** tool calls, you're done — return its text; otherwise print a one-line trace for each requested tool, execute it, and append a `ToolMessage` so the model sees the results next turn.
+<button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 1b');"><i class="fas fa-code"></i> TODO: Exercise 1b</button> — the ~10 lines that *are* the harness. One turn: call the model with the message history and append its response; if the response contains no tool calls, you're done — return its text; otherwise print a one-line trace for each requested tool, execute it, and append a `ToolMessage` so the model sees the results next turn.
 
 <details class="dx-peek is-solution">
 <summary>🆘 Need some help?</summary>
@@ -105,7 +105,7 @@ model:
   api_key: ${NVIDIA_API_KEY}
 ```
 
-> Prefer to reuse the **OpenClaw** agent you already hardened in Module 6? That works too — the point is *a* full harness, not a specific one.
+> Prefer to reuse the sandboxed OpenClaw agent from Module 6? That works too — the point is *a* full harness, not a specific one.
 
 </details>
 
@@ -119,7 +119,7 @@ Measure the two bundled harness configurations with `cl100k_base`. These prompt-
 
 ### 2a — `harness_overhead`: estimate the starting context
 
-<button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 2a');"><i class="fas fa-code"></i> TODO: Exercise 2a</button> — return the tokens a harness pays on **every** call: the system prompt **plus** the JSON-serialized schemas of all registered tools. Run each tool through `convert_to_openai_tool()` — it accepts both LangChain tool objects and already-converted dict schemas.
+<button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 2a');"><i class="fas fa-code"></i> TODO: Exercise 2a</button> — return the tokens a harness pays on every call: the system prompt plus the JSON-serialized schemas of all registered tools. Run each tool through `convert_to_openai_tool()` — it accepts both LangChain tool objects and already-converted dict schemas.
 
 The provided `measure_context_tax()` then calls your function twice: once with your minimal prompt + 4 tools, once with the bundled maximal configuration (a Claude Code-style system prompt + 15 tool schemas).
 
@@ -258,9 +258,9 @@ The skill file transfers unchanged. Its tools, Python libraries and execution pe
 
 ## Exercise 4 — Verified NVIDIA Skill, Real GPU
 
-Time to combine everything: governance from Module 6, skills from this module, and the GPU under your workshop. No blanks here either — `run_gpu_task` is provided. This one is an ops loop: **install → verify → run → watch**.
+Time to combine everything: governance from Module 6, skills from this module, and the GPU under your workshop. No blanks here either — `run_gpu_task` is provided. This one is an ops loop: install → verify → run → watch.
 
-First, fetch and **verify** the `accelerated-computing-cudf` skill before trusting it:
+First, fetch and verify the `accelerated-computing-cudf` skill before trusting it:
 
 ```bash
 bash code/7-agent-harnesses/scripts/install_nvidia_skill.sh accelerated-computing-cudf
@@ -291,7 +291,7 @@ If GPU utilization stays at zero, inspect the executed code and confirm cuDF imp
 
 ## Exercise 5 — The Self-Evolving Harness
 
-The pi finale: an agent that improves its own scaffolding. One blank, four steps.
+The finale, inspired by pi's self-extension: an agent that improves its own scaffolding. One blank, four steps.
 
 <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 5');"><i class="fas fa-code"></i> TODO: Exercise 5</button> — complete `self_evolve_skill` so that after finishing a task, the agent:
 
@@ -326,7 +326,7 @@ The `parse_frontmatter()` call is the line to internalize: validate *before* any
 cd code/7-agent-harnesses && python harness_lab.py --exercise 5
 ```
 
-One invocation plays both halves of the loop: run 1 completes the task bare and distills a skill from its own transcript; run 2 starts with that skill — a closing 🧾 line compares the two runs. That's **memory**, **skills**, **self-evolution**, and **token efficiency** — four of the five harness responsibilities — collapsing into a single loop.
+One invocation plays both halves of the loop: run 1 completes the task bare and distills a skill from its own transcript; run 2 starts with that skill — a closing 🧾 line compares the two runs. That's memory, skills, self-evolution, and token efficiency — four of the five harness responsibilities — collapsing into a single loop.
 
 > This is exactly the approach Hermes takes — it brands itself *"the agent that grows with you"* and persists self-authored skills into `~/.hermes/skills/`. You just built that mechanism by hand in ~30 lines. Same idea, no magic.
 

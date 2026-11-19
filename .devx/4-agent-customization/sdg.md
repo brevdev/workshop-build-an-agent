@@ -27,10 +27,10 @@ For a new domain like the LangGraph CLI, we don't have the real logs from the ag
 
 SDG breaks this cycle:
 
-1. **Define the space** — Your Pydantic schema describes the shape of a valid output
+1. **Define the space** — Your [Pydantic](https://docs.pydantic.dev/) schema (a Python class that lists each field and its type) describes the shape of a valid output
 2. **Sample the seeds systematically** — Samplers draw a command and its flags from distributions *you* control, then inspect whether the generated sample covers the cases you need
 3. **Generate natural language** — An LLM turns each seed into a realistic user phrasing
-4. **Generate the structured output** — A second, *schema-constrained* LLM call reads that phrasing and emits the JSON tool call
+4. **Generate the structured output** — A second LLM call, *schema-constrained* so its output must match that schema, reads that phrasing and emits the JSON tool call
 5. **Result**: Real training data without real users
 
 **Why this works**: The model doesn't need *authentic* user phrasing—it needs to learn the *mapping* from intent to command. Synthetic variations can help learn that mapping, and you can always fine-tune later with real data once you have it.

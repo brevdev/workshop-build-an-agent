@@ -1,6 +1,6 @@
-<div class="dx-hero" data-eyebrow="MODULE 06 / 05 - HANDS ON" data-title="Working with NemoClaw" data-meta="TIME::35 min|EXERCISES::5|RUNTIME::OpenShell"></div>
+<div class="dx-hero" data-eyebrow="MODULE 06 / 05 - HANDS ON" data-title="Working in the Sandbox" data-meta="TIME::35 min|EXERCISES::5|RUNTIME::OpenShell"></div>
 
-Your NemoClaw sandbox is running. The agent lives inside four enforcement layers: **Network** (egress policy), **Filesystem** (Landlock), **Process** (seccomp + least privilege), and **Inference** (Privacy Router). Reading about those layers and *feeling* them are very different things. This page walks you through five hands-on exercises that turn each layer into a copy-pasteable experience — and revisit the four probes from the [previous page](setup_openclaw) to distinguish model behavior from enforced restrictions.
+Your OpenShell sandbox is running. The agent lives inside four enforcement layers: **Network** (egress policy), **Filesystem** (Landlock), **Process** (seccomp + least privilege), and **Inference** (Privacy Router). Reading about those layers and *feeling* them are very different things. This page walks you through five hands-on exercises that turn each layer into a copy-pasteable experience — and revisit the four probes from the [previous page](setup_openclaw) to distinguish model behavior from enforced restrictions.
 
 <div class="dx-bento dx-reveal">
   <div class="dx-cell"><h4>EXERCISE 1</h4><span class="dx-big">Network</span>Stop the agent from phoning home (recalls Probe 1).</div>
@@ -14,7 +14,7 @@ Your NemoClaw sandbox is running. The agent lives inside four enforcement layers
 
 ### Before you begin — is your live sandbox up?
 
-Exercises 1–5 include commands for the **running** NemoClaw sandbox (`nemoclaw connect`, `openshell policy set`, …). If a command hangs, or a step fails with *"sandbox not found"* or *"Cannot find module"*, your control plane is down. Check all four layers — tunnel, gateway, CLI, and sandbox — with one read-only command:
+Exercises 1–5 include commands for the running OpenShell sandbox (`nemoclaw connect`, `openshell policy set`, …). If a command hangs, or a step fails with *"sandbox not found"* or *"Cannot find module"*, your control plane is down. Check all four layers — tunnel, gateway, CLI, and sandbox — with one read-only command:
 
 ```bash
 bash code/6-agent-safety/scripts/nemoclaw-health.sh
@@ -28,7 +28,7 @@ It reports which layer is down and prints the single command that brings the sta
 
 ## Section 1 — Layer 1: Network (Egress Policy)
 
-The Network layer controls **where the agent can reach**. The workshop policy denies destinations without a matching allow rule. Inspect your active policy before testing. Network rules can hot-reload without sandbox recreation — operators can grant (or revoke) access on a running agent.
+The Network layer controls where the agent can reach. The workshop policy denies destinations without a matching allow rule. Inspect your active policy before testing. Network rules can hot-reload without sandbox recreation — operators can grant (or revoke) access on a running agent.
 
 <!-- fold:break -->
 
@@ -36,7 +36,7 @@ The Network layer controls **where the agent can reach**. The workshop policy de
 
 > *Layer: **Network** · Recalls: **Probe 1** (Phone Home)*
 
-Compare the `https://httpbin.org/ip` result you observed on the previous page. Let's see what happens inside the NemoClaw sandbox — then write a policy that grants access on purpose.
+Compare the `https://httpbin.org/ip` result you observed on the previous page. Let's see what happens inside the OpenShell sandbox — then write a policy that grants access on purpose.
 
 <details class="dx-peek">
 <summary>Step 1 — Observe the deny</summary>
@@ -110,7 +110,7 @@ PYCODE
 openshell policy set my-assistant --policy code/6-agent-safety/policies/lab-policy.yaml --wait
 ```
 
-The `--wait` flag blocks until the proxy picks up the new policy revision. **No sandbox restart required** — this is dynamic enforcement in action.
+The `--wait` flag blocks until the proxy picks up the new policy revision. No sandbox restart required — this is dynamic enforcement in action.
 
 </details>
 
@@ -126,7 +126,7 @@ curl -sS --max-time 30 https://httpbin.org/ip
 
 Expected when httpbin is available: a JSON response with your origin IP. The agent can now reach `httpbin.org`.
 
-> Remember this for Exercise 3 — **filesystem** policy is *static*. You cannot change it on a running sandbox. Different layers, different tradeoffs.
+> Remember this for Exercise 3 — filesystem policy is *static*. You cannot change it on a running sandbox. Different layers, different tradeoffs.
 
 </details>
 
@@ -168,7 +168,7 @@ A `DENIED POST` log establishes that the proxy inspected and denied the HTTP met
 <details class="dx-peek">
 <summary>Step 2 — Remove the L7 hint and watch the POST slip through</summary>
 
-Open <button onclick="openExistingFileInJupyterLab('code/6-agent-safety/policies/lab-policy.yaml');"><i class="fa-solid fa-file-code"></i> lab-policy.yaml</button> again and **delete the `protocol: rest` line** under `network_policies.httpbin_access.endpoints[0]`. Reapply:
+Open <button onclick="openExistingFileInJupyterLab('code/6-agent-safety/policies/lab-policy.yaml');"><i class="fa-solid fa-file-code"></i> lab-policy.yaml</button> again and delete the `protocol: rest` line under `network_policies.httpbin_access.endpoints[0]`. Reapply:
 
 ```bash
 openshell policy set my-assistant --policy code/6-agent-safety/policies/lab-policy.yaml --wait
@@ -185,7 +185,7 @@ Put the `protocol: rest` line back, reapply, and POST is blocked again.
 <details class="dx-peek">
 <summary>Step 3 — Scope rules by binary</summary>
 
-A rule for `/usr/bin/curl` does **not** cover `/usr/bin/python3`. From the sandbox, try Python against the same endpoint your policy allows for curl:
+A rule for `/usr/bin/curl` does not cover `/usr/bin/python3`. From the sandbox, try Python against the same endpoint your policy allows for curl:
 
 ```bash
 python3 -c "import urllib.request; print(urllib.request.urlopen('https://httpbin.org/ip').read())"
@@ -209,7 +209,7 @@ Re-run the Python snippet. Check both the proxy decision and the upstream respon
 
 <img src="_static/robots/supervisor.png" alt="NemoClaw Hands-On Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Layers 2 and 3 share an exercise because they're both **kernel-level, static containment**. They're set once when the sandbox is created, locked in by the kernel, and unchangeable from inside the agent process by design. That tradeoff — stronger guarantee for less flexibility — is the core teaching point.
+Layers 2 and 3 share an exercise because they're both kernel-level, static containment. They're set once when the sandbox is created, locked in by the kernel, and unchangeable from inside the agent process by design. That tradeoff — stronger guarantee for less flexibility — is the core teaching point.
 
 <!-- fold:break -->
 
@@ -359,7 +359,7 @@ Even if the agent is compromised, the blast radius is bounded.
 
 ## Section 3 — Layer 4: Inference
 
-The Inference layer controls **what AI model the agent uses and how credentials are handled**. Two complementary pieces live here: **credential isolation** (the agent should never hold API keys in-process) and the **Privacy Router** (which backend — local or cloud — is active). Exercises 4 and 5 cover each piece.
+The Inference layer controls what AI model the agent uses and how credentials are handled. Two complementary pieces live here: **credential isolation** (the agent should never hold API keys in-process) and the **Privacy Router** (which backend — local or cloud — is active). Exercises 4 and 5 cover each piece.
 
 <!-- fold:break -->
 
@@ -444,7 +444,7 @@ Retry the same curl from inside the sandbox — expect a proxy CONNECT denial; c
 
 </details>
 
-> **The lesson:** credential isolation (Layer 4) alone does not guarantee privacy. Combine **Network policy + credential isolation**, and inspect allowed destinations too: permitted network requests can still carry data.
+> **The lesson:** credential isolation (Layer 4) alone does not guarantee privacy. Combine Network policy + credential isolation, and inspect allowed destinations too: permitted network requests can still carry data.
 
 <!-- fold:break -->
 
@@ -470,7 +470,7 @@ Expected: one provider + one model (e.g. `nvidia-prod` / `nvidia/nemotron-3.5-su
 <details class="dx-peek">
 <summary>Step 2 — Swap the inference target without touching the agent</summary>
 
-The Privacy Router's headline property is that **operators choose where inference runs and the agent never sees the change**. We'll demonstrate that by switching the active model on the live gateway and watching the next request from the sandbox land on the new target.
+The Privacy Router's headline property is that operators choose where inference runs and the agent never sees the change. We'll demonstrate that by switching the active model on the live gateway and watching the next request from the sandbox land on the new target.
 
 Use the workshop's tested `fast_chat` model role. This remains hosted inference; the change demonstrates routing, not local privacy. Use a dedicated workshop gateway because this route is shared:
 
@@ -480,7 +480,7 @@ openshell inference set --provider nvidia-prod --model "$WORKSHOP_FAST_MODEL"
 sleep 10
 ```
 
-Updates propagate asynchronously. After the initial wait, confirm an `Inference routes updated` entry in `openshell logs my-assistant --since 1m`. Don't run `nemoclaw connect` here: connect re-pins the gateway to the sandbox's recorded model. Use `exec` and a **bogus request model** to check that the gateway applies the operator's choice:
+Updates propagate asynchronously. After the initial wait, confirm an `Inference routes updated` entry in `openshell logs my-assistant --since 1m`. Don't run `nemoclaw connect` here: connect re-pins the gateway to the sandbox's recorded model. Use `exec` and a bogus request model to check that the gateway applies the operator's choice:
 
 ```bash
 nemoclaw my-assistant exec -- bash -c "curl -sS --max-time 60 -X POST https://inference.local/v1/chat/completions \

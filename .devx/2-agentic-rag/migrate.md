@@ -33,7 +33,7 @@ The model also needs **GPU memory and disk space**. The helper checks both befor
 | `auto` (default) | NIM picks: BF16 on A100, FP8 on L40S/H100 and newer | about 64 GB (BF16) or 34 GB (FP8), plus a 32 GB image | 63 GB (BF16) / 34 GB (FP8) |
 | `nvfp4` | You pass `--profile nvfp4` | about 19 GB, plus a 32 GB image | 21 GB |
 
-NVFP4 runs natively on Blackwell GPUs. On older GPUs it runs in emulation, which NIM marks as not validated; the workshop's smoke test below still checks that tool calling works. Use it when disk space is tight: on a 124 GB workshop disk, the BF16 profile does not fit next to the workshop image. The container reserves 80% of GPU memory, so stop training kernels and other GPU services first. **Workshop Health** shows whether this host can run the local NIM. You can keep using the hosted agent if it cannot.
+NVFP4 runs natively on Blackwell GPUs. On older GPUs it runs in emulation, which NIM marks as not validated; the workshop's smoke test below still checks that tool calling works. Use it when disk space is tight. The container reserves 80% of GPU memory, so stop training kernels and other GPU services first. <button onclick="launch('Workshop Health', 'Workshop Utilities');"><i class="fa-solid fa-rocket"></i> Workshop Health</button> shows whether this host can run the local NIM. You can keep using the hosted agent if it cannot.
 
 <!-- fold:break -->
 

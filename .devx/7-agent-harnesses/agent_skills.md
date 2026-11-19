@@ -49,7 +49,7 @@ Lazy loading reduces the initial prompt. Once loaded, a skill body can remain in
 
 ## Portable Instructions: The Open Spec
 
-The format follows the open **Agent Skills specification** ([agentskills.io](https://agentskills.io)). Compatible harnesses, including Hermes, Claude Code, and Codex, can discover the same `SKILL.md` instructions.
+The format follows the open Agent Skills specification ([agentskills.io](https://agentskills.io)). Compatible harnesses, including Hermes, Claude Code, and Codex, can discover the same `SKILL.md` instructions.
 
 ![One Skill, Every Harness](img/skill_portability_dark.svg)
 
@@ -59,9 +59,9 @@ The instructions are portable; tool names, dependencies, and permissions still n
 
 ## NVIDIA Verified Skills
 
-NVIDIA publishes skills for compatible harnesses: **[github.com/NVIDIA/skills](https://github.com/NVIDIA/skills)** — official, NVIDIA-verified skills that teach agents to use NVIDIA software optimally: CUDA-X libraries, AI Blueprints, and platform tools.
+NVIDIA publishes skills for compatible harnesses: [github.com/NVIDIA/skills](https://github.com/NVIDIA/skills) — official, NVIDIA-verified skills that teach agents to use NVIDIA software optimally: CUDA-X libraries, AI Blueprints, and platform tools.
 
-The catalog is synced daily from the NVIDIA product teams that own each skill, and spans **cuOpt** (optimization), **cuDF** (GPU DataFrames), **CUDA-Q**, **NeMo**, **Dynamo**, **Holoscan**, **Earth2Studio**, **PhysicsNeMo**, and more. Skills syndicate out to the marketplaces — skills.sh, the Claude Code and Codex plugin ecosystems, ClawHub, and Hermes Hub.
+The catalog is synced daily from the NVIDIA product teams that own each skill, and spans cuOpt (optimization), cuDF (GPU DataFrames), CUDA-Q, NeMo, Dynamo, Holoscan, Earth2Studio, PhysicsNeMo, and more. Skills syndicate out to the marketplaces — skills.sh, the Claude Code and Codex plugin ecosystems, ClawHub, and Hermes Hub.
 
 The catalog supports several installer targets. This lab uses a local verification step before installation:
 

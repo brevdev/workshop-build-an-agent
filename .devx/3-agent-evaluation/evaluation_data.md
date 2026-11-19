@@ -61,7 +61,7 @@ Now that you understand what evaluation datasets look like for each agent, let's
 
 Now it's time to create evaluation datasets for the agents you built!
 
-For this workshop, we'll use **Synthetic Data Generation** with **NVIDIA NeMo Data Designer**, an open source tool for generating high-quality synthetic data. This approach is ideal for getting started with agent evaluation and learning the fundamentals.
+For this workshop, we'll use **Synthetic Data Generation** with [**NVIDIA NeMo Data Designer**](https://github.com/NVIDIA-NeMo/DataDesigner), an open source tool for generating high-quality synthetic data. This approach is ideal for getting started with agent evaluation and learning the fundamentals.
 
 <div class="dx-island dx-reveal">
   <p class="dx-island-title">GENERATE YOUR DATASETS</p>

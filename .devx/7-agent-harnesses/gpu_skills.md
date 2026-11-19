@@ -47,7 +47,7 @@ Keep it visible while your agent runs the cuDF exercise. GPU activity can be bri
 
 ## Optional: The Closed-Harness Track
 
-Everything in this module's lab runs in open harnesses with Nemotron — **no subscription required**. But if you have Claude Code or Codex access, the portability claim takes 30 seconds to verify yourself:
+Everything in this module's lab runs in open harnesses with Nemotron — no subscription required. But if you have Claude Code or Codex access, the portability claim takes 30 seconds to verify yourself:
 
 <!-- tabs:start -->
 

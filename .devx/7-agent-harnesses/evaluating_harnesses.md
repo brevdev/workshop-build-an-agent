@@ -14,7 +14,7 @@ Just like Module 6 mapped its exercises to the production NemoClaw stack, here's
 | **2. Context tax + lazy loading** | pi's lazy skills; skill indexes and deferred tool loading in modern maximal harnesses |
 | **3. Portable skill** | The open Agent Skills spec ([agentskills.io](https://agentskills.io)) powering every major skill hub |
 | **4. Verified skill + GPU** | [NVIDIA Verified Skills](https://github.com/NVIDIA/skills): SkillSpector scans, skill cards, OpenSSF Model Signing |
-| **5. Self-evolving skill** | pi self-extension; Hermes's self-authored skills in `~/.hermes/skills/`; OpenClaw memory evolution — and the write-policies NemoClaw puts around them |
+| **5. Self-evolving skill** | pi's self-extension; Hermes's self-authored skills in `~/.hermes/skills/`; OpenClaw memory evolution — and the write-policies NemoClaw puts around them |
 
 <!-- fold:break -->
 
@@ -37,7 +37,7 @@ Choose skills for the libraries you use, verify their provenance, and check that
 
 <img src="_static/robots/finish.png" alt="Finish Robot" style="float:right;max-width:240px;margin:20px;" />
 
-This module's through-line is worth saying plainly. The harness layer is where the agent industry is innovating fastest, and NVIDIA's position is not to pick the winner — it's to **drive the technology forward together with the ecosystem**:
+The harness layer is where the agent industry is innovating fastest, so it's best practice not to tie your work to one harness. Build on pieces that work across them:
 
 - **NemoClaw** makes open harnesses safer (Module 6)
 - **Nemotron** supplies model inference through compatible endpoints (Modules 1–5)

@@ -32,7 +32,7 @@ environment:
             - name: DevX-Lab
               type: jupyterlab
               class: webapp
-              start_command: jupyter lab --allow-root --port 8888 --ip 0.0.0.0 --no-browser --NotebookApp.base_url=$PROXY_PREFIX --NotebookApp.default_url=/lab --NotebookApp.allow_origin='*' --expose-app-in-browser --NotebookApp.password='' --NotebookApp.token=''
+              start_command: jupyter trust /project/code/secrets_management/*.ipynb; jupyter lab --allow-root --port 8888 --ip 0.0.0.0 --no-browser --NotebookApp.base_url=$PROXY_PREFIX --NotebookApp.default_url=/lab --NotebookApp.allow_origin='*' --expose-app-in-browser --NotebookApp.password='' --NotebookApp.token=''
               health_check_command: curl -o /dev/null -sL $(jupyter lab list | grep :8888/projects/ | awk '{print $1}')
               stop_command: jupyter lab stop 8888
               user_msg: ""

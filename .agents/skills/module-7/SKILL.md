@@ -74,7 +74,7 @@ Flow (teaching narrative in `.devx/7-agent-harnesses/`, code in `code/7-agent-ha
 |---|---|---|
 | Setup | `secrets.md` | NVIDIA key for the core lab; optional harness setup |
 | Concepts | `intro_agent_harnesses.md` | harness vs LLM (engine/car); the **5 responsibilities**; the **context tax**; lazy loading |
-| Landscape | `harness_landscape.md` | **7 harnesses** on the context-tax axis; the 3-question chooser; the NVIDIA perspective |
+| Landscape | `harness_landscape.md` | **7 harnesses** on the context-tax axis; the 3-question chooser; NVIDIA pieces that work across harnesses |
 | Skills | `agent_skills.md` | `SKILL.md` anatomy; lazy loading; the open spec; **NVIDIA Verified Skills** + the verification pipeline |
 | GPU skills | `gpu_skills.md` | skills execute **locally on your GPU**; division of labor; `accelerated-computing-cudf` |
 | Lab | `harness_lab.md` | **Exercises 1–5** (build → measure → author → verified-skill+GPU → self-evolve) |

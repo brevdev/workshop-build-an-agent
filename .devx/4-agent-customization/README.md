@@ -26,7 +26,7 @@ By the end of this workshop, you'll know how to:
 <div class="dx-island dx-tutor">
   <p class="dx-island-title">WORK ALONGSIDE AN AI TUTOR</p>
 
-This workshop ships its own tutor as **Agent Skills**. It explains this module's concepts in the workshop's own framing, gives graduated hints **without ever completing your exercises**, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
+This workshop ships its own tutor as Agent Skills. It explains this module's concepts in the workshop's own framing, gives graduated hints without ever completing your exercises, and helps you troubleshoot when something breaks. Open one and leave it running beside these pages:
 
 <button onclick="launch('Claude Code', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Claude Code</button> <button onclick="launch('Codex CLI', 'Workshop Utilities');"><i class="fa-solid fa-robot"></i> Codex CLI</button>
 

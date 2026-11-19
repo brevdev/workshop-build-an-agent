@@ -80,7 +80,7 @@ Flow (teaching narrative in `.devx/5-deep-agents/`, code in `code/5-deep-agents/
 | Fundamentals | `deep_agents.md` | **the four pillars**; shallow vs deep; `create_deep_agent` + middleware |
 | Experience | `experience_deep_agent.md` | run a pre-built deep agent in the **Deep Agents Client** UI |
 | Build | `build_deep_agents.md` | complete `deep_agent.py` (5 exercises) |
-| Security | `sandboxing_security.md` | sandboxing spectrum, patterns, Docker sandbox, defense in depth |
+| Security | `sandboxing_security.md` | sandboxing spectrum, patterns, Docker sandbox, three security principles |
 
 **The four pillars:** **Planning** (explicit `write_todos` plan docs), **Delegation**
 (orchestrator spawns sub-agents via `task`, isolated context), **Memory** (filesystem as
@@ -114,10 +114,10 @@ Full reference + the workshop's framing in `references/concepts.md`. Essentials:
   OS-level isolation. Spectrum: prompt-only → Bubblewrap/Seatbelt → **Docker** → gVisor →
   Firecracker VM. Pattern used here: **Sandbox-as-Tool** (agent runs locally, delegates
   execution to a Docker container with no host mounts, 512 MB, 1 CPU, auto-cleanup).
-- **Defense in depth:** HITL → permissions → app sandboxing → container/VM → network →
-  audit. Assume any one layer can fail.
+- **Defense in depth:** a sandbox is one layer and any one layer can fail. The page only
+  names the idea; Module 6 builds the layers.
 - **Security principles:** trust the sandbox not the model; least privilege; credential
-  isolation; audit everything; rate limiting; adversarial testing; environment separation.
+  isolation.
 
 ## How to respond — playbook
 - **Concept question** (four pillars, shallow vs deep, sandboxing, defense-in-depth):

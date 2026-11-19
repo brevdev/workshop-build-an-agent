@@ -4,7 +4,7 @@
 
 In Modules 1 through 5, you built increasingly powerful agents — from a report generator to a sandboxed deep agent that plans, codes, and executes autonomously. Each module added capability. This module adds a safety architecture that helps make autonomous operation more trustworthy.
 
-This module centers on **NVIDIA NemoClaw** — a reference stack for running autonomous agents more securely. You'll build each layer of the NemoClaw architecture hands-on: network egress control, filesystem restrictions via Landlock LSM, process-level hardening with seccomp and dropped capabilities, and inference routing with the Privacy Router — four layers of deny-by-default security enforced by OpenShell.
+Three names come up throughout this module, so here is which is which. **OpenClaw** is the autonomous agent. **OpenShell** is the sandbox runtime that contains it and enforces rules on its network access, files, processes, and model requests. **NVIDIA NemoClaw** is the reference stack that installs and connects the two, with a Nemotron model behind the agent. You'll work through each of those four layers of control hands-on.
 
 The question isn't whether your agent can do the work. It's whether your agent can do the work **safely when no one is watching**.
 
@@ -21,7 +21,7 @@ User requests, tool outputs, and retrieved documents can share the same model co
 
 </details>
 
-<details class="dx-peek is-solution">
+<details class="dx-peek">
 <summary>2. The confused deputy</summary>
 
 An agent acts on your behalf, wielding your credentials and authority. But it can be deceived. Think of a diplomat who carries your seal of office -- if an adversary slips a forged instruction into the diplomat's briefing materials, the diplomat may unknowingly execute the adversary's will using your authority. A prompt injection exploits exactly this dynamic.
@@ -31,7 +31,7 @@ An agent acts on your behalf, wielding your credentials and authority. But it ca
 <details class="dx-peek">
 <summary>3. Tool use as attack surface</summary>
 
-Every tool an agent can invoke is a potential privilege escalation vector. A file-writing tool can overwrite configuration. A web-browsing tool can exfiltrate data. A code-execution tool can install malware. More tools means a larger attack surface -- and agents are designed to use many tools.
+Every tool an agent can invoke is a way to gain more access than intended. A file-writing tool can overwrite configuration. A web-browsing tool can send data out. A code-execution tool can install malware. More tools means more ways in, known as a larger attack surface -- and agents are designed to use many tools.
 
 </details>
 
@@ -144,12 +144,12 @@ Container isolation answers "where can the agent run?" but not "what data should
 
 These gaps map to different enforcement layers. Each layer adds protection that the previous layers cannot provide.
 
-> **A note on roles.** Throughout this module, the **operator** is the human (or automation acting on their behalf) with host-level access to the OpenShell gateway — the role that configures providers, sets the active inference backend, and applies policies. The **agent** runs inside the sandbox and cannot perform these actions; the **end user** sends prompts to the agent and is one step further removed. The distinction matters because much of M6's security story is *"the operator's configuration is enforced even when the agent is compromised."*
+> **A note on roles.** Throughout this module, the **operator** is the human (or automation acting on their behalf) with host-level access to the OpenShell gateway — the role that configures providers, sets the active inference backend, and applies policies. The **agent** runs inside the sandbox and cannot perform these actions; the **end user** sends prompts to the agent and is one step further removed. The distinction matters because much of this module's security story is *"the operator's configuration is enforced even when the agent is compromised."*
 
-| Dimension | Application Controls (M4) | Container Isolation (M5) | OpenShell Policies (M6) |
+| Dimension | Application Controls (Module 4) | Container Isolation (Module 5) | OpenShell Policies (Module 6) |
 |-----------|----------------------|------------------------|--------------------------------|
 | **Enforced by** | Python tool wrapper | Container runtime and kernel | Kernel, proxy, and gateway |
-| **Scope** | Commands and approvals | Tool process, files, network, and resources | Paths, syscalls, destinations, and inference backend |
+| **Scope** | Commands and approvals | Tool process, files, network, and resources | Paths, system calls, destinations, and inference backend |
 | **Data awareness** | Only if the application adds it | No content classification | Backend chosen by the operator; classifier is separate |
 | **Still needs review** | Allowed commands and approvals | Mounts, networking, and limits | Policies, providers, and runtime configuration |
 
@@ -164,14 +164,14 @@ Your OpenClaw agent processes a customer support queue overnight. At 2 AM, a pro
 
 Walk through how each layer responds:
 
-**Application-level allowlist (M4):**
+**Application-level allowlist (Module 4):**
 A command allowlist limits which programs can run. Even if a command is denied, that doesn't erase data the model has already seen or prevent it from including that data in an answer.
 
-**Container isolation (M5):**
+**Container isolation (Module 5):**
 A container can withhold host files, but files or credentials mounted or injected into it may still be accessible. It doesn't prevent the model from *saying* what it knows.
 
-**Kernel enforcement + data routing (M6):**
-Landlock can deny reads outside the allowed paths; read-only access still permits reading. Network rules restrict destinations, while the inference gateway keeps provider credentials outside the agent's environment. These controls reduce exposure, but secrets already in files or context can still leak through allowed outputs.
+**Kernel enforcement + data routing (Module 6):**
+Filesystem rules can deny reads outside the allowed paths; read-only access still permits reading. Network rules restrict destinations, while the inference gateway keeps provider credentials outside the agent's environment. These controls reduce exposure, but secrets already in files or context can still leak through allowed outputs.
 
 **Continuous verification:**
 The safety suite tests for known leaks and injection behavior when you run it. A small probe set can miss other attacks; this workshop does not schedule it automatically.
@@ -187,22 +187,20 @@ The progression adds controls around the model, then tests what those controls a
 
 ## Four Layers of Better Agent Security
 
-NemoClaw ships with deny-by-default security controls across four layers: **network**, **filesystem**, **process**, and **inference**. Each layer addresses a different dimension of agent behavior, and together they provide defense in depth that goes well beyond what application-level controls or container isolation alone can offer.
+A NemoClaw deployment comes with deny-by-default security controls across four layers, all enforced by OpenShell: **network**, **filesystem**, **process**, and **inference**. Each layer addresses a different dimension of agent behavior, and together they provide defense in depth that goes well beyond what application-level controls or container isolation alone can offer.
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell"><h4>NETWORK</h4><span class="dx-big">Where it connects</span>Deny-by-default egress - hot-reloadable at runtime.</div>
-  <div class="dx-cell"><h4>FILESYSTEM</h4><span class="dx-big">What it reads/writes</span>Landlock LSM - locked at sandbox creation.</div>
-  <div class="dx-cell"><h4>PROCESS</h4><span class="dx-big">What it executes</span>seccomp + non-root - locked at sandbox creation.</div>
-  <div class="dx-cell"><h4>INFERENCE</h4><span class="dx-big">Which models</span>Privacy Router - hot-reloadable at runtime.</div>
+  <div class="dx-cell"><h4>NETWORK</h4><span class="dx-big">Where it connects</span>Outbound connections blocked unless allowed - changeable while running.</div>
+  <div class="dx-cell"><h4>FILESYSTEM</h4><span class="dx-big">What it reads/writes</span>Kernel-enforced path rules - locked at sandbox creation.</div>
+  <div class="dx-cell"><h4>PROCESS</h4><span class="dx-big">What it executes</span>Restricted system calls, non-root user - locked at sandbox creation.</div>
+  <div class="dx-cell"><h4>INFERENCE</h4><span class="dx-big">Which models</span>Privacy Router - changeable while running.</div>
 </div>
 
 <!-- fold:break -->
 
 ### Layer 1: Network
 
-Controls where the agent can connect. Unlisted destinations are denied. Rules can select executables, and REST policies can restrict HTTP methods on an allowed host.
-
-> In NemoClaw, **OpenShell's HTTP CONNECT proxy** intercepts all egress from the sandbox and evaluates each request against the policy. Requests to unlisted endpoints are denied and logged for operator review.
+Controls where the agent can connect. Unlisted destinations are denied. Rules can be limited to specific programs, and to specific kinds of request on an allowed host.
 
 <!-- fold:break -->
 
@@ -210,23 +208,17 @@ Controls where the agent can connect. Unlisted destinations are denied. Rules ca
 
 Controls what the agent can read and write. System paths (`/usr`, `/lib`, `/etc`) are read-only, and writable access is limited to designated directories (`/sandbox`, `/tmp`). Read-only access prevents writes; it still permits reading any secrets in those paths.
 
-> In NemoClaw, **OpenShell applies Landlock LSM** restrictions at the kernel level. These rules are locked at sandbox creation and are designed to be irrevocable — the agent process should not be able to modify or lift them.
-
 <!-- fold:break -->
 
 ### Layer 3: Process
 
-Controls what the agent can execute. The agent runs as a non-root user with dropped capabilities, syscall filtering via seccomp BPF, and process limits — reducing the blast radius of any compromise.
-
-> In NemoClaw, **OpenShell enforces non-root execution** (the `sandbox` user), drops dangerous capabilities, and applies a seccomp filter that blocks privilege escalation and dangerous syscalls.
+Controls what the agent can execute. The agent runs as a non-root user, with a restricted set of allowed system calls, and can only start a limited number of processes at a time. This helps to reduce the impact of any compromise.
 
 <!-- fold:break -->
 
 ### Layer 4: Inference
 
 Controls the inference backend and its credentials. The agent calls `inference.local`; the host supplies the configured provider's key without placing it in the sandbox.
-
-> Calls to **`inference.local`** use the gateway's configured backend and host-side inference credentials. The operator can switch that backend without recreating sandboxes. Per-request choices need separately configured routes; Exercise 5 builds a classifier that proposes a route without changing shared gateway state.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>

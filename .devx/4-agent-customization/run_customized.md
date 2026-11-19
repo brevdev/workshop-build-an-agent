@@ -194,7 +194,7 @@ This is the same cycle production teams follow: build, extend, measure, improve.
 
 <!-- fold:break -->
 
-### What's Next?
+### Extending This Project
 
 **Immediate extensions:**
 - Expand SDG to cover more commands and edge cases
@@ -209,7 +209,6 @@ This is the same cycle production teams follow: build, extend, measure, improve.
 **Advanced topics:**
 - Extending a single-request translator to multi-turn conversations
 - Combining Skills + trained models for breadth + depth
-- Distillation from larger models to smaller ones
 
 <!-- fold:break -->
 

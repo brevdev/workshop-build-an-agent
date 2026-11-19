@@ -9,9 +9,9 @@ Before we dive into building agents, let's take a step back. What are agents, re
 Three common application patterns are:
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell"><h4>STAGE 1: SINGLE LLM CALL</h4>Send a prompt, get a response. Uses the supplied prompt and context; your application executes any requested actions.</div>
-  <div class="dx-cell"><h4>STAGE 2: WORKFLOW</h4>Developer-defined control flow, including branches and loops (e.g. a retrieval pipeline).</div>
-  <div class="dx-cell is-wide"><h4>STAGE 3: AGENT</h4>The model decides what to do - choosing tools and looping until it has the answer. The path adapts to each task.</div>
+  <div class="dx-cell"><h4>STAGE 1</h4><span class="dx-big">Single LLM call</span></div>
+  <div class="dx-cell"><h4>STAGE 2</h4><span class="dx-big">Workflow</span></div>
+  <div class="dx-cell is-wide"><h4>STAGE 3</h4><span class="dx-big">Agent</span></div>
 </div>
 
 ### Stage 1: Single LLM Calls

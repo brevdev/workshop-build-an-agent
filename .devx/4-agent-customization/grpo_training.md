@@ -3,7 +3,7 @@
 You have your dataset. Now how do you teach the model with it?
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide"><h4>SFT - SUPERVISED FINE-TUNING</h4>Learn from supervised input/output examples. Quality and coverage matter.</div>
+  <div class="dx-cell is-wide"><h4>SFT - SUPERVISED FINE-TUNING</h4>Train on example inputs paired with the correct outputs, so the model learns to produce answers like them. Quality and coverage matter.</div>
   <div class="dx-cell is-wide"><h4>GRPO - RL-BASED</h4>Try multiple outputs, learn which score highest. Best for complex tasks with verifiable correctness.</div>
 </div>
 
@@ -74,7 +74,7 @@ Outputs that score above the group average get reinforced; below-average outputs
 
 | Aspect | SFT (Supervised Fine-Tuning) | GRPO (RL-based) |
 |--------|------------------------------|-----------------|
-| **Learning signal** | "Copy this exact output" | "Outputs like this score higher" |
+| **Learning signal** | "Produce outputs like these examples" | "Outputs like this score higher" |
 | **Data requirement** | High-quality target answers | A reliable reward signal |
 | **Exploration during training** | Learns from supplied targets | Samples and scores variations |
 | **Overfitting risk** | Depends on data and training | Also present; includes reward hacking |

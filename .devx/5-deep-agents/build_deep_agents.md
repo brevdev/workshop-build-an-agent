@@ -133,7 +133,7 @@ CRITICAL RULES:
 The **backend** determines where file operations and shell commands execute. Deep agents support different backends:
 
 - `FilesystemBackend` — File-only operations (read, write, edit, ls, glob, grep)
-- `LocalShellBackend` — File operations **plus** shell execution (extends FilesystemBackend)
+- `LocalShellBackend` — File operations plus shell execution (extends FilesystemBackend)
 - `DockerSandboxBackend` — File and shell tools run in a disposable container with no network or host mounts
 
 <button onclick="goToLineAndSelect('code/5-deep-agents/deep_agent.py', '# TODO: Exercise 4');"><i class="fas fa-code"></i> # TODO: Exercise 4</button>

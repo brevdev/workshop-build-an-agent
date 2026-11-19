@@ -69,7 +69,7 @@ If an agent writes a poem or summarizes a document, how do you write a unit test
 We generally rely on three approaches: 
 
 <div class="dx-bento dx-reveal">
-  <div class="dx-cell is-wide"><h4>LLM-AS-A-JUDGE</h4><span class="dx-chip is-green">PRIMARY METHOD</span> An NVIDIA Nemotron model grades outputs against a rubric. Scalable and handles subjective qualities - but adds cost and latency, and can inherit the judge model's biases.</div>
+  <div class="dx-cell is-wide"><h4>LLM-AS-A-JUDGE</h4><span class="dx-chip is-green">PRIMARY METHOD</span> An LLM (NVIDIA Nemotron in this workshop) grades outputs against a rubric. Scalable and handles subjective qualities - but adds cost and latency, and can inherit the judge model's biases.</div>
   <div class="dx-cell"><h4>HUMAN EVALUATION</h4>The gold standard for subjective quality - most accurate, but slow, expensive, and not scalable. Used sparingly to grade the grader.</div>
   <div class="dx-cell"><h4>DETERMINISTIC CHECKS</h4>Code-based pass/fail (did the JSON parse? is the keyword present?). Objective and cheap, but misses nuance and valid alternatives.</div>
 </div>

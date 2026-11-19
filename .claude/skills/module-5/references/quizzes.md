@@ -26,7 +26,7 @@ go deeper.
 - **Go deeper:** contrast with a shallow agent doing the same task (all 20 summaries in one
   window) — why it degrades around step 50.
 
-## `sandboxing_security.md` — "Agent keeps generating dangerous shell commands. Contain it how?"
+## `sandboxing_security.md` — "A well-prompted agent may still run a dangerous shell command. Which control still protects the machine?"
 - **Correct:** *Run it in a sandbox with no host mounts and resource limits.*
 - **Why:** once an agent passes control to a **subprocess**, only **OS-level enforcement**
   contains it. A sandbox with no host mounts means a dangerous command has nothing to destroy.

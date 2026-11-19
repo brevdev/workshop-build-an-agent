@@ -220,7 +220,7 @@ In the <button onclick="launch('Simple Agents Client');"><i class="fa-solid fa-r
 - "How do I connect to VPN?" → Should use [KB:source_id]
 - "What's happening in AI news today?" → Should use [Web]
 
-Wow! Remember that custom, complicated Tavily tool implementation from Module 1? Now, we can eliminate the need for that by decoupling the tool from the agent. Build once, use anywhere - That's the value of MCP!
+Remember the prebuilt `search_tavily` tool from Module 1? That was about 140 lines of Python living inside the agent's code (`code/1-build-an-agent/tools.py`). Here, a few lines replaced all of that, because MCP decouples the tool from the agent. Build once, use anywhere - that's the value of MCP!
 
 <!-- fold:break -->
 

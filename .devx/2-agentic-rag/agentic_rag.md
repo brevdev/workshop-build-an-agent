@@ -14,7 +14,7 @@ After the initial imports, our code starts by defining configuration and loading
 
 <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '# Data Ingestion Configuration');"><i class="fas fa-code"></i> # Data Ingestion Configuration</button> defines the knowledge base path and the chunking parameters. More on those later.
 
-<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '# Model Configuration');"><i class="fas fa-code"></i> # Model Configuration</button> specifies which models to use for each step.
+<button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '# Model Configuration');"><i class="fas fa-code"></i> # Model Configuration</button> specifies which models to use for each step. The names come from <button onclick="openExistingFileInJupyterLab('code/workshop_support/models.json');"><i class="fa-solid fa-file-code"></i> models.json</button>, the one place the whole workshop sets its models; open it to see exactly which ones you are using.
 
 Finally, <button onclick="goToLineAndSelect('code/2-agentic-rag/rag_agent.py', '# Read the data');"><i class="fas fa-code"></i> # Read the data</button> reads the knowledge base markdown files.
 

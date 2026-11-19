@@ -1,12 +1,12 @@
 <div class="dx-hero" data-eyebrow="MODULE 06 / 04 - SETUP NEMOCLAW" data-title="Set Up NemoClaw" data-meta="TIME::20 min|STEPS::5|RUNTIME::OpenShell sandbox"></div>
 
-You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router isolates credentials and enforces the operator's choice of inference backend, and how Nemotron can serve as that backend when sensitive queries need to stay local. Now let's install it and get a more secure sandbox running around your OpenClaw agent.
+You've examined how OpenShell enforces kernel-level constraints, how the Privacy Router isolates credentials and enforces the operator's choice of inference backend, and how Nemotron can serve as that backend when sensitive queries need to stay local. Now let's install it and get an OpenClaw agent running inside a more secure sandbox.
 
 Here's what your NemoClaw deployment will look like when we're done. The agent lives inside the sandbox; outbound network access is governed by policy; upstream provider credentials stay in the gateway.
 
 ![NemoClaw Deployment](img/nemoclaw_deployment_dark.svg)
 
-> **Where you are:** You completed the OpenClaw setup on the previous page and have a working agent with an active gateway. This page adds NemoClaw's enforcement layers on top.
+> **Where you are:** You completed the OpenClaw setup and have a working agent on the host. NemoClaw does not wrap that agent: its installer starts a second OpenClaw inside a new OpenShell sandbox. Your first agent keeps running outside the sandbox, so you can compare the two.
 
 <!-- fold:break -->
 

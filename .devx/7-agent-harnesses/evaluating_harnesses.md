@@ -14,7 +14,7 @@ Just like Module 6 mapped its exercises to the production NemoClaw stack, here's
 | **2. Context tax + lazy loading** | pi's lazy skills; skill indexes and deferred tool loading in modern maximal harnesses |
 | **3. Portable skill** | The open Agent Skills spec ([agentskills.io](https://agentskills.io)) powering every major skill hub |
 | **4. Verified skill + GPU** | [NVIDIA Verified Skills](https://github.com/NVIDIA/skills): SkillSpector scans, skill cards, OpenSSF Model Signing |
-| **5. Self-evolving skill** | pi self-extension; Hermes's self-authored skills in `~/.hermes/skills/`; OpenClaw memory evolution — and the write-policies NemoClaw puts around them |
+| **5. Self-evolving skill** | pi's self-extension; Hermes's self-authored skills in `~/.hermes/skills/`; OpenClaw memory evolution — and the write-policies NemoClaw puts around them |
 
 <!-- fold:break -->
 

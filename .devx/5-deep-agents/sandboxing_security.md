@@ -110,7 +110,7 @@ Not all isolation is equal. Approaches range from trusting the model entirely to
   </div>
 </div>
 
-> Our demo uses **Docker containers** for agent execution sandboxing and isolation.
+> Our demo uses Docker containers for agent execution sandboxing and isolation.
 
 <!-- fold:break -->
 
@@ -139,9 +139,9 @@ The **agent itself** runs inside the sandbox. It communicates with external syst
 
 **Pros:** Mirrors local development; simple architecture — everything runs in one place.
 
-**Cons:** API keys live inside the sandbox (security risk); container rebuilds needed for every agent update; all tools inherit the sandbox's full permissions.
+**Cons:** API keys live inside the sandbox unless a gateway outside it supplies them; container rebuilds needed for every agent update; all tools inherit the sandbox's full permissions.
 
-**Best for:** Prototyping and tight coupling between agent and execution environment.
+**Best for:** Agents that need a full environment of their own. Module 6 uses this pattern: the whole agent runs inside an OpenShell sandbox, and a gateway keeps the API keys outside it.
 
 <!-- fold:break -->
 
@@ -159,7 +159,7 @@ The **agent runs locally** (or on your server), and code execution is **delegate
 
 | Dimension | Agent IN Sandbox | Sandbox as Tool |
 |-----------|-----------------|-----------------|
-| **Credential security** | Keys inside sandbox | Keys stay external |
+| **Credential security** | Keys inside, unless a gateway supplies them | Keys stay external |
 | **Update speed** | Requires rebuild | Instant |
 | **Failure isolation** | Agent + sandbox coupled | Independent |
 | **Parallel execution** | Complex | Natural |
@@ -170,7 +170,7 @@ The **agent runs locally** (or on your server), and code execution is **delegate
 
 ### How Our Sandbox Works
 
-Our implementation uses **Docker containers** as the isolation boundary — the agent runs on the system and delegates code execution to an isolated container.
+Our implementation uses Docker containers as the isolation boundary — the agent runs on the system and delegates code execution to an isolated container.
 
 ```python
 class DockerSandboxBackend(SandboxBackendProtocol):
@@ -229,9 +229,9 @@ Docker is a common approach for agent sandboxing in development. It provides:
 <details class="dx-peek">
 <summary>2. Firecracker MicroVMs</summary>
 
-Full hardware virtualization with ~150ms startup time. **E2B** is a leading agent sandboxing platform built on Firecracker.
+Full hardware virtualization with ~150ms startup time. E2B is a leading agent sandboxing platform built on Firecracker.
 
-- Each agent gets its own **kernel** — the strongest isolation available
+- Each agent gets its own kernel — the strongest isolation available
 - MicroVMs are lightweight (as little as 5MB memory overhead)
 - Startup time rivals containers, not traditional VMs
 - Full Linux environment with arbitrary package installation
@@ -248,7 +248,7 @@ Lightweight sandboxing built into the operating system:
 - **Bubblewrap** (Linux) — Creates unprivileged containers using Linux namespaces
 - **Seatbelt** (macOS) — Apple's sandbox framework restricting filesystem, network, and IPC access
 
-These are used by **Claude Code** for local execution — restricting which filesystem paths the agent can access, blocking network connections to unauthorized hosts, and limiting system call access.
+These are used by Claude Code for local execution — restricting which filesystem paths the agent can access, blocking network connections to unauthorized hosts, and limiting system call access.
 
 **When to use:** Local and desktop agent deployments where you need lightweight isolation without full containerization.
 
@@ -357,7 +357,7 @@ Use distinct configurations for development, staging, and production. Never test
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="dx-quiz-q">Your agent keeps generating dangerous shell commands. What is the right way to contain it?</p>
+  <p class="dx-quiz-q">Even a well-prompted agent may one day run a dangerous shell command, from a hallucination or an instruction hidden in a file it reads. Which control still protects your machine when that happens?</p>
   <button class="dx-quiz-opt" data-fb="The model can hallucinate right past any instruction, and a subprocess bypasses prompt rules entirely. Application-level controls are necessary but never sufficient.">Add a rule to the system prompt telling it never to run destructive commands</button>
   <button class="dx-quiz-opt" data-fb="Lowering temperature reduces randomness but not capability - one bad command is still catastrophic. Enforce limits at the infrastructure level.">Lower the model temperature so it behaves more predictably</button>
   <button class="dx-quiz-opt" data-right data-fb="Right. Once an agent passes control to a subprocess, OS-level controls bound subprocess access. With no host mounts, the container cannot directly modify the host workspace; its own writable files can still be damaged.">Run it in a sandbox with no host mounts and resource limits</button>

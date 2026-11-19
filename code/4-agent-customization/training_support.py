@@ -1,11 +1,16 @@
 """Small data and evaluation checks shared by the customization notebooks."""
 
 import json
+import logging
 import re
 
 import requests
 
 from nemo_gym_resources.langgraph_cli.app import CLIToolCall, normalize_unicode, score_cli_output
+
+# transformers repeats this benign notice on every training generation; hide only that message.
+logging.getLogger("transformers.generation.utils").addFilter(
+    lambda record: "`max_new_tokens` will take precedence" not in record.getMessage())
 
 
 def prepare_examples(records):

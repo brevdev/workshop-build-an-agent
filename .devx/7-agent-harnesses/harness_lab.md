@@ -10,7 +10,7 @@ This page follows <button onclick="openOrCreateFileInJupyterLab('code/7-agent-ha
 
 ## Exercise 1 — Build the Minimal Harness
 
-pi proves a complete harness needs surprisingly little: a short system prompt, four tools, and a loop. You'll build exactly that — Read, Write, Edit, Bash around Nemotron — by filling two blanks inside `build_bare_agent`.
+pi proves a complete harness needs surprisingly little: a short system prompt, four tools, and a loop. You won't install or run pi itself. You'll build your own harness in the same style — Read, Write, Edit, Bash around Nemotron — by filling two blanks inside `build_bare_agent`.
 
 Here's what a finished Exercise 1 run looks like:
 
@@ -291,7 +291,7 @@ If GPU utilization stays at zero, inspect the executed code and confirm cuDF imp
 
 ## Exercise 5 — The Self-Evolving Harness
 
-The pi finale: an agent that improves its own scaffolding. One blank, four steps.
+The finale, inspired by pi's self-extension: an agent that improves its own scaffolding. One blank, four steps.
 
 <button onclick="goToLineAndSelect('code/7-agent-harnesses/harness_lab.py', 'TODO: Exercise 5');"><i class="fas fa-code"></i> TODO: Exercise 5</button> — complete `self_evolve_skill` so that after finishing a task, the agent:
 

@@ -23,7 +23,7 @@ This module names the pattern those six have in common — and takes it apart.
 
 ## Engine vs. Car
 
-A useful analogy: the LLM is the **engine**, and the harness is **the rest of the car** — chassis, transmission, fuel system, steering. An engine on a stand is impressive but goes nowhere. A car without an engine is furniture.
+A useful analogy: the LLM is the **engine**, and the harness is **the rest of the car** — chassis, transmission, fuel system, steering. An engine on a stand can still do useful work, but it will not take you anywhere. A car without an engine is furniture.
 
 ![Harness Anatomy](img/harness_anatomy_dark.svg)
 

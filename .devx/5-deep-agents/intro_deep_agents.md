@@ -97,7 +97,7 @@ A **deep agent** goes beyond the flat ReAct loop. It has built-in capabilities t
 | **Context Management** | Depends on the implementation | Auto-summarization when conversations get long |
 | **Skills** | Can use reusable instructions | Loadable markdown methodology files |
 
-Deep agents aren't just agents with more tools — they're agents with an **architecture** designed for complex, autonomous work.
+Deep agents aren't just agents with more tools — they're agents with an architecture designed for complex, autonomous work.
 
 <!-- fold:break -->
 
@@ -121,7 +121,7 @@ That's a deep agent. And that's what we'll build in this module.
 
 ## The Deep Agents Library
 
-We'll use [**langchain-ai/deepagents**](https://github.com/langchain-ai/deepagents) — an open-source agent harness built on LangChain and LangGraph. It's designed to be batteries-included:
+We'll use [**langchain-ai/deepagents**](https://github.com/langchain-ai/deepagents) — an open-source agent harness built on LangChain and LangGraph. It's designed to be batteries-included, meaning the capabilities you need come built in:
 
 ```python
 from deepagents import create_deep_agent

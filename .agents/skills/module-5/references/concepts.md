@@ -83,7 +83,7 @@ container is empty (no host mounts). What can go wrong: destructive commands, su
 ## The security spectrum & patterns
 Isolation strength: **prompt-only** (dev only) → **Deno** → **Bubblewrap/Seatbelt** (Claude
 Code local) → **Docker + seccomp** (most production) → **gVisor** → **Firecracker VM**
-(max). Sandbox **patterns**: *Agent IN Sandbox* (agent runs inside; keys live inside — risky)
+(max). Sandbox **patterns**: *Agent IN Sandbox* (agent runs inside; keys live inside unless a gateway supplies them — Module 6's pattern)
 vs ***Sandbox-as-Tool*** (agent runs locally, delegates execution to a remote/Docker
 sandbox; keys stay out; instant updates; parallel; failures isolated). **This workshop uses Sandbox-as-Tool with Docker; deepagents supports other backends.** Choose isolation by **threat model**: who controls inputs,
 what data is reachable, does it execute code, what's the blast radius.

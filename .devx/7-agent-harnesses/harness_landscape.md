@@ -8,11 +8,11 @@ Let's start with that picture, then meet each one.
 
 ## The Context Tax Meter
 
-Compare the two bundled lab configurations: system prompt plus tool schemas, estimated with `tiktoken`. These are teaching examples, not benchmarks of commercial harnesses.
+Compare two example harness setups that ship with this module's lab: a minimal one (a short prompt and four tools) and a maximal one (a long prompt and 15 tool schemas). Each number is that setup's system prompt plus tool schemas, estimated with `tiktoken`. These are teaching examples, not benchmarks of commercial harnesses.
 
 <div class="dx-island dx-bet" data-answer="3,922 tokens" data-explain="measured with tiktoken in Exercise 2; the minimal harness pays just 400.">
   <p class="dx-island-title">TAKE A GUESS</p>
-  <p class="dx-quiz-q">Before you scroll: how many tokens does the bundled maximal config inject per turn?</p>
+  <p class="dx-quiz-q">Before you scroll: how many tokens does the lab's maximal setup add to every turn?</p>
   <div class="dx-bet-opts">
     <button class="dx-bet-opt">~500</button>
     <button class="dx-bet-opt">~1,500</button>
@@ -22,7 +22,7 @@ Compare the two bundled lab configurations: system prompt plus tool schemas, est
 </div>
 
 <div class="dx-island">
-  <p class="dx-island-title">CONTEXT TAX METER — BUNDLED EXAMPLES</p>
+  <p class="dx-island-title">CONTEXT TAX METER — THE LAB'S TWO EXAMPLES</p>
   <div class="dx-tax">
     <div class="dx-tax-row" style="--dx-w:10"><span class="dx-tax-name">Minimal lab</span><div class="dx-tax-track"><div class="dx-tax-fill">400</div></div><span class="dx-tax-note">estimated tokens</span></div>
     <div class="dx-tax-row" data-tier="max" style="--dx-w:98"><span class="dx-tax-name">Maximal lab</span><div class="dx-tax-track"><div class="dx-tax-fill">3,922</div></div><span class="dx-tax-note">estimated tokens</span></div>
@@ -206,7 +206,7 @@ Work through the three questions below. Your path ends at a recommendation.
 
 <!-- fold:break -->
 
-## The NVIDIA Perspective: Driving the Technology Together
+## NVIDIA Pieces That Work Across Harnesses
 
 Whichever harness you land on, the NVIDIA pieces come with you:
 
@@ -214,15 +214,13 @@ Whichever harness you land on, the NVIDIA pieces come with you:
 - **Nemotron** works with harnesses that support its endpoint and model capabilities
 - **NVIDIA Verified Skills** can travel between compatible harnesses, with the required tools and dependencies
 
-NVIDIA isn't picking a harness winner. The harness layer is where the industry is innovating fastest, and NVIDIA's approach is to **drive the technology forward together with the ecosystem** — contributing open models, open safety stacks, and open, portable, verifiable skills that can extend compatible harnesses.
-
 <div class="dx-island dx-quiz">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>
-  <p class="dx-quiz-q">Which option provides the always-on assistant and OpenClaw configuration used in Module 6, with a configurable model endpoint?</p>
-  <button class="dx-quiz-opt" data-fb="This option was not the always-on assistant configured in Module 6.">Claude Code</button>
-  <button class="dx-quiz-opt" data-fb="Module 7 borrows pi’s minimal design; Module 6 configured OpenClaw.">pi</button>
-  <button class="dx-quiz-opt" data-right data-fb="Module 6 configured OpenClaw with NemoClaw; compatible model endpoints can be selected.">OpenClaw</button>
-  <button class="dx-quiz-opt" data-fb="OpenCode has its own runtime and server options; Module 6 configured OpenClaw.">OpenCode</button>
+  <p class="dx-quiz-q">You are running a small local model where every token of context counts, and you are happy for capabilities to load only when a task needs them. Which harness on this page is built around that tradeoff?</p>
+  <button class="dx-quiz-opt" data-fb="Claude Code is an integrated coding workflow with much more built in. The minimal pole of this page is a different harness.">Claude Code</button>
+  <button class="dx-quiz-opt" data-right data-fb="Right. pi is the minimal pole: a system prompt under 1,000 tokens, four core tools, and lazy skills that cost one line of context until they are invoked.">pi</button>
+  <button class="dx-quiz-opt" data-fb="OpenClaw is the always-on agent from Module 6. This page lists maximal context tax as the thing to watch for with it.">OpenClaw</button>
+  <button class="dx-quiz-opt" data-fb="OpenCode leaves the context tax in your hands, and a fully loaded config approaches the maximal harnesses. It is not built around a minimal default.">OpenCode</button>
 </div>
 
 > That portable skills layer is the key that unlocks everything else. Head to [Agent Skills](agent_skills) to take it apart.

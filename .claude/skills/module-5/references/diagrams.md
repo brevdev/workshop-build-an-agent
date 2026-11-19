@@ -2,7 +2,7 @@
 
 Help a learner read the deep-agent figures. Diagrams in `.devx/5-deep-agents/img/`.
 
-## shallow_agent_pattern (`shallow_agent_pattern_dark.svg`, `deep_agents.md`)
+## shallow_agent_pattern (`shallow_agent_pattern_dark.svg`, `intro_deep_agents.md`)
 - **Depicts:** `User → Model → (ReAct Loop: Model ↔ Tool) → Response`.
 - **Takeaway:** the baseline from Modules 1–2 — a single loop, everything in one context.
   Deep agents extend this with planning, delegation and context management.

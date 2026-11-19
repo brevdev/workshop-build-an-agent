@@ -2,11 +2,11 @@
 
 <img src="_static/robots/supervisor.png" alt="Agent Security Deep-Dive Robot" style="float:right;max-width:300px;margin:25px;" />
 
-Your OpenClaw agent is running. SOUL.md guides its behavior, but prompts do not enforce permissions. OpenClaw also supports tool policies, approvals, and sandboxing; our quickstart has not configured a sandbox. NemoClaw adds an operator-managed boundary around the agent.
+Your OpenClaw agent is running. SOUL.md guides its behavior, but prompts do not enforce permissions. OpenClaw also supports tool policies, approvals, and sandboxing; our quickstart has not configured a sandbox. NemoClaw runs an OpenClaw agent inside an operator-managed boundary.
 
 Here, we'll start with **why** agent security is a distinct problem, map **what** threats exist, and then walk through **how** NemoClaw addresses each one -- layer by layer.
 
-> NemoClaw is an open-source reference stack that simplifies running OpenClaw agents inside OpenShell containers with policy-based security and privacy guardrails. The `nemoclaw` CLI handles onboarding, lifecycle management, and sandbox configuration. OpenShell provides the sandbox runtime. NemoClaw enhances OpenClaw -- it does not replace it. Everything you built on the previous page still runs; NemoClaw wraps it with infrastructure-level enforcement.
+> NemoClaw is an open-source reference stack that simplifies running OpenClaw agents inside OpenShell containers with policy-based security and privacy guardrails. The `nemoclaw` CLI handles onboarding, lifecycle management, and sandbox configuration. OpenShell provides the sandbox runtime. NemoClaw does not modify the agent you built on the previous page: its installer starts a separate OpenClaw inside the sandbox, and your first agent keeps running outside it.
 
 <!-- fold:break -->
 
@@ -113,14 +113,14 @@ Defense in depth uses several controls to cover different failure paths. Which c
 
 | Control | Enforced by | Workshop example |
 |---|---|---|
-| HITL gate | Application | M4 — human approval |
-| Command allowlist | Application | M4 — command checks |
-| Tool permissions | Application | M5 — selected capabilities |
-| Docker isolation | Container runtime + kernel | M5 — namespaces and limits |
-| Landlock | Kernel | M6 — file access |
-| seccomp | Kernel | M6 — syscall filtering |
-| Network policy | Proxy | M6 — destination and executable rules |
-| Inference routing | Gateway | M6 — operator-selected backend |
+| HITL gate | Application | Module 4 — human approval |
+| Command allowlist | Application | Module 4 — command checks |
+| Tool permissions | Application | Module 5 — selected capabilities |
+| Docker isolation | Container runtime + kernel | Module 5 — namespaces and limits |
+| Landlock | Kernel | Module 6 — file access |
+| seccomp | Kernel | Module 6 — syscall filtering |
+| Network policy | Proxy | Module 6 — destination and executable rules |
+| Inference routing | Gateway | Module 6 — operator-selected backend |
 
 </div>
 
@@ -594,7 +594,7 @@ This opens a terminal UI showing every allow and deny decision as the agent oper
 
 You've covered the full arc: from understanding what makes agent security a distinct challenge, through the threat landscape and defense-in-depth principle, to the technical details of each enforcement layer and the YAML policy that ties them together.
 
-You now understand the four layers that NemoClaw adds to a vanilla OpenClaw agent -- deny-by-default network policies, kernel-level filesystem sandboxing via Landlock, process hardening with seccomp and least privilege, and operator-controlled inference routing through the `inference.local` gateway. The next page walks you through installing and configuring the full NemoClaw stack so you can see these layers enforce policy in real time.
+You now understand the four layers that NemoClaw places around its OpenClaw agent -- deny-by-default network policies, kernel-level filesystem sandboxing via Landlock, process hardening with seccomp and least privilege, and operator-controlled inference routing through the `inference.local` gateway. The next page walks you through installing and configuring the full NemoClaw stack so you can see these layers enforce policy in real time.
 
 <div class="dx-island dx-quiz dx-reveal">
   <p class="dx-island-title">CHECK YOUR UNDERSTANDING</p>

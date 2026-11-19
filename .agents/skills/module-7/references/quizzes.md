@@ -19,15 +19,15 @@ is *tempting* but wrong, and how to go deeper.
 - **Principle:** context overhead is one measurable harness design choice (`concepts.md` → the context tax).
 - **Go deeper:** ask them to predict their Exercise 2 eager-vs-lazy numbers before running it.
 
-## `harness_landscape.md` — "Which always-on assistant did Module 6 configure?"
-- **Correct:** *OpenClaw.*
-- **Why:** Module 6 uses OpenClaw with NemoClaw and a configurable compatible model endpoint. No community-size ranking is implied.
+## `harness_landscape.md` — "Small local model, every token counts: which harness is built around that tradeoff?"
+- **Correct:** *pi.*
+- **Why:** pi is the minimal pole of the context-tax axis: a system prompt under 1,000 tokens, four core tools, and lazy skills.
 - **Distractors:**
-  - *Claude Code* → not the assistant configured in Module 6.
-  - *pi* → Module 7 borrows its minimal design; Module 6 configured OpenClaw.
-  - *OpenCode* → it has its own runtime and server options; Module 6 configured OpenClaw.
-- **Principle:** the 3-question chooser — model flexibility → always-on vs task-shaped →
-  community/defaults. (Prefer stronger defaults + a curated skill hub? → Hermes.)
+  - *Claude Code* → an integrated coding workflow with much more built in.
+  - *OpenClaw* → the always-on agent from Module 6; the page flags its maximal context tax.
+  - *OpenCode* → the context tax is in your hands; a fully loaded config approaches the maximal harnesses.
+- **Principle:** the context-tax axis — minimal harnesses load capability when a task needs it;
+  maximal ones bake it in up front. (Every token precious → pi.)
 - **Go deeper:** have them run the chooser on a project they actually have.
 
 ## `agent_skills.md` — "New conversation, 30 lazy skills, no body loaded — what's in context?"
